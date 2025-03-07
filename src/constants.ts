@@ -56,8 +56,8 @@ export const FULL_NAME: string = `${APP_NAME.CASED} v${VERSIONING.APP}`;
 
 /** URLs have trailing slash/ */
 export const APP_URLs = {
-    REPO: "https://github.com/ZakaHaceCosas/FuckingNode/",
-    WEBSITE: "https://zakahacecosas.github.io/FuckingNode/",
+    REPO: "https://github.com/FuckingNode/FuckingNode/",
+    WEBSITE: "https://fuckingnode.github.io/",
 };
 
 /**

@@ -197,7 +197,7 @@ Acknowledgements to [@MrSerge01](https://github.com/MrSerge01) and [@dimkauzh](h
 
 ### Added
 
-- Added a **new** experimental **command**: _**audit**_. Currently it's only available for `npm` users and behind the `--experimental-audit` flag. TL;DR it helps you better understand security audits by asking questions, read more in [here](https://zakahacecosas.github.io/FuckingNode/learn/audit/).
+- Added a **new** experimental **command**: _**audit**_. Currently it's only available for `npm` users and behind the `--experimental-audit` flag. TL;DR it helps you better understand security audits by asking questions, read more in [here](https://fuckingnode.github.io/learn/audit/).
 - Added support for more IDEs / code editors as favorite editors (VSCodium, Emacs, Notepad++, Atom).
 - Added a `repo` command that shows the URL to GitHub.
 

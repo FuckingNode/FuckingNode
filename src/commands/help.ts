@@ -198,7 +198,7 @@ export default async function TheHelper(params: TheHelperConstructedParams) {
         [
             "audit",
             "[project-path | --] [--strict, -s]",
-            "Runs your package manager's audit command, then asks you questions to tell if found vulnerabilities affect your project.\n  Run without a project or with '--' to audit all projects.\n  Learn more about it at https://zakahacecosas.github.io/FuckingNode/learn/audit/",
+            "Runs your package manager's audit command, then asks you questions to tell if found vulnerabilities affect your project.\n  Run without a project or with '--' to audit all projects.\n  Learn more about it at https://fuckingnode.github.io/learn/audit/",
         ],
     ]);
     const MIGRATE_OPTIONS = formatCmd([

@@ -1,5 +1,5 @@
 # this is the real config for this repo
-# for learning about this, head to https://zakahacecosas.github.io/FuckingNode/manual/fknode-yaml
+# for learning about this, head to https://fuckingnode.github.io/manual/fknode-yaml
 destroy:
     intensities: ["*"]
     targets:

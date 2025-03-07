@@ -1,7 +1,7 @@
 <!-- markdownlint-disable md033 md041-->
 <p align="center">
-  <a href="https://zakahacecosas.github.io/FuckingNode">
-    <img src="https://raw.githubusercontent.com/ZakaHaceCosas/FuckingNode/refs/heads/master/docs/fkn_logo_light.png" alt="FuckingNode Logo" height=150>
+  <a href="https://fuckingnode.github.io/">
+    <img src="https://raw.githubusercontent.com/FuckingNode/FuckingNode/refs/heads/master/docs/fkn_logo_light.png" alt="FuckingNode Logo" height=150>
     </a>
 </p>
 <h1 align="center">The f*cking chaos of maintaining JavaScript projects ends here</h1>
@@ -15,11 +15,11 @@
 
 <div align="center">
 
-[Documentation](https://zakahacecosas.github.io/FuckingNode/manual) &nbsp;&nbsp;•&nbsp;&nbsp; [Issues](https://github.com/ZakaHaceCosas/FuckingNode/issues/new) &nbsp;&nbsp;•&nbsp;&nbsp; [Roadmap](https://zakahacecosas.github.io/FuckingNode/roadmap)
+[Documentation](https://fuckingnode.github.io/manual) &nbsp;&nbsp;•&nbsp;&nbsp; [Issues](https://github.com/ZakaHaceCosas/FuckingNode/issues/new) &nbsp;&nbsp;•&nbsp;&nbsp; [Roadmap](https://fuckingnode.github.io/roadmap)
 
 </div>
 
-### [Read the manual →](https://zakahacecosas.github.io/FuckingNode/manual)
+### [Read the manual →](https://fuckingnode.github.io/manual)
 
 [Watch here our **official low budget action trailer** :) →](https://youtube.com/watch?v=_lppvGYUXNk)
 
@@ -27,7 +27,7 @@
 
 We can't fix your bugs, but we can automate most headache-giving tasks across all of your NodeJS/Deno/Bun projects and give you a set of tools to make JS development great again.
 
-DenoJS, BunJS, and even Golang and Rust are also (partially) supported (_see [Cross-runtime support](https://zakahacecosas.github.io/FuckingNode/cross-platform/) for more info._).
+DenoJS, BunJS, and even Golang and Rust are also (partially) supported (_see [Cross-runtime support](https://fuckingnode.github.io/cross-platform/) for more info._).
 
 **FuckingNode is a CLI tool** (not a CLI-ish npm package) that automates and simplifies **cleaning**, **linting**, and **prettifying** JS or TS projects, **releasing** npm / jsr **packages**, **destroying generated artifacts & caches**, <!-- **understanding security audits**, --> and also gives you additional tools for better Git committing, project cloning, and more.
 
@@ -55,7 +55,7 @@ fkn kickstart < git-url > # clones a repo, installs deps, and launches your fav 
 Copy and paste the following code in a terminal session.
 
 ```powershell
-powershell -c "irm zakahacecosas.github.io/FuckingNode/install.ps1 | iex"
+powershell -c "irm fuckingnode.github.io/install.ps1 | iex"
 ```
 
 ### Linux and macOS
@@ -63,7 +63,7 @@ powershell -c "irm zakahacecosas.github.io/FuckingNode/install.ps1 | iex"
 Copy and paste the following code in a terminal session.
 
 ```bash
-curl -fsSL zakahacecosas.github.io/FuckingNode/install.sh | bash
+curl -fsSL fuckingnode.github.io/install.sh | bash
 ```
 
 ### NixOS
@@ -98,7 +98,7 @@ We auto-check for updates once every few days to tell you about new versions, an
 
 ## Documentation
 
-Refer to our [user manual](https://zakahacecosas.github.io/FuckingNode/manual) to learn everything about how to use FuckingNode.
+Refer to our [user manual](https://fuckingnode.github.io/manual) to learn everything about how to use FuckingNode.
 
 ---
 
