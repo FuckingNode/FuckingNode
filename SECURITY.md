@@ -11,4 +11,4 @@ If you find a security vulnerability, you should do one of the following:
 
 ### Supported Versions
 
-This section is here for redundancy, as this isn't some large-scale project with "v20" and "v19" being both supported. As soon as v3 comes out, v2 drops support. The latest major (as we use SemVer) defines whether a version is supported or not. Period.
+This section is here for redundancy, as this isn't some large-scale project with "v20" and "v19" being both supported. We don't like this bureaucratic way of thinking where different versions get patched, as it gives us more work and can actually make it harder and slower to get issues resolved. So, as soon as 1.2.3 drops, 1.2.2 is unsupported, and as soon as 2.X drops, 1.X is unsupported. Period.
