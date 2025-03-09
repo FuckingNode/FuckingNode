@@ -35,7 +35,7 @@ const coolStrings = {
     spain: ColorString("Spain", "red"),
     zakaOne: ColorString("ZakaHaceCosas", "bright-green"),
     zakaTwo: ColorString("ZakaMakesStuff", "italic"),
-    gitUrl: ColorString(`https://github.com/ZakaHaceCosas/${APP_NAME.CASED}`, "orange"),
+    gitUrl: ColorString(`https://github.com/${APP_NAME.CASED}/${APP_NAME.CASED}`, "orange"),
     side: ColorString("Another side project", "italic"),
     date: ColorString("September 28, 2024", "cyan"),
     yt: ColorString("YouTube", "red"),

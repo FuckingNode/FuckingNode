@@ -9,7 +9,7 @@
     let
       system = "x86_64-linux";
       version = "3.0.0";
-      downloadUrl = "https://github.com/ZakaHaceCosas/FuckingNode/releases/download/${version}/FuckingNode-linux_x86_64";
+      downloadUrl = "https://github.com/FuckingNode/FuckingNode/releases/download/${version}/FuckingNode-linux_x86_64";
       sha256 = "0ic450gla6zhbprnjxx5dfqrgd9xn4adkwvfzr95z7139wzv5xb0";
 
       pkgs = import nixpkgs {

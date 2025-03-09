@@ -77,9 +77,7 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
         if (!params.install) return;
         const filename = LOCAL_PLATFORM.SYSTEM === "windows" ? "install.ps1" : "install.sh";
         const res = await fetch(
-            LOCAL_PLATFORM.SYSTEM === "windows"
-                ? "https://fuckingnode.github.io/install.ps1"
-                : "https://fuckingnode.github.io/install.sh",
+            LOCAL_PLATFORM.SYSTEM === "windows" ? "https://fuckingnode.github.io/install.ps1" : "https://fuckingnode.github.io/install.sh",
         );
 
         const buffer = await res.arrayBuffer();

@@ -1,13 +1,10 @@
 #!/bin/bash
 
-# i'll clarify - i didn't write most of this, i just copied stuff from places
-# i'm no sh-er. if it doesn't work i accept any bonk (and any PR too)
-
 # constants
 APP_NAME="FuckingNode"
 CLI_NAME="fuckingnode"
 STYLED_NAME="F*ckingNode"
-REPO="ZakaHaceCosas/$APP_NAME"
+REPO="$APP_NAME/$APP_NAME"
 INSTALL_DIR="/usr/local/$APP_NAME"
 EXE_PATH="$INSTALL_DIR/$CLI_NAME"
 BASE_URL="https://api.github.com/repos/$REPO/releases/latest"
