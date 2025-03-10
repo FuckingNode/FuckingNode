@@ -13,6 +13,20 @@
         "useTabs": false,
         "exclude": ["docs/**"]
     },
+    "lint": {
+        "include": ["src/"],
+        "rules": {
+            "tags": ["recommended"],
+            "include": [
+                "ban-ts-comment",
+                "adjacent-overload-signatures",
+                "ban-types",
+                "ban-untagged-ignore",
+                "eqeqeq",
+                "require-await"
+            ]
+        }
+    },
     "tasks": {
         "good": {
             "description": "Makes the code good by formatting and type-checking it.",
@@ -63,5 +77,8 @@
         "@types/node": "npm:@types/node@^22.13.10",
         "@zakahacecosas/string-utils": "jsr:@zakahacecosas/string-utils@^2.1.0"
     },
-    "lock": true
+    "lock": {
+        "path": "deno.lock",
+        "frozen": true
+    }
 }
