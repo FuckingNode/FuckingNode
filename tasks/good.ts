@@ -10,9 +10,7 @@ function Run(...args: string[]) {
         args,
     }).outputSync();
 
-    const e = new TextDecoder();
-
-    if (!output.success) throw new Error(e.decode(output.stderr) + "\n" + e.decode(output.stdout));
+    if (!output.success) throw new Error(new TextDecoder().decode(output.stderr));
     console.log(args, "went right");
 }
 
