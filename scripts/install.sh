@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# error handling
+set -e
+set -x
+set -u
+
 # constants
 APP_NAME="FuckingNode"
 CLI_NAME="fuckingnode"

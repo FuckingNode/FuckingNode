@@ -75,7 +75,7 @@
         "@std/semver": "jsr:@std/semver@1.0.4",
         "@std/assert": "jsr:@std/assert@^1.0.12",
         "@types/node": "npm:@types/node@^22.13.14",
-        "@zakahacecosas/string-utils": "jsr:@zakahacecosas/string-utils@^2.1.0"
+        "@zakahacecosas/string-utils": "jsr:@zakahacecosas/string-utils@^2.2.0"
     },
     "lock": {
         "path": "deno.lock",
