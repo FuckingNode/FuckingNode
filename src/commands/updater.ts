@@ -76,14 +76,12 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
         await TellAboutUpdate(latestVer);
         if (!params.install) return;
         const filename = LOCAL_PLATFORM.SYSTEM === "windows" ? "install.ps1" : "install.sh";
-        const res = await fetch(
+        const buffer = await (await fetch(
             LOCAL_PLATFORM.SYSTEM === "windows" ? "https://fuckingnode.github.io/install.ps1" : "https://fuckingnode.github.io/install.sh",
-        );
-
-        const buffer = await res.arrayBuffer();
+        )).arrayBuffer();
 
         const path = Deno.makeTempDirSync({ prefix: "UPDATE-SH" });
-        Deno.writeFileSync(JoinPaths(path, filename), new Uint8Array(buffer));
+        Deno.writeTextFileSync(JoinPaths(path, filename), new TextDecoder().decode(new Uint8Array(buffer)));
 
         await Commander(
             LOCAL_PLATFORM.SYSTEM === "windows" ? "iex" : "bash",
