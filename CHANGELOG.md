@@ -8,8 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [3.1.2] (Unreleased)
 
+### Changed
+
+- Made more methods sync for error fixing.
+
 ### Fixed
 
+- Fixed the CLI not handling "rootless workspaces" (workspaces where the root itself is not a project - thus lacking `"name"` or `"version"`). Closes issue [#13](https://github.com/FuckingNode/FuckingNode/issues/13).
+  - There's a known issue for this - if the workspace lacks a lockfile, this will silently fail and it will not be added even though the CLI will say it did.
+- Fixed workspaces sometimes not being detected because of some path handling issues.
 - Fixed the CLI never being able to run if an invalid project is mistakenly added _once_.
 
 ## [3.1.1] (29-03-2025)

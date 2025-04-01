@@ -1,7 +1,7 @@
 import { parse as parseYaml } from "@std/yaml";
 import { parse as parseToml } from "@std/toml";
 import { parse as parseJsonc } from "@std/jsonc";
-import { expandGlob } from "@std/fs";
+import { expandGlobSync } from "@std/fs";
 import { APP_NAME, APP_URLs, DEFAULT_FKNODE_YAML, I_LIKE_JS } from "../constants.ts";
 import type { CargoPkgFile, NodePkgFile, ProjectEnvironment, UnderstoodProjectProtection } from "../types/platform.ts";
 import { CheckForPath, JoinPaths, ParsePath, ParsePathList } from "./filesystem.ts";
@@ -72,105 +72,156 @@ export async function AddProject(
 
     if (!CheckForPath(workingEntry)) throw new FknError("Generic__NonExistingPath", `Path "${workingEntry}" doesn't exist.`);
 
-    const env = await GetProjectEnvironment(workingEntry);
-    const projectName = await NameProject(workingEntry, "all");
-
-    async function addTheEntry() {
+    async function addTheEntry(name: string) {
         await Deno.writeTextFile(GetAppPath("MOTHERFKRS"), `${workingEntry}\n`, {
             append: true,
         });
         await LogStuff(
-            `Congrats! ${projectName} was added to your list. One mf less to care about!`,
+            `Congrats! ${name} was added to your list. One mf less to care about!`,
             "tick-clear",
         );
     }
 
-    const validation = await ValidateProject(workingEntry, false);
+    try {
+        const env = await GetProjectEnvironment(workingEntry);
+        const projectName = await NameProject(workingEntry, "all");
 
-    if (validation !== true) {
-        if (validation === "IsDuplicate") {
-            await LogStuff(`bruh, ${projectName} is already added! No need to re-add it.`, "bruh");
-        } else if (validation === "NoLockfile") {
+        const validation = await ValidateProject(workingEntry, false);
+
+        if (validation !== true) {
+            if (validation === "IsDuplicate") {
+                await LogStuff(`bruh, ${projectName} is already added! No need to re-add it.`, "bruh");
+            } else if (validation === "NoLockfile") {
+                await LogStuff(
+                    `Error adding ${projectName}: no lockfile present!\nProject's that don't have a lockfile can't be added to the list, and if you add them manually by editing the text file we'll remove them on next launch.\nWe NEED a lockfile to work with your project!`,
+                    "error",
+                );
+            } else if (validation === "NoName") {
+                await LogStuff(
+                    `Error adding ${projectName}: no name!\nSee how the project's name is missing? We can't work with that, we need a name to identify the project.\nPlease set "name" in your package file to something valid.`,
+                    "error",
+                );
+            } else if (validation === "NoVersion") {
+                await LogStuff(
+                    `Error adding ${projectName}: no version!\nWhile not too frequently used, we internally require your project to have a version field.\nPlease set "version" in your package file to something valid.`,
+                    "error",
+                );
+            } else if (validation === "NoPkgFile") {
+                await LogStuff(
+                    `Error adding ${projectName}: no package file!\nIs this even the path to a JavaScript project? No package.json, no deno.json; not even go.mod or Cargo.toml found.`,
+                    "error",
+                );
+            } else if (validation === "NotFound") {
+                await LogStuff(
+                    `The specified path was not found. Check for typos or if the project was moved.`,
+                    "error",
+                );
+            }
+            return;
+        }
+
+        if (env.runtime === "deno") {
             await LogStuff(
-                `Error adding ${projectName}: no lockfile present!\nProject's that don't have a lockfile can't be added to the list, and if you add them manually by editing the text file we'll remove them on next launch.\nWe NEED a lockfile to work with your project!`,
-                "error",
-            );
-        } else if (validation === "NoName") {
-            await LogStuff(
-                `Error adding ${projectName}: no name!\nSee how the project's name is missing? We can't work with that, we need a name to identify the project.\nPlease set "name" in your package file to something valid.`,
-                "error",
-            );
-        } else if (validation === "NoVersion") {
-            await LogStuff(
-                `Error adding ${projectName}: no version!\nWhile not too frequently used, we internally require your project to have a version field.\nPlease set "version" in your package file to something valid.`,
-                "error",
-            );
-        } else if (validation === "NoPkgFile") {
-            await LogStuff(
-                `Error adding ${projectName}: no package file!\nIs this even the path to a JavaScript project? No package.json, no deno.json; not even go.mod or Cargo.toml found.`,
-                "error",
-            );
-        } else if (validation === "NotFound") {
-            await LogStuff(
-                `The specified path was not found. Check for typos or if the project was moved.`,
-                "error",
+                // says 'good choice' because it's the same runtime as F*ckingNode. its not a real opinion lmao
+                // idk whats better, deno or bun. i have both installed, i could try. one day, maybe.
+                `This project uses the Deno runtime (good choice btw). Keep in mind it's not *fully* supported *yet*.`,
+                "bruh",
+                "italic",
             );
         }
-        return;
-    }
+        if (env.runtime === "bun") {
+            await LogStuff(
+                `This project uses the Bun runtime. Keep in mind it's not *fully* supported *yet*.`,
+                "what",
+                "italic",
+            );
+        }
 
-    if (env.runtime === "deno") {
+        const workspaces = env.workspaces;
+
+        if (!workspaces || workspaces.length === 0) {
+            await addTheEntry(projectName);
+            return;
+        }
+
+        const workspaceString: string[] = [];
+
+        for (const ws of workspaces) {
+            workspaceString.push(await NameProject(ws, "all"));
+        }
+
+        const addWorkspaces = await LogStuff(
+            `Hey! This looks like a ${I_LIKE_JS.FKN} monorepo. We've found these workspaces:\n\n${
+                workspaceString.join("\n")
+            }.\n\nShould we add them to your list as well, so they're all cleaned?`,
+            "bulb",
+            undefined,
+            true,
+        );
+
+        if (!addWorkspaces) {
+            await addTheEntry(projectName);
+            return;
+        }
+
+        const allEntries = [workingEntry, ...workspaces].join("\n") + "\n";
+        await Deno.writeTextFile(GetAppPath("MOTHERFKRS"), allEntries, { append: true });
+
         await LogStuff(
-            // says 'good choice' because it's the same runtime as F*ckingNode. its not a real opinion lmao
-            // idk whats better, deno or bun. i have both installed, i could try. one day, maybe.
-            `This project uses the Deno runtime (good choice btw). Keep in mind it's not *fully* supported *yet*.`,
-            "bruh",
-            "italic",
+            `Added all of your projects. Many mfs less to care about!`,
+            "tick-clear",
+        );
+        return;
+    } catch (e) {
+        if (!(e instanceof FknError) || e.code !== "Env__UnparsableMainFile") throw e;
+
+        const ws = GetWorkspaces(workingEntry);
+        if (ws.length === 0) throw e;
+
+        // returning {w, res} and not res is some weird workaround i searched up
+        // because JS Arrays cannot handle promises from .filter()
+        const workspaceResults = await Promise.all(
+            ws.map(async (w) => {
+                const res = await ValidateProject(w, false);
+                return { w, isValid: res === true };
+            }),
+        );
+
+        const workspaces = workspaceResults
+            .filter(({ isValid }) => isValid)
+            .map(({ w }) => w);
+
+        // TODO - known issue: workspaces tend to lack lockfiles
+        // invalidating valid projects
+        if (workspaces.length === 0) {
+            await LogStuff(
+                "There are some workspaces here, but they're all already added.",
+                "bruh",
+            );
+            return;
+        }
+
+        const addWorkspaces = await LogStuff(
+            `Hey! This looks like a ${I_LIKE_JS.FKN} rootless monorepo. We've found these workspaces:\n\n${
+                workspaces.join("\n")
+            }.\n\nShould we add them to your list so they're all cleaned?`,
+            "bulb",
+            undefined,
+            true,
+        );
+
+        if (!addWorkspaces) {
+            return;
+        }
+
+        const allEntries = [workingEntry, ...workspaces].join("\n") + "\n";
+        await Deno.writeTextFile(GetAppPath("MOTHERFKRS"), allEntries, { append: true });
+
+        await LogStuff(
+            `Added all of your projects. Many mfs less to care about!`,
+            "tick-clear",
         );
     }
-    if (env.runtime === "bun") {
-        await LogStuff(
-            `This project uses the Bun runtime. Keep in mind it's not *fully* supported *yet*.`,
-            "what",
-            "italic",
-        );
-    }
-
-    const workspaces = env.workspaces;
-
-    if (!workspaces || workspaces.length === 0) {
-        await addTheEntry();
-        return;
-    }
-
-    const workspaceString: string[] = [];
-
-    for (const ws of workspaces) {
-        workspaceString.push(await NameProject(ws, "all"));
-    }
-
-    const addWorkspaces = await LogStuff(
-        `Hey! This looks like a ${I_LIKE_JS.FKN} monorepo. We've found these workspaces:\n\n${
-            workspaceString.join("\n")
-        }.\n\nShould we add them to your list as well, so they're all cleaned?`,
-        "bulb",
-        undefined,
-        true,
-    );
-
-    if (!addWorkspaces) {
-        await addTheEntry();
-        return;
-    }
-
-    const allEntries = [workingEntry, ...workspaces].join("\n") + "\n";
-    await Deno.writeTextFile(GetAppPath("MOTHERFKRS"), allEntries, { append: true });
-
-    await LogStuff(
-        `Added all of your projects. Many mfs less to care about!`,
-        "tick-clear",
-    );
-    return;
 }
 
 /**
@@ -405,13 +456,14 @@ export async function ValidateProject(entry: string, existing: boolean): Promise
         const env = await GetProjectEnvironment(workingEntry);
 
         if (!CheckForPath(env.main.path)) return "NoPkgFile";
+        // TODO - requiring lockfiles is a bit too problematic
+        // workspaces don't have them, deno projects can disable them...
         if (!CheckForPath(env.lockfile.path)) {
             // if runtime is bun and bun.lockb exists, no return
             // so the project is considered valid
             if (env.runtime !== "bun") return "NoLockfile";
             if (!CheckForPath(JoinPaths(env.root, "bun.lockb"))) return "NoLockfile";
         }
-
         if (!env.main.cpfContent.name) return "NoName";
         if (!env.main.cpfContent.version) return "NoVersion";
     } catch {
@@ -430,18 +482,17 @@ export async function ValidateProject(entry: string, existing: boolean): Promise
 /**
  * Checks for workspaces within a Node, Bun, or Deno project, supporting package.json, pnpm-workspace.yaml, .yarnrc.yml, and bunfig.toml.
  *
- * @async
  * @param {string} path Path to the root of the project. Expects an already parsed path.
- * @returns {Promise<string[]>}
+ * @returns {string[]}
  */
-export async function GetWorkspaces(path: string): Promise<string[]> {
+export function GetWorkspaces(path: string): string[] {
     try {
         const workspacePaths: string[] = [];
 
         // Check package.json for Node, npm, and yarn (and Bun workspaces).
         const packageJsonPath = JoinPaths(path, "package.json");
         if (CheckForPath(packageJsonPath)) {
-            const pkgJson: NodePkgFile = JSON.parse(await Deno.readTextFile(packageJsonPath));
+            const pkgJson: NodePkgFile = JSON.parse(Deno.readTextFileSync(packageJsonPath));
             if (pkgJson.workspaces) {
                 const pkgWorkspaces = Array.isArray(pkgJson.workspaces) ? pkgJson.workspaces : pkgJson.workspaces?.packages || [];
                 workspacePaths.push(...pkgWorkspaces);
@@ -451,21 +502,21 @@ export async function GetWorkspaces(path: string): Promise<string[]> {
         // Check pnpm-workspace.yaml for pnpm workspaces
         const pnpmWorkspacePath = JoinPaths(path, "pnpm-workspace.yaml");
         if (CheckForPath(pnpmWorkspacePath)) {
-            const pnpmConfig = parseYaml(await Deno.readTextFile(pnpmWorkspacePath)) as { packages: string[] };
+            const pnpmConfig = parseYaml(Deno.readTextFileSync(pnpmWorkspacePath)) as { packages: string[] };
             if (pnpmConfig.packages && Array.isArray(pnpmConfig.packages)) workspacePaths.push(...pnpmConfig.packages);
         }
 
         // Check .yarnrc.yml for Yarn workspaces
         const yarnRcPath = JoinPaths(path, ".yarnrc.yml");
         if (CheckForPath(yarnRcPath)) {
-            const yarnConfig = parseYaml(await Deno.readTextFile(yarnRcPath)) as { workspaces?: string[] };
+            const yarnConfig = parseYaml(Deno.readTextFileSync(yarnRcPath)) as { workspaces?: string[] };
             if (yarnConfig.workspaces && Array.isArray(yarnConfig.workspaces)) workspacePaths.push(...yarnConfig.workspaces);
         }
 
         // Check bunfig.toml for Bun workspaces
         const bunfigTomlPath = JoinPaths(path, "bunfig.toml");
         if (CheckForPath(bunfigTomlPath)) {
-            const bunConfig = parseToml(await Deno.readTextFile(bunfigTomlPath)) as { workspace?: string[] };
+            const bunConfig = parseToml(Deno.readTextFileSync(bunfigTomlPath)) as { workspace?: string[] };
             if (bunConfig.workspace && Array.isArray(bunConfig.workspace)) workspacePaths.push(...bunConfig.workspace);
         }
 
@@ -473,8 +524,8 @@ export async function GetWorkspaces(path: string): Promise<string[]> {
         const denoJsonPath = JoinPaths(path, "deno.json");
         const denoJsoncPath = JoinPaths(path, "deno.jsonc");
         if (CheckForPath(denoJsonPath) || CheckForPath(denoJsoncPath)) {
-            const denoConfig = CheckForPath(denoJsoncPath) ? parseJsonc(await Deno.readTextFile(denoJsoncPath)) : JSON.parse(
-                await Deno.readTextFile(
+            const denoConfig = CheckForPath(denoJsoncPath) ? parseJsonc(Deno.readTextFileSync(denoJsoncPath)) : JSON.parse(
+                Deno.readTextFileSync(
                     denoJsonPath,
                 ),
             );
@@ -489,7 +540,7 @@ export async function GetWorkspaces(path: string): Promise<string[]> {
         // Check for Cargo configuration (Cargo.toml)
         const cargoTomlPath = JoinPaths(path, "Cargo.toml");
         if (CheckForPath(cargoTomlPath)) {
-            const cargoToml = parseToml(await Deno.readTextFile(cargoTomlPath)) as unknown as CargoPkgFile;
+            const cargoToml = parseToml(Deno.readTextFileSync(cargoTomlPath)) as unknown as CargoPkgFile;
             if (cargoToml.workspace && Array.isArray(cargoToml.workspace.members)) {
                 workspacePaths.push(...cargoToml.workspace.members);
             }
@@ -498,7 +549,7 @@ export async function GetWorkspaces(path: string): Promise<string[]> {
         // Check for Golang configuration (go.work)
         const goWorkPath = JoinPaths(path, "go.work");
         if (CheckForPath(goWorkPath)) {
-            const goWork = internalGolangRequireLikeStringParser((await Deno.readTextFile(goWorkPath)).split("\n"), "use");
+            const goWork = internalGolangRequireLikeStringParser((Deno.readTextFileSync(goWorkPath)).split("\n"), "use");
             if (goWork.length > 0) workspacePaths.push(...goWork.filter((s) => !["(", ")"].includes(StringUtils.normalize(s))));
         }
 
@@ -507,9 +558,10 @@ export async function GetWorkspaces(path: string): Promise<string[]> {
         const absoluteWorkspaces: string[] = [];
 
         for (const workspacePath of workspacePaths) {
-            const fullPath = JoinPaths(path, workspacePath);
+            // TODO - instead of this stupid fix, assert that everywhere we either pre-append the path or not
+            const fullPath = workspacePath.startsWith(path) ? workspacePath : JoinPaths(path, workspacePath);
             if (!CheckForPath(fullPath)) continue;
-            for await (const dir of expandGlob(fullPath)) {
+            for (const dir of expandGlobSync(fullPath)) {
                 if (dir.isDirectory) {
                     absoluteWorkspaces.push(dir.path);
                 }
@@ -517,8 +569,8 @@ export async function GetWorkspaces(path: string): Promise<string[]> {
         }
 
         return absoluteWorkspaces;
-    } catch (e) {
-        await LogStuff(`Error looking for workspaces: ${e}`, "error");
+    } catch {
+        // await LogStuff(`Error looking for workspaces: ${e}`, "error");
         return [];
     }
 }
@@ -537,7 +589,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
     if (!CheckForPath(root)) throw new FknError("Internal__Projects__CantDetermineEnv", `Path ${root} doesn't exist.`);
 
     const hall_of_trash = JoinPaths(root, "node_modules");
-    const workspaces = await GetWorkspaces(root);
+    const workspaces = GetWorkspaces(root);
 
     const paths = {
         deno: {
