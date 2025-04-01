@@ -401,25 +401,28 @@ export async function ValidateProject(entry: string, existing: boolean): Promise
     const workingEntry = ParsePath(entry);
     if (!CheckForPath(workingEntry)) return "NotFound";
     // GetProjectEnvironment() already does some validations by itself, so we can just use it here
-    const env = await GetProjectEnvironment(workingEntry);
+    try {
+        const env = await GetProjectEnvironment(workingEntry);
 
-    const list = GetAllProjects();
-    const isDuplicate = list.filter(
+        if (!CheckForPath(env.main.path)) return "NoPkgFile";
+        if (!CheckForPath(env.lockfile.path)) {
+            // if runtime is bun and bun.lockb exists, no return
+            // so the project is considered valid
+            if (env.runtime !== "bun") return "NoLockfile";
+            if (!CheckForPath(JoinPaths(env.root, "bun.lockb"))) return "NoLockfile";
+        }
+
+        if (!env.main.cpfContent.name) return "NoName";
+        if (!env.main.cpfContent.version) return "NoVersion";
+    } catch {
+        return "CantGetProjectEnv";
+    }
+
+    const isDuplicate = (GetAllProjects()).filter(
         (item) => StringUtils.normalize(item) === StringUtils.normalize(workingEntry),
     ).length > (existing ? 1 : 0);
 
     if (isDuplicate) return "IsDuplicate";
-
-    if (!CheckForPath(env.main.path)) return "NoPkgFile";
-    if (!CheckForPath(env.lockfile.path)) {
-        // if runtime is bun and bun.lockb exists, no return
-        // so the project is considered valid
-        if (env.runtime !== "bun") return "NoLockfile";
-        if (!CheckForPath(JoinPaths(env.root, "bun.lockb"))) return "NoLockfile";
-    }
-
-    if (!env.main.cpfContent.name) return "NoName";
-    if (!env.main.cpfContent.version) return "NoVersion";
 
     return true;
 }
