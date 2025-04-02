@@ -5,13 +5,19 @@ import { FkNodeInterop } from "./interop/interop.ts";
 
 export default async function TheLauncher(params: TheLauncherConstructedParams) {
     const path = await SpotProject(params.project);
+    const env = await GetProjectEnvironment(path);
 
     Deno.chdir(path);
 
     await LaunchUserIDE();
-    await FkNodeInterop.Features.Update({
-        env: await GetProjectEnvironment(path),
+    if (env.settings.launchWithUpdate) {
+        await FkNodeInterop.Features.Update({
+            env,
+            verbose: true,
+        });
+    }
+    await FkNodeInterop.Features.Launch({
+        env,
         verbose: true,
     });
-    // TODO: add launchCmd
 }

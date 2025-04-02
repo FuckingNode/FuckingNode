@@ -183,6 +183,7 @@ export const DEFAULT_FKNODE_YAML: FullFkNodeYaml = {
     releaseCmd: "__DISABLE",
     launchCmd: "__DISABLE",
     launchFile: "__DISABLE",
+    launchWithUpdate: true,
 };
 
 /** Checks if a given command is __USE_DEFAULT */

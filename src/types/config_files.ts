@@ -176,11 +176,17 @@ export interface FullFkNodeYaml {
      */
     launchCmd: string;
     /**
-     * A file to be executed when `launchCmd` is invoked.
+     * A file to be executed when `launchCmd` is invoked. Only used for Deno, Cargo, and Golang.
      *
      * @type {string}
      */
     launchFile: string;
+    /**
+     * If true, dependencies for a project will be updated upon using `fklaunch` with it.
+     *
+     * @type {boolean}
+     */
+    launchWithUpdate: boolean;
 }
 
 /**

@@ -5,6 +5,7 @@ import type { ProjectEnvironment } from "../../types/platform.ts";
 import { DebugFknErr, FknError } from "../../functions/error.ts";
 import { FkNodeInterop } from "./interop.ts";
 import { isDef } from "../../constants.ts";
+import { NameProject } from "../../functions/projects.ts";
 
 function HandleError(
     err:
@@ -188,5 +189,43 @@ export const InteropedFeatures = {
 
             return true;
         }
+    },
+    Launch: async (params: InteropedFeatureParams): Promise<boolean> => {
+        const { env, verbose } = params;
+        const script = env.settings.launchCmd;
+
+        if (isDef(script)) {
+            if (StringUtils.validateAgainst(env.manager, ["go", "deno", "cargo"]) && !env.settings.launchFile) {
+                throw new FknError(
+                    "Unknown__CleanerTask__Launch",
+                    `You tried to launch project ${await NameProject(
+                        env.root,
+                        "name",
+                    )} without specifying a launchFile in your fknode.yaml. ${env.runtime} requires to specify what file to run.`,
+                );
+            }
+
+            const output = await Commander(
+                env.commands.base,
+                StringUtils.validateAgainst(env.manager, ["go", "deno", "cargo"])
+                    ? [env.commands.start, env.settings.launchFile]
+                    : [env.commands.start],
+                verbose,
+            );
+
+            if (!output.success) HandleError("Unknown__CleanerTask__Launch", output.stdout);
+
+            return true;
+        }
+
+        const output = await Commander(
+            env.commands.run[0],
+            [env.commands.run[1], script],
+            verbose,
+        );
+
+        if (!output.success) HandleError("Unknown__CleanerTask__Launch", output.stdout);
+
+        return true;
     },
 };
