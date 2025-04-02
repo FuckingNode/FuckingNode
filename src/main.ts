@@ -23,7 +23,7 @@ import { FreshSetup, GetAppPath, GetUserSettings } from "./functions/config.ts";
 import { DEBUG_LOG, GenericErrorHandler } from "./functions/error.ts";
 import type { TheCleanerConstructedParams } from "./commands/constructors/command.ts";
 import { RunScheduledTasks } from "./functions/schedules.ts";
-import { StringUtils } from "@zakahacecosas/string-utils";
+import { StringUtils, UnknownString } from "@zakahacecosas/string-utils";
 import { CleanupProjects } from "./functions/projects.ts";
 import { LaunchWebsite } from "./functions/http.ts";
 
@@ -119,20 +119,18 @@ if (hasFlag("version", true, true) && !flags[1]) {
     Deno.exit(0);
 }
 
+function isNotFlag(arg: UnknownString): arg is string {
+    if (!StringUtils.validate(arg)) return false;
+    const str = StringUtils.normalize(arg, { preserveCase: true, strict: false, stripCliColors: true });
+    return !str.startsWith("-") && !str.startsWith("--");
+}
+
 async function main(command: string) {
     await init();
 
-    /* this is a bit unreadable, i admit */
-    const projectArg = (
-            flags[1] &&
-            flags[1].trim() !== "" &&
-            (((!flags[1].trim().startsWith("--") && !flags[1].trim().startsWith("-")) &&
-                !ParseFlag("self", false).includes(flags[1])) || ParseFlag("self", false).includes(flags[1]))
-        )
-        ? flags[1]
-        : 0 as const;
+    const projectArg = isNotFlag(flags[1]) ? flags[1] : 0 as const;
 
-    const intensityArg = (flags[2] && flags[2].trim() !== "" && !flags[2].trim().includes("--")) ? flags[2] : GetUserSettings().defaultIntensity;
+    const intensityArg = isNotFlag(flags[2]) ? flags[2] : GetUserSettings().defaultIntensity;
 
     const cleanerArgs: TheCleanerConstructedParams = {
         flags: {
