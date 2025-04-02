@@ -1,6 +1,6 @@
 # Contributing
 
-These are basic guidelines & info we hope you'll find useful for contributing to the project. For documentation-related contributions, head to [this repository instead](https://github.com/FuckingNode/fuckingnode.github.io).
+These are basic guidelines & info we hope you'll find useful for contributing to the project. For installer-script-related or documentation-related contributions, head to [this repository instead](https://github.com/FuckingNode/fuckingnode.github.io).
 
 ## Dev tools
 
