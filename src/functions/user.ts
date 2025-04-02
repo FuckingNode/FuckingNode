@@ -4,8 +4,7 @@ import type { ProjectEnvironment } from "../types/platform.ts";
 import { Commander } from "./cli.ts";
 import { isDis } from "../constants.ts";
 import type { CF_FKNODE_SETTINGS } from "../types/config_files.ts";
-import { LogStuff } from "./io.ts";
-import { GetSettings } from "./config.ts";
+import { GetUserSettings } from "./config.ts";
 
 export function ValidateUserCmd(env: ProjectEnvironment, key: "commitCmd" | "releaseCmd"): string {
     const command = key === "commitCmd" ? env.settings.commitCmd : env.settings.releaseCmd;
@@ -43,11 +42,10 @@ export async function RunUserCmd(params: { key: "commitCmd" | "releaseCmd"; env:
 }
 
 export async function LaunchUserIDE() {
-    const IDE: CF_FKNODE_SETTINGS["favEditor"] = (await GetSettings()).favEditor;
+    const IDE: CF_FKNODE_SETTINGS["favEditor"] = GetUserSettings().favEditor;
 
     if (!StringUtils.validateAgainst(IDE, ["vscode", "sublime", "emacs", "notepad++", "atom", "vscodium"])) {
-        await LogStuff(`Error: ${IDE} is not a supported editor! Cannot launch it.`, "error");
-        return;
+        throw new Error(`${IDE} is not a supported editor! Cannot launch it.`);
     }
 
     let executionCommand: "subl" | "code" | "emacs" | "notepad++" | "codium" | "atom";

@@ -118,12 +118,11 @@ export async function FreshSetup(repairSetts?: boolean): Promise<void> {
  * Returns current user settings.
  *
  * @export
- * @async
- * @returns {Promise<FKNODE_SETTINGS>}
+ * @returns {FKNODE_SETTINGS}
  */
-export async function GetSettings(): Promise<CF_FKNODE_SETTINGS> {
+export function GetUserSettings(): CF_FKNODE_SETTINGS {
     const path = GetAppPath("SETTINGS");
-    const stuff: CF_FKNODE_SETTINGS = await parseYaml(await Deno.readTextFile(path)) as CF_FKNODE_SETTINGS;
+    const stuff: CF_FKNODE_SETTINGS = parseYaml(Deno.readTextFileSync(path)) as CF_FKNODE_SETTINGS;
     if (!stuff.flushFreq || !stuff.defaultIntensity || !stuff.favEditor || !stuff.updateFreq) {
         const newStuff: CF_FKNODE_SETTINGS = {
             flushFreq: stuff.flushFreq ?? DEFAULT_SETTINGS.flushFreq,
@@ -131,7 +130,7 @@ export async function GetSettings(): Promise<CF_FKNODE_SETTINGS> {
             favEditor: stuff.favEditor ?? DEFAULT_SETTINGS.favEditor,
             defaultIntensity: stuff.defaultIntensity ?? DEFAULT_SETTINGS.defaultIntensity,
         };
-        await Deno.writeTextFile(path, StringifyYaml(newStuff));
+        Deno.writeTextFileSync(path, StringifyYaml(newStuff));
         return newStuff;
     }
     return stuff;
@@ -155,7 +154,7 @@ export async function ChangeSetting(
     value: UnknownString,
 ): Promise<void> {
     const settingsPath = GetAppPath("SETTINGS");
-    const currentSettings = await GetSettings();
+    const currentSettings = GetUserSettings();
 
     if (setting === "defaultIntensity") {
         if (!StringUtils.validateAgainst(value, ["normal", "hard", "hard-only", "maxim", "maxim-only"])) {
@@ -227,7 +226,7 @@ export async function ChangeSetting(
  * @returns {Promise<void>}
  */
 export async function DisplaySettings(): Promise<void> {
-    const settings = await GetSettings();
+    const settings = GetUserSettings();
 
     const formattedSettings = [
         `Update frequency: Each ${ColorString(settings.updateFreq, "bright-green")} days. ${ColorString("updateFreq", "half-opaque", "italic")}`,

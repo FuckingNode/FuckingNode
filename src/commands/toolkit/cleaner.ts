@@ -1,6 +1,6 @@
 import { FULL_NAME, I_LIKE_JS, isDef, LOCAL_PLATFORM } from "../../constants.ts";
 import { Commander, CommandExists } from "../../functions/cli.ts";
-import { GetAppPath, GetSettings } from "../../functions/config.ts";
+import { GetAppPath, GetUserSettings } from "../../functions/config.ts";
 import { BulkRemoveFiles, CheckForPath, JoinPaths, ParsePath } from "../../functions/filesystem.ts";
 import { ColorString, LogStuff } from "../../functions/io.ts";
 import { GetProjectEnvironment, NameProject, SpotProject, UnderstandProjectProtection } from "../../functions/projects.ts";
@@ -507,7 +507,7 @@ export async function ValidateIntensity(intensity: string): Promise<CleanerInten
     }
 
     const workingIntensity = cleanedIntensity as CleanerIntensity | "--";
-    const defaultIntensity = (await GetSettings()).defaultIntensity;
+    const defaultIntensity = GetUserSettings().defaultIntensity;
 
     if (workingIntensity === "--") {
         return defaultIntensity;

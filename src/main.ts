@@ -19,7 +19,7 @@ import TheLauncher from "./commands/launch.ts";
 // other things
 import { APP_NAME, APP_URLs, FULL_NAME } from "./constants.ts";
 import { ColorString, LogStuff, ParseFlag } from "./functions/io.ts";
-import { FreshSetup, GetAppPath, GetSettings } from "./functions/config.ts";
+import { FreshSetup, GetAppPath, GetUserSettings } from "./functions/config.ts";
 import { DEBUG_LOG, GenericErrorHandler } from "./functions/error.ts";
 import type { TheCleanerConstructedParams } from "./commands/constructors/command.ts";
 import { RunScheduledTasks } from "./functions/schedules.ts";
@@ -132,9 +132,7 @@ async function main(command: string) {
         ? flags[1]
         : 0 as const;
 
-    const intensityArg = (flags[2] && flags[2].trim() !== "" && !flags[2].trim().includes("--"))
-        ? flags[2]
-        : (await GetSettings()).defaultIntensity;
+    const intensityArg = (flags[2] && flags[2].trim() !== "" && !flags[2].trim().includes("--")) ? flags[2] : GetUserSettings().defaultIntensity;
 
     const cleanerArgs: TheCleanerConstructedParams = {
         flags: {

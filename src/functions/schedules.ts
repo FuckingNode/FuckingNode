@@ -1,13 +1,13 @@
 import TheUpdater from "../commands/updater.ts";
 import type { CF_FKNODE_SCHEDULE } from "../types/config_files.ts";
-import { FlushConfigFiles, GetAppPath, GetSettings } from "./config.ts";
+import { FlushConfigFiles, GetAppPath, GetUserSettings } from "./config.ts";
 import { GetDateNow, ParseDate } from "./date.ts";
 import { parse as parseYaml } from "@std/yaml";
 import { StringifyYaml } from "./io.ts";
 import { VERSIONING } from "../constants.ts";
 
 export async function RunScheduledTasks() {
-    const { updateFreq, flushFreq } = await GetSettings();
+    const { updateFreq, flushFreq } = GetUserSettings();
     const scheduleFilePath: string = GetAppPath("SCHEDULE");
     const scheduleFile: CF_FKNODE_SCHEDULE = parseYaml(await Deno.readTextFile(scheduleFilePath)) as CF_FKNODE_SCHEDULE;
 
