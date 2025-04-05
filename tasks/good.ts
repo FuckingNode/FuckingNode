@@ -43,20 +43,3 @@ Run("fmt"); // ensure code is formatted
 Run("upgrade"); // ensure we're on latest
 
 Run("outdated", "--update", "--latest"); // ensure deps are on latest
-
-try {
-    Deno.stat("../fkdocs");
-} catch (e) {
-    if (e instanceof Deno.errors.NotFound) {
-        console.warn("Didn't copy scripts to docs. You'll have to clone the repo for that (in ../fkdocs).");
-    }
-}
-
-await Deno.copyFile(
-    join(dir, "scripts/install.ps1"),
-    join(dir, "../fkdocs/docs/install.ps1"),
-); // ensure Windows install is on latest
-await Deno.copyFile(
-    join(dir, "scripts/install.sh"),
-    join(dir, "../fkdocs/docs/install.sh"),
-); // ensure macOS and Linux install are on latest
