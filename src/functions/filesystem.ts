@@ -22,16 +22,14 @@ export function CheckForPath(path: string): boolean {
  * Checks for a directory, returns a string depending on the result.
  *
  * @export
- * @async
  * @param {string} path
+ * @returns {"NotDir" | "Valid" | "ValidButNotEmpty" | "NotFound"}
  */
-export async function CheckForDir(path: string): Promise<
-    "NotDir" | "Valid" | "ValidButNotEmpty" | "NotFound"
-> {
+export function CheckForDir(path: string): "NotDir" | "Valid" | "ValidButNotEmpty" | "NotFound" {
     try {
-        const info = await Deno.stat(path);
+        const info = Deno.statSync(path);
         if (!info.isDirectory) return "NotDir";
-        for await (const _ of Deno.readDir(path)) {
+        for (const _ of Deno.readDirSync(path)) {
             // If we find a single entry, it's not empty.
             return "ValidButNotEmpty";
         }
@@ -136,15 +134,14 @@ export function JoinPaths(pathA: string, pathB: string): string {
  * Takes an array of paths and removes all of them, with recursive removal enabled.
  *
  * @export
- * @async
  * @param {string[]} files Array of file paths to remove
- * @returns {Promise<void>}
+ * @returns {void}
  */
-export async function BulkRemoveFiles(files: string[]): Promise<void> {
+export function BulkRemoveFiles(files: string[]): void {
     if (files.length === 0) return;
-    await Promise.all(files.map(async (file) => {
-        await Deno.remove(ParsePath(file), {
+    files.map((file) => {
+        Deno.removeSync(ParsePath(file), {
             recursive: true,
         });
-    }));
+    });
 }

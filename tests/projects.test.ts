@@ -8,7 +8,7 @@ import { ColorString } from "../src/functions/io.ts";
 Deno.test({
     name: "reads node env",
     fn: async () => {
-        const env = await GetProjectEnvironment(TEST_ONE.root);
+        const env = GetProjectEnvironment(TEST_ONE.root);
         assertEquals(env, TEST_ONE);
     },
 });
@@ -31,14 +31,14 @@ Deno.test({
 Deno.test({
     name: "names projects accordingly",
     fn: async () => {
-        const toName = await SpotProject("@zakahacecosas/fuckingnode");
+        const toName = SpotProject("@zakahacecosas/fuckingnode");
 
         assertEquals(
-            await NameProject(toName, "name-colorless"),
+            NameProject(toName, "name-colorless"),
             "@zakahacecosas/fuckingnode",
         );
         assertEquals(
-            await NameProject(toName, "name"),
+            NameProject(toName, "name"),
             ColorString("@zakahacecosas/fuckingnode", "bold"),
         );
     },

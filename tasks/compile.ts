@@ -56,5 +56,4 @@ Deno.mkdir("./dist/");
 
 CompileApp();
 
-// for nix, get into WSL and run:
-// nix-prefetch-url URL_TO_LATEST_LINUX_64_86_EXE
+// for nix, run "nix-prefetch-url URL_TO_LATEST_LINUX_64_86_EXE"

@@ -41,20 +41,20 @@ const coolStrings = {
     yt: ColorString("YouTube", "red"),
 };
 
-export default async function TheAbouter() {
-    await LogStuff(colorizeText(ASCII));
+export default function TheAbouter() {
+    LogStuff(colorizeText(ASCII));
     console.log("-".repeat(35));
-    await LogStuff(`${ColorString(VERSIONING.APP, "bright-yellow")} · ${getRandomPhrase()}\n`);
-    await LogStuff(
+    LogStuff(`${ColorString(VERSIONING.APP, "bright-yellow")} · ${getRandomPhrase()}\n`);
+    LogStuff(
         `Written in ${coolStrings.ts}. Running in ${coolStrings.deno}.\nDeveloped in ${coolStrings.spain} by ${coolStrings.zakaOne} (${coolStrings.zakaTwo} in spanish).\n`,
     );
-    await LogStuff(
+    LogStuff(
         `See cool trailer on ${coolStrings.yt} / ${APP_URLs.WEBSITE}follow-us`,
     );
-    await LogStuff(
+    LogStuff(
         `${I_LIKE_JS.FK} communism, love freedom. this one's open-source: ${coolStrings.gitUrl}\n`,
     );
-    await LogStuff(
+    LogStuff(
         `${coolStrings.side}, born ${coolStrings.date} (a bit earlier but 'Initial commit' in the 1st repo was then)`,
     );
 }

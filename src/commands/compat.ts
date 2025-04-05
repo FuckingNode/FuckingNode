@@ -51,15 +51,15 @@ const migrateCompatibility = [
     { From: "NodeJS / yarn", To: "npm / pnpm", Supported: labels.y },
 ];
 
-const overallSupport = async () => {
-    await LogStuff("OVERALL SUPPORT ---");
-    await LogStuff(StringUtils.table(featureCompatibility));
-    await LogStuff("For specific compatibility details, run 'compat' followed by any of these: cleaner, kickstart, release, migrate, commit.");
+const overallSupport = () => {
+    LogStuff("OVERALL SUPPORT ---");
+    LogStuff(StringUtils.table(featureCompatibility));
+    LogStuff("For specific compatibility details, run 'compat' followed by any of these: cleaner, kickstart, release, migrate, commit.");
     return;
 };
 
-export default async function TheCompater(params: TheCompaterConstructedParams) {
-    await LogStuff(
+export default function TheCompater(params: TheCompaterConstructedParams) {
+    LogStuff(
         `${
             ColorString("This table shows feature compatibility across environments.", "bold")
         }\nMore details available at ${APP_URLs.WEBSITE}manual/cross-runtime`,
@@ -67,39 +67,39 @@ export default async function TheCompater(params: TheCompaterConstructedParams) 
     );
 
     if (!StringUtils.validate(params.target)) {
-        await overallSupport();
+        overallSupport();
         return;
     }
 
     switch (StringUtils.normalize(params.target, { strict: true })) {
         case "cleaner":
         case "advanced":
-            await LogStuff("ADVANCED CLEANER FEATURES SUPPORT ---");
-            await LogStuff(StringUtils.table(advancedFeatureCompatibility));
+            LogStuff("ADVANCED CLEANER FEATURES SUPPORT ---");
+            LogStuff(StringUtils.table(advancedFeatureCompatibility));
             return;
         case "kickstart":
-            await LogStuff("KICKSTART FEATURE SUPPORT ---");
-            await LogStuff(StringUtils.table(kickstartCompatibility));
+            LogStuff("KICKSTART FEATURE SUPPORT ---");
+            LogStuff(StringUtils.table(kickstartCompatibility));
             // IDEs too, this is simple so i ain't extracting to a constant
-            await LogStuff(StringUtils.table([
+            LogStuff(StringUtils.table([
                 { "Supported IDEs": ["VSCode", "VSCodium", "Notepad++", "Sublime", "Emacs", "Atom"] },
             ]));
             return;
         case "commit":
-            await LogStuff("COMMIT FEATURE SUPPORT ---");
-            await LogStuff(StringUtils.table(commitCompatibility));
+            LogStuff("COMMIT FEATURE SUPPORT ---");
+            LogStuff(StringUtils.table(commitCompatibility));
 
             return;
         case "migrate":
-            await LogStuff("MIGRATE FEATURE SUPPORT ---");
-            await LogStuff(StringUtils.table(migrateCompatibility));
+            LogStuff("MIGRATE FEATURE SUPPORT ---");
+            LogStuff(StringUtils.table(migrateCompatibility));
             return;
         case "release":
-            await LogStuff("RELEASE FEATURE SUPPORT ---");
-            await LogStuff(StringUtils.table(releaseCompatibility));
+            LogStuff("RELEASE FEATURE SUPPORT ---");
+            LogStuff(StringUtils.table(releaseCompatibility));
             return;
         default:
-            await overallSupport();
+            overallSupport();
             return;
     }
 }

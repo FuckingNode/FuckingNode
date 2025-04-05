@@ -3,7 +3,7 @@ import type { CF_FKNODE_SETTINGS } from "../types/config_files.ts";
 import { FknError } from "./error.ts";
 import { BulkRemoveFiles, CheckForPath, JoinPaths, ParsePathList } from "./filesystem.ts";
 import { parse as parseYaml } from "@std/yaml";
-import { ColorString, LogStuff, StringifyYaml } from "./io.ts";
+import { ColorString, Interrogate, LogStuff, StringifyYaml } from "./io.ts";
 import { StringUtils, type UnknownString } from "@zakahacecosas/string-utils";
 import { format } from "@std/fmt/bytes";
 
@@ -109,7 +109,7 @@ export async function FreshSetup(repairSetts?: boolean): Promise<void> {
 
     if (toBeRemoved.length === 0) return;
 
-    await BulkRemoveFiles(toBeRemoved);
+    BulkRemoveFiles(toBeRemoved);
 
     return;
 }
@@ -158,7 +158,7 @@ export async function ChangeSetting(
 
     if (setting === "defaultIntensity") {
         if (!StringUtils.validateAgainst(value, ["normal", "hard", "hard-only", "maxim", "maxim-only"])) {
-            await LogStuff(`${value} is not valid. Enter either 'normal', 'hard', 'hard-only', or 'maxim'.`);
+            LogStuff(`${value} is not valid. Enter either 'normal', 'hard', 'hard-only', or 'maxim'.`);
             return;
         }
         const newSettings: CF_FKNODE_SETTINGS = {
@@ -172,7 +172,7 @@ export async function ChangeSetting(
     } else if (setting === "updateFreq") {
         const newValue = Math.ceil(Number(value));
         if (typeof newValue !== "number" || isNaN(newValue) || newValue <= 0) {
-            await LogStuff(`${value} is not valid. Enter a valid number greater than 0.`);
+            LogStuff(`${value} is not valid. Enter a valid number greater than 0.`);
             return;
         }
         const newSettings: CF_FKNODE_SETTINGS = {
@@ -185,7 +185,7 @@ export async function ChangeSetting(
         );
     } else if (setting === "favEditor") {
         if (!StringUtils.validateAgainst(value, ["vscode", "sublime", "emacs", "atom", "notepad++", "vscodium"])) {
-            await LogStuff(
+            LogStuff(
                 `${value} is not valid. Enter either:\n'vscode', 'sublime', 'emacs', 'atom', 'notepad++', or 'vscodium'.`,
             );
             return;
@@ -201,7 +201,7 @@ export async function ChangeSetting(
     } else {
         const newValue = Math.ceil(Number(value));
         if (typeof newValue !== "number" || isNaN(newValue) || newValue <= 0) {
-            await LogStuff(`${value} is not valid. Enter a valid number greater than 0.`);
+            LogStuff(`${value} is not valid. Enter a valid number greater than 0.`);
             return;
         }
         const newSettings: CF_FKNODE_SETTINGS = {
@@ -214,7 +214,7 @@ export async function ChangeSetting(
         );
     }
 
-    await LogStuff(`Settings successfully updated! ${setting} is now ${value}`, "tick-clear");
+    LogStuff(`Settings successfully updated! ${setting} is now ${value}`, "tick-clear");
 
     return;
 }
@@ -222,10 +222,9 @@ export async function ChangeSetting(
 /**
  * Formats user settings and logs them.
  *
- * @async
- * @returns {Promise<void>}
+ * @returns {void}
  */
-export async function DisplaySettings(): Promise<void> {
+export function DisplaySettings(): void {
     const settings = GetUserSettings();
 
     const formattedSettings = [
@@ -239,7 +238,7 @@ export async function DisplaySettings(): Promise<void> {
         }`,
     ].join("\n");
 
-    await LogStuff(`${ColorString("Your current settings are:", "bright-yellow")}\n---\n${formattedSettings}`, "bulb");
+    LogStuff(`${ColorString("Your current settings are:", "bright-yellow")}\n---\n${formattedSettings}`, "bulb");
 }
 
 /**
@@ -254,7 +253,7 @@ export async function DisplaySettings(): Promise<void> {
  */
 export async function FlushConfigFiles(target: UnknownString, force: boolean, silent: boolean = false): Promise<void> {
     if (!StringUtils.validateAgainst(target, ["logs", "projects", "schedules", "errors", "all"])) {
-        await LogStuff(
+        LogStuff(
             "Specify what to flush. Either 'logs', 'projects', 'schedules', 'errors', or 'all'.",
             "warn",
         );
@@ -286,15 +285,12 @@ export async function FlushConfigFiles(target: UnknownString, force: boolean, si
 
     if (
         !force &&
-        !(await LogStuff(
+        !Interrogate(
             `Are you sure you want to clean your ${target} file? You'll recover ${format(fileSize)}.`,
-            "what",
-            undefined,
-            true,
-        ))
+        )
     ) return;
 
-    await BulkRemoveFiles(file);
-    if (!silent) await LogStuff("That worked out!", "tick-clear");
+    BulkRemoveFiles(file);
+    if (!silent) LogStuff("That worked out!", "tick-clear");
     return;
 }

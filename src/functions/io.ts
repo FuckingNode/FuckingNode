@@ -64,21 +64,18 @@ export function Emojify(message: string, emoji: SUPPORTED_EMOJIS): string {
  * @author ZakaHaceCosas
  *
  * @export
- * @async
  * @param {string} message The message to be logged.
  * @param {?SUPPORTED_EMOJIS} [emoji] Additionally, add an emoji before the log.
  * @param {?(tValidColors | tValidColors[])} [color] Optionally, a color (or more) for the output.
- * @param {?boolean} [question] If true, the log will act as a y/N confirm. Will return true if the user confirms, false otherwise.
  * @param {?boolean} [verbose] If false, stuff will be saved to `.log` file but not written to the `stdout`. Pass here the variable you use to handle verbose logs.
- * @returns {Promise<boolean>} Boolean value if it's a question depending on user input. If it's not a question, to avoid a type error for being `void`, it always returns false.
+ * @returns {void} Boolean value if it's a question depending on user input. If it's not a question, to avoid a type error for being `void`, it always returns false.
  */
-export async function LogStuff(
+export function LogStuff(
     message: string,
     emoji?: SUPPORTED_EMOJIS,
     color?: tValidColors | tValidColors[],
-    question?: boolean,
     verbose?: boolean,
-): Promise<boolean> {
+): void {
     try {
         const finalMessage = emoji ? Emojify(message, emoji) : message;
 
@@ -101,21 +98,40 @@ export async function LogStuff(
             }
         }
 
-        await Deno.writeTextFile(
+        Deno.writeTextFileSync(
             GetAppPath("LOGS"),
             formattedMessage,
             { append: true },
         );
 
-        if (question) {
-            return confirm("Confirm?");
-        }
-
-        return false;
+        return;
     } catch (e) {
         console.error(`Error logging stuff: ${e}`);
         throw e;
     }
+}
+
+/**
+ * Asks a question to the user in the form of a [y/N] confirm. It returns false for everything except for an explicit yes.
+ *
+ * @export
+ * @param {string} question What to ask?
+ * @returns {boolean} User input, or false if none.
+ */
+export function Interrogate(question: string, style?: "ask" | "warn" | "heads-up"): boolean {
+    switch (style) {
+        case "warn":
+            LogStuff(question, "warn", "bold");
+            break;
+        case "heads-up":
+            LogStuff(question, "heads-up", "bold");
+            break;
+        case "ask":
+        default:
+            LogStuff(question, "what");
+            break;
+    }
+    return confirm("Confirm?");
 }
 
 /**

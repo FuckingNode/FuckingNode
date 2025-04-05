@@ -8,6 +8,7 @@ import { assertEquals } from "@std/assert";
 Deno.test({
     name: "detects all managers and runtimes",
     fn: () => {
+        // TODO - one-line-ize
         const npm = CommandExists("npm");
         assertEquals(npm, true);
         const pnpm = CommandExists("pnpm");
@@ -27,9 +28,10 @@ Deno.test({
 
 Deno.test({
     name: "commander returns output",
-    fn: async () => {
+    fn: () => {
+        // TODO - test linux too
         if (LOCAL_PLATFORM.SYSTEM === "windows") {
-            const out = await Commander("powershell", ["echo", "hi"], false);
+            const out = Commander("powershell", ["echo", "hi"], false);
             assertEquals(out, { success: true, stdout: "hi\r\n\n" });
         }
     },

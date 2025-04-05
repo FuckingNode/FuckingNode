@@ -1,5 +1,5 @@
 import { format, parse } from "@std/semver";
-import { ColorString, LogStuff } from "../functions/io.ts";
+import { ColorString, Interrogate, LogStuff } from "../functions/io.ts";
 import { GetProjectEnvironment, NameProject, SpotProject } from "../functions/projects.ts";
 import type { TheReleaserConstructedParams } from "./constructors/command.ts";
 import type { DenoPkgFile, NodePkgFile } from "../types/platform.ts";
@@ -17,15 +17,15 @@ export default async function TheReleaser(params: TheReleaserConstructedParams) 
     try {
         parse(params.version);
     } catch {
-        await LogStuff(`Invalid version: ${params.version}. Please use a valid SemVer version.`, "error", "red");
+        LogStuff(`Invalid version: ${params.version}. Please use a valid SemVer version.`, "error", "red");
         return;
     }
 
     const parsedVersion = parse(params.version);
-    const project = await SpotProject(params.project);
+    const project = SpotProject(params.project);
     const CWD = Deno.cwd();
-    const env = await GetProjectEnvironment(project);
-    const canUseGit = await Git.IsRepo(project);
+    const env = GetProjectEnvironment(project);
+    const canUseGit = Git.IsRepo(project);
 
     Deno.chdir(env.root);
 
@@ -74,14 +74,14 @@ export default async function TheReleaser(params: TheReleaserConstructedParams) 
             ColorString(`Publish your changes to ${ColorString(env.runtime === "deno" ? "JSR" : "npm", "bold")}`, "red"),
         );
     }
-    const confirmation = await LogStuff(
-        `Heads up! We're about to take the following actions:\n${actions.join("\n")}\n\n- all of this at ${await NameProject(
-            project,
-            "all",
-        )}`,
+    const confirmation = Interrogate(
+        `Heads up! We're about to take the following actions:\n${actions.join("\n")}\n\n- all of this at ${
+            NameProject(
+                project,
+                "all",
+            )
+        }`,
         "heads-up",
-        "red",
-        true,
     );
 
     if (!confirmation) return;
@@ -95,26 +95,26 @@ export default async function TheReleaser(params: TheReleaserConstructedParams) 
     }
 
     // run their releaseCmd
-    await RunUserCmd({
+    RunUserCmd({
         key: "releaseCmd",
         env,
     });
 
     // just in case
     if (canUseGit) {
-        await Git.Ignore(
+        Git.Ignore(
             project,
             `${env.main.name}.bak`,
         );
 
-        await Git.Commit(
+        Git.Commit(
             project,
             `Release v${format(parsedVersion)} (automated by F*ckingNode)`,
             [env.main.path],
             [],
         );
 
-        await Git.Tag(
+        Git.Tag(
             project,
             format(parsedVersion),
             params.push,
@@ -122,7 +122,7 @@ export default async function TheReleaser(params: TheReleaserConstructedParams) 
 
         if (params.push) {
             // push stuff to git
-            const pushOutput = await Git.Push(project, false);
+            const pushOutput = Git.Push(project, false);
             if (pushOutput === 1) {
                 throw new Error(`Git push failed unexpectedly.`);
             }
@@ -131,7 +131,7 @@ export default async function TheReleaser(params: TheReleaserConstructedParams) 
 
     if (params.dry === true || env.settings.releaseAlwaysDry === true) {
         if (env.settings.releaseAlwaysDry === true) {
-            await LogStuff(
+            LogStuff(
                 "Note: Package won't be published because the releaseAlwaysDry key in your fknode.yaml is set to true. If you want to publish this package, remove or unset that key.",
                 "warn",
                 "bright-yellow",
@@ -141,12 +141,12 @@ export default async function TheReleaser(params: TheReleaserConstructedParams) 
     }
 
     // publish the package
-    const publishOutput = await Commander(env.commands.base, env.commands.publish);
+    const publishOutput = Commander(env.commands.base, env.commands.publish);
     if (!publishOutput.success) {
         throw new Error(`Publish command failed: ${publishOutput.stdout}`);
     }
 
     Deno.chdir(CWD);
-    await LogStuff(`That worked out! ${params.version} should be live now.`, "tick", ["bold", "bright-green"]);
+    LogStuff(`That worked out! ${params.version} should be live now.`, "tick", ["bold", "bright-green"]);
     return;
 }

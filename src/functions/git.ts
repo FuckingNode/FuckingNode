@@ -6,12 +6,12 @@ import { FULL_NAME } from "../constants.ts";
 import { StringUtils } from "@zakahacecosas/string-utils";
 import { FknError } from "./error.ts";
 
-async function __isRepo(path: string) {
+function __isRepo(path: string): boolean {
     try {
-        const resolvedPath = await SpotProject(path);
+        const resolvedPath = SpotProject(path);
 
         // make sure we're in a repo
-        const output = await Commander(
+        const output = Commander(
             "git",
             [
                 "-C",
@@ -41,30 +41,28 @@ export const Git = {
      * Checks if a given project is a Git repository.
      *
      * @export
-     * @async
      * @param {string} path Path to the repo, or project name.
-     * @returns {Promise<boolean>}
+     * @returns {boolean}
      */
-    IsRepo: async (path: string): Promise<boolean> => {
-        return await __isRepo(path);
+    IsRepo: (path: string): boolean => {
+        return __isRepo(path);
     },
     /**
      * Checks if a local repository has uncommitted changes or not. Returns `true` if you CAN commit (there are no uncommitted changes) and `false` if otherwise.
      *
      * @export
-     * @async
      * @param {string} path Path to the repo, or project name.
-     * @returns {Promise<boolean | "nonAdded">}
+     * @returns {boolean | "nonAdded"}
      */
-    CanCommit: async (path: string): Promise<boolean | "nonAdded"> => {
+    CanCommit: (path: string): boolean | "nonAdded" => {
         try {
-            const resolvedPath = await SpotProject(path);
+            const resolvedPath = SpotProject(path);
 
             // make sure we're in a repo
-            if (!(await __isRepo(path))) return false;
+            if (!__isRepo(path)) return false;
 
             // check for uncommitted changes
-            const localChanges = await Commander(
+            const localChanges = Commander(
                 "git",
                 [
                     "-C",
@@ -85,7 +83,7 @@ export const Git = {
             ) return false; // if anything happens we assume the tree isn't clean, just in case.
 
             // check if the local branch is behind the remote
-            const remoteStatus = await Commander(
+            const remoteStatus = Commander(
                 "git",
                 [
                     "-C",
@@ -104,17 +102,17 @@ export const Git = {
 
             return true; // clean working tree and up to date with remote, we can do whatever we want
         } catch (e) {
-            await LogStuff(`An error happened validating the Git working tree: ${e}`, "error");
+            LogStuff(`An error happened validating the Git working tree: ${e}`, "error");
             return false;
         }
     },
-    Commit: async (project: string, message: string, add: string[] | "all" | "none", avoid: string[]): Promise<0 | 1> => {
+    Commit: (project: string, message: string, add: string[] | "all" | "none", avoid: string[]): 0 | 1 => {
         try {
-            const path = await SpotProject(project);
+            const path = SpotProject(project);
             const toAdd = Array.isArray(add) ? add : add === "none" ? [] : add === "all" ? ["."] : [];
 
             if (toAdd.length > 0) {
-                const addOutput = await Commander(
+                const addOutput = Commander(
                     "git",
                     [
                         "-C",
@@ -128,7 +126,7 @@ export const Git = {
             }
 
             if (avoid.length > 0) {
-                const restoreOutput = await Commander(
+                const restoreOutput = Commander(
                     "git",
                     [
                         "-C",
@@ -142,7 +140,7 @@ export const Git = {
                 if (!restoreOutput.success) throw new Error(restoreOutput.stdout);
             }
 
-            const commitOutput = await Commander(
+            const commitOutput = Commander(
                 "git",
                 [
                     "-C",
@@ -159,20 +157,20 @@ export const Git = {
             }
             return 0;
         } catch (e) {
-            await LogStuff(
+            LogStuff(
                 `Error - could not create commit ${ColorString(message, "bold")} at ${ColorString(project, "bold")} because of error: ${e}`,
                 "error",
             );
             return 1;
         }
     },
-    Push: async (project: string, branch: string | false): Promise<0 | 1> => {
+    Push: (project: string, branch: string | false): 0 | 1 => {
         try {
-            const path = await SpotProject(project);
+            const path = SpotProject(project);
 
             const pushToBranch = branch === false ? [] : ["origin", branch.trim()];
 
-            const pushOutput = await Commander(
+            const pushOutput = Commander(
                 "git",
                 [
                     "-C",
@@ -187,7 +185,7 @@ export const Git = {
             }
             return 0;
         } catch (e) {
-            await LogStuff(
+            LogStuff(
                 `Error - could not push at ${ColorString(project, "bold")} because of error: ${e}`,
                 "error",
             );
@@ -197,25 +195,25 @@ export const Git = {
     /**
      * Make sure to `Git.Commit()` changes to `.gitignore`.
      */
-    Ignore: async (project: string, toBeIgnored: string): Promise<0 | 1> => {
+    Ignore: (project: string, toBeIgnored: string): 0 | 1 => {
         try {
-            const path = await SpotProject(project);
-            const env = await GetProjectEnvironment(path);
+            const path = SpotProject(project);
+            const env = GetProjectEnvironment(path);
             const gitIgnoreFile = JoinPaths(env.root, ".gitignore");
             if (!CheckForPath(gitIgnoreFile)) {
-                await Deno.writeTextFile(gitIgnoreFile, "");
-                await LogStuff(
+                Deno.writeTextFileSync(gitIgnoreFile, "");
+                LogStuff(
                     `Ignored ${toBeIgnored} successfully`,
                     "tick",
                 );
 
                 return 0;
             }
-            const gitIgnoreContent = await Deno.readTextFile(gitIgnoreFile);
+            const gitIgnoreContent = Deno.readTextFileSync(gitIgnoreFile);
 
             if (gitIgnoreContent.includes(toBeIgnored)) return 0;
 
-            await Deno.writeTextFile(
+            Deno.writeTextFileSync(
                 gitIgnoreFile,
                 `# auto-added by ${FULL_NAME} release command\n${toBeIgnored}`,
                 {
@@ -223,14 +221,14 @@ export const Git = {
                 },
             );
 
-            await LogStuff(
+            LogStuff(
                 `Ignored ${toBeIgnored} successfully`,
                 "tick",
             );
 
             return 0;
         } catch (e) {
-            await LogStuff(
+            LogStuff(
                 `Error - could not ignore file ${toBeIgnored} at ${ColorString(project, "bold")} because of error: ${e}`,
                 "error",
             );
@@ -238,10 +236,10 @@ export const Git = {
             return 1;
         }
     },
-    Tag: async (project: string, tag: string, push: boolean): Promise<0 | 1> => {
+    Tag: (project: string, tag: string, push: boolean): 0 | 1 => {
         try {
-            const path = await SpotProject(project);
-            const tagOutput = await Commander(
+            const path = SpotProject(project);
+            const tagOutput = Commander(
                 "git",
                 [
                     "-C",
@@ -255,7 +253,7 @@ export const Git = {
                 throw new Error(tagOutput.stdout);
             }
             if (push) {
-                const pushOutput = await Commander(
+                const pushOutput = Commander(
                     "git",
                     [
                         "-C",
@@ -272,7 +270,7 @@ export const Git = {
             }
             return 0;
         } catch (e) {
-            await LogStuff(
+            LogStuff(
                 `Error - could not create tag ${tag} at ${ColorString(project, "bold")} because of error: ${e}`,
                 "error",
             );
@@ -280,10 +278,10 @@ export const Git = {
             return 1;
         }
     },
-    GetLatestTag: async (project: string): Promise<string | undefined> => {
+    GetLatestTag: (project: string): string | undefined => {
         try {
-            const path = await SpotProject(project);
-            const getTagOutput = await Commander(
+            const path = SpotProject(project);
+            const getTagOutput = Commander(
                 "git",
                 [
                     "-C",
@@ -302,18 +300,17 @@ export const Git = {
             }
             return getTagOutput.stdout.trim(); // describe --tags --abbrev=0 should return a string with nothing but the latest tag, so this will do
         } catch (e) {
-            await LogStuff(
+            LogStuff(
                 `Error - could not get latest tag at ${ColorString(project, "bold")} because of error: ${e}`,
                 "error",
             );
-
             return undefined;
         }
     },
-    GetFilesReadyForCommit: async (project: string): Promise<string[]> => {
+    GetFilesReadyForCommit: (project: string): string[] => {
         try {
-            const path = await SpotProject(project);
-            const getFilesOutput = await Commander(
+            const path = SpotProject(project);
+            const getFilesOutput = Commander(
                 "git",
                 [
                     "-C",
@@ -328,17 +325,17 @@ export const Git = {
             if (!StringUtils.validate(getFilesOutput.stdout)) return [];
             return StringUtils.softlyNormalizeArray(getFilesOutput.stdout.split("\n"));
         } catch (e) {
-            await LogStuff(
+            LogStuff(
                 `Error - could not get files ready for commit (staged) at ${ColorString(project, "bold")} because of error: ${e}`,
                 "error",
             );
             return [];
         }
     },
-    GetBranches: async (project: string): Promise<{ current: string; all: string[] }> => {
+    GetBranches: (project: string): { current: string; all: string[] } => {
         try {
-            const path = await SpotProject(project);
-            const getBranchesOutput = await Commander(
+            const path = SpotProject(project);
+            const getBranchesOutput = Commander(
                 "git",
                 [
                     "-C",
@@ -353,7 +350,7 @@ export const Git = {
             if (!StringUtils.validate(getBranchesOutput.stdout)) {
                 // fallback to status
                 // this is an edge case for newly made repositories
-                const statusOutput = await Commander(
+                const statusOutput = Commander(
                     "git",
                     [
                         "-C",
@@ -379,7 +376,7 @@ export const Git = {
                 ),
             };
         } catch (e) {
-            await LogStuff(
+            LogStuff(
                 `Error - could not get branches at ${ColorString(project, "bold")} because of error: ${e}`,
                 "error",
             );

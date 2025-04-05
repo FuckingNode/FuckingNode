@@ -19,12 +19,12 @@ function StringifyDependencyRelationship(rel: FnCPF["deps"][0]["rel"]): string {
         : "Dependency...?";
 }
 
-export default async function TheStatistics(target: UnknownString) {
-    const project = await SpotProject(target);
-    const env = await GetProjectEnvironment(project);
-    const name = await NameProject(project, "all");
+export default function TheStatistics(target: UnknownString) {
+    const project = SpotProject(target);
+    const env = GetProjectEnvironment(project);
+    const name = NameProject(project, "all");
 
-    await LogStuff(
+    LogStuff(
         `${name} · ${ColorString(env.runtime, "bold")} runtime · ${ColorString(env.manager, "bold")} pkg manager`,
     );
 
@@ -42,20 +42,20 @@ export default async function TheStatistics(target: UnknownString) {
         .join("\n");
 
     if (!deps || deps.length === 0) {
-        await LogStuff("No dependencies found (impressive).");
+        LogStuff("No dependencies found (impressive).");
     } else {
-        await LogStuff(`\nDepends on ${ColorString(realDeps.length, "bold")} ${I_LIKE_JS.MFS}:`);
-        await LogStuff(
+        LogStuff(`\nDepends on ${ColorString(realDeps.length, "bold")} ${I_LIKE_JS.MFS}:`);
+        LogStuff(
             deps,
         );
-        await LogStuff(
+        LogStuff(
             realDeps.length >= maxDeps ? `...and ${realDeps.length - maxDeps} more.\n` : "\n",
         );
     }
 
     if (env.manager === "go" || env.manager === "cargo") return;
 
-    await LogStuff("This is how your project compares to the Recommended Community Standards.", "chart");
+    LogStuff("This is how your project compares to the Recommended Community Standards.", "chart");
 
     // deno-lint-ignore no-explicit-any
     const content = env.main.stdContent as any;
@@ -63,37 +63,37 @@ export default async function TheStatistics(target: UnknownString) {
     if (StringUtils.validateAgainst(env.runtime, ["node", "bun"])) {
         const { private: p, license: l, author: a, contributors: c, description: d, repository: r, bugs: b, type: t } = content;
 
-        await LogStuff(
+        LogStuff(
             p ? "This is a private project. Running generic checks." : "This is a public project. Running additional package checks.",
             "bulb",
         );
 
-        await LogStuff(l ? `${l} license, good.` : "No license found. You should specify it!", l ? "tick" : "error");
+        LogStuff(l ? `${l} license, good.` : "No license found. You should specify it!", l ? "tick" : "error");
         if (!p || a) {
-            await LogStuff(
+            LogStuff(
                 a ? `Made by ${typeof a === "string" ? a : a.name}, nice.` : "No author found. Who made this 'great' code?",
                 a ? "tick" : "error",
             );
         }
-        await LogStuff(
+        LogStuff(
             c
                 ? `So we've got ${c.length} contributor(s), great.`
                 : "No contributors found. If none, that's fine, but if someone helps, mention them.",
             c ? "tick" : "bruh",
         );
-        await LogStuff(
+        LogStuff(
             d ? `${ColorString(d, "italic")}, neat description.` : "No description found. What does your code even do?",
             d ? "tick" : "error",
         );
         if (!p) {
-            await LogStuff(r ? `Known repo URL, awesome.` : "You didn't specify a repository, why?", r ? "tick" : "error");
-            await LogStuff(
+            LogStuff(r ? `Known repo URL, awesome.` : "You didn't specify a repository, why?", r ? "tick" : "error");
+            LogStuff(
                 b ? `Known bug-report URL, incredible.` : "You didn't specify where to report bugs. Don't be lazy and accept feedback!",
                 b ? "tick" : "error",
             );
         }
 
-        await LogStuff(
+        LogStuff(
             t === "module"
                 ? "This is an ESM project, lovely."
                 : `Using CommonJS is not 'wrong', but not ideal. Consider switching to ESM.${
@@ -105,15 +105,15 @@ export default async function TheStatistics(target: UnknownString) {
         // this is very basic tbh, a deno.json doesn't have much
         const { lint, fmt, lock } = content;
 
-        await LogStuff(
+        LogStuff(
             lint ? `Found lint configurations. That's good!` : "No lint configurations found.",
             lint ? "tick" : "bruh",
         );
-        await LogStuff(
+        LogStuff(
             fmt ? `Found formatting configurations. That's good!` : "No formatting configurations found.",
             fmt ? "tick" : "bruh",
         );
-        await LogStuff(
+        LogStuff(
             lock ? `Found lockfile configurations. That's good!` : "Why did you disable the lockfile???",
             lock ? "tick" : "bruh",
         );

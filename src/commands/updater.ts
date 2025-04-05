@@ -11,8 +11,8 @@ import type { CF_FKNODE_SCHEDULE } from "../types/config_files.ts";
 import { Commander } from "../functions/cli.ts";
 import { JoinPaths } from "../functions/filesystem.ts";
 
-async function TellAboutUpdate(newVer: string): Promise<void> {
-    await LogStuff(
+function TellAboutUpdate(newVer: string): void {
+    LogStuff(
         `There's a new version! ${newVer}. Consider downloading it from GitHub. You're on ${VERSIONING.APP}, btw.`,
         "bulb",
     );
@@ -58,7 +58,7 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
 
     const needsToUpdate = await CheckUpdates();
     if (needsToUpdate === "rl") {
-        await LogStuff(
+        LogStuff(
             "Bro was rate-limited by GitHub (update provider). Try again in a few hours.",
             "bruh",
             "bright-yellow",
@@ -70,10 +70,10 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
 
     if (IsUpToDate(latestVer)) {
         if (params.silent) return;
-        await LogStuff(`You're up to date! ${ColorString(VERSIONING.APP, "bright-green")} is the latest.`, "tick");
+        LogStuff(`You're up to date! ${ColorString(VERSIONING.APP, "bright-green")} is the latest.`, "tick");
         return;
     } else {
-        await TellAboutUpdate(latestVer);
+        TellAboutUpdate(latestVer);
         if (!params.install) return;
         const filename = LOCAL_PLATFORM.SYSTEM === "windows" ? "install.ps1" : "install.sh";
         const buffer = await (await fetch(
@@ -83,7 +83,7 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
         const path = Deno.makeTempDirSync({ prefix: "UPDATE-SH" });
         Deno.writeTextFileSync(JoinPaths(path, filename), new TextDecoder().decode(new Uint8Array(buffer)));
 
-        await Commander(
+        Commander(
             LOCAL_PLATFORM.SYSTEM === "windows" ? "iex" : "bash",
             [JoinPaths(path, filename)],
         );

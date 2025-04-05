@@ -5,7 +5,7 @@ import { expandGlobSync } from "@std/fs";
 import { APP_NAME, APP_URLs, DEFAULT_FKNODE_YAML, I_LIKE_JS } from "../constants.ts";
 import type { CargoPkgFile, NodePkgFile, ProjectEnvironment, UnderstoodProjectProtection } from "../types/platform.ts";
 import { CheckForPath, JoinPaths, ParsePath, ParsePathList } from "./filesystem.ts";
-import { ColorString, LogStuff } from "./io.ts";
+import { ColorString, Interrogate, LogStuff } from "./io.ts";
 import { DEBUG_LOG, FknError } from "../functions/error.ts";
 import { type FkNodeYaml, type FullFkNodeYaml, ValidateFkNodeYaml } from "../types/config_files.ts";
 import { GetAppPath } from "./config.ts";
@@ -54,13 +54,12 @@ export function GetAllProjects(ignored?: false | "limit" | "exclude"): string[] 
  * Adds a new project.
  *
  * @export
- * @async
  * @param {UnknownString} entry Path to the project.
  * @returns {Promise<void>}
  */
-export async function AddProject(
+export function AddProject(
     entry: UnknownString,
-): Promise<void> {
+): void {
     if (!StringUtils.validate(entry)) {
         throw new FknError(
             "Generic__InteractionInvalidCauseNoPathProvided",
@@ -76,43 +75,43 @@ export async function AddProject(
         await Deno.writeTextFile(GetAppPath("MOTHERFKRS"), `${workingEntry}\n`, {
             append: true,
         });
-        await LogStuff(
+        LogStuff(
             `Congrats! ${name} was added to your list. One mf less to care about!`,
             "tick-clear",
         );
     }
 
     try {
-        const env = await GetProjectEnvironment(workingEntry);
-        const projectName = await NameProject(workingEntry, "all");
+        const env = GetProjectEnvironment(workingEntry);
+        const projectName = NameProject(workingEntry, "all");
 
-        const validation = await ValidateProject(workingEntry, false);
+        const validation = ValidateProject(workingEntry, false);
 
         if (validation !== true) {
             if (validation === "IsDuplicate") {
-                await LogStuff(`bruh, ${projectName} is already added! No need to re-add it.`, "bruh");
+                LogStuff(`bruh, ${projectName} is already added! No need to re-add it.`, "bruh");
             } else if (validation === "NoLockfile") {
-                await LogStuff(
+                LogStuff(
                     `Error adding ${projectName}: no lockfile present!\nProject's that don't have a lockfile can't be added to the list, and if you add them manually by editing the text file we'll remove them on next launch.\nWe NEED a lockfile to work with your project!`,
                     "error",
                 );
             } else if (validation === "NoName") {
-                await LogStuff(
+                LogStuff(
                     `Error adding ${projectName}: no name!\nSee how the project's name is missing? We can't work with that, we need a name to identify the project.\nPlease set "name" in your package file to something valid.`,
                     "error",
                 );
             } else if (validation === "NoVersion") {
-                await LogStuff(
+                LogStuff(
                     `Error adding ${projectName}: no version!\nWhile not too frequently used, we internally require your project to have a version field.\nPlease set "version" in your package file to something valid.`,
                     "error",
                 );
             } else if (validation === "NoPkgFile") {
-                await LogStuff(
+                LogStuff(
                     `Error adding ${projectName}: no package file!\nIs this even the path to a JavaScript project? No package.json, no deno.json; not even go.mod or Cargo.toml found.`,
                     "error",
                 );
             } else if (validation === "NotFound") {
-                await LogStuff(
+                LogStuff(
                     `The specified path was not found. Check for typos or if the project was moved.`,
                     "error",
                 );
@@ -121,7 +120,7 @@ export async function AddProject(
         }
 
         if (env.runtime === "deno") {
-            await LogStuff(
+            LogStuff(
                 // says 'good choice' because it's the same runtime as F*ckingNode. its not a real opinion lmao
                 // idk whats better, deno or bun. i have both installed, i could try. one day, maybe.
                 `This project uses the Deno runtime (good choice btw). Keep in mind it's not *fully* supported *yet*.`,
@@ -130,7 +129,7 @@ export async function AddProject(
             );
         }
         if (env.runtime === "bun") {
-            await LogStuff(
+            LogStuff(
                 `This project uses the Bun runtime. Keep in mind it's not *fully* supported *yet*.`,
                 "what",
                 "italic",
@@ -140,34 +139,31 @@ export async function AddProject(
         const workspaces = env.workspaces;
 
         if (!workspaces || workspaces.length === 0) {
-            await addTheEntry(projectName);
+            addTheEntry(projectName);
             return;
         }
 
         const workspaceString: string[] = [];
 
         for (const ws of workspaces) {
-            workspaceString.push(await NameProject(ws, "all"));
+            workspaceString.push(NameProject(ws, "all"));
         }
 
-        const addWorkspaces = await LogStuff(
+        const addWorkspaces = Interrogate(
             `Hey! This looks like a ${I_LIKE_JS.FKN} monorepo. We've found these workspaces:\n\n${
                 workspaceString.join("\n")
             }.\n\nShould we add them to your list as well, so they're all cleaned?`,
-            "bulb",
-            undefined,
-            true,
         );
 
         if (!addWorkspaces) {
-            await addTheEntry(projectName);
+            addTheEntry(projectName);
             return;
         }
 
         const allEntries = [workingEntry, ...workspaces].join("\n") + "\n";
-        await Deno.writeTextFile(GetAppPath("MOTHERFKRS"), allEntries, { append: true });
+        Deno.writeTextFileSync(GetAppPath("MOTHERFKRS"), allEntries, { append: true });
 
-        await LogStuff(
+        LogStuff(
             `Added all of your projects. Many mfs less to care about!`,
             "tick-clear",
         );
@@ -180,12 +176,10 @@ export async function AddProject(
 
         // returning {w, res} and not res is some weird workaround i searched up
         // because JS Arrays cannot handle promises from .filter()
-        const workspaceResults = await Promise.all(
-            ws.map(async (w) => {
-                const res = await ValidateProject(w, false);
-                return { w, isValid: res === true };
-            }),
-        );
+        const workspaceResults = ws.map((w) => {
+            const res = ValidateProject(w, false);
+            return { w, isValid: res === true };
+        });
 
         const workspaces = workspaceResults
             .filter(({ isValid }) => isValid)
@@ -194,20 +188,17 @@ export async function AddProject(
         // TODO - known issue: workspaces tend to lack lockfiles
         // invalidating valid projects
         if (workspaces.length === 0) {
-            await LogStuff(
+            LogStuff(
                 "There are some workspaces here, but they're all already added.",
                 "bruh",
             );
             return;
         }
 
-        const addWorkspaces = await LogStuff(
+        const addWorkspaces = Interrogate(
             `Hey! This looks like a ${I_LIKE_JS.FKN} rootless monorepo. We've found these workspaces:\n\n${
                 workspaces.join("\n")
             }.\n\nShould we add them to your list so they're all cleaned?`,
-            "bulb",
-            undefined,
-            true,
         );
 
         if (!addWorkspaces) {
@@ -215,9 +206,9 @@ export async function AddProject(
         }
 
         const allEntries = [workingEntry, ...workspaces].join("\n") + "\n";
-        await Deno.writeTextFile(GetAppPath("MOTHERFKRS"), allEntries, { append: true });
+        Deno.writeTextFileSync(GetAppPath("MOTHERFKRS"), allEntries, { append: true });
 
-        await LogStuff(
+        LogStuff(
             `Added all of your projects. Many mfs less to care about!`,
             "tick-clear",
         );
@@ -229,54 +220,57 @@ export async function AddProject(
  *
  * @async
  * @param {UnknownString} entry Path to the project.
- * @returns {Promise<void>}
+ * @returns {void}
  */
-export async function RemoveProject(
+export function RemoveProject(
     entry: UnknownString,
     showOutput: boolean = true,
-): Promise<void> {
-    const workingEntry = await SpotProject(entry).catch(async (e) => {
+): void {
+    try {
+        SpotProject(entry);
+
+        const workingEntry = SpotProject(entry);
+        if (!workingEntry) return;
+
+        const list = GetAllProjects(false);
+        const index = list.indexOf(workingEntry);
+        const name = NameProject(workingEntry, "name");
+
+        if (!list.includes(workingEntry)) {
+            LogStuff(
+                `Bruh, that mf doesn't exist yet.\nAnother typo? We took: ${workingEntry}`,
+                "error",
+            );
+            return;
+        }
+
+        if (index !== -1) list.splice(index, 1); // remove only 1st coincidence, to avoid issues
+        Deno.writeTextFileSync(GetAppPath("MOTHERFKRS"), list.join("\n") + "\n");
+
+        if (list.length > 0 && showOutput === true) {
+            LogStuff(
+                `I guess ${name} was another "revolutionary cutting edge project" that's now gone, right?`,
+                "tick-clear",
+            );
+            return;
+        } else {
+            if (!showOutput) return;
+            LogStuff(
+                `Removed ${name}. That was your last project, the list is now empty.`,
+                "moon-face",
+            );
+            return;
+        }
+    } catch (e) {
         if (e instanceof FknError && e.code === "Project__NonFoundProject") {
-            await LogStuff(
+            LogStuff(
                 `Bruh, that mf doesn't exist yet.\nAnother typo? We took: ${entry} (=> ${entry ? ParsePath(entry) : "undefined?"})`,
                 "error",
             );
-            return null;
+            Deno.exit(1);
         } else {
             throw e;
         }
-    });
-
-    if (!workingEntry) return;
-
-    const list = GetAllProjects(false);
-    const index = list.indexOf(workingEntry);
-    const name = await NameProject(workingEntry, "name");
-
-    if (!list.includes(workingEntry)) {
-        await LogStuff(
-            `Bruh, that mf doesn't exist yet.\nAnother typo? We took: ${workingEntry}`,
-            "error",
-        );
-        return;
-    }
-
-    if (index !== -1) list.splice(index, 1); // remove only 1st coincidence, to avoid issues
-    await Deno.writeTextFile(GetAppPath("MOTHERFKRS"), list.join("\n") + "\n");
-
-    if (list.length > 0 && showOutput === true) {
-        await LogStuff(
-            `I guess ${name} was another "revolutionary cutting edge project" that's now gone, right?`,
-            "tick-clear",
-        );
-        return;
-    } else {
-        if (!showOutput) return;
-        await LogStuff(
-            `Removed ${name}. That was your last project, the list is now empty.`,
-            "moon-face",
-        );
-        return;
     }
 }
 
@@ -288,16 +282,16 @@ export async function RemoveProject(
  * @param {?"name" | "name-colorless" | "path" | "name-ver" | "all"} wanted What to return. `name` returns the name, `path` the file path, `name-ver` a `name@version` string, and `all` returns everything together.
  * @returns {string} The name of the project. If an error happens, it will return the path you provided (that's how we used to name projects anyway).
  */
-export async function NameProject(
+export function NameProject(
     path: UnknownString,
     wanted?: "name" | "name-colorless" | "path" | "name-ver" | "all",
-): Promise<string> {
+): string {
     const workingPath = ParsePath(path);
     const formattedPath = ColorString(workingPath, "italic", "half-opaque");
 
     try {
         if (!CheckForPath(workingPath)) throw new Error("(this won't be shown and formatted path will be returned instead)");
-        const env = await GetProjectEnvironment(workingPath);
+        const env = GetProjectEnvironment(workingPath);
 
         const pkgFile = env.main.cpfContent;
 
@@ -448,12 +442,12 @@ export function UnderstandProjectProtection(settings: FkNodeYaml, options: {
  * @param {boolean} existing True if you're validating an existing project, false if it's a new one to be added.
  * @returns {Promise<true | PROJECT_ERROR_CODES>} True if it's valid, a `PROJECT_ERROR_CODES` otherwise.
  */
-export async function ValidateProject(entry: string, existing: boolean): Promise<true | PROJECT_ERROR_CODES> {
+export function ValidateProject(entry: string, existing: boolean): true | PROJECT_ERROR_CODES {
     const workingEntry = ParsePath(entry);
     if (!CheckForPath(workingEntry)) return "NotFound";
     // GetProjectEnvironment() already does some validations by itself, so we can just use it here
     try {
-        const env = await GetProjectEnvironment(workingEntry);
+        const env = GetProjectEnvironment(workingEntry);
 
         if (!CheckForPath(env.main.path)) return "NoPkgFile";
         // TODO - requiring lockfiles is a bit too problematic
@@ -569,8 +563,8 @@ export function GetWorkspaces(path: string): string[] {
         }
 
         return absoluteWorkspaces;
-    } catch {
-        // await LogStuff(`Error looking for workspaces: ${e}`, "error");
+    } catch (e) {
+        LogStuff(`Error looking for workspaces: ${e}`, "error");
         return [];
     }
 }
@@ -579,12 +573,11 @@ export function GetWorkspaces(path: string): string[] {
  * Returns a project's environment (package manager, runtime, settings, paths to lockfile and `node_modules`, etc...).
  *
  * @export
- * @async
  * @param {UnknownString} path Path to the project's root.
- * @returns {Promise<ProjectEnvironment>}
+ * @returns {ProjectEnvironment}
  */
-export async function GetProjectEnvironment(path: UnknownString): Promise<ProjectEnvironment> {
-    const root = await SpotProject(path);
+export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
+    const root = SpotProject(path);
 
     if (!CheckForPath(root)) throw new FknError("Internal__Projects__CantDetermineEnv", `Path ${root} doesn't exist.`);
 
@@ -620,47 +613,37 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
 
     const pathChecks = {
         deno: Object.fromEntries(
-            await Promise.all(
-                Object.entries(paths.deno).map(([key, path]) => [key, CheckForPath(path)]),
-            ),
+            Object.entries(paths.deno).map(([key, path]) => [key, CheckForPath(path)]),
         ),
         bun: Object.fromEntries(
-            await Promise.all(
-                Object.entries(paths.bun).map(([key, path]) => [key, CheckForPath(path)]),
-            ),
+            Object.entries(paths.bun).map(([key, path]) => [key, CheckForPath(path)]),
         ),
         node: Object.fromEntries(
-            await Promise.all(
-                Object.entries(paths.node).map(([key, path]) => [key, CheckForPath(path)]),
-            ),
+            Object.entries(paths.node).map(([key, path]) => [key, CheckForPath(path)]),
         ),
         golang: Object.fromEntries(
-            await Promise.all(
-                Object.entries(paths.golang).map(([key, path]) => [key, CheckForPath(path)]),
-            ),
+            Object.entries(paths.golang).map(([key, path]) => [key, CheckForPath(path)]),
         ),
         rust: Object.fromEntries(
-            await Promise.all(
-                Object.entries(paths.rust).map(([key, path]) => [key, CheckForPath(path)]),
-            ),
+            Object.entries(paths.rust).map(([key, path]) => [key, CheckForPath(path)]),
         ),
     };
 
-    const isGolang = pathChecks.golang.pkg || pathChecks.golang.lock;
-    const isRust = pathChecks.rust.pkg || pathChecks.rust.lock;
-    const isDeno = pathChecks.deno.lock ||
-        pathChecks.deno.json ||
-        pathChecks.deno.jsonc;
-    const isBun = pathChecks.bun.lock ||
-        pathChecks.bun.lockb ||
-        pathChecks.bun.toml;
-    const isNode = pathChecks.node.lockNpm ||
-        pathChecks.node.lockPnpm ||
-        pathChecks.node.lockYarn ||
-        pathChecks.node.json;
+    const isGolang = pathChecks.golang["pkg"] || pathChecks.golang["lock"];
+    const isRust = pathChecks.rust["pkg"] || pathChecks.rust["lock"];
+    const isDeno = pathChecks.deno["lock"] ||
+        pathChecks.deno["json"] ||
+        pathChecks.deno["jsonc"];
+    const isBun = pathChecks.bun["lock"] ||
+        pathChecks.bun["lockb"] ||
+        pathChecks.bun["toml"];
+    const isNode = pathChecks.node["lockNpm"] ||
+        pathChecks.node["lockPnpm"] ||
+        pathChecks.node["lockYarn"] ||
+        pathChecks.node["json"];
 
     if (
-        !pathChecks.node.json && !pathChecks.deno.json && !pathChecks.bun.toml && !pathChecks.golang.pkg && !pathChecks.rust.pkg
+        !pathChecks.node["json"] && !pathChecks.deno["json"] && !pathChecks.bun["toml"] && !pathChecks.golang["pkg"] && !pathChecks.rust["pkg"]
     ) {
         throw new FknError(
             "Internal__Projects__CantDetermineEnv",
@@ -680,10 +663,10 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
         : isRust
         ? paths.rust.pkg
         : isDeno
-        ? pathChecks.deno.jsonc ? paths.deno.jsonc : pathChecks.deno.json ? paths.deno.json : paths.node.json
+        ? pathChecks.deno["jsonc"] ? paths.deno.jsonc : pathChecks.deno["json"] ? paths.deno.json : paths.node.json
         : paths.node.json;
 
-    const mainString: string = await Deno.readTextFile(mainPath);
+    const mainString: string = Deno.readTextFileSync(mainPath);
     const settings: FullFkNodeYaml = GetProjectSettings(root);
 
     const runtimeColor = isBun ? "pink" : isNode ? "bright-green" : isDeno ? "bright-blue" : isRust ? "orange" : "cyan";
@@ -699,7 +682,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
                 path: mainPath,
                 name: "go.mod",
                 stdContent: PackageFileParsers.Golang.STD(mainString),
-                cpfContent: PackageFileParsers.Golang.CPF(mainString, await Git.GetLatestTag(root), workspaces),
+                cpfContent: PackageFileParsers.Golang.CPF(mainString, Git.GetLatestTag(root), workspaces),
             },
             lockfile: {
                 name: "go.sum",
@@ -762,7 +745,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
                 cpfContent: PackageFileParsers.NodeBun.CPF(mainString, "bun", workspaces),
             },
             lockfile: {
-                name: pathChecks.bun.lockb ? "bun.lockb" : "bun.lock",
+                name: pathChecks.bun["lockb"] ? "bun.lockb" : "bun.lock",
                 path: paths.bun.lock,
             },
             runtime: "bun",
@@ -790,7 +773,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             runtimeColor,
             main: {
                 path: mainPath,
-                name: pathChecks.deno.jsonc ? "deno.jsonc" : "deno.json",
+                name: pathChecks.deno["jsonc"] ? "deno.jsonc" : "deno.json",
                 stdContent: PackageFileParsers.Deno.STD(mainString),
                 cpfContent: PackageFileParsers.Deno.CPF(mainString, workspaces),
             },
@@ -814,7 +797,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             workspaces,
         };
     }
-    if (pathChecks.node.lockYarn) {
+    if (pathChecks.node["lockYarn"]) {
         return {
             root,
 
@@ -846,7 +829,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             workspaces,
         };
     }
-    if (pathChecks.node.lockPnpm) {
+    if (pathChecks.node["lockPnpm"]) {
         return {
             root,
 
@@ -878,7 +861,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             workspaces,
         };
     }
-    if (pathChecks.node.lockNpm) {
+    if (pathChecks.node["lockNpm"]) {
         return {
             root,
 
@@ -921,13 +904,13 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
  * Parses a lockfile, differentiating `.yaml` from `.json` files. Unused, (I made it to fix an issue but turns out the fix was different lmao), but keep it here just in case.
  *
  * @export
- * @async
  * @param {string} lockfilePath
- * @returns {Promise<unknown>} Whatever the file returns :)
+ * @returns {unknown} Whatever the file returns :)
  */
-export async function ParseLockfile(lockfilePath: string): Promise<unknown> {
-    const file = await Deno.readTextFile(ParsePath(lockfilePath));
+export function ParseLockfile(lockfilePath: string): unknown {
+    const file = Deno.readTextFileSync(ParsePath(lockfilePath));
     if (lockfilePath.includes(".yaml") || lockfilePath.includes(".lock")) {
+        // TODO: bun.lock is JSON, not yaml
         return parseYaml(file);
     } else {
         return JSON.parse(file);
@@ -938,11 +921,10 @@ export async function ParseLockfile(lockfilePath: string): Promise<unknown> {
  * Tries to spot the given project name inside of the project list, returning its root path. If not found, returns the parsed path. It also works when you pass a path, parsing it to handle `--self` and relative paths.
  *
  * @export
- * @async
  * @param {UnknownString} name Project's name, path, or `--self`.
  * @returns {Promise<string>}
  */
-export async function SpotProject(name: UnknownString): Promise<string> {
+export function SpotProject(name: UnknownString): string {
     if (!StringUtils.validate(name)) {
         throw new FknError(
             "Generic__InteractionInvalidCauseNoPathProvided",
@@ -960,7 +942,7 @@ export async function SpotProject(name: UnknownString): Promise<string> {
 
     for (const project of allProjects) {
         const projectName = StringUtils.normalize(
-            await NameProject(project, "name-colorless"),
+            NameProject(project, "name-colorless"),
             { strict: false, preserveCase: true, stripCliColors: true },
         );
         if (toSpot === projectName) {
@@ -979,16 +961,15 @@ export async function SpotProject(name: UnknownString): Promise<string> {
  * Cleans up projects that are invalid and probably we won't be able to clean.
  *
  * @export
- * @async
  * @returns {Promise<0 | 1>} 0 if success, 1 if no projects to remove.
  */
-export async function CleanupProjects(): Promise<0 | 1> {
+export function CleanupProjects(): 0 | 1 {
     const listOfRemovals: { project: string; issue: PROJECT_ERROR_CODES }[] = [];
 
     const allProjects = GetAllProjects();
 
     for (const project of allProjects) {
-        const validation = await ValidateProject(project, true);
+        const validation = ValidateProject(project, true);
 
         if (validation !== true) {
             listOfRemovals.push({
@@ -1007,7 +988,7 @@ export async function CleanupProjects(): Promise<0 | 1> {
 
     if (result.length === 0) return 1;
 
-    for (const target of result) await RemoveProject(target.project, false);
+    for (const target of result) RemoveProject(target.project, false);
 
     return 0;
 }

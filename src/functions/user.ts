@@ -21,12 +21,12 @@ export function ValidateUserCmd(env: ProjectEnvironment, key: "commitCmd" | "rel
     return cmd;
 }
 
-export async function RunUserCmd(params: { key: "commitCmd" | "releaseCmd"; env: ProjectEnvironment }) {
+export function RunUserCmd(params: { key: "commitCmd" | "releaseCmd"; env: ProjectEnvironment }) {
     const { env, key } = params;
 
     const cmd = ValidateUserCmd(env, key);
 
-    const cmdOutput = await Commander(
+    const cmdOutput = Commander(
         env.commands.run[0],
         [env.commands.run[1], cmd],
         true,
@@ -41,7 +41,7 @@ export async function RunUserCmd(params: { key: "commitCmd" | "releaseCmd"; env:
     }
 }
 
-export async function LaunchUserIDE() {
+export function LaunchUserIDE() {
     const IDE: CF_FKNODE_SETTINGS["favEditor"] = GetUserSettings().favEditor;
 
     if (!StringUtils.validateAgainst(IDE, ["vscode", "sublime", "emacs", "notepad++", "atom", "vscodium"])) {
@@ -71,11 +71,7 @@ export async function LaunchUserIDE() {
             break;
     }
 
-    await Commander(executionCommand, ["."], false)
-        .then((res) => {
-            if (res.success === false) throw new Error(res.stdout);
-        })
-        .catch((e) => {
-            throw e;
-        });
+    const out = Commander(executionCommand, ["."], false);
+    if (!out.success) throw new Error(out.stdout);
+    return;
 }

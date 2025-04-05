@@ -30,15 +30,13 @@ export interface CommanderOutput {
  * @param {string} main Main command.
  * @param {string[]} stuff Additional args for the command.
  * @param {?boolean} showOutput Defaults to true. If false, the output of the command won't be shown and it'll be returned in the `CommanderOutput` promise instead.
- * @param {?boolean} enforce Defaults to false. If true AND showOutput is false, output will be synchronous.
  * @returns {Promise<CommanderOutput>} An object with a boolean telling if it was successful and its output.
  */
-export async function Commander(
+export function Commander(
     main: string,
     stuff: string[],
     showOutput?: boolean,
-    enforce?: boolean,
-): Promise<CommanderOutput> {
+): CommanderOutput {
     if (showOutput === false) {
         const command = new Deno.Command(main, {
             args: stuff,
@@ -46,7 +44,7 @@ export async function Commander(
             stderr: "piped",
         });
 
-        const process = enforce ? command.outputSync() : await command.output();
+        const process = command.outputSync();
 
         const result: CommanderOutput = {
             success: process.success,
@@ -63,7 +61,7 @@ export async function Commander(
         stdin: "inherit",
     });
 
-    const process = await command.output();
+    const process = command.outputSync();
 
     const result: CommanderOutput = {
         success: process.code === 0,

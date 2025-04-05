@@ -15,8 +15,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- Now several more methods are sync, for error fixing.
 - Now you can specify GitHub URLs without `.git` (`https://github.com/me/my-repo`).
-- Now more methods are sync, for error fixing.
 
 ### Fixed
 

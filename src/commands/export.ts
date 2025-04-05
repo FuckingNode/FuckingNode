@@ -5,11 +5,11 @@ import { ColorString, LogStuff, StringifyYaml } from "../functions/io.ts";
 import { APP_NAME, FULL_NAME, VERSIONING } from "../constants.ts";
 import { GetDateNow } from "../functions/date.ts";
 
-export default async function TheExporter(params: TheExporterConstructedParams) {
+export default function TheExporter(params: TheExporterConstructedParams) {
     const { project } = params;
 
-    const workingProject = await SpotProject(project);
-    const env = await GetProjectEnvironment(workingProject);
+    const workingProject = SpotProject(project);
+    const env = GetProjectEnvironment(workingProject);
 
     const cpfString = params.json === true ? JSON.stringify(env.main.cpfContent, undefined, 2) : StringifyYaml(env.main.cpfContent);
 
@@ -20,11 +20,11 @@ export default async function TheExporter(params: TheExporterConstructedParams) 
 
     const commentString = params.json === true ? comment.replaceAll("#", "//") : comment;
 
-    await Deno.writeTextFile(
+    Deno.writeTextFileSync(
         JoinPaths(env.root, outFileName),
         `${commentString}\n${cpfString}`,
     );
 
-    if (params.cli === true) await LogStuff(cpfString);
-    await LogStuff(`${ColorString(outFileName, "bold")} file written successfully`, "tick", "bright-green");
+    if (params.cli === true) LogStuff(cpfString);
+    LogStuff(`${ColorString(outFileName, "bold")} file written successfully`, "tick", "bright-green");
 }

@@ -15,7 +15,7 @@ export default async function TheAuditer(params: TheAuditerConstructedParams) {
 
     if (shouldAuditAll) {
         const projects = GetAllProjects();
-        await LogStuff(
+        LogStuff(
             `${APP_NAME.CASED} Audit is only supported for NodeJS projects as of now.`,
             "heads-up",
         );
@@ -32,28 +32,28 @@ export default async function TheAuditer(params: TheAuditerConstructedParams) {
             });
         }
 
-        const reportDetails = await Promise.all(report.map(async (item) => {
-            const name = await NameProject(item.project, "name-ver");
+        const reportDetails = report.map((item) => {
+            const name = NameProject(item.project, "name-ver");
             const string = `${name} # ${ColorString(`${item.audit.percentage.toFixed(2)}%`, "bold")} risk factor`;
             return string;
-        }));
+        });
         console.log("");
         if (reportDetails.length > 0) {
-            await LogStuff(
+            LogStuff(
                 `Report (${ColorString(strict ? "strict" : "standard", "bold")})\n${reportDetails.join("\n")}${
                     strict ? "" : `\n${ColorString("Unsure about the results? Run with --strict (or -s) for stricter criteria", "italic")}\n`
                 }`,
                 "chart",
             );
         } else {
-            await LogStuff("Not a single project has security issues. Great!\n", "tick");
+            LogStuff("Not a single project has security issues. Great!\n", "tick");
         }
     } else {
         await PerformAuditing(project, strict);
     }
 
-    await LogStuff("Audit complete!", "tick-clear");
-    await LogStuff(
+    LogStuff("Audit complete!", "tick-clear");
+    LogStuff(
         ColorString(
             "Keep in mind our report simply can't be 100% accurate - the best option is always to fix vulnerabilities.",
             "italic",

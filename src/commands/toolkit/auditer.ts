@@ -3,7 +3,7 @@
 import { StringUtils, type UnknownString } from "@zakahacecosas/string-utils";
 import { APP_NAME, I_LIKE_JS } from "../../constants.ts";
 import { Commander } from "../../functions/cli.ts";
-import { ColorString, LogStuff } from "../../functions/io.ts";
+import { ColorString, Interrogate, LogStuff } from "../../functions/io.ts";
 import { GetProjectEnvironment, NameProject, SpotProject } from "../../functions/projects.ts";
 import type {
     AnalyzedIndividualSecurityVulnerability,
@@ -143,16 +143,14 @@ function AnalyzeVulnerabilities(vulnerabilities: ApiFetchedIndividualSecurityVul
 /**
  * Asks a question for the interrogatory, returns a "stringified boolean" (weird, I know, we had to pivot a little bit), depending on the response. `"true"` means the user response is something to worry about, `"false"` means it's not.
  *
- * @async
  * @param {string} question Question itself.
  * @param {boolean} isFollowUp If true, question is a follow up to another question.
  * @param {boolean} isReversed If true, responding "yes" to the question means it's not a vulnerability (opposite logic).
- * @returns {Promise<"true" | "false">}
+ * @returns {"true" | "false"}
  */
-async function askQuestion(question: string, isFollowUp: boolean, isReversed: boolean): Promise<"true" | "false"> {
+function askQuestion(question: string, isFollowUp: boolean, isReversed: boolean): "true" | "false" {
     const formattedQuestion = ColorString(question, isFollowUp ? "bright-blue" : "bright-yellow", "italic");
-    const response = await LogStuff(formattedQuestion, undefined, undefined, true);
-    if (response) return isReversed ? "false" : "true";
+    if (Interrogate(formattedQuestion)) return isReversed ? "false" : "true";
     return isReversed ? "true" : "false";
 }
 
@@ -222,7 +220,7 @@ async function InterrogateVulnerability(questions: string[]): Promise<FkNodeSecu
                 false,
             );
             if (followUpThree === "true") {
-                await LogStuff(
+                LogStuff(
                     "We'll use the word 'WebSockets', however these questions apply for any other kind of persistent connection, like WebRTC.",
                     undefined,
                     "italic",
@@ -296,11 +294,10 @@ async function InterrogateVulnerability(questions: string[]): Promise<FkNodeSecu
 /**
  * Formats and displays the audit results.
  *
- * @async
  * @param {number} percentage Percentage result.
- * @returns {Promise<void>}
+ * @returns {void}
  */
-async function DisplayAudit(percentage: number): Promise<void> {
+function DisplayAudit(percentage: number): void {
     let color: "bright-yellow" | "red" | "bright-green";
     let message: string;
     if (percentage < 20) {
@@ -326,10 +323,10 @@ async function DisplayAudit(percentage: number): Promise<void> {
         color,
         "bold",
     );
-    await LogStuff(
+    LogStuff(
         `We've evaluated your responses and concluded a risk factor of ${percentageString}.`,
     );
-    await LogStuff(message);
+    LogStuff(message);
     console.log("");
 }
 
@@ -540,14 +537,14 @@ export async function AuditProject(bareReport: ParsedNodeReport, strict: boolean
 
     const totalVulnerabilities: number = vulnerabilities.length;
 
-    await LogStuff(
+    LogStuff(
         `\n===        FOUND VULNERABILITIES (${totalVulnerabilities.toString().padStart(3, "0")})        ===\n${
             ColorString(vulnerabilities.map((vuln) => vuln.id).join(" & "), "bold")
         }\n===    STARTING ${APP_NAME.STYLED} SECURITY AUDIT    ===`,
     );
 
     console.log("");
-    await LogStuff("Please answer these questions. We'll use your responses to evaluate this vulnerability:", "bulb");
+    LogStuff("Please answer these questions. We'll use your responses to evaluate this vulnerability:", "bulb");
     console.log("");
 
     const { questions } = AnalyzeVulnerabilities(vulnerabilities);
@@ -594,16 +591,16 @@ export async function PerformAuditing(project: string, strict: boolean): Promise
     | 0
     | 1
 > {
-    const workingPath = await SpotProject(project);
-    const env = await GetProjectEnvironment(workingPath);
-    const name = await NameProject(env.root, "name-ver");
+    const workingPath = SpotProject(project);
+    const env = GetProjectEnvironment(workingPath);
+    const name = NameProject(env.root, "name-ver");
     const current = Deno.cwd();
     // === "__UNSUPPORTED" already does the job, but typescript wants me to specify
     if (
         env.commands.audit === "__UNSUPPORTED" || env.manager === "deno" || env.manager === "bun" || env.manager === "cargo" ||
         env.manager === "go"
     ) {
-        await LogStuff(
+        LogStuff(
             `Audit is unsupported for ${env.manager.toUpperCase()} (${project}).`,
             "prohibited",
         );
@@ -611,16 +608,15 @@ export async function PerformAuditing(project: string, strict: boolean): Promise
     }
     Deno.chdir(env.root);
 
-    await LogStuff(`Auditing ${name} [${ColorString(env.commands.audit.join(" "), "italic", "half-opaque")}]`, "working");
-    const res = await Commander(
+    LogStuff(`Auditing ${name} [${ColorString(env.commands.audit.join(" "), "italic", "half-opaque")}]`, "working");
+    const res = Commander(
         env.commands.base,
         env.commands.audit,
         false,
-        true,
     );
 
     if (res.success) {
-        await LogStuff(
+        LogStuff(
             `Clear! There aren't any known vulnerabilities affecting ${name}.`,
             "tick",
         );
@@ -631,13 +627,13 @@ export async function PerformAuditing(project: string, strict: boolean): Promise
 
     if (bareReport.vulnerablePackages.length === 0) {
         if (!res.stdout || res.stdout?.trim() === "") {
-            await LogStuff(
+            LogStuff(
                 `An error occurred at ${name} and we weren't able to get the stdout. Unable to audit.`,
                 "error",
             );
             return 1;
         }
-        await LogStuff(
+        LogStuff(
             `Clear! There aren't any known vulnerabilities affecting ${name}.`,
             "tick",
         );

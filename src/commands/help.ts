@@ -20,15 +20,15 @@ function formatCmd(obj: helpThing): string {
     return strings.join("\n----\n");
 }
 
-async function pathReminder() {
-    await LogStuff(
+function pathReminder() {
+    LogStuff(
         `----\nNote: <project-path> is either a file path OR the "--self" flag which uses the Current Working Directory.\nE.g., running 'fkadd --self' here equals 'fkadd ${Deno.cwd()}'.\n\nAdditionally, in some places where we assume the project is already added (like clean or stats),\nyou can pass the project's name (as it appears in the package file) and it'll work as well.`,
         undefined,
         "italic",
     );
 }
 
-export default async function TheHelper(params: TheHelperConstructedParams) {
+export default function TheHelper(params: TheHelperConstructedParams) {
     const { query } = params;
 
     const USAGE = formatCmd([
@@ -94,11 +94,11 @@ export default async function TheHelper(params: TheHelperConstructedParams) {
         ],
     ]);
 
-    async function NoParamProvided() {
-        await LogStuff(
+    function NoParamProvided() {
+        LogStuff(
             `Usage: ${ColorString(APP_NAME.CLI, "bright-green")} <command> [params...]\n\n${USAGE}\n`,
         );
-        await LogStuff(
+        LogStuff(
             "Pro tip: Run --help <command-name> to get help with a specific command.",
             "bulb",
             "bright-yellow",
@@ -267,72 +267,72 @@ export default async function TheHelper(params: TheHelperConstructedParams) {
 
     switch (StringUtils.normalize(query ?? "", { strict: true })) {
         case "clean":
-            await LogStuff(
+            LogStuff(
                 `'clean' will clean your added projects. Options and flags:\n${CLEAN_OPTIONS}`,
             );
-            await pathReminder();
+            pathReminder();
             break;
         case "manager":
-            await LogStuff(
+            LogStuff(
                 `'manager' will let you manage projects. Options:\n${MANAGER_OPTIONS}`,
             );
-            await pathReminder();
+            pathReminder();
             break;
         case "settings":
-            await LogStuff(
+            LogStuff(
                 `'settings' lets you manage app configurations and more. Options:\n${SETTINGS_OPTIONS}`,
             );
             break;
         case "kickstart":
-            await LogStuff(
+            LogStuff(
                 `'kickstart' allows you to kickstart a repo easily. Options:\n${KICKSTART_OPTIONS}`,
             );
-            await pathReminder();
+            pathReminder();
             break;
         case "migrate":
-            await LogStuff(MIGRATE_OPTIONS);
-            await pathReminder();
+            LogStuff(MIGRATE_OPTIONS);
+            pathReminder();
             break;
         case "audit":
-            await LogStuff(AUDIT_OPTIONS);
-            await pathReminder();
+            LogStuff(AUDIT_OPTIONS);
+            pathReminder();
             break;
         case "surrender":
-            await LogStuff(
+            LogStuff(
                 `'surrender' allows you to deprecate a project easily. Options:\n${SURRENDER_OPTIONS}`,
             );
-            await pathReminder();
+            pathReminder();
             break;
         case "compat":
-            await LogStuff(COMPAT_OPTIONS);
+            LogStuff(COMPAT_OPTIONS);
             break;
         case "commit":
-            await LogStuff(COMMIT_OPTIONS);
+            LogStuff(COMMIT_OPTIONS);
             break;
         case "release":
         case "publish":
-            await LogStuff(RELEASE_OPTIONS);
-            await pathReminder();
+            LogStuff(RELEASE_OPTIONS);
+            pathReminder();
             break;
         case "export":
-            await LogStuff(EXPORT_OPTIONS);
-            await pathReminder();
+            LogStuff(EXPORT_OPTIONS);
+            pathReminder();
             break;
         case "setup":
-            await LogStuff(SETUP_OPTIONS);
-            await pathReminder();
+            LogStuff(SETUP_OPTIONS);
+            pathReminder();
             break;
         case "upgrade":
-            await LogStuff(UPGRADE_OPTIONS);
+            LogStuff(UPGRADE_OPTIONS);
             break;
         case "about":
-            await LogStuff(ABOUT_OPTIONS);
+            LogStuff(ABOUT_OPTIONS);
             break;
         case "help":
-            await LogStuff(HELP_OPTIONS);
+            LogStuff(HELP_OPTIONS);
             break;
         default:
-            await NoParamProvided();
+            NoParamProvided();
             break;
     }
 }

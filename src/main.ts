@@ -60,7 +60,7 @@ if (StringUtils.normalize(Deno.args[0] ?? "") === "something-fucked-up") {
 async function init() {
     await FreshSetup();
     await RunScheduledTasks();
-    await CleanupProjects();
+    CleanupProjects();
 }
 
 /** Normalized Deno.args */
@@ -86,7 +86,7 @@ function hasFlag(flag: string, allowQuickFlag: boolean, firstOnly: boolean = fal
 if (hasFlag("help", true)) {
     try {
         await init();
-        await TheHelper({ query: flags[1] });
+        TheHelper({ query: flags[1] });
         Deno.exit(0);
     } catch (e) {
         console.error("Critical error", e);
@@ -97,7 +97,7 @@ if (hasFlag("help", true)) {
 if (hasFlag("experimental-audit", false)) {
     try {
         await init();
-        await LogStuff(
+        LogStuff(
             "Beware that as an experimental feature, errors are likely to happen. Report issues, suggestions, or feedback on GitHub.",
             "warn",
             "bright-yellow",
@@ -115,7 +115,7 @@ if (hasFlag("experimental-audit", false)) {
 
 if (hasFlag("version", true, true) && !flags[1]) {
     await init();
-    await LogStuff(FULL_NAME, "bulb", "bright-green");
+    LogStuff(FULL_NAME, "bulb", "bright-green");
     Deno.exit(0);
 }
 
@@ -155,11 +155,11 @@ async function main(command: string) {
         })
     ) {
         case "clean":
-            await TheCleaner(cleanerArgs);
+            TheCleaner(cleanerArgs);
             break;
         case "global-clean":
         case "hard-clean":
-            await TheCleaner({
+            TheCleaner({
                 flags: { ...cleanerArgs["flags"] },
                 parameters: {
                     intensity: "hard-only",
@@ -170,7 +170,7 @@ async function main(command: string) {
         case "storage-emergency":
         case "maxim-clean":
         case "get-rid-of-node_modules":
-            await TheCleaner({
+            TheCleaner({
                 flags: { ...cleanerArgs["flags"] },
                 parameters: {
                     intensity: "maxim-only",
@@ -179,10 +179,10 @@ async function main(command: string) {
             });
             break;
         case "manager":
-            await TheManager(flags);
+            TheManager(flags);
             break;
         case "kickstart":
-            await TheKickstarter({
+            TheKickstarter({
                 gitUrl: flags[1],
                 path: flags[2],
                 manager: flags[3],
@@ -196,12 +196,12 @@ async function main(command: string) {
             break;
         case "self-update":
         case "upgrade":
-            await LogStuff(`Currently using ${ColorString(FULL_NAME, "green")}`);
-            await LogStuff("Checking for updates...");
+            LogStuff(`Currently using ${ColorString(FULL_NAME, "green")}`);
+            LogStuff("Checking for updates...");
             await TheUpdater({ silent: false, install: true });
             break;
         case "about":
-            await TheAbouter();
+            TheAbouter();
             break;
         case "release":
         case "publish":
@@ -213,7 +213,7 @@ async function main(command: string) {
             });
             break;
         case "commit":
-            await TheCommitter({
+            TheCommitter({
                 message: flags[1],
                 branch: flags[2],
                 push: hasFlag("push", true),
@@ -250,7 +250,7 @@ async function main(command: string) {
         case "export":
         case "gen-cpf":
         case "generate-cpf":
-            await TheExporter({
+            TheExporter({
                 project: flags[1],
                 json: hasFlag("json", false),
                 cli: hasFlag("cli", false),
@@ -258,41 +258,41 @@ async function main(command: string) {
             break;
         case "compat":
         case "features":
-            await TheCompater({
+            TheCompater({
                 target: flags[1],
             });
             break;
         case "stats":
-            await TheStatistics(flags[1]);
+            TheStatistics(flags[1]);
             break;
         case "documentation":
         case "docs":
         case "web":
         case "website":
-            await LogStuff(`Best documentation website for best CLI, live at ${APP_URLs.WEBSITE}`, "bulb");
+            LogStuff(`Best documentation website for best CLI, live at ${APP_URLs.WEBSITE}`, "bulb");
             break;
         case "github":
         case "repo":
         case "repository":
         case "oss":
         case "gh":
-            await LogStuff(
+            LogStuff(
                 `Free and open source, and free as in freedom, live at ${APP_URLs.WEBSITE}repo\n(The above URL is a redirect to GitHub.)`,
                 "bulb",
             );
             break;
         case "audit":
-            await LogStuff(
+            LogStuff(
                 "The Audit feature is experimental and only available for NodeJS projects. Run '--experimental-audit' to use it.\nImportant: We did not update this feature for V3, it's planned to be fully rewritten for V3.3. Do not use it as of now, it is very broken and mostly useless (AS OF NOW).",
                 "warn",
                 "bright-yellow",
             );
             break;
         case "sokoballs":
-            await LaunchWebsite("https://tenor.com/view/sokora-dunk-ice-skate-ice-dunk-balling-gif-7665972654807661282?quality=lossless");
+            LaunchWebsite("https://tenor.com/view/sokora-dunk-ice-skate-ice-dunk-balling-gif-7665972654807661282?quality=lossless");
             break;
         default:
-            await TheHelper({ query: flags[1] });
+            TheHelper({ query: flags[1] });
     }
 
     Deno.exit(0);
@@ -301,7 +301,7 @@ async function main(command: string) {
 try {
     if (!StringUtils.validate(flags[0])) {
         await init();
-        await TheHelper({});
+        TheHelper({});
         Deno.exit(0);
     }
 
