@@ -66,20 +66,24 @@ Copy and paste the following code in a terminal session.
 curl -fsSL fuckingnode.github.io/install.sh | bash
 ```
 
-### NixOS
+### Nix/NixOS
+> [!NOTE]
+> "aarch64-linux" are available, but are NOT tested!
 
 Add the repo to your `flake.nix`.
 
 ```nix
 inputs = {
+    ...
     fuckingnode.url = "github:FuckingNode/FuckingNode";
-}
+    ...
+};
 ```
 
 Then, add this to your system packages:
 
 ```nix
-inputs.fuckingnode.packages."${pkgs.system}".default
+inputs.fuckingnode.packages."${pkgs.system}".default;
 ```
 
 ### Compile from source
