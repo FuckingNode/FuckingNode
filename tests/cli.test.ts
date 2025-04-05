@@ -8,30 +8,24 @@ import { assertEquals } from "@std/assert";
 Deno.test({
     name: "detects all managers and runtimes",
     fn: () => {
-        // TODO - one-line-ize
-        const npm = CommandExists("npm");
-        assertEquals(npm, true);
-        const pnpm = CommandExists("pnpm");
-        assertEquals(pnpm, true);
-        const yarn = CommandExists("yarn");
-        assertEquals(yarn, true);
-        const deno = CommandExists("deno");
-        assertEquals(deno, true);
-        const bun = CommandExists("bun");
-        assertEquals(bun, true);
-        const go = CommandExists("go");
-        assertEquals(go, true);
-        const cargo = CommandExists("cargo");
-        assertEquals(cargo, true);
+        assertEquals(CommandExists("npm"), true);
+        assertEquals(CommandExists("pnpm"), true);
+        assertEquals(CommandExists("yarn"), true);
+        assertEquals(CommandExists("deno"), true);
+        assertEquals(CommandExists("bun"), true);
+        assertEquals(CommandExists("go"), true);
+        assertEquals(CommandExists("cargo"), true);
     },
 });
 
 Deno.test({
     name: "commander returns output",
     fn: () => {
-        // TODO - test linux too
         if (LOCAL_PLATFORM.SYSTEM === "windows") {
             const out = Commander("powershell", ["echo", "hi"], false);
+            assertEquals(out, { success: true, stdout: "hi\r\n\n" });
+        } else {
+            const out = Commander("echo", ["hi"], false);
             assertEquals(out, { success: true, stdout: "hi\r\n\n" });
         }
     },

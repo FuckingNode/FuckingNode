@@ -909,11 +909,10 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
  */
 export function ParseLockfile(lockfilePath: string): unknown {
     const file = Deno.readTextFileSync(ParsePath(lockfilePath));
-    if (lockfilePath.includes(".yaml") || lockfilePath.includes(".lock")) {
-        // TODO: bun.lock is JSON, not yaml
+    if (lockfilePath.includes(".yaml") || (lockfilePath.includes(".lock") && !lockfilePath.includes("bun.lock"))) {
         return parseYaml(file);
     } else {
-        return JSON.parse(file);
+        return parseJsonc(file);
     }
 }
 

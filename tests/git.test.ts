@@ -1,13 +1,15 @@
 import { assertEquals } from "@std/assert";
 import { Git } from "../src/functions/git.ts";
 import { APP_NAME } from "../src/constants.ts";
+import { SpotProject } from "../src/functions/projects.ts";
+
+const here = SpotProject(APP_NAME.SCOPE);
 
 Deno.test({
     name: "gets git branches",
     fn: () => {
-        const branches = Git.GetBranches(APP_NAME.SCOPE);
         assertEquals(
-            branches,
+            Git.GetBranches(here),
             {
                 current: "v3",
                 all: [
@@ -24,10 +26,9 @@ Deno.test({
 Deno.test({
     name: "gets git latest tag",
     fn: () => {
-        const tag = Git.GetLatestTag(APP_NAME.SCOPE);
         assertEquals(
-            tag,
-            "2.2.1", // TODO - assuming tags use semver version, make this use the value from deno.json so we're not changing this each time for tests to pass
+            Git.GetLatestTag(here),
+            JSON.parse(Deno.readTextFileSync("./deno.json")).version,
         );
     },
 });

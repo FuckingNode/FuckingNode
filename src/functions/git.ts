@@ -278,14 +278,19 @@ export const Git = {
             return 1;
         }
     },
+    /**
+     * Gets the latest tag for a project.
+     *
+     * @param project Project path. **Assumes it's parsed & spotted.**
+     * @returns A string with the tag name, or `undefined` if an error happens.
+     */
     GetLatestTag: (project: string): string | undefined => {
         try {
-            const path = SpotProject(project);
             const getTagOutput = Commander(
                 "git",
                 [
                     "-C",
-                    path,
+                    project,
                     "describe",
                     "--tags",
                     "--abbrev=0",
@@ -296,7 +301,7 @@ export const Git = {
                 throw new Error(getTagOutput.stdout);
             }
             if (!getTagOutput.stdout) {
-                throw new Error(`git describe --tags --abbrev=0 returned an undefined output for ${path}`);
+                throw new Error(`git describe --tags --abbrev=0 returned an undefined output for ${project}`);
             }
             return getTagOutput.stdout.trim(); // describe --tags --abbrev=0 should return a string with nothing but the latest tag, so this will do
         } catch (e) {
@@ -332,14 +337,19 @@ export const Git = {
             return [];
         }
     },
+    /**
+     * Gets all Git branches for a project.
+     *
+     * @param project Project path. **Assumes it's parsed & spotted.**
+     * @returns An object with the current branch and an array with all branch names.
+     */
     GetBranches: (project: string): { current: string; all: string[] } => {
         try {
-            const path = SpotProject(project);
             const getBranchesOutput = Commander(
                 "git",
                 [
                     "-C",
-                    path,
+                    project,
                     "branch",
                 ],
                 false,
@@ -354,13 +364,12 @@ export const Git = {
                     "git",
                     [
                         "-C",
-                        path,
+                        project,
                         "status",
                     ],
                     false,
                 );
                 if (!statusOutput.success) throw new Error(`${statusOutput.stdout}`);
-                console.debug(statusOutput);
                 const currentBranch = statusOutput.stdout?.split("\n")[0]?.split(" ")[2]?.trim();
                 if (!currentBranch) throw new Error("unable to get branch");
                 return {

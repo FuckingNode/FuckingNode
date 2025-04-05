@@ -292,46 +292,41 @@ export const Parsers = {
     Deno: {
         STD: internalParsers.DenoPkgFile,
         CPF: (content: string, ws: string[]): FnCPF => {
-            try {
-                const parsedContent = internalParsers.DenoPkgFile(content);
+            const parsedContent = internalParsers.DenoPkgFile(content);
 
-                const denoImportRegex = /^(?<source>[a-z]+):(?<package>@[a-zA-Z0-9_\-/]+)@(?<version>[~^<>=]*\d+\.\d+\.\d+)$/;
-                // regex not mine. deno uses platform:@scope/package@version imports so we gotta do that.
+            const denoImportRegex = /^(?<source>[a-z]+):(?<package>@[a-zA-Z0-9_\-/]+)@(?<version>[~^<>=]*\d+\.\d+\.\d+)$/;
+            // regex not mine. deno uses platform:@scope/package@version imports so we gotta do that.
 
-                const deps: FnCPF["deps"] = [];
+            const deps: FnCPF["deps"] = [];
 
-                Object.values(parsedContent.imports ?? {}).map((v) => {
-                    const t = v.match(denoImportRegex); // Directly use the match result
-                    if (
-                        t && t.groups && t.groups["package"] && t.groups["version"] &&
-                        StringUtils.validateAgainst(t.groups["source"], ["npm", "jsr"])
-                    ) {
-                        deps.push({
-                            name: t.groups["package"], // Scope/package
-                            ver: t.groups["version"], // Version
-                            src: t.groups["source"], // Platform
-                            rel: "univ:dep",
-                        });
-                    }
-                });
+            Object.values(parsedContent.imports ?? {}).map((v) => {
+                const t = v.match(denoImportRegex); // Directly use the match result
+                if (
+                    t && t.groups && t.groups["package"] && t.groups["version"] &&
+                    StringUtils.validateAgainst(t.groups["source"], ["npm", "jsr"])
+                ) {
+                    deps.push({
+                        name: t.groups["package"], // Scope/package
+                        ver: t.groups["version"], // Version
+                        src: t.groups["source"], // Platform
+                        rel: "univ:dep",
+                    });
+                }
+            });
 
-                return {
-                    name: parsedContent.name ?? "__ERROR_NOT_PROVIDED",
-                    version: parsedContent.version ?? "0.0.0",
-                    rm: "deno",
-                    perPlatProps: {
-                        cargo: {
-                            edition: "__NTP",
-                        },
+            return {
+                name: parsedContent.name ?? "__ERROR_NOT_PROVIDED",
+                version: parsedContent.version ?? "0.0.0",
+                rm: "deno",
+                perPlatProps: {
+                    cargo: {
+                        edition: "__NTP",
                     },
-                    deps: dedupeDependencies(deps),
-                    ws,
-                    internal: FnCPFInternal,
-                };
-            } catch (e) {
-                console.error(e);
-                throw e;
-            }
+                },
+                deps: dedupeDependencies(deps),
+                ws,
+                internal: FnCPFInternal,
+            };
         },
     },
 };

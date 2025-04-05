@@ -292,7 +292,7 @@ async function main(command: string) {
             LaunchWebsite("https://tenor.com/view/sokora-dunk-ice-skate-ice-dunk-balling-gif-7665972654807661282?quality=lossless");
             break;
         default:
-            TheHelper({ query: flags[1] });
+            TheHelper({ query: flags[0] });
     }
 
     Deno.exit(0);
