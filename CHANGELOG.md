@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Added the ability to run a script/file when launching a project.
 - Added `fklist` alias to `fuckingnode manager list`.
+- Added two new setups to `fkn setup`
 
 ### Changed
 

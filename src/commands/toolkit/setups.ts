@@ -15,7 +15,7 @@ export const SETUPS: {
     name: string;
     desc: string;
     content: string;
-    seek: "fknode.yaml" | ".gitignore" | "tsconfig.json" | ".editorconfig";
+    seek: "fknode.yaml" | ".gitignore" | "tsconfig.json" | ".editorconfig" | ".prettierrc";
 }[] = [
     {
         name: "fknode-basic",
@@ -59,12 +59,32 @@ export const SETUPS: {
         content: Get(".editorconfig-default"),
         seek: ".editorconfig",
     },
+    {
+        name: "prettierrc-default",
+        desc: "An unopinionated Prettier config that suits everyone.",
+        content: Get(".prettierrc-default"),
+        seek: ".prettierrc",
+    },
+    {
+        name: "prettierrc-funy",
+        desc: "(this should not be used in real working environments)",
+        content: Get(".prettierrc-funy"),
+        seek: ".prettierrc",
+    },
 ];
 
 export const VISIBLE_SETUPS = SETUPS.map(({ name, desc, seek }) => ({
     Name: ColorString(
         name,
-        seek === "fknode.yaml" ? "red" : seek === "tsconfig.json" ? "bright-blue" : seek === ".editorconfig" ? "cyan" : "orange",
+        seek === "fknode.yaml"
+            ? "red"
+            : seek === "tsconfig.json"
+            ? "bright-blue"
+            : seek === ".editorconfig"
+            ? "cyan"
+            : seek === ".prettierrc"
+            ? "bright-yellow"
+            : "orange",
     ),
-    Description: ColorString(desc, "bold"),
+    Description: ColorString(desc, "italic"),
 }));
