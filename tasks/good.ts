@@ -1,4 +1,4 @@
-import { walk } from "@std/fs/walk";
+import { walkSync } from "@std/fs/walk";
 import { join } from "@std/path";
 
 console.log("we making this good");
@@ -14,12 +14,12 @@ function Run(...args: string[]) {
     console.log(args, "went right");
 }
 
-async function GetAllTsFiles(): Promise<string[]> {
+function GetAllTsFiles(): string[] {
     const exclude = [join(dir, "tests/environment")];
     const tsFiles: string[] = [];
 
-    for await (
-        const entry of walk(dir, {
+    for (
+        const entry of walkSync(dir, {
             includeDirs: false,
             exts: [".ts"],
             skip: [
@@ -34,7 +34,7 @@ async function GetAllTsFiles(): Promise<string[]> {
     return tsFiles;
 }
 
-const toPrepare: string[] = await GetAllTsFiles();
+const toPrepare: string[] = GetAllTsFiles();
 
 for (const unprepared of toPrepare) Run("check", unprepared); // ensure code is right
 

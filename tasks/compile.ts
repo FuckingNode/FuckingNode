@@ -22,7 +22,9 @@ function CompileApp(): void {
             "--allow-net", // fetch the network, to update the app
             "--allow-env", // see ENV variables, to access .../AppData/...
             "--allow-run", // run cleanup commands
-            "--allow-sys", // used for an easter egg that requires `os.Uptime`
+            "--allow-sys=osUptime", // used for an easter egg that requires OS uptime
+            "--include",
+            "./src/commands/toolkit/setups", // include setups
             "--target",
             target,
             "--output",
@@ -44,8 +46,8 @@ function CompileApp(): void {
 }
 
 try {
-    await Deno.stat("./dist/");
-    await Deno.remove("./dist/", {
+    Deno.statSync("./dist/");
+    Deno.removeSync("./dist/", {
         recursive: true,
     });
 } catch {
