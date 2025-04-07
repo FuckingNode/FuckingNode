@@ -27,12 +27,14 @@ const internalJokes = [
 
 const internalQuotes = [
     "'You are supposed to cool it, not heat it up' - Herpes of Balkan", // i mean, he's right
-    "'THE DAY OF Ws' - serge", // that was a good day
-    "'lmfao' - serge", // such a quote is worth a book
-    "'am jok' - serge", // hes jok
-    "'please don't kil' - serge",
-    "'shork thinking its smol fish crushes goose!!!!' - serge",
-    "'it's sokover' - serge", // from the creators of it's joever (not)
+    "'THE DAY OF Ws' - Serge", // that was a good day
+    "'lmfao' - Serge", // such a quote is worth a book
+    "'am jok' - Serge", // hes jok
+    "'please don't kil' - Serge",
+    "'shork thinking its smol fish crushes goose!!!!' - Serge",
+    "'it's sokover' - Serge", // from the creators of it's joever (not)
+    "'Dookie in da pookie' - Dima",
+    "'learn as if you will live forever, live like you will die tomorrow' - EpicSprout",
 ];
 
 const coolJokes = [

@@ -25,12 +25,6 @@ export function RecommendedCommunityStandards(env: ProjectEnvironment) {
             LogStuff(`${version} is not a valid version! Follow the SemVer specification.`, "error");
         }
         LogStuff(license ? `${license} license, good.` : "No license found. You should specify it!", license ? "tick" : "error");
-        if (!isPrivate || author) {
-            LogStuff(
-                author ? `Made by ${typeof author === "string" ? author : author.name}, nice.` : "No author found. Who made this 'great' code?",
-                author ? "tick" : "error",
-            );
-        }
         LogStuff(
             contributors
                 ? `So we've got ${contributors.length} contributor(s), great.`
@@ -41,14 +35,6 @@ export function RecommendedCommunityStandards(env: ProjectEnvironment) {
             description ? `"${ColorString(description, "italic")}", neat description.` : "No description found. What does your code even do?",
             description ? "tick" : "error",
         );
-        if (!isPrivate) {
-            LogStuff(repository ? `Known repo URL, awesome.` : "You didn't specify a repository, why?", repository ? "tick" : "error");
-            LogStuff(
-                bugs ? `Known bug-report URL, incredible.` : "You didn't specify where to report bugs. Don't be lazy and accept feedback!",
-                bugs ? "tick" : "error",
-            );
-        }
-
         LogStuff(
             type === "module"
                 ? "This is an ESM project, lovely."
@@ -57,6 +43,24 @@ export function RecommendedCommunityStandards(env: ProjectEnvironment) {
                 }`,
             type ? "tick" : "bruh",
         );
+        if (!isPrivate || author) {
+            LogStuff(
+                author ? `Made by ${typeof author === "string" ? author : author.name}, nice.` : "No author found. Who made this 'great' code?",
+                author ? "tick" : "error",
+            );
+        }
+        if (!isPrivate) {
+            LogStuff(
+                repository
+                    ? `A repository was specified, nice.`
+                    : "No repository found. Consider adding a repository URL, else how do we contribute bug fixes?",
+                repository ? "tick" : "error",
+            );
+            LogStuff(
+                bugs ? `Known bug-report URL, incredible.` : "You didn't specify where to report bugs. Don't be lazy and accept feedback!",
+                bugs ? "tick" : "error",
+            );
+        }
     } else if (isDenoJs) {
         // this is very basic tbh, a deno.json doesn't have much
         const { lint, fmt, lock, version } = content;
@@ -81,7 +85,6 @@ export function RecommendedCommunityStandards(env: ProjectEnvironment) {
         );
     } else {
         // in this case we know it's cargo
-
         const { license, authors, description, repository, edition } = content;
 
         LogStuff(
@@ -112,10 +115,5 @@ export function RecommendedCommunityStandards(env: ProjectEnvironment) {
             edition ? `Rust ${edition} edition` : "No edition found. You should specify the edition you're using (e.g., 2018, 2021).",
             edition ? "tick" : "error",
         );
-
-        // LogStuff(
-        //     features && features.length > 0 ? `Found ${features.length} features.` : "No features found. Consider defining optional features.",
-        //     features && features.length > 0 ? "tick" : "bruh",
-        // );
     }
 }
