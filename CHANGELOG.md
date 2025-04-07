@@ -17,6 +17,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Now several more methods are sync, for error fixing.
 - Now you can specify GitHub URLs without `.git` (`https://github.com/me/my-repo`).
+- Now `migrate` _technically_ respects the lockfile's versions.
+  - Note it does not actually _read_ the versions from the lockfile _per se_ (as that would take too long on projects with 20K LOC+ lockfiles). It instead uses the `update` command, which typically ensures version coherence.
 
 ### Fixed
 

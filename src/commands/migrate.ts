@@ -2,7 +2,7 @@ import { StringUtils } from "@zakahacecosas/string-utils";
 import { FULL_NAME } from "../constants.ts";
 import { GetDateNow } from "../functions/date.ts";
 import { CheckForPath, JoinPaths } from "../functions/filesystem.ts";
-import { Interrogate, LogStuff } from "../functions/io.ts";
+import { LogStuff } from "../functions/io.ts";
 import { GetProjectEnvironment, NameProject, SpotProject } from "../functions/projects.ts";
 import type { MANAGER_JS, ProjectEnvironment } from "../types/platform.ts";
 import type { TheMigratorConstructedParams } from "./constructors/command.ts";
@@ -21,20 +21,26 @@ async function handler(
 
         LogStuff("Please wait (this will take a while)...", "working");
 
-        LogStuff("Updating dependencies (1/5)...", "working");
+        LogStuff("Updating dependencies (1/6)...", "working");
         FkNodeInterop.Features.Update({ env, verbose: true });
 
-        LogStuff("Removing node_modules (2/5)...", "working");
+        LogStuff("Removing node_modules (2/6)...", "working");
         await Deno.remove(env.hall_of_trash, {
             recursive: true,
         });
 
         Deno.chdir(env.root);
 
-        // TODO - this is already reliable enough for release
-        // ...BUT reading the lockfile would be better
-        // (we promised that for 3.0 but i don't want this to release in 2077 so yeah)
-        LogStuff("Migrating versions from previous package file (3/5)...", "working");
+        // this is not 100% reliable, reading the lockfile is better
+        // since straightforward reading it could cause issues (and ngl i'm a bit lazy)
+        // even tho the promise was to "read the lockfile" what we'll do is
+        // on step 6/6 run "update" to SYNC the lockfile and the pkg file
+        // it technically complies our promise, as this command fixes
+        // the lockfile being in slightly newer versions
+        // and is way easier for me to write
+
+        // i'm a damn genius
+        LogStuff("Migrating versions from previous package file (3/6)...", "working");
         LogStuff("A copy will be made (package.json.bak), just in case", "wink");
         if (env.main.path.endsWith("jsonc")) {
             LogStuff(
@@ -62,7 +68,7 @@ async function handler(
             JSON.stringify(newPackageFile),
         );
 
-        LogStuff("Making a backup of your previous lockfile (4/5)...", "working");
+        LogStuff("Making a backup of your previous lockfile (4/6)...", "working");
         if (env.lockfile.name === "bun.lockb" && CheckForPath(JoinPaths(env.root, "bun.lock"))) {
             // handle case where bun.lockb was replaced with bun.lock
             rename(env.lockfile.path, JoinPaths(env.root, "bun.lockb.bak"), (e) => {
@@ -81,8 +87,11 @@ async function handler(
             await Deno.remove(env.lockfile.path);
         }
 
-        LogStuff("Installing modules with the desired manager (5/5)...", "working");
+        LogStuff("Installing modules with the desired manager (5/6)...", "working");
         FkNodeInterop.Installers.UniJs(env.root, to);
+
+        LogStuff("Updating to ensure lockfile consistency (6/6)...", "working");
+        FkNodeInterop.Features.Update({ env, verbose: true });
     } catch (e) {
         LogStuff(`Migration threw an: ${e}`, "error");
     }
@@ -116,12 +125,10 @@ export default async function TheMigrator(params: TheMigratorConstructedParams):
         );
     }
 
-    if (
-        // TODO - replace validation with a non-blocking warning once we start using lockfile for this (by v3.2)
-        !Interrogate(
-            `Are you sure?\nMigrating ${workingProject} to ${desiredManager} will remove your current lockfile, so versions could be potentially messed up.`,
-        )
-    ) return;
+    LogStuff(
+        `Migrating ${workingProject} to ${desiredManager} has a chance of messing your versions up.\nYour lockfile will be backed up and synced to ensure coherence.`,
+        "warn",
+    );
 
     await handler(
         workingEnv.manager as MANAGER_JS,
