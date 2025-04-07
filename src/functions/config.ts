@@ -54,58 +54,57 @@ export function GetAppPath(
  * Check if config files are present, create them otherwise ("Fresh Setup").
  *
  * @export
- * @async
- * @returns {Promise<void>}
+ * @returns {void}
  */
-export async function FreshSetup(repairSetts?: boolean): Promise<void> {
+export function FreshSetup(repairSetts?: boolean): void {
     const basePath = GetAppPath("BASE");
     if (!CheckForPath(basePath)) {
-        await Deno.mkdir(basePath, { recursive: true });
+        Deno.mkdirSync(basePath, { recursive: true });
     }
 
     const projectPath = GetAppPath("MOTHERFKRS");
     if (!CheckForPath(projectPath)) {
-        await Deno.writeTextFile(projectPath, "", {
+        Deno.writeTextFileSync(projectPath, "", {
             create: true,
         });
     }
 
     const logsPath = GetAppPath("LOGS");
     if (!CheckForPath(logsPath)) {
-        await Deno.writeTextFile(logsPath, "", {
+        Deno.writeTextFileSync(logsPath, "", {
             create: true,
         });
     }
 
     const errorLogsPath = GetAppPath("ERRORS");
     if (!CheckForPath(errorLogsPath)) {
-        await Deno.writeTextFile(errorLogsPath, "", {
+        Deno.writeTextFileSync(errorLogsPath, "", {
             create: true,
         });
     }
 
     const settingsPath = GetAppPath("SETTINGS");
     if ((!CheckForPath(settingsPath) || repairSetts === true)) {
-        await Deno.writeTextFile(settingsPath, StringifyYaml(DEFAULT_SETTINGS), {
+        Deno.writeTextFileSync(settingsPath, StringifyYaml(DEFAULT_SETTINGS), {
             create: true,
         });
     }
 
     const schedulePath = GetAppPath("SCHEDULE");
     if (!CheckForPath(schedulePath)) {
-        await Deno.writeTextFile(schedulePath, StringifyYaml(DEFAULT_SCHEDULE_FILE), {
+        Deno.writeTextFileSync(schedulePath, StringifyYaml(DEFAULT_SCHEDULE_FILE), {
             create: true,
         });
     }
 
     const remPath = GetAppPath("REM");
     if (!CheckForPath(remPath)) {
-        await Deno.writeTextFile(remPath, "", {
+        Deno.writeTextFileSync(remPath, "", {
             create: true,
         });
     }
 
-    const toBeRemoved = ParsePathList(await Deno.readTextFile(remPath));
+    const toBeRemoved = ParsePathList(Deno.readTextFileSync(remPath));
 
     if (toBeRemoved.length === 0) return;
 
@@ -144,15 +143,14 @@ export const VALID_SETTINGS: setting[] = ["defaultIntensity", "updateFreq", "fav
  * Changes a given user setting to a given value.
  *
  * @export
- * @async
  * @param {setting} setting Setting to change.
  * @param {UnknownString} value Value to set it to.
- * @returns {Promise<void>}
+ * @returns {void}
  */
-export async function ChangeSetting(
+export function ChangeSetting(
     setting: setting,
     value: UnknownString,
-): Promise<void> {
+): void {
     const settingsPath = GetAppPath("SETTINGS");
     const currentSettings = GetUserSettings();
 
@@ -165,7 +163,7 @@ export async function ChangeSetting(
             ...currentSettings,
             defaultIntensity: value,
         };
-        await Deno.writeTextFile(
+        Deno.writeTextFileSync(
             settingsPath,
             StringifyYaml(newSettings),
         );
@@ -179,7 +177,7 @@ export async function ChangeSetting(
             ...currentSettings,
             updateFreq: Math.ceil(newValue),
         };
-        await Deno.writeTextFile(
+        Deno.writeTextFileSync(
             settingsPath,
             StringifyYaml(newSettings),
         );
@@ -194,7 +192,7 @@ export async function ChangeSetting(
             ...currentSettings,
             favEditor: value,
         };
-        await Deno.writeTextFile(
+        Deno.writeTextFileSync(
             settingsPath,
             StringifyYaml(newSettings),
         );
@@ -208,7 +206,7 @@ export async function ChangeSetting(
             ...currentSettings,
             flushFreq: newValue,
         };
-        await Deno.writeTextFile(
+        Deno.writeTextFileSync(
             settingsPath,
             StringifyYaml(newSettings),
         );
@@ -245,13 +243,12 @@ export function DisplaySettings(): void {
  * Flushes configuration files.
  *
  * @export
- * @async
  * @param {UnknownString} target What to flush.
  * @param {boolean} force If true no confirmation prompt will be shown.
  * @param {boolean} [silent=false] If true no success message will be shown.
- * @returns {Promise<void>}
+ * @returns {void}
  */
-export async function FlushConfigFiles(target: UnknownString, force: boolean, silent: boolean = false): Promise<void> {
+export function FlushConfigFiles(target: UnknownString, force: boolean, silent: boolean = false): void {
     if (!StringUtils.validateAgainst(target, ["logs", "projects", "schedules", "errors", "all"])) {
         LogStuff(
             "Specify what to flush. Either 'logs', 'projects', 'schedules', 'errors', or 'all'.",
@@ -276,12 +273,8 @@ export async function FlushConfigFiles(target: UnknownString, force: boolean, si
     }
 
     const fileSize = typeof file === "string"
-        ? (await Deno.stat(file)).size
-        : (await Promise.all(file.map((item) =>
-            Deno.stat(item).then((s) => {
-                return s.size;
-            })
-        ))).reduce((acc, num) => acc + num, 0);
+        ? Deno.statSync(file).size
+        : (file.map((item) => Deno.statSync(item).size)).reduce((acc, num) => acc + num, 0);
 
     if (
         !force &&

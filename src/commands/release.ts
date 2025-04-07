@@ -8,7 +8,7 @@ import { Git } from "../functions/git.ts";
 import { StringUtils } from "@zakahacecosas/string-utils";
 import { RunUserCmd, ValidateUserCmd } from "../functions/user.ts";
 
-export default async function TheReleaser(params: TheReleaserConstructedParams) {
+export default function TheReleaser(params: TheReleaserConstructedParams) {
     if (!StringUtils.validate(params.version)) {
         throw new Error("No version specified!");
     }
@@ -88,8 +88,8 @@ export default async function TheReleaser(params: TheReleaserConstructedParams) 
 
     // write the updated pkg file
     try {
-        await Deno.copyFile(env.main.path, `${env.main.path}.bak`); // Backup original
-        await Deno.writeTextFile(env.main.path, JSON.stringify(newPackageFile, undefined, 2));
+        Deno.copyFileSync(env.main.path, `${env.main.path}.bak`); // Backup original
+        Deno.writeTextFileSync(env.main.path, JSON.stringify(newPackageFile, undefined, 2));
     } catch (e) {
         throw new Error(`Failed to write to '${env.main.path}': ${e}`);
     }

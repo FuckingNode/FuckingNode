@@ -7,7 +7,7 @@ import { parse as parseYaml } from "@std/yaml";
 import { parse as parseJsonc } from "@std/jsonc";
 import { SETUPS, VISIBLE_SETUPS } from "./toolkit/setups.ts";
 
-export default async function TheSetuper(params: TheSetuperConstructedParams) {
+export default function TheSetuper(params: TheSetuperConstructedParams) {
     if (!StringUtils.validate(params.setup) || !StringUtils.validate(params.project)) {
         LogStuff(StringUtils.table(VISIBLE_SETUPS));
         LogStuff(
@@ -25,6 +25,11 @@ export default async function TheSetuper(params: TheSetuperConstructedParams) {
         !setupToUse
     ) throw new Error(`Given setup ${params.setup} is not valid! Choose from the list ${SETUPS.map((s) => s.name)}.`);
 
+    const contentToUse = setupToUse.seek === "tsconfig.json"
+        ? JSON.parse(setupToUse.content)
+        : setupToUse.seek === "fknode.yaml"
+        ? parseYaml(setupToUse.content)
+        : setupToUse.content;
     const path = JoinPaths(env.root, setupToUse.seek);
     const exists = CheckForPath(path);
 
@@ -51,26 +56,26 @@ export default async function TheSetuper(params: TheSetuperConstructedParams) {
     let finalContent: string;
 
     if (exists) {
-        const fileContent = await Deno.readTextFile(path);
+        const fileContent = Deno.readTextFileSync(path);
         if (setupToUse.seek === "tsconfig.json") {
             const parsedContent = parseJsonc(fileContent);
-            finalContent = JSON.stringify(deepMerge(setupToUse.content, parsedContent), undefined, 4);
+            finalContent = JSON.stringify(deepMerge(contentToUse, parsedContent), undefined, 4);
         } else if (setupToUse.seek === "fknode.yaml") {
             const parsedContent = parseYaml(fileContent);
-            finalContent = StringifyYaml(deepMerge(setupToUse.content, parsedContent));
+            finalContent = StringifyYaml(deepMerge(contentToUse, parsedContent));
         } else {
             // (gitignore or editorconfig)
-            finalContent = `${fileContent}\n${setupToUse.content}`;
+            finalContent = `${fileContent}\n${contentToUse}`;
         }
     } else {
         finalContent = setupToUse.seek === "fknode.yaml"
-            ? StringifyYaml(setupToUse.content)
+            ? StringifyYaml(contentToUse)
             : setupToUse.seek === "tsconfig.json"
-            ? JSON.stringify(setupToUse.content, undefined, 4)
-            : setupToUse.content.toString();
+            ? JSON.stringify(contentToUse, undefined, 4)
+            : contentToUse.toString();
     }
 
-    await Deno.writeTextFile(
+    Deno.writeTextFileSync(
         path,
         finalContent,
     );

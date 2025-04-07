@@ -19,7 +19,7 @@ const deprecationNotices = [
     "# ❗ Deprecated Codebase\n\nThis project is outdated and should not be used for new developments.",
 ];
 
-export default async function TheSurrenderer(params: TheSurrendererConstructedParams) {
+export default function TheSurrenderer(params: TheSurrendererConstructedParams) {
     const project = SpotProject(params.project);
 
     if (
@@ -78,7 +78,7 @@ export default async function TheSurrenderer(params: TheSurrendererConstructedPa
 
     const README = JoinPaths(env.root, "README.md");
 
-    if (CheckForPath(README)) await Deno.writeTextFile(README, `${message}\n${await Deno.readTextFile(README)}`);
+    if (CheckForPath(README)) Deno.writeTextFileSync(README, `${message}\n${Deno.readTextFileSync(README)}`);
 
     const commitTwo = Git.Commit(
         project,

@@ -4,19 +4,19 @@ import { ChangeSetting, DisplaySettings, FlushConfigFiles, FreshSetup, VALID_SET
 import { StringUtils } from "@zakahacecosas/string-utils";
 import { DEBUG_LOG } from "../functions/error.ts";
 
-async function ResetSettings() {
+function ResetSettings() {
     const confirmation = Interrogate(
         "Are you sure you want to reset your settings to the defaults? Current settings will be lost",
     );
 
     if (!confirmation) return;
 
-    await FreshSetup(true);
+    FreshSetup(true);
     LogStuff("Switched to defaults successfully:", "tick");
     DisplaySettings();
 }
 
-export default async function TheSettings(params: TheSettingsConstructedParams) {
+export default function TheSettings(params: TheSettingsConstructedParams) {
     const args = StringUtils.normalizeArray(params.args);
     DEBUG_LOG("SETTINGS TOOK", args[0]);
 
@@ -32,11 +32,11 @@ export default async function TheSettings(params: TheSettingsConstructedParams) 
 
     switch (args[0]) {
         case "flush":
-            await FlushConfigFiles(args[1], StringUtils.testFlag(args[2] ?? "", "force"));
+            FlushConfigFiles(args[1], StringUtils.testFlag(args[2] ?? "", "force"));
             break;
         case "repair":
         case "reset":
-            await ResetSettings();
+            ResetSettings();
             break;
         case "change":
             if (!StringUtils.validateAgainst(args[1], VALID_SETTINGS)) {
@@ -49,7 +49,7 @@ export default async function TheSettings(params: TheSettingsConstructedParams) 
                 LogStuff("Provide a value to update this setting to.");
                 return;
             }
-            await ChangeSetting(
+            ChangeSetting(
                 args[1],
                 args[2],
             );

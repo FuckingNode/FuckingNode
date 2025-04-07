@@ -9,7 +9,7 @@ import type { TheMigratorConstructedParams } from "./constructors/command.ts";
 import { FkNodeInterop } from "./interop/interop.ts";
 import { rename } from "node:fs";
 
-async function handler(
+function handler(
     from: MANAGER_JS,
     to: MANAGER_JS,
     env: ProjectEnvironment,
@@ -25,7 +25,7 @@ async function handler(
         FkNodeInterop.Features.Update({ env, verbose: true });
 
         LogStuff("Removing node_modules (2/6)...", "working");
-        await Deno.remove(env.hall_of_trash, {
+        Deno.removeSync(env.hall_of_trash, {
             recursive: true,
         });
 
@@ -57,13 +57,13 @@ async function handler(
                 env.main.cpfContent,
                 env.main.stdContent,
             );
-        await Deno.writeTextFile(
+        Deno.writeTextFileSync(
             JoinPaths(env.root, `${env.main.name}.jsonc.bak`),
             `// This is a backup of your previous project file. We (${FULL_NAME}) overwrote it at ${GetDateNow()}.\n${
                 JSON.stringify(env.main.stdContent)
             }`,
         );
-        await Deno.writeTextFile(
+        Deno.writeTextFileSync(
             env.main.path,
             JSON.stringify(newPackageFile),
         );
@@ -78,13 +78,13 @@ async function handler(
                     "bruh",
                 );
             });
-            await Deno.remove(env.lockfile.path);
+            Deno.removeSync(env.lockfile.path);
         } else {
-            await Deno.writeTextFile(
+            Deno.writeTextFileSync(
                 JoinPaths(env.root, `${env.lockfile.name}.bak`),
-                await Deno.readTextFile(env.lockfile.path),
+                Deno.readTextFileSync(env.lockfile.path),
             );
-            await Deno.remove(env.lockfile.path);
+            Deno.removeSync(env.lockfile.path);
         }
 
         LogStuff("Installing modules with the desired manager (5/6)...", "working");
@@ -96,7 +96,7 @@ async function handler(
         LogStuff(`Migration threw an: ${e}`, "error");
     }
 }
-export default async function TheMigrator(params: TheMigratorConstructedParams): Promise<void> {
+export default function TheMigrator(params: TheMigratorConstructedParams): void {
     const { projectPath, wantedManager } = params;
 
     if (!StringUtils.validate(wantedManager)) throw new Error("No target (pnpm, npm, yarn, deno, bun) specified.");
@@ -130,7 +130,7 @@ export default async function TheMigrator(params: TheMigratorConstructedParams):
         "warn",
     );
 
-    await handler(
+    handler(
         workingEnv.manager as MANAGER_JS,
         desiredManager as MANAGER_JS,
         workingEnv,

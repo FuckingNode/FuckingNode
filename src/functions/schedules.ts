@@ -9,7 +9,7 @@ import { VERSIONING } from "../constants.ts";
 export async function RunScheduledTasks() {
     const { updateFreq, flushFreq } = GetUserSettings();
     const scheduleFilePath: string = GetAppPath("SCHEDULE");
-    const scheduleFile: CF_FKNODE_SCHEDULE = parseYaml(await Deno.readTextFile(scheduleFilePath)) as CF_FKNODE_SCHEDULE;
+    const scheduleFile: CF_FKNODE_SCHEDULE = parseYaml(Deno.readTextFileSync(scheduleFilePath)) as CF_FKNODE_SCHEDULE;
 
     const currentDate: Date = new Date();
     const CalculateDifference = (date: Date) => (currentDate.getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
@@ -41,7 +41,7 @@ export async function RunScheduledTasks() {
             install: false,
             silent: true,
         });
-        await Deno.writeTextFile(scheduleFilePath, StringifyYaml(updatedScheduleFile));
+        Deno.writeTextFileSync(scheduleFilePath, StringifyYaml(updatedScheduleFile));
     }
 
     if (dates.flusher.diff >= flushFreq) {
@@ -51,7 +51,7 @@ export async function RunScheduledTasks() {
                 lastFlush: GetDateNow(),
             },
         };
-        await FlushConfigFiles("logs", true, true);
-        await Deno.writeTextFile(scheduleFilePath, StringifyYaml(updatedScheduleFile));
+        FlushConfigFiles("logs", true, true);
+        Deno.writeTextFileSync(scheduleFilePath, StringifyYaml(updatedScheduleFile));
     }
 }

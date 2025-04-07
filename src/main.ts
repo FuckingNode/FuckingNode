@@ -58,7 +58,7 @@ if (StringUtils.normalize(Deno.args[0] ?? "") === "something-fucked-up") {
 }
 
 async function init() {
-    await FreshSetup();
+    FreshSetup();
     await RunScheduledTasks();
     CleanupProjects();
 }
@@ -189,10 +189,10 @@ async function main(command: string) {
             });
             break;
         case "settings":
-            await TheSettings({ args: flags.slice(1) });
+            TheSettings({ args: flags.slice(1) });
             break;
         case "migrate":
-            await TheMigrator({ projectPath: flags[1], wantedManager: flags[2] });
+            TheMigrator({ projectPath: flags[1], wantedManager: flags[2] });
             break;
         case "self-update":
         case "upgrade":
@@ -205,7 +205,7 @@ async function main(command: string) {
             break;
         case "release":
         case "publish":
-            await TheReleaser({
+            TheReleaser({
                 project: flags[1],
                 version: flags[2],
                 push: hasFlag("push", true),
@@ -226,7 +226,7 @@ async function main(command: string) {
         case "i-really-hate":
         // "im-done-with <project>" is wild LMAO
         case "im-done-with":
-            await TheSurrenderer({
+            TheSurrenderer({
                 project: flags[1],
                 message: flags[2],
                 alternative: flags[3],
@@ -237,13 +237,13 @@ async function main(command: string) {
         case "setup":
         case "configure":
         case "preset":
-            await TheSetuper({
+            TheSetuper({
                 project: flags[1],
                 setup: flags[2],
             });
             break;
         case "launch":
-            await TheLauncher({
+            TheLauncher({
                 project: flags[1],
             });
             break;
