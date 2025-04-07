@@ -1,0 +1,15 @@
+divineProtection: disabled
+destroy:
+    intensities: ["*"]
+    targets:
+        - "dist/"
+        - "out/"
+        - "build/"
+        - ".cache/"
+flagless:
+    flaglessCommit: false
+    flaglessDestroy: true
+    flaglessLint: true
+    flaglessPretty: true
+    flaglessUpdate: true
+commitActions: true

@@ -1,0 +1,28 @@
+# built / output files
+dist/
+out/
+build/
+.cache/
+.deno/
+
+# environment
+.env
+.env.local
+.env.*.local
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+bun-debug.log*
+lerna-debug.log*
+
+# caches
+.npm/
+.bun/
+.pnp/
+.pnp.js
+deno_dir/
+
+# modules
+node_modules/
