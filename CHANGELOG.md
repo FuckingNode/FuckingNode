@@ -6,13 +6,14 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
-## [3.2.0] (Unreleased)
+## [3.2.0] (07-04-2025)
 
 ### Added
 
 - Added the ability to run a script/file when launching a project.
 - Added `fklist` alias to `fuckingnode manager list`.
 - Added two new setups to `fkn setup`
+- Added `fkn hint` to randomly show one of the hints / _F\*ckingProTips_ shown in the about page. A few more hints were added as well.
 
 ### Changed
 
@@ -20,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Now you can specify GitHub URLs without `.git` (`https://github.com/me/my-repo`).
 - Now `migrate` _technically_ respects the lockfile's versions.
   - Note it does not actually _read_ the versions from the lockfile _per se_ (as that would take too long on projects with 20K LOC+ lockfiles). It instead uses the `update` command, which typically ensures version coherence.
+- Now `fkn repo` and `fkn website` will launch the corresponding URL automatically.
 
 ### Fixed
 

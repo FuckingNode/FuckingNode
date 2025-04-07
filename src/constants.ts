@@ -55,7 +55,7 @@ export const APP_NAME: { CASED: string; CLI: string; STYLED: string; SCOPE: stri
 export const FULL_NAME: string = `${APP_NAME.CASED} v${VERSIONING.APP}`;
 
 /** URLs have trailing slash/ */
-export const APP_URLs = {
+export const APP_URLs: { REPO: tURL; WEBSITE: tURL } = {
     REPO: "https://github.com/FuckingNode/FuckingNode/",
     WEBSITE: "https://fuckingnode.github.io/",
 };

@@ -66,11 +66,15 @@ const devJokes = [
     "ALPHA -> BETA -> RELEASE CANDIDATE -> STAY LIKE THAT FOR AGES -> STABLE -> IT BREAKS -> repeat()",
 ];
 
-const secretHints = [
-    "F\*ckingProTip: try running with --FKN_DBG next time",
+/** (used to be secretHints...) */
+export const hints = [
+    "F\*ckingProTip: try running with --FKNDBG next time",
     "F\*ckingProTip: run 'fkn sokoballs'",
     "F\*ckingProTip: cleanup supports a '--verbose' flag that shows CLI output in real time from tasks that are being automated",
     `F\*ckingProTip: critical errors get logged to ${GetAppPath("ERRORS")} in a fairly readable format`,
+    `F\*ckingProTip: run 'fkn export <project>', it'll show you what we REALLY understand about your project (and care enough about)`,
+    `F\*ckingProTip: 'fkn surrender' has aliases that do the exact same thing but more properly representing why you chose to surrender on a project, for example 'fkn im-done-with <project>', or 'fkn i-give-up <project>'`,
+    `F\*ckingProTip: if your drive is nearly full and you desperately need storage, run 'fkn storage-emergency'. thank me later. note: desperate situations require desperate measures, be advised.`,
 ];
 
 const appRelatedJokes = [
@@ -107,5 +111,5 @@ export const phrases = [
     ...appRelatedJokes,
     ...quotes,
     ...internalQuotes,
-    ...secretHints,
+    ...hints,
 ];

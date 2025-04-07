@@ -26,6 +26,7 @@ import { RunScheduledTasks } from "./functions/schedules.ts";
 import { StringUtils, UnknownString } from "@zakahacecosas/string-utils";
 import { CleanupProjects } from "./functions/projects.ts";
 import { LaunchWebsite } from "./functions/http.ts";
+import { hints } from "./functions/phrases.ts";
 
 // this is outside the main loop so it can be executed
 // without depending on other modules
@@ -270,6 +271,7 @@ async function main(command: string) {
         case "web":
         case "website":
             LogStuff(`Best documentation website for best CLI, live at ${APP_URLs.WEBSITE}`, "bulb");
+            LaunchWebsite(APP_URLs.WEBSITE);
             break;
         case "github":
         case "repo":
@@ -280,6 +282,7 @@ async function main(command: string) {
                 `Free and open source, and free as in freedom, live at ${APP_URLs.WEBSITE}repo\n(The above URL is a redirect to GitHub.)`,
                 "bulb",
             );
+            LaunchWebsite(`${APP_URLs.WEBSITE}repo`);
             break;
         case "audit":
             LogStuff(
@@ -290,6 +293,14 @@ async function main(command: string) {
             break;
         case "sokoballs":
             LaunchWebsite("https://tenor.com/view/sokora-dunk-ice-skate-ice-dunk-balling-gif-7665972654807661282?quality=lossless");
+            break;
+        case "hint":
+        case "protip":
+            LogStuff(
+                hints[Math.floor(Math.random() * hints.length)]!,
+                undefined,
+                "bright-blue",
+            );
             break;
         default:
             TheHelper({ query: flags[0] });
