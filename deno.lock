@@ -3,15 +3,15 @@
   "specifiers": {
     "jsr:@std/assert@^1.0.12": "1.0.12",
     "jsr:@std/collections@^1.0.10": "1.0.10",
-    "jsr:@std/datetime@~0.225.3": "0.225.3",
+    "jsr:@std/datetime@~0.225.4": "0.225.4",
     "jsr:@std/fmt@^1.0.6": "1.0.6",
-    "jsr:@std/fs@^1.0.15": "1.0.15",
+    "jsr:@std/fs@^1.0.16": "1.0.16",
     "jsr:@std/internal@^1.0.6": "1.0.6",
     "jsr:@std/json@1": "1.0.1",
     "jsr:@std/jsonc@^1.0.1": "1.0.1",
     "jsr:@std/path@^1.0.8": "1.0.8",
-    "jsr:@std/semver@1.0.4": "1.0.4",
-    "jsr:@std/toml@^1.0.3": "1.0.3",
+    "jsr:@std/semver@1.0.5": "1.0.5",
+    "jsr:@std/toml@^1.0.4": "1.0.4",
     "jsr:@std/yaml@*": "1.0.5",
     "jsr:@zakahacecosas/string-utils@^2.2.1": "2.2.1",
     "npm:@types/node@*": "22.12.0"
@@ -26,14 +26,14 @@
     "@std/collections@1.0.10": {
       "integrity": "903af106a3d92970d74e20f7ebff77d9658af9bef4403f1dc42a7801c0575899"
     },
-    "@std/datetime@0.225.3": {
-      "integrity": "fda0b7791b43d9a46764986fec39922a8ceb70ffca642651fa7d0683501a171a"
+    "@std/datetime@0.225.4": {
+      "integrity": "682bc21738b941a4ed1465be6da01704e8010a3a6d9b615de9458202b84e00ec"
     },
     "@std/fmt@1.0.6": {
       "integrity": "a2c56a69a2369876ddb3ad6a500bb6501b5bad47bb3ea16bfb0c18974d2661fc"
     },
-    "@std/fs@1.0.15": {
-      "integrity": "c083fb479889d6440d768e498195c3fc499d426fbf9a6592f98f53884d1d3f41",
+    "@std/fs@1.0.16": {
+      "integrity": "81878f62b6eeda0bf546197fc3daa5327c132fee1273f6113f940784a468b036",
       "dependencies": [
         "jsr:@std/path"
       ]
@@ -53,11 +53,11 @@
     "@std/path@1.0.8": {
       "integrity": "548fa456bb6a04d3c1a1e7477986b6cffbce95102d0bb447c67c4ee70e0364be"
     },
-    "@std/semver@1.0.4": {
-      "integrity": "a62af791917d8fd6c48d6ebbb872f83fad3fc6671ffadbbd39ea229c2d34d175"
+    "@std/semver@1.0.5": {
+      "integrity": "529f79e83705714c105ad0ba55bec0f9da0f24d2f726b6cc1c15e505cc2c0624"
     },
-    "@std/toml@1.0.3": {
-      "integrity": "dd5c039860a312779ec19980be000d977ce8f56fadaa073d8f33632f21540ffb",
+    "@std/toml@1.0.4": {
+      "integrity": "8781e687d04c8fbe246b9c5714be01925792a94d943462c33777675ab557cff1",
       "dependencies": [
         "jsr:@std/collections"
       ]
@@ -83,13 +83,13 @@
   "workspace": {
     "dependencies": [
       "jsr:@std/assert@^1.0.12",
-      "jsr:@std/datetime@~0.225.3",
+      "jsr:@std/datetime@~0.225.4",
       "jsr:@std/fmt@^1.0.6",
-      "jsr:@std/fs@^1.0.15",
+      "jsr:@std/fs@^1.0.16",
       "jsr:@std/jsonc@^1.0.1",
       "jsr:@std/path@^1.0.8",
-      "jsr:@std/semver@1.0.4",
-      "jsr:@std/toml@^1.0.3",
+      "jsr:@std/semver@1.0.5",
+      "jsr:@std/toml@^1.0.4",
       "jsr:@std/yaml@*",
       "jsr:@zakahacecosas/string-utils@^2.2.1"
     ]

@@ -9,11 +9,7 @@ const DATE_FMT = "dd-MM-yyyy HH:mm:ss";
  * @returns {string}
  */
 export function GetDateNow(): string {
-    const now = new Date();
-    const timezoneOffset = now.getTimezoneOffset();
-    const localDate = new Date(now.getTime() - timezoneOffset * 60 * 1000);
-
-    return format(localDate, DATE_FMT);
+    return format(new Date(), DATE_FMT);
 }
 
 /**

@@ -27,6 +27,7 @@ import { StringUtils, UnknownString } from "@zakahacecosas/string-utils";
 import { CleanupProjects } from "./functions/projects.ts";
 import { LaunchWebsite } from "./functions/http.ts";
 import { hints } from "./functions/phrases.ts";
+import { GetDateNow } from "./functions/date.ts";
 
 // this is outside the main loop so it can be executed
 // without depending on other modules
@@ -147,6 +148,30 @@ async function main(command: string) {
             project: projectArg,
         },
     };
+
+    // debug commands
+    if (Deno.args[0]?.startsWith("FKNDBG")) {
+        console.log(ColorString("FKNDBG at " + GetDateNow(), "italic"));
+        console.log("This isn't stored into the .log file.");
+        console.log("-".repeat(37));
+    }
+    if (Deno.args[0] === "FKNDBG_PROC") {
+        console.log(
+            "PROC NAME",
+            new TextDecoder().decode(
+                new Deno.Command("ps", {
+                    args: ["-p", Deno.pid.toString(), "-o", "comm="],
+                }).outputSync().stdout,
+            ).trim(),
+        );
+        console.log(
+            "PROC ID && PROC PAREN ID",
+            Deno.pid,
+            "&&",
+            Deno.ppid,
+        );
+        return;
+    }
 
     switch (
         StringUtils.normalize(command, {

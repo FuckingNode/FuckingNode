@@ -6,6 +6,12 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
+## Unreleased
+
+### Fixed
+
+- Fixed schedules and update checks being one hour ahead. This wasn't causing any trouble _per se_, but it still wasn't right anyway; now it should be.
+
 ## [3.2.0] (07-04-2025)
 
 ### Added
