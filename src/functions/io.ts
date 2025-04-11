@@ -11,7 +11,7 @@ import { stringify as stringifyYaml } from "@std/yaml";
  * @returns {string} The message with your emoji, e.g. `"😐 hi chat"`.
  */
 export function Emojify(message: string, emoji: SUPPORTED_EMOJIS): string {
-    const GetEmoji = (emoji: SUPPORTED_EMOJIS) => {
+    function GetEmoji(emoji: SUPPORTED_EMOJIS) {
         switch (emoji) {
             case "danger":
                 return `🛑`;
@@ -53,7 +53,7 @@ export function Emojify(message: string, emoji: SUPPORTED_EMOJIS): string {
             default:
                 return "";
         }
-    };
+    }
 
     const emojiString = GetEmoji(emoji).normalize("NFC");
     return emojiString === "" ? message : `${emojiString} ${message}`;
@@ -162,7 +162,7 @@ export function ParseFlag(flag: string, min: boolean): string[] {
  * @returns {string} A colorful string.
  */
 export function ColorString(string: string | number, ...colors: tValidColors[]): string {
-    const internalColorString = (string: string | number, color: tValidColors): string => {
+    function internalColorString(string: string | number, color: tValidColors): string {
         const finalString = typeof string === "string" ? string : String(string);
         const RESET = "\x1b[0m";
         let colorCode = RESET;
@@ -215,7 +215,7 @@ export function ColorString(string: string | number, ...colors: tValidColors[]):
         }
 
         return `${colorCode}${finalString}${RESET}`;
-    };
+    }
 
     const finalString = typeof string === "string" ? string : String(string);
 

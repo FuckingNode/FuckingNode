@@ -51,12 +51,12 @@ const migrateCompatibility = [
     { From: "NodeJS / yarn", To: "npm / pnpm", Supported: labels.y },
 ];
 
-const overallSupport = () => {
+function overallSupport() {
     LogStuff("OVERALL SUPPORT ---");
     LogStuff(StringUtils.table(featureCompatibility));
     LogStuff("For specific compatibility details, run 'compat' followed by any of these: cleaner, kickstart, release, migrate, commit.");
     return;
-};
+}
 
 export default function TheCompater(params: TheCompaterConstructedParams) {
     LogStuff(

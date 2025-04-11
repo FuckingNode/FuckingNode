@@ -12,7 +12,9 @@ export async function RunScheduledTasks() {
     const scheduleFile: CF_FKNODE_SCHEDULE = parseYaml(Deno.readTextFileSync(scheduleFilePath)) as CF_FKNODE_SCHEDULE;
 
     const currentDate: Date = new Date();
-    const CalculateDifference = (date: Date) => (currentDate.getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
+    function CalculateDifference(date: Date) {
+        return (currentDate.getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
+    }
 
     const dates = {
         updater: {

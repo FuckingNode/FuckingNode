@@ -34,11 +34,11 @@ export default function TheSurrenderer(params: TheSurrendererConstructedParams) 
     const cwd = Deno.cwd();
     Deno.chdir(project);
 
-    const valid = (str: UnknownString): str is string => {
+    function valid(str: UnknownString): str is string {
         if (!StringUtils.validate(str)) return false;
         const normalized = StringUtils.normalize(str);
         return normalized !== "--" && normalized !== "-";
-    };
+    }
 
     const alternatives = valid(params.alternative)
         ? `\n\nThe maintainer of this repository has provided the following alternative: ${params.alternative.trim()}`

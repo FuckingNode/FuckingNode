@@ -30,7 +30,9 @@ export function GetAppPath(
 
     const funny = I_LIKE_JS.MFS.toLowerCase().replace("*", "o").replace("*", "u");
 
-    const formatDir = (name: string) => JoinPaths(BASE_DIR, `${APP_NAME.CLI}-${name}`);
+    function formatDir(name: string) {
+        return JoinPaths(BASE_DIR, `${APP_NAME.CLI}-${name}`);
+    }
 
     const BASE_DIR = JoinPaths(appDataPath, APP_NAME.CLI);
     const PROJECTS = formatDir(`${funny}.txt`);

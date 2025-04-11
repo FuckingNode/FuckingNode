@@ -345,12 +345,12 @@ function GetHighestSeverity(severities: string[]): "low" | "moderate" | "high" |
         return "moderate";
     }
 }
-const validSeverity = (s: UnknownString): s is "low" | "moderate" | "high" | "critical" => {
+function validSeverity(s: UnknownString): s is "low" | "moderate" | "high" | "critical" {
     return StringUtils.validate(s) && ["low", "moderate", "high", "critical"].includes(s);
-};
-const validUrl = (s: UnknownString): s is tURL => {
+}
+function validUrl(s: UnknownString): s is tURL {
     return StringUtils.validate(s) && StringUtils.normalize(s).startsWith("https://");
-};
+}
 
 /**
  * Takes the output of npm audit command and parses it to get what we care about.
@@ -565,7 +565,7 @@ export async function AuditProject(bareReport: ParsedNodeReport, strict: boolean
     // ATTEMPTS OF IMPROVEMENT THAT NEVER WORKED OUT :(
     // const tweakedPercentage = (neg === 0) ? 0 : Math.abs(((pos + riskBump) / (pos + neg)) * 100);
     // const strictPercentage = Math.abs(pos - neg) !== 0 ? ((pos / (pos + neg)) + (riskBump / (riskBump + neg - pos))) * 100 : 0;
-    await DisplayAudit(percentage);
+    DisplayAudit(percentage);
     return {
         negatives,
         positives,
