@@ -6,7 +6,12 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
-## Unreleased
+## [3.2.1] (11-04-2025)
+
+### Changed
+
+- Changed compile script to fix some issues and add Konbini support.
+  - (That's a separate project I'm personally working on, don't expect to find any info related to it as of now).
 
 ### Fixed
 
