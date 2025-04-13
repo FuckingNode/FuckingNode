@@ -17,6 +17,7 @@ import TheSurrenderer from "./commands/surrender.ts";
 import TheSetuper from "./commands/setup.ts";
 import TheLauncher from "./commands/launch.ts";
 // other things
+// import { InterrogateVulnerableProject, ParseNodeReport } from "./commands/toolkit/audit-v4.ts";
 import { APP_NAME, APP_URLs, FULL_NAME } from "./constants.ts";
 import { ColorString, LogStuff, ParseFlag } from "./functions/io.ts";
 import { FreshSetup, GetAppPath, GetUserSettings } from "./functions/config.ts";
@@ -129,9 +130,9 @@ function isNotFlag(arg: UnknownString): arg is string {
 
 async function main(command: string) {
     await init();
-
-    const projectArg = isNotFlag(flags[1]) ? flags[1] : 0 as const;
-
+    DEBUG_LOG(flags[1], isNotFlag(flags[1]));
+    const projectArg = (isNotFlag(flags[1]) || flags[1] === "--self") ? flags[1] : 0 as const;
+    DEBUG_LOG(flags[2], isNotFlag(flags[2]));
     const intensityArg = isNotFlag(flags[2]) ? flags[2] : GetUserSettings().defaultIntensity;
 
     const cleanerArgs: TheCleanerConstructedParams = {
@@ -311,11 +312,15 @@ async function main(command: string) {
             break;
         case "audit":
             LogStuff(
-                "The Audit feature is experimental and only available for NodeJS projects. Run '--exp-audit' to use it.",
+                "The Audit feature is experimental and only available for NodeJS projects. Run '--exp-audit' to use it.\nRun 'audit-v4' to test the even more experimental version 4 of the audit system.",
                 "warn",
                 "bright-yellow",
             );
             break;
+        case "auditv4": {
+            console.log("(this commit does not have it yet)");
+            break;
+        }
         case "sokoballs":
             LaunchWebsite("https://tenor.com/view/sokora-dunk-ice-skate-ice-dunk-balling-gif-7665972654807661282?quality=lossless");
             break;

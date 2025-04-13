@@ -60,7 +60,7 @@ Import order doesn't matter, except on the entry point (`src/main.ts`). As soon 
 
 ### Declare functions properly
 
-Wherever you get to choose between `const x = () => {}` and `function x() {}`, declare a function. There were some nerdy differences between each way of doing it, but functions do everything you need and use less characters, so prefer them.
+Wherever you get to choose between `const x = () => {}` and `function x() {}`, declare a function, unless the `const` declaration lets you do a one-liner, in which case it's preferred. There were some nerdy differences between each way of doing it, but functions do everything you need and use less characters, so prefer them.
 
 "Wherever you get to choose" is said because, for example, in `someArray.map()`, you can't do `.map(function x() { /* stuff */ });`, so you'd have to use an arrow function (or directly pass a callback if possible).
 

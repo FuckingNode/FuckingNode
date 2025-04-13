@@ -12,6 +12,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Added a `defaultManager` setting for kickstart, letting users define what manager to use by default when none passed. Defaults to `pnpm` if installed; if not, `npm`.
 
+### Fixed
+
+- Fixed `fkclean --self` cleaning all projects instead of only the current one.
+
 ### Removed
 
 - Removed an unused, undocumented feature (interop layer versioning).

@@ -4,6 +4,4 @@ destroy:
     intensities: ["*"]
     targets:
         - "dist"
-commitActions: true
-commitMessage: "Maintenance tasks (automated by FuckingNode itself)" # lol
-commitCmd: "good"
+commitActions: false
