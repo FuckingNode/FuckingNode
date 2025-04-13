@@ -6,8 +6,8 @@ import type { FkNodeSecurityAudit } from "../types/audit.ts";
 import type { TheAuditerConstructedParams } from "./constructors/command.ts";
 import { StringUtils } from "@zakahacecosas/string-utils";
 
-export default async function TheAuditer(params: TheAuditerConstructedParams) {
-    const { project, strict } = params;
+export default function TheAuditer(params: TheAuditerConstructedParams) {
+    const { project } = params;
 
     const shouldAuditAll = !StringUtils.validate(project) ||
         StringUtils.testFlag(project, "all", { allowQuickFlag: true, allowSingleDash: true, normalize: true }) ||
@@ -24,7 +24,7 @@ export default async function TheAuditer(params: TheAuditerConstructedParams) {
             audit: FkNodeSecurityAudit;
         }[] = [];
         for (const project of projects) {
-            const res = await PerformAuditing(project, strict);
+            const res = PerformAuditing(project);
             if (typeof res === "number") continue;
             report.push({
                 project: project,
@@ -40,16 +40,14 @@ export default async function TheAuditer(params: TheAuditerConstructedParams) {
         console.log("");
         if (reportDetails.length > 0) {
             LogStuff(
-                `Report (${ColorString(strict ? "strict" : "standard", "bold")})\n${reportDetails.join("\n")}${
-                    strict ? "" : `\n${ColorString("Unsure about the results? Run with --strict (or -s) for stricter criteria", "italic")}\n`
-                }`,
+                `Report\n${reportDetails.join("\n")}`,
                 "chart",
             );
         } else {
             LogStuff("Not a single project has security issues. Great!\n", "tick");
         }
     } else {
-        await PerformAuditing(project, strict);
+        PerformAuditing(project);
     }
 
     LogStuff("Audit complete!", "tick-clear");

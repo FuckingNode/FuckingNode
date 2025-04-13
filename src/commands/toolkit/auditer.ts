@@ -1,114 +1,103 @@
-// send help
-
-import { StringUtils, type UnknownString } from "@zakahacecosas/string-utils";
-import { APP_NAME, I_LIKE_JS } from "../../constants.ts";
-import { Commander } from "../../functions/cli.ts";
-import { ColorString, Interrogate, LogStuff } from "../../functions/io.ts";
-import { GetProjectEnvironment, NameProject, SpotProject } from "../../functions/projects.ts";
-import type { FkNodeSecurityAudit } from "../../types/audit.ts";
-import type { tURL } from "../../types/misc.ts";
-
-// * BEGIN OLD TYPE DEFINITIONS * //
-// they've been removed from types/audit.ts and added here
-// so this still "works" (somewhat)
-// audit version 4 will remove these types as they're irrelevant
-// btw audit V4 will probably become the first stabilized audit version
-// (FINALLY, GOD)
-
 /**
- * A security vulnerability fetched from https://OSV.dev.
- */
-export type ApiFetchedIndividualSecurityVulnerability = {
-    id: string;
-    references: {
-        type: "REPORT";
-        url: tURL;
-    }[];
-    summary: string;
-    details: string | string[];
-};
-
-/**
- * An analyzed security vulnerability.
- */
-export type AnalyzedIndividualSecurityVulnerability = {
-    severity: "low" | "moderate" | "high" | "critical";
-    packageName: string;
-    vulnerableVersions: string;
-    patchedVersions: string;
-    advisoryUrl: tURL | undefined;
-};
-
-/**
- * A parsed NodeJS report, from either `npm`, `pnpm`, or `yarn`.
- */
-export type ParsedNodeReport = {
-    /**
-     * Packages that are vulnerable.
-     *
-     * @type {AnalyzedIndividualSecurityVulnerability[]}
-     */
-    vulnerablePackages: AnalyzedIndividualSecurityVulnerability[];
-    /**
-     * Do the proposed fixes imply breaking changes, non-breaking changes, or a mix of both?
-     *
-     * @type {"break" | "noBreak" | "both"}
-     */
-    changeType: "break" | "noBreak" | "both";
-    /**
-     * Dependencies directly affected.
-     *
-     * e.g., if I depend on `expo@52.0.0` and it's vulnerable to something _by itself_, it appears here.
-     *
-     * @type {string[]}
-     */
-    directDependencies: string[];
-    /**
-     * Dependencies indirectly affected.
-     *
-     * e.g., if I depend on `expo@52.0.0` and it's _not_ vulnerable to something _by itself_ but depends on some package that _is_ vulnerable, it appears here.
-     *
-     * @type {string[]}
-     */
-    indirectDependencies: string[];
-    /**
-     * Highest risk found.
-     *
-     * @type {("low" | "moderate" | "high" | "critical")}
-     */
-    risk: "low" | "moderate" | "high" | "critical";
-};
-
-// * END OLD TYPE DEFINITIONS * //
-
-/**
- * Gets a package's security vulnerabilities from OSV.dev.
+ * @file audit-v4.ts
+ * @author ZakaHaceCosas
  *
- * @async
- * @param {string} packageName Name of the package.
- * @returns {Promise<ApiFetchedIndividualSecurityVulnerability[]>} Array of vulnerabilities associated to the package.
+ * This file contains the new, JSON-based, npm / pnpm / yarn compatible audit module.
+ *
+ * (send help)
  */
-async function FetchVulnerability(packageName: string): Promise<ApiFetchedIndividualSecurityVulnerability[]> {
-    const response = await fetch("https://api.osv.dev/v1/query", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            package: {
-                name: packageName,
-                ecosystem: "npm",
-            },
-        }),
-    });
 
-    if (!response.ok) throw new Error(`Error checking with OSV.dev: ${response.statusText}`);
+import { StringUtils } from "@zakahacecosas/string-utils";
+import type { MANAGER_NODE } from "../../types/platform.ts";
+import { ColorString, Interrogate, LogStuff } from "../../functions/io.ts";
+import { FkNodeSecurityAudit, ParsedNodeReport } from "../../types/audit.ts";
+import { GetProjectEnvironment, NameProject, SpotProject } from "../../functions/projects.ts";
+import { Commander } from "../../functions/cli.ts";
+import { APP_NAME, I_LIKE_JS } from "../../constants.ts";
+import { DEBUG_LOG } from "../../functions/error.ts";
 
-    const data: { vulns: ApiFetchedIndividualSecurityVulnerability[] | undefined } = await response.json();
-
-    return data.vulns || [];
+/**
+ * **NPM report.** This interface only types properties of our interest.
+ */
+interface NPM_REPORT {
+    vulnerabilities: Record<
+        string,
+        {
+            name: string;
+            severity: "low" | "moderate" | "high" | "critical";
+            isDirect: boolean;
+            via: {
+                name: string;
+                url: `https://github.com/advisories/GHSA-${string}`;
+            }[];
+            /** (shouldn't this be "affects"? npm is built differently, i guess) */
+            effects: string[];
+            fixAvailable: {
+                name: string;
+                version: string;
+                /** true = breaking changes */
+                isSemVerMajor: boolean;
+            };
+        }
+    >;
 }
 
-/** TODO: Extract to somewhere else
- * TODO 2: Add more vectors (implicit TODO 3: add more questions)
+/** Individual item of a `PNPM_REPORT` */
+interface PNPM_REPORT_ITEM {
+    /** `findings.version` = CURRENT (affected) version */
+    findings: {
+        /** current, broken version the user is using */
+        version: string;
+    }[];
+    /** nerdy text. */
+    overview: string;
+    /** how bad this is. */
+    severity: "low" | "moderate" | "high" | "critical";
+    /** github advisory identifier */
+    github_advisory_id: string;
+    /** what version is needed to fix this */
+    patched_versions: string;
+    /** name of the vulnerability */
+    title: string;
+}
+
+/**
+ * **PNPM report.** This interface only types properties of our interest.
+ */
+interface PNPM_REPORT {
+    advisories: Record<
+        string,
+        PNPM_REPORT_ITEM
+    >;
+}
+
+/**
+ * **YARN report.** This interface only types properties of our interest.
+ */
+type YARN_STUPID_REPORT = {
+    type: "auditAdvisory";
+    data: {
+        resolution: {
+            path: string;
+            dev: boolean;
+        };
+        advisory: {
+            overview: string;
+            module_name: string;
+            title: string;
+            severity: "low" | "moderate" | "high" | "critical";
+            vulnerable_versions: string;
+            github_advisory_id: string;
+            patched_versions: string;
+        };
+    };
+}[];
+
+/** Vulnerability vector keywords.
+ *
+ * - TODO: Extract to somewhere else
+ * - TODO 2: Add more vectors
+ * - (implicit) TODO 3: add more questions
  */
 const VULNERABILITY_VECTORS = {
     NETWORK: [
@@ -139,7 +128,7 @@ const VULNERABILITY_VECTORS = {
         "Cross-Origin Resource Sharing",
         "exfiltration",
     ],
-    COOKIE: [
+    COOKIES: [
         "cookie",
         "session",
         "set-cookie",
@@ -160,15 +149,14 @@ const VULNERABILITY_VECTORS = {
     ],
 };
 
+type SV_KEYWORDS = { summary: string; overview: string };
+
 /**
- * Analyzes security vulnerabilities searching for keywords, returns an array of starter questions for the interrogatory. While unused, also returns the keywords (`vectors`) found.
+ * Analyzes security vulnerability summaries searching for keywords, returns an array of starter questions for the interrogatory.
  *
- * @param {ApiFetchedIndividualSecurityVulnerability[]} vulnerabilities
+ * @param {SV_KEYWORDS[]} svKeywords
  */
-function AnalyzeVulnerabilities(vulnerabilities: ApiFetchedIndividualSecurityVulnerability[]): {
-    questions: string[];
-    vectors: string[];
-} {
+function AnalyzeSecurityVectorKeywords(svKeywords: SV_KEYWORDS[]): string[] {
     const questions: Set<string> = new Set<string>();
     const vectors: Set<string> = new Set<string>();
 
@@ -176,41 +164,158 @@ function AnalyzeVulnerabilities(vulnerabilities: ApiFetchedIndividualSecurityVul
         return substrings.some((substring) => target.includes(StringUtils.normalize(substring)));
     }
 
-    function has(vuln: ApiFetchedIndividualSecurityVulnerability, keywords: string[]): boolean {
-        const details = StringUtils.normalize(vuln.details.toString());
-        const summary = StringUtils.normalize(vuln.summary);
-        return includes(summary, keywords) || includes(details, keywords);
+    function has(keywords: SV_KEYWORDS, values: string[]): boolean {
+        const details = StringUtils.validate(keywords.summary) ? StringUtils.normalize(keywords.summary) : "";
+        const summary = StringUtils.validate(keywords.overview) ? StringUtils.normalize(keywords.overview) : "";
+        return includes(summary, values) || includes(details, values);
     }
 
-    for (const vulnerability of vulnerabilities) {
-        if (has(vulnerability, VULNERABILITY_VECTORS.NETWORK)) {
+    for (const keywordPair of svKeywords) {
+        if (has(keywordPair, VULNERABILITY_VECTORS.NETWORK)) {
             questions.add(
-                "Does your app make HTTP requests and/or depend on networking in any way? [V:NW]",
+                "Does your app make HTTP requests and/or depend on networking in any way? [V:NTW]",
             );
             vectors.add("network");
         }
 
-        if (has(vulnerability, VULNERABILITY_VECTORS.COOKIE)) {
+        if (has(keywordPair, VULNERABILITY_VECTORS.COOKIES)) {
             questions.add(
-                "Does your app make use of browser cookies? [V:CK]",
+                "Does your app make use of browser cookies? [V:CKS]",
             );
             vectors.add("cookie");
         }
 
-        if (has(vulnerability, VULNERABILITY_VECTORS.CONSOLE)) {
+        if (has(keywordPair, VULNERABILITY_VECTORS.CONSOLE)) {
             questions.add(
-                "Does your app allow access to the browser or JavaScript console?\n(Web apps obviously do; we ask for cases like Electron or ReactNative apps). [V:JSC]",
+                "Does your app allow access to any custom method via the JavaScript console? [V:JSC]",
             );
             vectors.add("console");
         }
     }
 
+    return Array.from(questions);
+}
+
+/** quickly parse semver */
+const qps = (s: string): string => s.replaceAll(">", "").replaceAll("<", "").replaceAll("=", "").split(".")[0]!;
+
+/**
+ * Parses a NodeJS report, using JSON format.
+ *
+ * Notes:
+ * - npm and pnpm offer statistics, but yarn doesn't; only reason we don't offer vulnerability count (update: it does, but in a separate JSON, so they're hard to gather)
+ * - overall yarn JSON is a f\*\*king piece of sh\*t that makes the entire code of this function worse (please deprecate yarn and migrate everyone to pnpm)
+ *
+ * @param {string} jsonString Report string (JSON PLEASE).
+ * @param {MANAGER_NODE} platform Package manager used for the report.
+ */
+export function ParseNodeReport(jsonString: string, platform: MANAGER_NODE): ParsedNodeReport {
+    /**
+     * `yarn audit --json` returns something like THIS:
+     * ```json
+     * {"jsonThing": "hi"}
+     * {"otherJsonThing": "uhh"}
+     * // ...
+     * ```
+     * which is stupid, BECAUSE THAT IS _NOT_ VALID JSON! therefore the name of the variable
+     */
+    const yarnStupidJsonFormat = StringUtils.softlyNormalizeArray(jsonString.split("\n")).filter((s) => s.includes('{"type":"auditAdvisory"'))
+        .map((
+            s,
+        ) => JSON.parse(s));
+
+    const parsedJson = platform === "yarn" ? yarnStupidJsonFormat : JSON.parse(jsonString);
+
+    const brokenDeps: boolean[] = [false];
+    const advisories: string[] = [];
+    const severities: ("low" | "moderate" | "high" | "critical")[] = [];
+    const initialKws: SV_KEYWORDS[] = [];
+
+    if (platform === "yarn") {
+        // * STUPID YARN IMPLEMENTATION * //
+        const report = parsedJson as YARN_STUPID_REPORT;
+
+        for (const _entry of report) {
+            const entry = _entry.data.advisory;
+            /** Compares major SemVer version of current version and fixed version. */
+            const impliesBreakingChanges = qps(entry.patched_versions) ===
+                qps(entry.vulnerable_versions);
+
+            brokenDeps.push(impliesBreakingChanges);
+            severities.push(entry.severity);
+            advisories.push(entry.github_advisory_id);
+            initialKws.push({
+                summary: entry.title,
+                overview: entry.overview,
+            });
+        }
+    } else if (platform === "npm") {
+        // * STUPIDN'T NPM IMPLEMENTATION * //
+        const report = parsedJson as NPM_REPORT;
+
+        for (const entry of Object.values(report.vulnerabilities)) {
+            /** Compares major SemVer version of current version and fixed version. */
+            const impliesBreakingChanges = entry.fixAvailable.isSemVerMajor;
+
+            const filteredAdvisories = entry.via
+                .filter((e) => e.url)
+                .map((e) => e.url.split("https://github.com/advisories/")[1])
+                .filter((v) => v !== undefined);
+
+            advisories.push(...filteredAdvisories);
+            severities.push(entry.severity);
+            brokenDeps.push(impliesBreakingChanges);
+            initialKws.push(...entry.via.map((e) => {
+                // npm reports do not include a detailed description, so we gotta live with this
+                return {
+                    summary: e.name,
+                    overview: e.name,
+                };
+            }));
+        }
+    } else {
+        // * STUPIDN'T PNPM IMPLEMENTATION * //
+        const report = parsedJson as PNPM_REPORT;
+
+        for (const entry of Object.values(report.advisories)) {
+            /** Compares major SemVer version of current version and fixed version. */
+            const impliesBreakingChanges = qps(entry.findings[0]!.version) ===
+                qps(entry.patched_versions);
+
+            advisories.push(entry.github_advisory_id);
+            severities.push(entry.severity);
+            brokenDeps.push(impliesBreakingChanges);
+            initialKws.push({
+                summary: entry.title,
+                overview: entry.overview,
+            });
+        }
+    }
+
+    const questions = AnalyzeSecurityVectorKeywords(initialKws);
+    let severity: "low" | "moderate" | "high" | "critical";
+
+    if (severities.includes("critical")) {
+        severity = "critical";
+    } else if (severities.includes("high")) {
+        severity = "high";
+    } else if (severities.includes("moderate")) {
+        severity = "moderate";
+    } else {
+        severity = "low";
+    }
+
+    const breaking = brokenDeps.includes(true);
+
     return {
-        questions: Array.from(questions),
-        vectors: Array.from(vectors),
+        advisories,
+        severity,
+        breaking,
+        questions,
     };
 }
 
+/** Possible responses of an interrogatory question. */
 type InterrogatoryResponse = "true+1" | "true+2" | "false+1" | "false+2";
 
 /**
@@ -234,12 +339,23 @@ function askQuestion(question: string, isFollowUp: boolean, isReversed: boolean,
  * @param {string[]} questions Base questions.
  * @returns {FkNodeSecurityAudit}
  */
-function InterrogateVulnerability(questions: string[]): FkNodeSecurityAudit {
+export function InterrogateVulnerableProject(questions: string[]): Omit<
+    FkNodeSecurityAudit,
+    "percentage"
+> {
     const responses: InterrogatoryResponse[] = [];
 
-    // I REMADE BOOLEANS AS STRINGS IN PURPOSE
-    // ! DON'T QUESTION IT
-    function handleAskQuestion(q: string, f: boolean, r: boolean, w: 1 | 2): InterrogatoryResponse {
+    function handleQuestion(params: {
+        /** QUESTION ITSELF */
+        q: string;
+        /** IS IT A FOLLOW UP? */
+        f: boolean;
+        /** IF TRUE, RESPONDING "Y" SUMS TO NEGATIVES, ELSE TO POSITIVES */
+        r: boolean;
+        /** SUM 1 OR 2? */
+        w: 1 | 2;
+    }): InterrogatoryResponse {
+        const { q, f, r, w } = params;
         const qu = askQuestion(q, f, r, w);
         responses.push(qu);
         return qu;
@@ -248,86 +364,76 @@ function InterrogateVulnerability(questions: string[]): FkNodeSecurityAudit {
     const isTrue = (s: InterrogatoryResponse): boolean => StringUtils.validateAgainst(s, ["true+2", "true+1"]);
 
     for (const question of questions) {
-        const response = handleAskQuestion(question, false, false, 1);
+        const response = handleQuestion({ q: question, f: false, r: true, w: 1 });
 
         // specific follow-up questions based on user responses
         // to further interrogate da vulnerability
         // im the king of naming functions fr fr
-        if (isTrue(response) && question.includes("V:CK")) {
-            handleAskQuestion(
-                "Are cookies being set with the 'Secure' and 'HttpOnly' flags?",
-                true,
-                true,
-                1,
+        if (!isTrue(response) && question.includes("V:CKS")) {
+            handleQuestion(
+                { q: "Are cookies being set with the 'Secure' and 'HttpOnly' flags?", f: true, r: false, w: 1 },
             );
-            handleAskQuestion(
-                "Are your cookies being shared across domains?",
-                true,
-                false,
-                1,
+            handleQuestion(
+                { q: "Are your cookies being shared across domains?", f: true, r: true, w: 1 },
             );
-            const followUpThree = handleAskQuestion(
-                "Are you using cookies to store sensitive data (such as user login)?",
-                true,
-                false,
-                2,
+            const followUp = handleQuestion(
+                { q: "Are you using cookies to store sensitive data (such as user login)?", f: true, r: true, w: 2 },
             );
-            if (isTrue(followUpThree)) {
-                handleAskQuestion(
-                    "Do these cookies store sensitive data directly (e.g., a user token that grants automatic access), or is there an additional layer of protection for their content?",
-                    true,
-                    false,
-                    1,
+            if (!isTrue(followUp)) {
+                handleQuestion(
+                    {
+                        q: "Do these cookies store sensitive data directly (e.g., a user token that grants automatic access) without an additional layer of protection for their content?",
+                        f: true,
+                        r: true,
+                        w: 1,
+                    },
                 );
             }
         }
 
-        if (isTrue(response) && question.includes("V:NW")) {
-            handleAskQuestion(
-                "Does any of that HTTP requests include any sensitive data? Such as login credentials, user data, etc...",
-                true,
-                false,
-                2,
+        if (!isTrue(response) && question.includes("V:NTW")) {
+            handleQuestion(
+                {
+                    q: "Does any of that HTTP requests include any sensitive data? Such as login credentials, user data, etc...",
+                    f: true,
+                    r: true,
+                    w: 2,
+                },
             );
-            handleAskQuestion(
-                "Do you use HTTP Secure (HTTPS) for all requests?",
-                true,
-                true,
-                2,
+            handleQuestion(
+                { q: "Do you use HTTP Secure (HTTPS) for all requests?", f: true, r: false, w: 2 },
             );
-            const followUpThree = handleAskQuestion(
-                "Does your app use WebSockets or similar persistent connections?",
-                true,
-                false,
-                2,
+            const followUp = handleQuestion(
+                { q: "Does your app use WebSockets or similar persistent connections?", f: true, r: true, w: 2 },
             );
-            if (isTrue(followUpThree)) {
+            if (!isTrue(followUp)) {
                 LogStuff(
                     "We'll use the word 'WebSockets', however these questions apply for any other kind of persistent connection, like WebRTC.",
                     undefined,
                     "italic",
                 );
-                handleAskQuestion(
-                    "Do you use Secure WebSockets (WSS) for some or all connections?",
-                    true,
-                    true,
-                    2,
+                handleQuestion(
+                    { q: "Do you use Secure WebSockets (WSS) for some or all connections?", f: true, r: false, w: 2 },
                 );
-                handleAskQuestion(
-                    "WebSockets are used for real-time communication in your app. In your app, is it possible for a user to access sensitive data or perform administrative actions from another client without additional authorization? For example, in a real-time document editing app, changing permissions or seeing emails from other users?",
-                    true,
-                    false,
-                    2,
+                handleQuestion(
+                    {
+                        q: "WebSockets are used for real-time communication in your app. In your app, is it possible for a user to access sensitive data or perform administrative actions from another client without additional authorization? For example, in a real-time document editing app, changing permissions or seeing emails from other users?",
+                        f: true,
+                        r: true,
+                        w: 2,
+                    },
                 );
             }
         }
 
         if (isTrue(response) && question.includes("V:JSC")) {
-            handleAskQuestion(
-                "Does that include risky methods? For example, in Discord you can get an account's token from the JS console (risky method).",
-                true,
-                false,
-                2,
+            handleQuestion(
+                {
+                    q: "Does that include risky methods? For example, in Discord you can get an account's token from the JS console (risky method).",
+                    f: true,
+                    r: true,
+                    w: 2,
+                },
             );
         }
     }
@@ -343,13 +449,16 @@ function InterrogateVulnerability(questions: string[]): FkNodeSecurityAudit {
         { positives: 0, negatives: 0 },
     );
 
-    const total = positives + negatives;
-    const percentage = total === 0 ? 0 : Math.abs((positives / total) * 100);
+    DEBUG_LOG(
+        "P",
+        positives,
+        "N",
+        negatives,
+    );
 
     return {
         positives,
         negatives,
-        percentage,
     };
 }
 
@@ -389,219 +498,23 @@ function DisplayAudit(percentage: number): void {
         `We've evaluated your responses and concluded a risk factor of ${percentageString}.`,
     );
     LogStuff(message);
-    console.log("");
-}
-
-function GetHighestSeverity(severities: string[]): "low" | "moderate" | "high" | "critical" {
-    if (severities.includes("critical")) {
-        return "critical";
-    } else if (severities.includes("high")) {
-        return "high";
-    } else if (severities.includes("moderate")) {
-        return "moderate";
-    } else if (severities.includes("low")) {
-        return "low";
-    } else {
-        // 1. rare edge case, we should have detected a severity already
-        // 2. just in case, default to moderate instead of low (as we don't really know what's up)
-        return "moderate";
-    }
-}
-function validSeverity(s: UnknownString): s is "low" | "moderate" | "high" | "critical" {
-    return StringUtils.validate(s) && ["low", "moderate", "high", "critical"].includes(s);
-}
-function validUrl(s: UnknownString): s is tURL {
-    return StringUtils.validate(s) && StringUtils.normalize(s).startsWith("https://");
-}
-
-/**
- * Takes the output of npm audit command and parses it to get what we care about.
- *
- * _Don't tell me about npm audit --json, I know that exists, we parse bare output by design, not by mistake._
- *
- * TODO - forgetting the stupid message above and migrating to JSON based reports
- * ! - see "audit-v4.ts" in this folder
- *
- * @export
- * @param {string} report
- * @returns {ParsedNodeReport}
- */
-export function ParseNpmReport(report: string): ParsedNodeReport {
-    const vulnerablePackages: AnalyzedIndividualSecurityVulnerability[] = [];
-    const directlyAffectedDependencies: string[] = [];
-    const indirectlyAffectedDependencies: string[] = [];
-    const severities: string[] = [];
-    let breakingChanges = false;
-    let nonBreakingChanges = false;
-
-    const lines = StringUtils.normalizeArray(report.split("\n"));
-
-    const installations: Record<string, string> = {}; // "packageName": "installed version"
-    let currentPackage: string = "";
-
-    lines.forEach((line) => {
-        if (!line.startsWith("#") && lines[lines.indexOf(line) + 1]?.includes("severity")) {
-            currentPackage = line.split(" ")[0]!;
-        }
-
-        const installMatch = line.match(/will\s+install\s+\S+@([^\s]+)/i);
-        if (currentPackage && installMatch && installMatch[1]) {
-            installations[currentPackage] = installMatch[1].replace(",", "");
-        }
-    });
-
-    lines.forEach((line) => {
-        if (
-            !line.startsWith("#") &&
-            (lines[lines.indexOf(line) + 2] || lines[lines.indexOf(line) + 3] || "").includes("severity") &&
-            (lines[lines.indexOf(line) + 2] || lines[lines.indexOf(line) + 3] || "").includes("fix available")
-        ) {
-            const match = line.split(" ");
-            const i = lines.indexOf(line);
-            const sev = lines[i + 1]?.split(" ")[1];
-            const advUrl = lines[i + 2]?.split(" - ")[1]?.trim();
-            if (match[0] && match[1] && validSeverity(sev)) {
-                const entry: AnalyzedIndividualSecurityVulnerability = {
-                    packageName: match[0],
-                    vulnerableVersions: match.slice(1).join("").replace("-", ","),
-                    severity: sev,
-                    advisoryUrl: validUrl(advUrl) ? advUrl : undefined,
-                    patchedVersions: installations[match[0]] || "UNKNOWN",
-                };
-                vulnerablePackages.push(entry);
-            }
-        } else if (line.includes("fix available via") && line.includes("--force")) {
-            // fix (breaking)
-            breakingChanges = true;
-        } else if (line.includes("fix available via") && !line.includes("--force")) {
-            // fix (non breaking)
-            nonBreakingChanges = true;
-        } else if (line.startsWith("node_modules")) {
-            // extract affected dependencies
-            const match = line.match(/node_modules\/([\w-]+)/);
-            if (match && match[1]) {
-                if (line.includes("depends on vulnerable versions")) {
-                    indirectlyAffectedDependencies.push(match[1]);
-                } else {
-                    directlyAffectedDependencies.push(match[1]);
-                }
-            }
-        } else if (/severity:\s*(\w+)/.test(line)) {
-            // get severity
-            const match = line.match(/severity:\s*(\w+)/);
-            if (match && match[1]) {
-                severities.push(match[1]);
-            }
-        }
-    });
-
-    // determine the kind of change
-    let changeType: "noBreak" | "break" | "both" = "noBreak";
-
-    if (breakingChanges && nonBreakingChanges) {
-        changeType = "both";
-    } else if (breakingChanges) {
-        changeType = "break";
-    } else {
-        changeType = "noBreak";
-    }
-
-    return {
-        vulnerablePackages: Array.from(new Set(vulnerablePackages)).sort(), // (Set to remove duplicates)
-        changeType,
-        directDependencies: Array.from(new Set(directlyAffectedDependencies)).sort(),
-        indirectDependencies: [...new Set(indirectlyAffectedDependencies)],
-        risk: GetHighestSeverity(severities),
-    };
-}
-
-export function ParsePnpmYarnReport(report: string, target: "pnpm" | "yarn"): ParsedNodeReport {
-    const vulnerablePackages: AnalyzedIndividualSecurityVulnerability[] = [];
-    const severities: string[] = [];
-    // it's the stupid fact that they put the "┬" in different places what forces me to differentiate pnpm from yarn
-    const stupidYarnBlock = "┌───────────────┬──────────────────────────────────────────────────────────────┐";
-    const stupidPnpmBlock = "┌─────────────────────┬────────────────────────────────────────────────────────┐";
-    const blocks = report.split(target === "pnpm" ? stupidPnpmBlock : stupidYarnBlock)
-        .map((i) => i.replaceAll("\r\n", "\n"));
-
-    for (const block of blocks) {
-        const lines = block.split("\n").map((line) => line.trim()).filter(Boolean);
-
-        let severity = "";
-        let packageName = "";
-        let vulnerableVersions = "__unknown"; // TODO - yarn doesn't give this
-        let patchedVersions = "";
-        const paths: string[] = [];
-        let advisoryUrl = "";
-
-        for (const line of lines) {
-            if (
-                line.startsWith("│ low") || line.startsWith("│ moderate") || line.startsWith("│ high") ||
-                line.startsWith("│ critical")
-            ) {
-                severity = line.split(" ")[1]!.trim();
-                severities.push(StringUtils.normalize(severity));
-                // summary = line.split("│")[2]!.trim();
-            } else if (line.startsWith("│ Package")) {
-                packageName = line.split("│")[2]?.trim() || "";
-            } else if (line.startsWith("│ Vulnerable versions")) {
-                vulnerableVersions = line?.split("│").slice(2).toString().replaceAll(",", "").trim().replace(" ", ",");
-            } else if (line.startsWith("│ Patched versions") || line.startsWith("│ Patched in")) {
-                patchedVersions = line?.split("│").slice(2).toString().replaceAll(",", "").trim().replace(" ", ",");
-            } else if (line.startsWith("│ Paths")) {
-                // NOTE - unused as of now.
-                paths.push(...line.split("│").slice(2).map((a) => a.trim()).filter((b) => b !== ""));
-            } else if (line.startsWith("│ More info")) {
-                advisoryUrl = (line.split("│")[2] ?? "").trim();
-            }
-        }
-
-        severity = StringUtils.normalize(severity);
-
-        if (validSeverity(severity) && packageName && validUrl(advisoryUrl)) {
-            vulnerablePackages.push({
-                severity,
-                packageName,
-                vulnerableVersions,
-                patchedVersions,
-                advisoryUrl,
-            });
-        }
-    }
-
-    return {
-        vulnerablePackages: Array.from(new Set(vulnerablePackages)).sort(),
-        directDependencies: Array.from(new Set(vulnerablePackages.map((p) => p.packageName))).sort(), // todo
-        indirectDependencies: [], // todo
-        changeType: "break", // todo
-        risk: GetHighestSeverity(vulnerablePackages.map((p) => p.severity)),
-    };
 }
 
 /**
  * Handler function for auditing a project.
  *
  * @export
- * @async
  * @param {ParsedNodeReport} bareReport Parsed npm audit.
- * @param {boolean} strict If true, uses a slightly stricter criteria for the audit.
- * @returns {Promise<FkNodeSecurityAudit>}
+ * @returns {FkNodeSecurityAudit}
  */
-export async function AuditProject(bareReport: ParsedNodeReport, strict: boolean): Promise<FkNodeSecurityAudit> {
-    const { vulnerablePackages, risk } = bareReport;
+export function AuditProject(bareReport: ParsedNodeReport): FkNodeSecurityAudit {
+    const { advisories, questions, severity } = bareReport;
 
-    const vulnerabilities: ApiFetchedIndividualSecurityVulnerability[] = [];
-
-    for (const dependency of vulnerablePackages) {
-        const res = await FetchVulnerability(dependency.packageName);
-        vulnerabilities.push(...res);
-    }
-
-    const totalVulnerabilities: number = vulnerabilities.length;
+    const totalAdvisories: number = advisories.length;
 
     LogStuff(
-        `\n===        FOUND VULNERABILITIES (${totalVulnerabilities.toString().padStart(3, "0")})        ===\n${
-            ColorString(vulnerabilities.map((vuln) => vuln.id).join(" & "), "bold")
+        `\n===        FOUND VULNERABILITIES (${totalAdvisories.toString().padStart(3, "0")})        ===\n${
+            ColorString(advisories.join(" & "), "bold")
         }\n===    STARTING ${APP_NAME.STYLED} SECURITY AUDIT    ===`,
     );
 
@@ -609,20 +522,24 @@ export async function AuditProject(bareReport: ParsedNodeReport, strict: boolean
     LogStuff("Please answer these questions. We'll use your responses to evaluate this vulnerability:", "bulb");
     console.log("");
 
-    const { questions } = AnalyzeVulnerabilities(vulnerabilities);
-
-    const audit = InterrogateVulnerability(questions);
+    const audit = InterrogateVulnerableProject(questions);
     const { negatives, positives } = audit;
 
-    const riskBump = risk === "critical" ? 1 : risk === "high" ? 0.75 : risk === "moderate" ? 0.5 : 0.25;
+    const severityDeBump = severity === "critical" ? 0.25 : severity === "high" ? 0.5 : severity === "moderate" ? 0.75 : 1;
+    const severityBump = severity === "critical" ? 2 : severity === "high" ? 2.75 : severity === "moderate" ? 1.5 : 1.25;
+
+    const total = positives + (negatives * severityDeBump);
+    const percentage = ((positives + negatives) === 0 || negatives === 0)
+        ? 0
+        : Math.min(100, Math.max(0, ((negatives * severityBump) / total) * 100));
+
+    DEBUG_LOG("RF", percentage, "N", negatives, "P", positives, "SB", severityBump, "SDB", severityDeBump);
 
     // neg += riskBump;
-    // LEGACY IMPLEMENTATION
-    const classicPercentage = (positives + negatives) > 0 ? (positives / (positives + negatives)) * 100 : 0;
+    // LEGACY IMPLEMENTATIONS
+    // const classicPercentage = (positives + negatives) > 0 ? (positives / (positives + negatives)) * 100 : 0;
 
-    const revampedStrictPercentage = (classicPercentage + (riskBump * 100)) / 2;
-
-    const percentage = strict ? revampedStrictPercentage : classicPercentage;
+    // const revampedStrictPercentage = (classicPercentage + (severityBump * 100)) / 2;
 
     // ATTEMPTS OF IMPROVEMENT THAT NEVER WORKED OUT :(
     // const tweakedPercentage = (neg === 0) ? 0 : Math.abs(((pos + riskBump) / (pos + neg)) * 100);
@@ -639,20 +556,10 @@ export async function AuditProject(bareReport: ParsedNodeReport, strict: boolean
  * Audits a project for security vulnerabilities. Returns 0 if no vulnerabilities are found, 1 if the project manager doesn't support auditing, or the audit results.
  *
  * @export
- * @async
  * @param {string} project Path to project to be audited.
- * @param {boolean} strict If true, uses a slightly stricter criteria for the audit.
- * @returns {Promise<
- *     | FkNodeSecurityAudit
- *     | 0
- *     | 1
- * >}
+ * @returns {FkNodeSecurityAudit | 0 | 1}
  */
-export async function PerformAuditing(project: string, strict: boolean): Promise<
-    | FkNodeSecurityAudit
-    | 0
-    | 1
-> {
+export function PerformAuditing(project: string): FkNodeSecurityAudit | 0 | 1 {
     const workingPath = SpotProject(project);
     const env = GetProjectEnvironment(workingPath);
     const name = NameProject(env.root, "name-ver");
@@ -668,6 +575,7 @@ export async function PerformAuditing(project: string, strict: boolean): Promise
         );
         return 1;
     }
+
     Deno.chdir(env.root);
 
     LogStuff(`Auditing ${name} [${ColorString(env.commands.audit.join(" "), "italic", "half-opaque")}]`, "working");
@@ -685,24 +593,17 @@ export async function PerformAuditing(project: string, strict: boolean): Promise
         return 0;
     }
 
-    const bareReport = (env.manager === "npm") ? ParseNpmReport(res.stdout ?? "") : ParsePnpmYarnReport(res.stdout ?? "", env.manager);
-
-    if (bareReport.vulnerablePackages.length === 0) {
-        if (!res.stdout || res.stdout?.trim() === "") {
-            LogStuff(
-                `An error occurred at ${name} and we weren't able to get the stdout. Unable to audit.`,
-                "error",
-            );
-            return 1;
-        }
+    if (!res.stdout || res.stdout?.trim() === "") {
         LogStuff(
-            `Clear! There aren't any known vulnerabilities affecting ${name}.`,
-            "tick",
+            `An error occurred at ${name} and we weren't able to get the stdout. Unable to audit.`,
+            "error",
         );
-        return 0;
+        return 1;
     }
 
-    const audit = await AuditProject(bareReport, strict);
+    const bareReport = ParseNodeReport(res.stdout, env.manager);
+
+    const audit = AuditProject(bareReport);
 
     Deno.chdir(current);
 

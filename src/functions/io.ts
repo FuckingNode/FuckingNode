@@ -135,24 +135,6 @@ export function Interrogate(question: string, style?: "ask" | "warn" | "heads-up
 }
 
 /**
- * Given a string, e.g. "help", returns an array of all strings that could be considered a `--flag`, so you can test a string against that flag.
- *
- * @export
- * @param {string} flag String you want to test.
- * @param {boolean} min When true, using just the 1st letter of the provided string (e.g. "--h") is also counted as valid.
- * @returns {string[]}
- */
-export function ParseFlag(flag: string, min: boolean): string[] {
-    const target: string = flag.trim().toLowerCase();
-
-    const response: string[] = [`--${target}`, `-${target}`];
-
-    if (min) response.push(`--${target.charAt(0)}`, `-${target.charAt(0)}`);
-
-    return response;
-}
-
-/**
  * Given a string, returns a CLI-colored version of it.
  * @author ZakaHaceCosas
  *

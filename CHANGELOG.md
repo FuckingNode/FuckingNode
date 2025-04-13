@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added Audit V4, a rewrite of the `audit` feature that's JSON based, mathematically more complex and accurate, and finally considered a stable (still NodeJS only) feature.
 - Added a `defaultManager` setting for kickstart, letting users define what manager to use by default when none passed. Defaults to `pnpm` if installed; if not, `npm`.
 
 ### Fixed
@@ -19,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Removed
 
 - Removed an unused, undocumented feature (interop layer versioning).
+- Removed `--strict` flag from audit, now all audits are "strict" per se.
 
 ## [3.2.1] (11-04-2025)
 

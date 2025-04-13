@@ -324,12 +324,6 @@ export interface TheAuditerConstructedParams {
      * @type {UnknownString}
      */
     project: UnknownString;
-    /**
-     * If true, stricter criteria will be used. Does not affect questions, just the math done for risk calculation.
-     *
-     * @type {boolean}
-     */
-    strict: boolean;
 }
 
 /**

@@ -67,7 +67,7 @@ const devJokes = [
 ];
 
 /** (used to be secretHints...) */
-export const hints = [
+export const HINTS = [
     `F\*ckingProTip: try running with "FKNDBG" at the end next time`,
     "F\*ckingProTip: run 'fkn sokoballs'",
     "F\*ckingProTip: cleanup supports a '--verbose' flag that shows CLI output in real time from tasks that are being automated",
@@ -111,5 +111,5 @@ export const phrases = [
     ...appRelatedJokes,
     ...quotes,
     ...internalQuotes,
-    ...hints,
+    ...HINTS,
 ];

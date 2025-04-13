@@ -19,6 +19,7 @@ const featureCompatibility = [
     { Feature: "Stats", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.p, Cargo: labels.y },
     { Feature: "Surrender", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
     { Feature: "Setup", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
+    { Feature: "Audit", NodeJS: labels.y, Deno: labels.n, Bun: labels.n, Go: labels.n, Cargo: labels.n },
 ];
 
 const advancedFeatureCompatibility = [
@@ -40,6 +41,10 @@ const releaseCompatibility = [
     { NodeJS: labels.npm, Deno: labels.jsr, Bun: labels.npm, Go: labels.n, Cargo: labels.n },
 ];
 
+const auditCompatibility = [
+    { NodeJS: labels.y, Deno: labels.n, Bun: labels.n, Go: labels.n, Cargo: labels.n },
+];
+
 const migrateCompatibility = [
     { From: "NodeJS", To: "Deno", Supported: labels.y },
     { From: "NodeJS", To: "Bun", Supported: labels.y },
@@ -54,7 +59,7 @@ const migrateCompatibility = [
 function overallSupport() {
     LogStuff("OVERALL SUPPORT ---");
     LogStuff(StringUtils.table(featureCompatibility));
-    LogStuff("For specific compatibility details, run 'compat' followed by any of these: cleaner, kickstart, release, migrate, commit.");
+    LogStuff("For specific compatibility details, run 'compat' followed by any of these: cleaner, kickstart, release, migrate, commit, audit.");
     return;
 }
 
@@ -96,6 +101,10 @@ export default function TheCompater(params: TheCompaterConstructedParams) {
         case "release":
             LogStuff("RELEASE FEATURE SUPPORT ---");
             LogStuff(StringUtils.table(releaseCompatibility));
+            return;
+        case "audit":
+            LogStuff("AUDIT FEATURE SUPPORT ---");
+            LogStuff(StringUtils.table(auditCompatibility));
             return;
         default:
             overallSupport();

@@ -17,9 +17,8 @@ import TheSurrenderer from "./commands/surrender.ts";
 import TheSetuper from "./commands/setup.ts";
 import TheLauncher from "./commands/launch.ts";
 // other things
-import { PerformAuditing } from "./commands/toolkit/audit-v4.ts";
 import { APP_NAME, APP_URLs, FULL_NAME } from "./constants.ts";
-import { ColorString, LogStuff, ParseFlag } from "./functions/io.ts";
+import { ColorString, LogStuff } from "./functions/io.ts";
 import { FreshSetup, GetAppPath, GetUserSettings } from "./functions/config.ts";
 import { DEBUG_LOG, GenericErrorHandler } from "./functions/error.ts";
 import type { TheCleanerConstructedParams } from "./commands/constructors/command.ts";
@@ -27,7 +26,7 @@ import { RunScheduledTasks } from "./functions/schedules.ts";
 import { StringUtils, UnknownString } from "@zakahacecosas/string-utils";
 import { CleanupProjects } from "./functions/projects.ts";
 import { LaunchWebsite } from "./functions/http.ts";
-import { hints } from "./functions/phrases.ts";
+import { HINTS } from "./functions/phrases.ts";
 import { GetDateNow } from "./functions/date.ts";
 
 // this is outside the main loop so it can be executed
@@ -90,25 +89,6 @@ if (hasFlag("help", true)) {
     try {
         await init();
         TheHelper({ query: flags[1] });
-        Deno.exit(0);
-    } catch (e) {
-        console.error("Critical error", e);
-        Deno.exit(1);
-    }
-}
-
-if (hasFlag("exp-audit", false)) {
-    try {
-        await init();
-        LogStuff(
-            "Beware that as an experimental feature, errors are likely to happen. Report issues, suggestions, or feedback on GitHub.",
-            "warn",
-            "bright-yellow",
-        );
-        await TheAuditer({
-            project: flags[1] ?? null,
-            strict: ParseFlag("strict", true).includes(flags[2] ?? ""),
-        });
         Deno.exit(0);
     } catch (e) {
         console.error("Critical error", e);
@@ -311,16 +291,10 @@ async function main(command: string) {
             LaunchWebsite(`${APP_URLs.WEBSITE}repo`);
             break;
         case "audit":
-            LogStuff(
-                "The Audit feature is experimental and only available for NodeJS projects. Run '--exp-audit' to use it.\nRun 'audit-v4' to test the even more experimental version 4 of the audit system.",
-                "warn",
-                "bright-yellow",
-            );
+            TheAuditer({
+                project: flags[1] ?? null,
+            });
             break;
-        case "auditv4": {
-            PerformAuditing(projectArg as string);
-            break;
-        }
         case "sokoballs":
             LaunchWebsite("https://tenor.com/view/sokora-dunk-ice-skate-ice-dunk-balling-gif-7665972654807661282?quality=lossless");
             break;
@@ -328,7 +302,7 @@ async function main(command: string) {
         case "protip":
         case "pro-tip":
             LogStuff(
-                hints[Math.floor(Math.random() * hints.length)]!,
+                HINTS[Math.floor(Math.random() * HINTS.length)]!,
                 undefined,
                 "bright-blue",
             );
