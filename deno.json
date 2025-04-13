@@ -1,6 +1,6 @@
 {
     "name": "@zakahacecosas/fuckingnode",
-    "version": "3.2.1",
+    "version": "3.3.0",
     "exports": {
         ".": "./src/main.ts"
     },
@@ -34,7 +34,8 @@
         },
         "compile": {
             "description": "Compiles the CLI",
-            "command": "deno -A tasks/compile.ts"
+            "command": "deno -A tasks/compile.ts",
+            "dependencies": ["good"]
         },
         "test": {
             "description": "Runs all tests",
