@@ -10,7 +10,7 @@
     linux_arm = "aarch64-linux";
     linux_x86 = "x86_64-linux";
     pname = "fuckingnode";
-    version = "3.2.1";
+    version = "3.3.0";
 
     pkgs_arm = import nixpkgs {
       system = linux_arm;
@@ -28,7 +28,7 @@
 
           src = pkgs_x86.fetchurl {
             url = "https://github.com/FuckingNode/FuckingNode/releases/download/${version}/FuckingNode-linux64";
-            sha256 = "0ajrgpwa1dgvhp5nwq2rr9hk1mwjqpidfyhac8j8hh0xx84hpi8i";
+            sha256 = "1rdlgvvl7kj1mb8qfys1nqjjs1f17gqfmr6jwqzcdb5w6njhkc6b";
           };
 
           phases = [ "installPhase" "fixupPhase" ];
@@ -58,7 +58,7 @@
 
           src = pkgs_arm.fetchurl {
             url = "https://github.com/FuckingNode/FuckingNode/releases/download/${version}/FuckingNode-linux_arm";
-            sha256 = "1mkf1kbbd1f5llsm610msfgjzwp8hnbihb2wl4aj8mfdgrwfrsch";
+            sha256 = "1hdvq6acv438z6cfyl45slaj2126764pxwcwlrfj0v6kb8p6i21w";
           };
 
           phases = [ "installPhase" "fixupPhase" ];
