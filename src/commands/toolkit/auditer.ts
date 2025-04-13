@@ -5,13 +5,81 @@ import { APP_NAME, I_LIKE_JS } from "../../constants.ts";
 import { Commander } from "../../functions/cli.ts";
 import { ColorString, Interrogate, LogStuff } from "../../functions/io.ts";
 import { GetProjectEnvironment, NameProject, SpotProject } from "../../functions/projects.ts";
-import type {
-    AnalyzedIndividualSecurityVulnerability,
-    ApiFetchedIndividualSecurityVulnerability,
-    FkNodeSecurityAudit,
-    ParsedNodeReport,
-} from "../../types/audit.ts";
+import type { FkNodeSecurityAudit } from "../../types/audit.ts";
 import type { tURL } from "../../types/misc.ts";
+
+// * BEGIN OLD TYPE DEFINITIONS * //
+// they've been removed from types/audit.ts and added here
+// so this still "works" (somewhat)
+// audit version 4 will remove these types as they're irrelevant
+// btw audit V4 will probably become the first stabilized audit version
+// (FINALLY, GOD)
+
+/**
+ * A security vulnerability fetched from https://OSV.dev.
+ */
+export type ApiFetchedIndividualSecurityVulnerability = {
+    id: string;
+    references: {
+        type: "REPORT";
+        url: tURL;
+    }[];
+    summary: string;
+    details: string | string[];
+};
+
+/**
+ * An analyzed security vulnerability.
+ */
+export type AnalyzedIndividualSecurityVulnerability = {
+    severity: "low" | "moderate" | "high" | "critical";
+    packageName: string;
+    vulnerableVersions: string;
+    patchedVersions: string;
+    advisoryUrl: tURL | undefined;
+};
+
+/**
+ * A parsed NodeJS report, from either `npm`, `pnpm`, or `yarn`.
+ */
+export type ParsedNodeReport = {
+    /**
+     * Packages that are vulnerable.
+     *
+     * @type {AnalyzedIndividualSecurityVulnerability[]}
+     */
+    vulnerablePackages: AnalyzedIndividualSecurityVulnerability[];
+    /**
+     * Do the proposed fixes imply breaking changes, non-breaking changes, or a mix of both?
+     *
+     * @type {"break" | "noBreak" | "both"}
+     */
+    changeType: "break" | "noBreak" | "both";
+    /**
+     * Dependencies directly affected.
+     *
+     * e.g., if I depend on `expo@52.0.0` and it's vulnerable to something _by itself_, it appears here.
+     *
+     * @type {string[]}
+     */
+    directDependencies: string[];
+    /**
+     * Dependencies indirectly affected.
+     *
+     * e.g., if I depend on `expo@52.0.0` and it's _not_ vulnerable to something _by itself_ but depends on some package that _is_ vulnerable, it appears here.
+     *
+     * @type {string[]}
+     */
+    indirectDependencies: string[];
+    /**
+     * Highest risk found.
+     *
+     * @type {("low" | "moderate" | "high" | "critical")}
+     */
+    risk: "low" | "moderate" | "high" | "critical";
+};
+
+// * END OLD TYPE DEFINITIONS * //
 
 /**
  * Gets a package's security vulnerabilities from OSV.dev.
@@ -39,6 +107,9 @@ async function FetchVulnerability(packageName: string): Promise<ApiFetchedIndivi
     return data.vulns || [];
 }
 
+/** TODO: Extract to somewhere else
+ * TODO 2: Add more vectors (implicit TODO 3: add more questions)
+ */
 const VULNERABILITY_VECTORS = {
     NETWORK: [
         "http",
@@ -140,149 +211,140 @@ function AnalyzeVulnerabilities(vulnerabilities: ApiFetchedIndividualSecurityVul
     };
 }
 
+type InterrogatoryResponse = "true+1" | "true+2" | "false+1" | "false+2";
+
 /**
  * Asks a question for the interrogatory, returns a "stringified boolean" (weird, I know, we had to pivot a little bit), depending on the response. `"true"` means the user response is something to worry about, `"false"` means it's not.
  *
  * @param {string} question Question itself.
  * @param {boolean} isFollowUp If true, question is a follow up to another question.
  * @param {boolean} isReversed If true, responding "yes" to the question means it's not a vulnerability (opposite logic).
+ * @param {1 | 2} worth What is the question worth? +1 to pos/neg or +2?
  * @returns {"true" | "false"}
  */
-function askQuestion(question: string, isFollowUp: boolean, isReversed: boolean): "true" | "false" {
+function askQuestion(question: string, isFollowUp: boolean, isReversed: boolean, worth: 1 | 2): InterrogatoryResponse {
     const formattedQuestion = ColorString(question, isFollowUp ? "bright-blue" : "bright-yellow", "italic");
-    if (Interrogate(formattedQuestion)) return isReversed ? "false" : "true";
-    return isReversed ? "true" : "false";
+    if (Interrogate(formattedQuestion)) return isReversed ? (worth === 2 ? "false+1" : "false+2") : (worth === 2 ? "true+1" : "true+2");
+    return isReversed ? (worth === 2 ? "true+1" : "true+2") : (worth === 2 ? "false+1" : "false+2");
 }
 
 /**
  * Interrogates a vulnerability, based on base questions (obtained from `AnalyzeVulnerabilities()`) and asking more in-depth questions based on user response.
  *
- * @async
  * @param {string[]} questions Base questions.
- * @returns {Promise<FkNodeSecurityAudit>}
+ * @returns {FkNodeSecurityAudit}
  */
-async function InterrogateVulnerability(questions: string[]): Promise<FkNodeSecurityAudit> {
-    const responses: ("true" | "false")[] = [];
+function InterrogateVulnerability(questions: string[]): FkNodeSecurityAudit {
+    const responses: InterrogatoryResponse[] = [];
 
     // I REMADE BOOLEANS AS STRINGS IN PURPOSE
     // ! DON'T QUESTION IT
-    async function handleAskQuestion(q: string, f: boolean, r: boolean): Promise<"true" | "false"> {
-        const qu = await askQuestion(q, f, r);
+    function handleAskQuestion(q: string, f: boolean, r: boolean, w: 1 | 2): InterrogatoryResponse {
+        const qu = askQuestion(q, f, r, w);
         responses.push(qu);
         return qu;
     }
 
+    const isTrue = (s: InterrogatoryResponse): boolean => StringUtils.validateAgainst(s, ["true+2", "true+1"]);
+
     for (const question of questions) {
-        const response = await handleAskQuestion(question, false, false);
+        const response = handleAskQuestion(question, false, false, 1);
 
         // specific follow-up questions based on user responses
         // to further interrogate da vulnerability
         // im the king of naming functions fr fr
-        if (response === "true" && question.includes("V:CK")) {
-            await handleAskQuestion(
+        if (isTrue(response) && question.includes("V:CK")) {
+            handleAskQuestion(
                 "Are cookies being set with the 'Secure' and 'HttpOnly' flags?",
                 true,
                 true,
+                1,
             );
-            await handleAskQuestion(
+            handleAskQuestion(
                 "Are your cookies being shared across domains?",
                 true,
                 false,
+                1,
             );
-            const followUpThree = await handleAskQuestion(
-                "Are you using cookies to store user sensitive data (such as their login)?",
+            const followUpThree = handleAskQuestion(
+                "Are you using cookies to store sensitive data (such as user login)?",
                 true,
                 false,
+                2,
             );
-            if (followUpThree === "true") {
-                await handleAskQuestion(
+            if (isTrue(followUpThree)) {
+                handleAskQuestion(
                     "Do these cookies store sensitive data directly (e.g., a user token that grants automatic access), or is there an additional layer of protection for their content?",
                     true,
                     false,
+                    1,
                 );
             }
         }
 
-        if (response === "true" && question.includes("V:NW")) {
-            await handleAskQuestion(
+        if (isTrue(response) && question.includes("V:NW")) {
+            handleAskQuestion(
                 "Does any of that HTTP requests include any sensitive data? Such as login credentials, user data, etc...",
                 true,
                 false,
+                2,
             );
-            await handleAskQuestion(
-                "Do you use Secure HTTP (HTTPS) for some or all requests?",
+            handleAskQuestion(
+                "Do you use HTTP Secure (HTTPS) for all requests?",
                 true,
                 true,
+                2,
             );
-            const followUpThree = await handleAskQuestion(
+            const followUpThree = handleAskQuestion(
                 "Does your app use WebSockets or similar persistent connections?",
                 true,
                 false,
+                2,
             );
-            if (followUpThree === "true") {
+            if (isTrue(followUpThree)) {
                 LogStuff(
                     "We'll use the word 'WebSockets', however these questions apply for any other kind of persistent connection, like WebRTC.",
                     undefined,
                     "italic",
                 );
-                await handleAskQuestion(
+                handleAskQuestion(
                     "Do you use Secure WebSockets (WSS) for some or all connections?",
                     true,
                     true,
+                    2,
                 );
-                await handleAskQuestion(
+                handleAskQuestion(
                     "WebSockets are used for real-time communication in your app. In your app, is it possible for a user to access sensitive data or perform administrative actions from another client without additional authorization? For example, in a real-time document editing app, changing permissions or seeing emails from other users?",
                     true,
                     false,
+                    2,
                 );
             }
         }
 
-        if (question.includes("V:JSC")) {
-            if (response === "true") {
-                const followUpOne = await handleAskQuestion(
-                    "Do you have any method and/or API exposed that can be used from the console?",
-                    true,
-                    false,
-                );
-                if (followUpOne === "true") {
-                    await handleAskQuestion(
-                        "Does that include risky methods? For example, in Discord you can get an account's token from the JS console (risky method).",
-                        true,
-                        false,
-                    );
-                }
-            } else if (response === "false") {
-                const followUpOne = await handleAskQuestion(
-                    "You said your app doesn't allow access to the console. Is there, still, any way of executing JS commands within your app that you're aware of?",
-                    true,
-                    false,
-                );
-                if (followUpOne === "true") {
-                    await handleAskQuestion(
-                        "Do you have control over it? So you can disable certain methods, and/or disable it entirely.",
-                        true,
-                        true,
-                    );
-                }
-            }
+        if (isTrue(response) && question.includes("V:JSC")) {
+            handleAskQuestion(
+                "Does that include risky methods? For example, in Discord you can get an account's token from the JS console (risky method).",
+                true,
+                false,
+                2,
+            );
         }
     }
 
     const { positives, negatives } = responses.reduce(
         (acc, value) => {
-            if (value === "true") {
-                acc.positives += 1;
-            } else if (value === "false") {
-                acc.negatives += 1;
-            }
+            if (value === "true+1") acc.positives += 1;
+            else if (value === "true+2") acc.positives += 2;
+            else if (value === "false+1") acc.negatives += 1;
+            else acc.negatives += 2;
             return acc;
         },
         { positives: 0, negatives: 0 },
     );
 
     const total = positives + negatives;
-    const percentage = Math.abs((positives / total) * 100);
+    const percentage = total === 0 ? 0 : Math.abs((positives / total) * 100);
 
     return {
         positives,
@@ -549,7 +611,7 @@ export async function AuditProject(bareReport: ParsedNodeReport, strict: boolean
 
     const { questions } = AnalyzeVulnerabilities(vulnerabilities);
 
-    const audit = await InterrogateVulnerability(questions);
+    const audit = InterrogateVulnerability(questions);
     const { negatives, positives } = audit;
 
     const riskBump = risk === "critical" ? 1 : risk === "high" ? 0.75 : risk === "moderate" ? 0.5 : 0.25;

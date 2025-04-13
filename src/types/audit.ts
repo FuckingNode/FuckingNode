@@ -1,29 +1,3 @@
-import type { tURL } from "./misc.ts";
-
-/**
- * A security vulnerability fetched from https://OSV.dev.
- */
-export type ApiFetchedIndividualSecurityVulnerability = {
-    id: string;
-    references: {
-        type: "REPORT";
-        url: tURL;
-    }[];
-    summary: string;
-    details: string | string[];
-};
-
-/**
- * An analyzed security vulnerability.
- */
-export type AnalyzedIndividualSecurityVulnerability = {
-    severity: "low" | "moderate" | "high" | "critical";
-    packageName: string;
-    vulnerableVersions: string;
-    patchedVersions: string;
-    advisoryUrl: tURL | undefined;
-};
-
 /**
  * A simple summary of our security audit.
  */
@@ -53,37 +27,29 @@ export type FkNodeSecurityAudit = {
  */
 export type ParsedNodeReport = {
     /**
-     * Packages that are vulnerable.
+     * Do the proposed fixes imply breaking changes?
      *
-     * @type {AnalyzedIndividualSecurityVulnerability[]}
+     * @type {boolean}
      */
-    vulnerablePackages: AnalyzedIndividualSecurityVulnerability[];
+    breaking: boolean;
     /**
-     * Do the proposed fixes imply breaking changes, non-breaking changes, or a mix of both?
-     *
-     * @type {"break" | "noBreak" | "both"}
-     */
-    changeType: "break" | "noBreak" | "both";
-    /**
-     * Dependencies directly affected.
-     *
-     * e.g., if I depend on `expo@52.0.0` and it's vulnerable to something _by itself_, it appears here.
+     * All GHSA identifiers.
      *
      * @type {string[]}
      */
-    directDependencies: string[];
-    /**
-     * Dependencies indirectly affected.
-     *
-     * e.g., if I depend on `expo@52.0.0` and it's _not_ vulnerable to something _by itself_ but depends on some package that _is_ vulnerable, it appears here.
-     *
-     * @type {string[]}
-     */
-    indirectDependencies: string[];
+    advisories: string[];
     /**
      * Highest risk found.
      *
      * @type {("low" | "moderate" | "high" | "critical")}
      */
-    risk: "low" | "moderate" | "high" | "critical";
+    severity: "low" | "moderate" | "high" | "critical";
+    /**
+     * Starter questions derived from the report.
+     *
+     * They contain `[IDs]` inside of the string for identifying them via `.includes()`.
+     *
+     * @type {string[]}
+     */
+    questions: string[];
 };

@@ -17,7 +17,7 @@ import TheSurrenderer from "./commands/surrender.ts";
 import TheSetuper from "./commands/setup.ts";
 import TheLauncher from "./commands/launch.ts";
 // other things
-// import { InterrogateVulnerableProject, ParseNodeReport } from "./commands/toolkit/audit-v4.ts";
+import { PerformAuditing } from "./commands/toolkit/audit-v4.ts";
 import { APP_NAME, APP_URLs, FULL_NAME } from "./constants.ts";
 import { ColorString, LogStuff, ParseFlag } from "./functions/io.ts";
 import { FreshSetup, GetAppPath, GetUserSettings } from "./functions/config.ts";
@@ -318,7 +318,7 @@ async function main(command: string) {
             );
             break;
         case "auditv4": {
-            console.log("(this commit does not have it yet)");
+            PerformAuditing(projectArg as string);
             break;
         }
         case "sokoballs":

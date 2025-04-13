@@ -197,9 +197,9 @@ interface GenericProjectEnvironment {
          */
         audit:
             | ["audit"]
-            | ["audit", "--ignore-registry-errors"]
-            | ["audit"]
-            | ["audit", "--recursive", "--all"]
+            | ["audit", "--ignore-registry-errors", "--json"]
+            | ["audit", "--json"]
+            | ["audit", "--recursive", "--all", "--json"]
             | "__UNSUPPORTED";
         /**
          * Package publish commands.
@@ -233,9 +233,9 @@ interface NodeEnvironment extends GenericProjectEnvironment {
             | [["autoclean", "--force"]]
             | "__UNSUPPORTED";
         audit:
-            | ["audit", "--ignore-registry-errors"]
-            | ["audit"]
-            | ["audit", "--recursive", "--all"]
+            | ["audit", "--ignore-registry-errors", "--json"]
+            | ["audit", "--json"]
+            | ["audit", "--recursive", "--all", "--json"]
             | "__UNSUPPORTED";
         publish: ["publish"] | ["publish", "--non-interactive"];
         start: "start";

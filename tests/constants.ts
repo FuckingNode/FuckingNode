@@ -56,6 +56,7 @@ const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
             ],
             audit: [
                 "audit",
+                "--json",
             ],
             run: ["npm", "run"],
             publish: ["publish"],
