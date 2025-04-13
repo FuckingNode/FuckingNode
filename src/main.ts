@@ -96,7 +96,7 @@ if (hasFlag("help", true)) {
     }
 }
 
-if (hasFlag("experimental-audit", false)) {
+if (hasFlag("exp-audit", false)) {
     try {
         await init();
         LogStuff(
@@ -311,7 +311,7 @@ async function main(command: string) {
             break;
         case "audit":
             LogStuff(
-                "The Audit feature is experimental and only available for NodeJS projects. Run '--experimental-audit' to use it.\nImportant: We did not update this feature for V3, it's planned to be fully rewritten for V3.3. Do not use it as of now, it is very broken and mostly useless (AS OF NOW).",
+                "The Audit feature is experimental and only available for NodeJS projects. Run '--exp-audit' to use it.",
                 "warn",
                 "bright-yellow",
             );
@@ -321,6 +321,7 @@ async function main(command: string) {
             break;
         case "hint":
         case "protip":
+        case "pro-tip":
             LogStuff(
                 hints[Math.floor(Math.random() * hints.length)]!,
                 undefined,

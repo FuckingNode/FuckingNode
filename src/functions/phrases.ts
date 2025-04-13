@@ -68,7 +68,7 @@ const devJokes = [
 
 /** (used to be secretHints...) */
 export const hints = [
-    "F\*ckingProTip: try running with --FKNDBG next time",
+    `F\*ckingProTip: try running with "FKNDBG" at the end next time`,
     "F\*ckingProTip: run 'fkn sokoballs'",
     "F\*ckingProTip: cleanup supports a '--verbose' flag that shows CLI output in real time from tasks that are being automated",
     `F\*ckingProTip: critical errors get logged to ${GetAppPath("ERRORS")} in a fairly readable format`,

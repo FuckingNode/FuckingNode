@@ -26,7 +26,7 @@ import { StringUtils, type UnknownString } from "@zakahacecosas/string-utils";
  */
 export function GetAllProjects(ignored?: false | "limit" | "exclude"): string[] {
     const content = Deno.readTextFileSync(GetAppPath("MOTHERFKRS"));
-    DEBUG_LOG("RAW LIST", content);
+    DEBUG_LOG("GetAllProjects CALLED (it's being called too many times i think?)");
     const list = ParsePathList(content);
     const cleanList = list.filter((p) => CheckForPath(p) === true);
 
