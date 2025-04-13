@@ -1,6 +1,6 @@
 import { FkNodeInterop } from "../src/commands/interop/interop.ts";
 import { assertEquals } from "@std/assert";
-import { VERSIONING } from "../src/constants.ts";
+import { VERSION } from "../src/constants.ts";
 import { CONSTANTS } from "./constants.ts";
 import { JoinPaths } from "../src/functions/filesystem.ts";
 import type { FnCPF } from "../src/types/platform.ts";
@@ -20,9 +20,7 @@ Deno.test({
                 version: "0.1.0",
                 rm: "cargo",
                 perPlatProps: {
-                    cargo: {
-                        edition: "2021",
-                    },
+                    cargo_edt: "2021",
                 },
                 deps: [
                     { name: "serde", ver: "1.0", rel: "univ:dep", src: "crates.io" },
@@ -33,11 +31,7 @@ Deno.test({
                     { name: "bindgen", ver: "0.59", rel: "rst:buildD", src: "crates.io" },
                 ],
                 ws: [],
-                internal: {
-                    fknode: VERSIONING.APP,
-                    fknodeCpf: "1.0.0",
-                    fknodeIol: "1.0.0",
-                },
+                fknVer: VERSION,
             },
         );
     },
@@ -58,7 +52,7 @@ Deno.test({
                 name: "vuelto.pp.ua",
                 version: "v1.1.0",
                 rm: "golang",
-                perPlatProps: { cargo: { edition: undefined } },
+                perPlatProps: { cargo_edt: undefined },
                 deps: [
                     {
                         name: "github.com/faiface/beep",
@@ -116,11 +110,7 @@ Deno.test({
                     },
                 ],
                 ws: [],
-                internal: {
-                    fknode: VERSIONING.APP,
-                    fknodeCpf: "1.0.0",
-                    fknodeIol: "1.0.0",
-                },
+                fknVer: VERSION,
             },
         );
     },
@@ -141,7 +131,7 @@ Deno.test({
                 name: "test",
                 version: "0.59.123",
                 rm: "pnpm",
-                perPlatProps: { cargo: { edition: undefined } },
+                perPlatProps: { cargo_edt: undefined },
                 deps: [
                     {
                         name: "eslint",
@@ -163,11 +153,7 @@ Deno.test({
                     },
                 ],
                 ws: [],
-                internal: {
-                    fknode: VERSIONING.APP,
-                    fknodeCpf: "1.0.0",
-                    fknodeIol: "1.0.0",
-                },
+                fknVer: VERSION,
             },
         );
     },
@@ -187,7 +173,7 @@ Deno.test({
                 name: "@zakahacecosas/string-utils",
                 version: "1.7.0",
                 rm: "deno",
-                perPlatProps: { cargo: { edition: undefined } },
+                perPlatProps: { cargo_edt: undefined },
                 deps: [
                     {
                         name: "@std/fs",
@@ -197,11 +183,7 @@ Deno.test({
                     },
                 ],
                 ws: [],
-                internal: {
-                    fknode: VERSIONING.APP,
-                    fknodeCpf: "1.0.0",
-                    fknodeIol: "1.0.0",
-                },
+                fknVer: VERSION,
             },
         );
     },
@@ -212,9 +194,7 @@ const PKGGEN_TEST_FNCPF: FnCPF = {
     version: "0.59.123",
     rm: "npm",
     perPlatProps: {
-        cargo: {
-            edition: undefined,
-        },
+        cargo_edt: undefined,
     },
     deps: [
         {
@@ -231,11 +211,7 @@ const PKGGEN_TEST_FNCPF: FnCPF = {
         },
     ],
     ws: [],
-    internal: {
-        fknode: VERSIONING.APP,
-        fknodeCpf: VERSIONING.CPF,
-        fknodeIol: VERSIONING.IOL,
-    },
+    fknVer: VERSION,
 };
 
 Deno.test({

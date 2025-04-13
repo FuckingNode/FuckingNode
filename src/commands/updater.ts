@@ -1,6 +1,6 @@
 import { compare, parse } from "@std/semver";
 import { FetchGitHub } from "../functions/http.ts";
-import { LOCAL_PLATFORM, RELEASE_URL, VERSIONING } from "../constants.ts";
+import { LOCAL_PLATFORM, RELEASE_URL, VERSION } from "../constants.ts";
 import type { GITHUB_RELEASE } from "../types/misc.ts";
 import { GetDateNow } from "../functions/date.ts";
 import type { TheUpdaterConstructedParams } from "./constructors/command.ts";
@@ -57,14 +57,14 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
 
     const { latestVer } = needsToUpdate.updater;
 
-    if (compare(parse(VERSIONING.APP), parse(latestVer)) >= 0) {
+    if (compare(parse(VERSION), parse(latestVer)) >= 0) {
         if (params.silent) return;
-        LogStuff(`You're up to date! ${ColorString(VERSIONING.APP, "bright-green")} is the latest.`, "tick");
+        LogStuff(`You're up to date! ${ColorString(VERSION, "bright-green")} is the latest.`, "tick");
         return;
     }
 
     LogStuff(
-        `There's a new version! ${latestVer}. You're on ${VERSIONING.APP}, btw.`,
+        `There's a new version! ${latestVer}. You're on ${VERSION}, btw.`,
         "bulb",
     );
     if (!params.install) return;

@@ -4,8 +4,8 @@ import { format, parse } from "@std/semver";
 import type { CF_FKNODE_SCHEDULE, CF_FKNODE_SETTINGS, FullFkNodeYaml } from "./types/config_files.ts";
 import * as DenoJson from "../deno.json" with { type: "json" };
 import { GetDateNow } from "./functions/date.ts";
-import type { FnCPF } from "./types/platform.ts";
 import { StringUtils, type UnknownString } from "@zakahacecosas/string-utils";
+import { CommandExists } from "./functions/cli.ts";
 
 /**
  * Current app version as a SemVer object. **Change it from `deno.json`.**
@@ -19,25 +19,7 @@ const _SV_VER: SemVer = parse(DenoJson.default.version);
  *
  * @type {string}
  */
-export const VERSIONING: { APP: string; CPF: string; IOL: string } = {
-    /** App itself */
-    APP: format(_SV_VER),
-    /** Common Package File */
-    CPF: "1.0.0",
-    /** InterOp Layer */
-    IOL: "1.0.0",
-};
-
-/**
- * Internal field for FnCPF files.
- *
- * @type {FnCPF["internal"]}
- */
-export const FnCPFInternal: FnCPF["internal"] = {
-    fknode: VERSIONING.APP,
-    fknodeCpf: VERSIONING.CPF,
-    fknodeIol: VERSIONING.IOL,
-};
+export const VERSION: string = format(_SV_VER);
 
 /**
  * Best CLI app ever (it's name, so you don't, for example, miss-capitalize it).
@@ -52,7 +34,7 @@ export const APP_NAME: { CASED: string; CLI: string; STYLED: string; SCOPE: stri
 };
 
 /** Full, cased name of the app in NAME vVERSION format. */
-export const FULL_NAME: string = `${APP_NAME.CASED} v${VERSIONING.APP}`;
+export const FULL_NAME: string = `${APP_NAME.CASED} v${VERSION}`;
 
 /** URLs have trailing slash/ */
 export const APP_URLs: { REPO: tURL; WEBSITE: tURL } = {
@@ -135,6 +117,7 @@ export const DEFAULT_SETTINGS: CF_FKNODE_SETTINGS = {
     flushFreq: 14,
     defaultIntensity: "normal",
     favEditor: "vscode",
+    defaultManager: CommandExists("pnpm") ? "pnpm" : "npm",
 };
 
 /**
@@ -144,7 +127,7 @@ export const DEFAULT_SETTINGS: CF_FKNODE_SETTINGS = {
  */
 export const DEFAULT_SCHEDULE_FILE: CF_FKNODE_SCHEDULE = {
     updater: {
-        latestVer: VERSIONING.APP,
+        latestVer: VERSION,
         lastCheck: GetDateNow(),
     },
     flusher: {

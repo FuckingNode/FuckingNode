@@ -5,7 +5,7 @@
 
 import { StringUtils, type UnknownString } from "@zakahacecosas/string-utils";
 import type { CargoPkgFile, DenoPkgFile, FnCPF, GolangPkgFile, MANAGER_JS, NodePkgFile } from "../../types/platform.ts";
-import { FnCPFInternal } from "../../constants.ts";
+import { VERSION } from "../../constants.ts";
 import { FknError } from "../../functions/error.ts";
 import { parse as parseToml } from "@std/toml";
 import { parse as parseJsonc } from "@std/jsonc";
@@ -197,13 +197,11 @@ export const Parsers = {
                     version: version === undefined ? "Unknown" : version,
                     rm: "golang",
                     perPlatProps: {
-                        cargo: {
-                            edition: "__NTP",
-                        },
+                        cargo_edt: "__NTP",
                     },
                     ws,
                     deps: dedupeDependencies(deps),
-                    internal: FnCPFInternal,
+                    fknVer: VERSION,
                 };
             } catch (e) {
                 throw e;
@@ -241,13 +239,11 @@ export const Parsers = {
                 version: parsedContent.package.version,
                 rm: "cargo",
                 perPlatProps: {
-                    cargo: {
-                        edition: parsedContent.package.edition,
-                    },
+                    cargo_edt: parsedContent.package.edition,
                 },
                 deps: dedupeDependencies(deps),
                 ws,
-                internal: FnCPFInternal,
+                fknVer: VERSION,
             };
         },
     },
@@ -279,13 +275,11 @@ export const Parsers = {
                 version: parsedContent.version ?? "0.0.0",
                 rm: rt,
                 perPlatProps: {
-                    cargo: {
-                        edition: "__NTP",
-                    },
+                    cargo_edt: "__NTP",
                 },
                 deps: dedupeDependencies(deps),
                 ws,
-                internal: FnCPFInternal,
+                fknVer: VERSION,
             };
         },
     },
@@ -319,13 +313,11 @@ export const Parsers = {
                 version: parsedContent.version ?? "0.0.0",
                 rm: "deno",
                 perPlatProps: {
-                    cargo: {
-                        edition: "__NTP",
-                    },
+                    cargo_edt: "__NTP",
                 },
                 deps: dedupeDependencies(deps),
                 ws,
-                internal: FnCPFInternal,
+                fknVer: VERSION,
             };
         },
     },

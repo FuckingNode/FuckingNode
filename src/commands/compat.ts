@@ -16,7 +16,7 @@ const featureCompatibility = [
     { Feature: "Kickstart", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
     { Feature: "Commit", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.p, Cargo: labels.p },
     { Feature: "Release", NodeJS: labels.npm, Deno: labels.jsr, Bun: labels.npm, Go: labels.n, Cargo: labels.n },
-    { Feature: "Stats", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.p, Cargo: labels.p },
+    { Feature: "Stats", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.p, Cargo: labels.y },
     { Feature: "Surrender", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
     { Feature: "Setup", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
 ];
@@ -88,7 +88,6 @@ export default function TheCompater(params: TheCompaterConstructedParams) {
         case "commit":
             LogStuff("COMMIT FEATURE SUPPORT ---");
             LogStuff(StringUtils.table(commitCompatibility));
-
             return;
         case "migrate":
             LogStuff("MIGRATE FEATURE SUPPORT ---");

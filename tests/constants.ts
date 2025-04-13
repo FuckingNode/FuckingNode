@@ -1,4 +1,4 @@
-import { DEFAULT_FKNODE_YAML, VERSIONING } from "../src/constants.ts";
+import { DEFAULT_FKNODE_YAML, VERSION } from "../src/constants.ts";
 import { JoinPaths, ParsePath } from "../src/functions/filesystem.ts";
 import type { ProjectEnvironment } from "../src/types/platform.ts";
 
@@ -23,7 +23,7 @@ const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
                 name: "uwu.js",
                 version: "1.0.0",
                 rm: "npm",
-                perPlatProps: { cargo: { edition: undefined } },
+                perPlatProps: { cargo_edt: undefined },
                 deps: [
                     {
                         name: "tslib",
@@ -35,11 +35,7 @@ const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
                 ws: [
                     ParsePath(`${CONSTANTS.ENV_PATH}/test-two`),
                 ],
-                internal: {
-                    fknode: VERSIONING.APP,
-                    fknodeCpf: "1.0.0",
-                    fknodeIol: "1.0.0",
-                },
+                fknVer: VERSION,
             },
         },
         commands: {

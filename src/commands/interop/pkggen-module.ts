@@ -77,11 +77,11 @@ export const Generators: {
     /** Generates a `Cargo.toml` from a FnCPF. */
     Cargo: (cpf: FnCPF, additionalParams?: object): ExtraProps<CargoPkgFile> => {
         const generatedPkgFile: ExtraProps<CargoPkgFile> = {
-            package: cpf.perPlatProps.cargo.edition
+            package: cpf.perPlatProps.cargo_edt
                 ? {
                     name: cpf.name,
                     version: cpf.version,
-                    edition: cpf.perPlatProps.cargo.edition,
+                    edition: cpf.perPlatProps.cargo_edt,
                 }
                 : {
                     name: cpf.name,

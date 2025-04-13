@@ -1,4 +1,5 @@
 import type { CleanerIntensity } from "./config_params.ts";
+import { MANAGER_GLOBAL } from "./platform.ts";
 
 /**
  * Supported code editors.
@@ -36,6 +37,10 @@ export interface CF_FKNODE_SETTINGS {
      * User's favorite code editor.
      */
     favEditor: SUPPORTED_EDITORS;
+    /**
+     * Default package manager / runtime to use for features like `kickstart`.
+     */
+    defaultManager: MANAGER_GLOBAL;
 }
 
 /**

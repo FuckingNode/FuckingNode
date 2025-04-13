@@ -371,7 +371,7 @@ interface FnCPFDependency {
     /**
      * Package relationship.
      */
-    rel: "univ:dep" | "univ:devD" | "go:ind" | "js:peer" | "rst:buildD" | `r:tar::${string}`;
+    rel: "univ:dep" | "univ:devD" | "go:ind" | "js:peer" | "rst:buildD";
     /**
      * Package source.
      *
@@ -416,10 +416,8 @@ export interface FnCPF {
      *     }}
      */
     perPlatProps: {
-        cargo: {
-            /** Rust edition. "__NTP" (Not This Platform) on other runtimes. */
-            edition: string | undefined | "__NTP";
-        };
+        /** Rust edition. "__NTP" (Not This Platform) on other runtimes. */
+        cargo_edt: string | undefined | "__NTP";
     };
     /**
      * Dependencies.
@@ -434,20 +432,10 @@ export interface FnCPF {
      */
     ws: string[];
     /**
-     * Internal info.
+     * Version of the CLI used to generate the file.
+     * Useful as we do not complicate ourselves with backwards compatibility troubles - if you're on V3, V2 doesn't work, and so happens with generated files.
      *
-     * @type {{
-     *         fknode: string;
-     *         "fknode-iol": string;
-     *         "fknode-cpf": string;
-     *     }}
+     * @type {string}
      */
-    internal: {
-        /** App version. */
-        fknode: string;
-        /** InterOp Layer version. */
-        fknodeIol: string;
-        /** FnCPF version. */
-        fknodeCpf: string;
-    };
+    fknVer: string;
 }

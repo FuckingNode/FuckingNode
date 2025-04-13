@@ -1,4 +1,4 @@
-import { APP_NAME, APP_URLs, I_LIKE_JS, VERSIONING } from "../constants.ts";
+import { APP_NAME, APP_URLs, I_LIKE_JS, VERSION } from "../constants.ts";
 import { ColorString } from "../functions/io.ts";
 import { LogStuff } from "../functions/io.ts";
 import type { tValidColors } from "../types/misc.ts";
@@ -44,7 +44,7 @@ const coolStrings = {
 export default function TheAbouter() {
     LogStuff(colorizeText(ASCII));
     console.log("-".repeat(30));
-    LogStuff(`${ColorString(VERSIONING.APP, "bright-yellow")} · ${getRandomPhrase()}\n`);
+    LogStuff(`${ColorString(VERSION, "bright-yellow")} · ${getRandomPhrase()}\n`);
     LogStuff(
         `Written in ${coolStrings.ts}. Running in ${coolStrings.deno}.\nDeveloped in ${coolStrings.spain} by ${coolStrings.zakaOne} (${coolStrings.zakaTwo} in spanish).\n`,
     );

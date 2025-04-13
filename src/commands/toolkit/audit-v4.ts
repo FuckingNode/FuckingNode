@@ -2,9 +2,7 @@
  * @file audit-v4.ts
  * @author ZakaHaceCosas
  *
- * This file only contains the new JSON-based, npm / pnpm / yarn compatible audit parser.
- *
- * HEAVY WORK IN PROGRESS. I might release V3 without this if it takes too long.
+ * This file contains the new JSON-based, npm / pnpm / yarn compatible audit parser.
  */
 
 import { StringUtils } from "@zakahacecosas/string-utils";

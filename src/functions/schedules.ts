@@ -4,7 +4,7 @@ import { FlushConfigFiles, GetAppPath, GetUserSettings } from "./config.ts";
 import { GetDateNow, ParseDate } from "./date.ts";
 import { parse as parseYaml } from "@std/yaml";
 import { StringifyYaml } from "./io.ts";
-import { VERSIONING } from "../constants.ts";
+import { VERSION } from "../constants.ts";
 
 export async function RunScheduledTasks() {
     const { updateFreq, flushFreq } = GetUserSettings();
@@ -36,7 +36,7 @@ export async function RunScheduledTasks() {
             ...scheduleFile,
             updater: {
                 lastCheck: GetDateNow(),
-                latestVer: VERSIONING.APP,
+                latestVer: VERSION,
             },
         };
         await TheUpdater({

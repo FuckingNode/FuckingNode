@@ -124,12 +124,13 @@ export function FreshSetup(repairSetts?: boolean): void {
 export function GetUserSettings(): CF_FKNODE_SETTINGS {
     const path = GetAppPath("SETTINGS");
     const stuff: CF_FKNODE_SETTINGS = parseYaml(Deno.readTextFileSync(path)) as CF_FKNODE_SETTINGS;
-    if (!stuff.flushFreq || !stuff.defaultIntensity || !stuff.favEditor || !stuff.updateFreq) {
+    if (!stuff.flushFreq || !stuff.defaultManager || !stuff.defaultIntensity || !stuff.favEditor || !stuff.updateFreq) {
         const newStuff: CF_FKNODE_SETTINGS = {
             flushFreq: stuff.flushFreq ?? DEFAULT_SETTINGS.flushFreq,
             updateFreq: stuff.updateFreq ?? DEFAULT_SETTINGS.updateFreq,
             favEditor: stuff.favEditor ?? DEFAULT_SETTINGS.favEditor,
             defaultIntensity: stuff.defaultIntensity ?? DEFAULT_SETTINGS.defaultIntensity,
+            defaultManager: stuff.defaultManager ?? DEFAULT_SETTINGS.defaultManager,
         };
         Deno.writeTextFileSync(path, StringifyYaml(newStuff));
         return newStuff;
@@ -198,7 +199,7 @@ export function ChangeSetting(
             settingsPath,
             StringifyYaml(newSettings),
         );
-    } else {
+    } else if (setting === "flushFreq") {
         const newValue = Math.ceil(Number(value));
         if (typeof newValue !== "number" || isNaN(newValue) || newValue <= 0) {
             LogStuff(`${value} is not valid. Enter a valid number greater than 0.`);
@@ -207,6 +208,26 @@ export function ChangeSetting(
         const newSettings: CF_FKNODE_SETTINGS = {
             ...currentSettings,
             flushFreq: newValue,
+        };
+        Deno.writeTextFileSync(
+            settingsPath,
+            StringifyYaml(newSettings),
+        );
+    } else {
+        if (!StringUtils.validateAgainst(value, ["npm", "pnpm", "yarn", "bun", "deno", "cargo", "go"])) {
+            LogStuff(`${value} is not valid. Enter a valid package manager (npm, pnpm, yarn, bun, deno, cargo, go).`);
+            return;
+        }
+        if (["cargo", "go"].includes(value)) {
+            if (
+                !Interrogate(
+                    `Are you sure? ${value} is a non-JS runtime and ${APP_NAME.CASED} is mainly a JS-related CLI; you'll be using JS projects more often.`,
+                )
+            ) return;
+        }
+        const newSettings: CF_FKNODE_SETTINGS = {
+            ...currentSettings,
+            defaultManager: value,
         };
         Deno.writeTextFileSync(
             settingsPath,

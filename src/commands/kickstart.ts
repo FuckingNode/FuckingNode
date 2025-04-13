@@ -9,6 +9,7 @@ import { NameLockfile, ResolveLockfiles } from "./toolkit/cleaner.ts";
 import type { MANAGER_GLOBAL } from "../types/platform.ts";
 import { LaunchUserIDE } from "../functions/user.ts";
 import { FknError } from "../functions/error.ts";
+import { GetUserSettings } from "../functions/config.ts";
 
 export default function TheKickstarter(params: TheKickstarterConstructedParams) {
     const { gitUrl, path, manager } = params;
@@ -93,15 +94,12 @@ export default function TheKickstarter(params: TheKickstarterConstructedParams) 
     const env = GetProjectEnvironment(Deno.cwd());
 
     const initialManager = StringUtils.validateAgainst(manager, ["npm", "pnpm", "yarn", "deno", "bun"]) ? manager : env.manager;
-    // if pnpm exists, prefer that over npm for fallback
-    // TODO: make this into a user setting
-    const fallbackNodeManager: "pnpm" | "npm" | null = CommandExists("pnpm") ? "pnpm" : CommandExists("npm") ? "npm" : null;
 
-    const managerToUse: MANAGER_GLOBAL | null = CommandExists(initialManager)
+    const managerToUse: MANAGER_GLOBAL = CommandExists(initialManager)
         ? initialManager
         : CommandExists(env.manager)
         ? env.manager
-        : fallbackNodeManager;
+        : GetUserSettings().defaultManager;
 
     if (!managerToUse) {
         throw new FknError(
@@ -121,9 +119,7 @@ export default function TheKickstarter(params: TheKickstarterConstructedParams) 
         FkNodeInterop.Installers.Golang(Deno.cwd());
     } else if (managerToUse === "cargo") {
         FkNodeInterop.Installers.Cargo(Deno.cwd());
-    } else if (
-        StringUtils.validateAgainst(managerToUse, ["bun", "deno", "npm", "pnpm", "yarn"])
-    ) {
+    } else {
         FkNodeInterop.Installers.UniJs(Deno.cwd(), managerToUse);
     }
 
