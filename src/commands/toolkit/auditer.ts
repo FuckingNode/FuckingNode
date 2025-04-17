@@ -1,8 +1,8 @@
 /**
- * @file audit-v4.ts
+ * @file auditer.ts
  * @author ZakaHaceCosas
  *
- * This file contains the new, JSON-based, npm / pnpm / yarn compatible audit module.
+ * This file contains the npm / pnpm / yarn compatible audit module (V4).
  *
  * (send help)
  */
@@ -15,6 +15,7 @@ import { GetProjectEnvironment, NameProject, SpotProject } from "../../functions
 import { Commander } from "../../functions/cli.ts";
 import { APP_NAME, I_LIKE_JS } from "../../constants.ts";
 import { DEBUG_LOG } from "../../functions/error.ts";
+import { VULNERABILITY_VECTORS } from "./vectors.ts";
 
 /**
  * **NPM report.** This interface only types properties of our interest.
@@ -23,18 +24,12 @@ interface NPM_REPORT {
     vulnerabilities: Record<
         string,
         {
-            name: string;
             severity: "low" | "moderate" | "high" | "critical";
-            isDirect: boolean;
             via: {
                 name: string;
                 url: `https://github.com/advisories/GHSA-${string}`;
             }[];
-            /** (shouldn't this be "affects"? npm is built differently, i guess) */
-            effects: string[];
             fixAvailable: {
-                name: string;
-                version: string;
                 /** true = breaking changes */
                 isSemVerMajor: boolean;
             };
@@ -77,13 +72,8 @@ interface PNPM_REPORT {
 type YARN_STUPID_REPORT = {
     type: "auditAdvisory";
     data: {
-        resolution: {
-            path: string;
-            dev: boolean;
-        };
         advisory: {
             overview: string;
-            module_name: string;
             title: string;
             severity: "low" | "moderate" | "high" | "critical";
             vulnerable_versions: string;
@@ -92,62 +82,6 @@ type YARN_STUPID_REPORT = {
         };
     };
 }[];
-
-/** Vulnerability vector keywords.
- *
- * - TODO: Extract to somewhere else
- * - TODO 2: Add more vectors
- * - (implicit) TODO 3: add more questions
- */
-const VULNERABILITY_VECTORS = {
-    NETWORK: [
-        "http",
-        "https",
-        "proxy",
-        "redirect",
-        "fetch",
-        "request",
-        "xhr",
-        "XMLHttpRequest",
-        "ws",
-        "WebSocket",
-        "api",
-        "origin",
-        "csrf",
-        "Cross-Site Request Forgery",
-        "samesite",
-        "referer",
-        "url",
-        "headers",
-        "get",
-        "post",
-        "put",
-        "delete",
-        "content-type",
-        "cors",
-        "Cross-Origin Resource Sharing",
-        "exfiltration",
-    ],
-    COOKIES: [
-        "cookie",
-        "session",
-        "set-cookie",
-        "secure",
-        "httponly",
-        "samesite",
-        "storage",
-        "cache",
-        "persistence",
-        "expiration",
-        "csrf",
-        "auth-cookie",
-        "token-cookie",
-    ],
-    CONSOLE: [
-        "console",
-        "terminal",
-    ],
-};
 
 type SV_KEYWORDS = { summary: string; overview: string };
 
@@ -158,7 +92,6 @@ type SV_KEYWORDS = { summary: string; overview: string };
  */
 function AnalyzeSecurityVectorKeywords(svKeywords: SV_KEYWORDS[]): string[] {
     const questions: Set<string> = new Set<string>();
-    const vectors: Set<string> = new Set<string>();
 
     function includes(target: string, substrings: string[]): boolean {
         return substrings.some((substring) => target.includes(StringUtils.normalize(substring)));
@@ -173,23 +106,44 @@ function AnalyzeSecurityVectorKeywords(svKeywords: SV_KEYWORDS[]): string[] {
     for (const keywordPair of svKeywords) {
         if (has(keywordPair, VULNERABILITY_VECTORS.NETWORK)) {
             questions.add(
-                "Does your app make HTTP requests and/or depend on networking in any way? [V:NTW]",
+                "Does your project make HTTP requests and/or depend on networking in any way? [V:NTW]",
             );
-            vectors.add("network");
         }
 
         if (has(keywordPair, VULNERABILITY_VECTORS.COOKIES)) {
             questions.add(
-                "Does your app make use of browser cookies? [V:CKS]",
+                "Does your project make use of browser cookies? [V:CKS]",
             );
-            vectors.add("cookie");
         }
 
         if (has(keywordPair, VULNERABILITY_VECTORS.CONSOLE)) {
             questions.add(
-                "Does your app allow access to any custom method via the JavaScript console? [V:JSC]",
+                "Does your project allow access to any custom method via the JavaScript console? [V:JSC]",
             );
-            vectors.add("console");
+        }
+
+        if (has(keywordPair, VULNERABILITY_VECTORS.INJECTION)) {
+            questions.add(
+                "Does your project make usage of any database system? [V:INJ]",
+            );
+        }
+
+        if (has(keywordPair, VULNERABILITY_VECTORS.AUTHENTICATION)) {
+            questions.add(
+                "Does your project handle user authentication or session management? [V:ATH [SV:AUTH]]",
+            );
+        }
+
+        if (has(keywordPair, VULNERABILITY_VECTORS.PRIVILEGES)) {
+            questions.add(
+                "Does your project handle user authentication or session management? [V:ATH [SV:PRIV]]",
+            );
+        }
+
+        if (has(keywordPair, VULNERABILITY_VECTORS.FILES)) {
+            questions.add(
+                "Does your project allow file uploads or manage files in any way? [V:FLE]",
+            );
         }
     }
 
@@ -363,6 +317,7 @@ export function InterrogateVulnerableProject(questions: string[]): Omit<
 
     const isTrue = (s: InterrogatoryResponse): boolean => StringUtils.validateAgainst(s, ["true+2", "true+1"]);
 
+    // TODO - add detailed questions for new vectors
     for (const question of questions) {
         const response = handleQuestion({ q: question, f: false, r: true, w: 1 });
 
@@ -535,15 +490,6 @@ export function AuditProject(bareReport: ParsedNodeReport): FkNodeSecurityAudit 
 
     DEBUG_LOG("RF", percentage, "N", negatives, "P", positives, "SB", severityBump, "SDB", severityDeBump);
 
-    // neg += riskBump;
-    // LEGACY IMPLEMENTATIONS
-    // const classicPercentage = (positives + negatives) > 0 ? (positives / (positives + negatives)) * 100 : 0;
-
-    // const revampedStrictPercentage = (classicPercentage + (severityBump * 100)) / 2;
-
-    // ATTEMPTS OF IMPROVEMENT THAT NEVER WORKED OUT :(
-    // const tweakedPercentage = (neg === 0) ? 0 : Math.abs(((pos + riskBump) / (pos + neg)) * 100);
-    // const strictPercentage = Math.abs(pos - neg) !== 0 ? ((pos / (pos + neg)) + (riskBump / (riskBump + neg - pos))) * 100 : 0;
     DisplayAudit(percentage);
     return {
         negatives,
@@ -601,9 +547,7 @@ export function PerformAuditing(project: string): FkNodeSecurityAudit | 0 | 1 {
         return 1;
     }
 
-    const bareReport = ParseNodeReport(res.stdout, env.manager);
-
-    const audit = AuditProject(bareReport);
+    const audit = AuditProject(ParseNodeReport(res.stdout, env.manager));
 
     Deno.chdir(current);
 
