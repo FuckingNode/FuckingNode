@@ -12,6 +12,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Added more vectors & questions to `audit`.
 
+### Changed
+
+- Now the `setup` command respects earlier indent size on `tsconfig.json` and `.prettierrc` files.
+
 ## [3.3.0] (13-04-2025)
 
 ### Added
