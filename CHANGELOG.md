@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- Fixed a situation where projects _might_ not get added (not awaiting an async function).
 - Fixed the "not fully supported" warning not showing up for Golang and Rust.
 
 ## [3.3.0] (13-04-2025)

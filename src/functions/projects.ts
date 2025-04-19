@@ -71,8 +71,8 @@ export function AddProject(
 
     if (!CheckForPath(workingEntry)) throw new FknError("Generic__NonExistingPath", `Path "${workingEntry}" doesn't exist.`);
 
-    async function addTheEntry(name: string) {
-        await Deno.writeTextFile(GetAppPath("MOTHERFKRS"), `${workingEntry}\n`, {
+    function addTheEntry(name: string) {
+        Deno.writeTextFileSync(GetAppPath("MOTHERFKRS"), `${workingEntry}\n`, {
             append: true,
         });
         LogStuff(
