@@ -26,7 +26,7 @@ Deno.test({
             assertEquals(out, { success: true, stdout: "hi\r\n\n" });
         } else {
             const out = Commander("echo", ["hi"], false);
-            assertEquals(out, { success: true, stdout: "hi\r\n\n" });
+            assertEquals(out, { success: true, stdout: "hi\n\n" });
         }
     },
 });

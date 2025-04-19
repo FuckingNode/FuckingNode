@@ -11,13 +11,12 @@ Deno.test({
         assertEquals(
             Git.GetBranches(here),
             {
-                current: "v3",
+                current: "master",
+                // update if we add more branches
+                // apparently git clone only clones the branch you're going to use
                 all: [
-                    "v3",
-                    "v2",
                     "master",
-                    "feature-audit",
-                ].sort(),
+                ],
             },
         );
     },

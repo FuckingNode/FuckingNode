@@ -9,7 +9,7 @@ Deno.test({
     name: "interop layer manages cargo pkg file",
     fn: () => {
         const commonPkgFile = FkNodeInterop.PackageFileParsers.Cargo.CPF(
-            Deno.readTextFileSync(JoinPaths(CONSTANTS.INTEROP_PATH, "Cargo.toml")),
+            Deno.readTextFileSync(JoinPaths(CONSTANTS.INTEROP_PATH, "cargo.toml")),
             [],
         );
 
@@ -52,7 +52,7 @@ Deno.test({
                 name: "vuelto.pp.ua",
                 version: "v1.1.0",
                 rm: "golang",
-                perPlatProps: { cargo_edt: undefined },
+                perPlatProps: { cargo_edt: "__NTP" },
                 deps: [
                     {
                         name: "github.com/faiface/beep",
@@ -131,7 +131,7 @@ Deno.test({
                 name: "test",
                 version: "0.59.123",
                 rm: "pnpm",
-                perPlatProps: { cargo_edt: undefined },
+                perPlatProps: { cargo_edt: "__NTP" },
                 deps: [
                     {
                         name: "eslint",
@@ -173,7 +173,7 @@ Deno.test({
                 name: "@zakahacecosas/string-utils",
                 version: "1.7.0",
                 rm: "deno",
-                perPlatProps: { cargo_edt: undefined },
+                perPlatProps: { cargo_edt: "__NTP" },
                 deps: [
                     {
                         name: "@std/fs",
@@ -194,7 +194,7 @@ const PKGGEN_TEST_FNCPF: FnCPF = {
     version: "0.59.123",
     rm: "npm",
     perPlatProps: {
-        cargo_edt: undefined,
+        cargo_edt: "__NTP",
     },
     deps: [
         {

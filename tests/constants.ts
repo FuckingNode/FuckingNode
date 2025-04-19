@@ -14,7 +14,7 @@ const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
     ONE: {
         root: ParsePath(`${CONSTANTS.ENV_PATH}/test-one`),
         settings: DEFAULT_FKNODE_YAML,
-        runtimeColor: "green",
+        runtimeColor: "bright-green",
         main: {
             path: ParsePath(`${CONSTANTS.ENV_PATH}/test-one/package.json`),
             name: "package.json",
@@ -23,7 +23,7 @@ const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
                 name: "uwu.js",
                 version: "1.0.0",
                 rm: "npm",
-                perPlatProps: { cargo_edt: undefined },
+                perPlatProps: { cargo_edt: "__NTP" },
                 deps: [
                     {
                         name: "tslib",
