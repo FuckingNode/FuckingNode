@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added Git aliases to `fkstart`. For example, `fkstart gh:ZakaHaceCosas/dev-utils` will translate into `https://github.com/ZakaHaceCosas/dev-utils.git`. More than 10 Git providers are supported, run `compat kickstart` to see them all.
+- Added missing `compat launch` command, listing launch-able IDEs.
 - Added more vectors & questions to `audit`.
 
 ### Changed
@@ -20,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Fixed a situation where projects _might_ not get added (not awaiting an async function).
 - Fixed the "not fully supported" warning not showing up for Golang and Rust.
+- Fixed a lot of issues with Git URL parsing from the `fkstart` command.
 
 ## [3.3.0] (13-04-2025)
 

@@ -20,6 +20,7 @@ const featureCompatibility = [
     { Feature: "Surrender", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
     { Feature: "Setup", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
     { Feature: "Audit", NodeJS: labels.y, Deno: labels.n, Bun: labels.n, Go: labels.n, Cargo: labels.n },
+    { Feature: "Launch", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
 ];
 
 const advancedFeatureCompatibility = [
@@ -30,6 +31,10 @@ const advancedFeatureCompatibility = [
 ];
 
 const kickstartCompatibility = [
+    { NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
+];
+
+const launchCompatibility = [
     { NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
 ];
 
@@ -59,7 +64,9 @@ const migrateCompatibility = [
 function overallSupport() {
     LogStuff("OVERALL SUPPORT ---");
     LogStuff(StringUtils.table(featureCompatibility));
-    LogStuff("For specific compatibility details, run 'compat' followed by any of these: cleaner, kickstart, release, migrate, commit, audit.");
+    LogStuff(
+        "For specific compatibility details, run 'compat' followed by any of these: cleaner, kickstart, release, migrate, commit, audit, launch.",
+    );
     return;
 }
 
@@ -67,7 +74,7 @@ export default function TheCompater(params: TheCompaterConstructedParams) {
     LogStuff(
         `${
             ColorString("This table shows feature compatibility across environments.", "bold")
-        }\nMore details available at ${APP_URLs.WEBSITE}manual/cross-runtime`,
+        }\nMore details available at ${APP_URLs.WEBSITE}crossruntime`,
         "bulb",
     );
 
@@ -86,8 +93,21 @@ export default function TheCompater(params: TheCompaterConstructedParams) {
             LogStuff("KICKSTART FEATURE SUPPORT ---");
             LogStuff(StringUtils.table(kickstartCompatibility));
             // IDEs too, this is simple so i ain't extracting to a constant
+            LogStuff(`Supported IDEs: ${["VSCode", "VSCodium", "Notepad++", "Sublime", "Emacs", "Atom"].join(", ")}`);
+            // git clients too, this is simple too so i ain't extracting to a constant
+            LogStuff("Supported Git client aliases:");
             LogStuff(StringUtils.table([
-                { "Supported IDEs": ["VSCode", "VSCodium", "Notepad++", "Sublime", "Emacs", "Atom"] },
+                { "Alias": "gh", "Points to": "GitHub", "That means": "github.com/USER/REPO" },
+                { "Alias": "gl", "Points to": "GitLab", "That means": "gitlab.com/USER/REPO" },
+                { "Alias": "bb", "Points to": "Bitbucket", "That means": "bitbucket.org/USER/REPO" },
+                { "Alias": "git", "Points to": "Custom Git", "That means": "git.example.com/USER/REPO" },
+                { "Alias": "sr", "Points to": "SourceForge", "That means": "sourceforge.net/p/USER/REPO" },
+                { "Alias": "bbp", "Points to": "Bitbucket Pipelines", "That means": "bitbucket.org/USER/REPO/pipelines" },
+                { "Alias": "gist", "Points to": "GitHub Gist", "That means": "gist.github.com/USER/REPO" },
+                { "Alias": "gb", "Points to": "Codeberg", "That means": "codeberg.org/USER/REPO" },
+                { "Alias": "gt", "Points to": "Gitee", "That means": "gitee.com/USER/REPO" },
+                { "Alias": "fg", "Points to": "Framagit", "That means": "framagit.org/USER/REPO" },
+                { "Alias": "op", "Points to": "OpenPrivacy Git", "That means": "git.openprivacy.ca/USER/REPO" },
             ]));
             return;
         case "commit":
@@ -105,6 +125,12 @@ export default function TheCompater(params: TheCompaterConstructedParams) {
         case "audit":
             LogStuff("AUDIT FEATURE SUPPORT ---");
             LogStuff(StringUtils.table(auditCompatibility));
+            return;
+        case "launch":
+            LogStuff("LAUNCH FEATURE SUPPORT ---");
+            LogStuff(StringUtils.table(launchCompatibility));
+            // IDEs too, this is simple so i ain't extracting to a constant
+            LogStuff(`Supported IDEs: ${["VSCode", "VSCodium", "Notepad++", "Sublime", "Emacs", "Atom"].join(", ")}`);
             return;
         default:
             overallSupport();

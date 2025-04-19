@@ -10,33 +10,12 @@ import type { MANAGER_GLOBAL } from "../types/platform.ts";
 import { LaunchUserIDE } from "../functions/user.ts";
 import { FknError } from "../functions/error.ts";
 import { GetUserSettings } from "../functions/config.ts";
+import { GenerateGitUrl } from "./toolkit/git-url.ts";
 
 export default function TheKickstarter(params: TheKickstarterConstructedParams) {
     const { gitUrl, path, manager } = params;
 
-    if (!StringUtils.validate(gitUrl)) throw new Error("Git URL is required!");
-
-    const gitUrlRegex = /^(https?:\/\/.*?\/)([^\/]+)(?:\.git)?$/;
-    const regexMatch = gitUrl.match(gitUrlRegex);
-    if (!regexMatch || !regexMatch[2]) throw new Error(`${gitUrl} is not a valid Git URL!`);
-    const userForgotDotGit = gitUrl.endsWith(regexMatch[2]) && regexMatch[2].split(".").length === 1;
-
-    if (userForgotDotGit) {
-        LogStuff(
-            "Psst... You forgot '.git' at the end. No worries, we can still read it.",
-            "bruh",
-            "italic",
-        );
-    }
-
-    const workingGitUrl = userForgotDotGit ? gitUrl + ".git" : gitUrl;
-
-    const strictGitUrlRegex = /^(https?:\/\/.*?\/)([^\/]+)\.git$/;
-
-    if (!strictGitUrlRegex.test(workingGitUrl)) throw new Error(`${gitUrl} is not a valid Git URL!`);
-
-    const projectName = regexMatch[2];
-    if (!projectName) throw new Error(`RegEx Error: Can't spot the project name in ${workingGitUrl}`);
+    const { full: repoUrl, name: projectName } = GenerateGitUrl(gitUrl);
 
     const cwd = Deno.cwd();
     const clonePath: string = ParsePath(StringUtils.validate(path) ? path : JoinPaths(cwd, projectName));
@@ -50,9 +29,9 @@ export default function TheKickstarter(params: TheKickstarterConstructedParams) 
     }
 
     LogStuff("Let's begin! Wait a moment please...", "tick-clear", ["bright-green", "bold"]);
-    LogStuff(`Cloning from ${workingGitUrl}`);
+    LogStuff(`Cloning from ${repoUrl}`);
 
-    const gitOutput = Commander("git", ["clone", workingGitUrl, clonePath], true);
+    const gitOutput = Commander("git", ["clone", repoUrl, clonePath], true);
     if (!gitOutput.success) throw new Error(`Error cloning repository: ${gitOutput.stdout}`);
 
     Deno.chdir(clonePath);
