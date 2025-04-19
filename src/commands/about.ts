@@ -43,8 +43,7 @@ const coolStrings = {
 
 export default function TheAbouter() {
     LogStuff(colorizeText(ASCII));
-    console.log("-".repeat(30));
-    LogStuff(`${ColorString(VERSION, "bright-yellow")} · ${getRandomPhrase()}\n`);
+    LogStuff(`${"-".repeat(30)}\n${ColorString(VERSION, "bright-yellow")} · ${getRandomPhrase()}\n`);
     LogStuff(
         `Written in ${coolStrings.ts}. Running in ${coolStrings.deno}.\nDeveloped in ${coolStrings.spain} by ${coolStrings.zakaOne} (${coolStrings.zakaTwo} in spanish).\n`,
     );

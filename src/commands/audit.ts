@@ -37,25 +37,22 @@ export default function TheAuditer(params: TheAuditerConstructedParams) {
             const string = `${name} # ${ColorString(`${item.audit.percentage.toFixed(2)}%`, "bold")} risk factor`;
             return string;
         });
-        console.log("");
-        if (reportDetails.length > 0) {
-            LogStuff(
-                `Report\n${reportDetails.join("\n")}`,
-                "chart",
-            );
-        } else {
-            LogStuff("Not a single project has security issues. Great!\n", "tick");
+        if (reportDetails.length === 0) {
+            LogStuff("Not a single project has security issues. Great!", "tick-clear");
+            return;
         }
+        LogStuff(
+            `Report\n${reportDetails.join("\n")}`,
+            "chart",
+        );
     } else {
         PerformAuditing(project);
     }
 
     LogStuff("Audit complete!", "tick-clear");
     LogStuff(
-        ColorString(
-            "Keep in mind our report simply can't be 100% accurate - the best option is always to fix vulnerabilities.",
-            "italic",
-        ),
+        "Keep in mind our report simply can't be 100% accurate - the best option is always to fix vulnerabilities.",
         "heads-up",
+        "italic",
     );
 }

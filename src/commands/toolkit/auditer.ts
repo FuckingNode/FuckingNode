@@ -443,7 +443,6 @@ function DisplayAudit(percentage: number): void {
             ColorString("Please, fix this issue.", "bold")
         }`;
     }
-    console.log("");
     const percentageString = ColorString(
         `${percentage.toFixed(2)}%`,
         color,
@@ -470,12 +469,10 @@ export function AuditProject(bareReport: ParsedNodeReport): FkNodeSecurityAudit 
     LogStuff(
         `\n===        FOUND VULNERABILITIES (${totalAdvisories.toString().padStart(3, "0")})        ===\n${
             ColorString(advisories.join(" & "), "bold")
-        }\n===    STARTING ${APP_NAME.STYLED} SECURITY AUDIT    ===`,
+        }\n===    STARTING ${APP_NAME.STYLED} SECURITY AUDIT    ===\n`,
     );
 
-    console.log("");
-    LogStuff("Please answer these questions. We'll use your responses to evaluate this vulnerability:", "bulb");
-    console.log("");
+    LogStuff("Please answer these questions. We'll use your responses to evaluate this vulnerability:\n", "bulb");
 
     const audit = InterrogateVulnerableProject(questions);
     const { negatives, positives } = audit;

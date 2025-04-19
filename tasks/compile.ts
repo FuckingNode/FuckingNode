@@ -12,8 +12,6 @@ try {
 
 Deno.mkdir("./dist/");
 
-console.debug(Deno.cwd());
-
 const TARGETS: Record<
     "win64" | "darwinArm" | "linuxArm" | "darwin64" | "linux64",
     [string, string]
@@ -77,7 +75,6 @@ const ALL_COMMANDS = Object.entries(TARGETS).map(([key, [target, output]]) => {
 
 // first
 for (const CMD of ALL_COMMANDS) {
-    console.log("Compile for", CMD.target);
     CMD.compileCmd.outputSync();
 }
 
@@ -93,11 +90,10 @@ const hashes: Record<
     win64_sha: "",
 };
 for (const CMD of ALL_COMMANDS) {
-    console.log("Hash for", CMD.target);
     const hashing = CMD.hashCmd.outputSync();
     const hash = new TextDecoder().decode(hashing.stdout).trim();
     hashes[CMD.target] = hash;
-    console.log(CMD.target, ":", hash);
+    console.log(CMD.target, "HASH", hash);
     Deno.writeTextFileSync("konbini.hash.yaml", stringifyYaml(hashes));
 }
 
