@@ -4,7 +4,7 @@
     <img src="https://raw.githubusercontent.com/FuckingNode/fuckingnode.github.io/refs/heads/main/docs/fkn_logo_light.png" alt="FuckingNode Logo" height=150>
     </a>
 </p>
-<h1 align="center">The f*cking chaos of maintaining JavaScript projects ends here</h1>
+<h1 align="center">The f*cking chaos of maintaining<br/>JavaScript projects ends here</h1>
 <h3 align="center">Because dev life is messy enough</h3>
 
 <div align="center">
@@ -25,11 +25,9 @@
 
 ## What is FuckingNode?
 
-We can't fix your bugs, but we can automate most headache-giving tasks across all of your NodeJS/Deno/Bun projects and give you a set of tools to make JS development great again.
-
-DenoJS, BunJS, and even Golang and Rust are also (partially) supported (_see [Cross-runtime support](https://fuckingnode.github.io/cross-platform/) for more info._).
-
 **FuckingNode is a CLI tool** (not a CLI-ish npm package) that automates and simplifies **cleaning**, **linting**, and **prettifying** JS or TS projects, **releasing** npm / jsr **packages**, **destroying generated artifacts & caches**, <!-- **understanding security audits**, --> and also gives you additional tools for better Git committing, project cloning, and more.
+
+We may not be able to fix your bugs, but we are able to automate most headache-giving tasks across all of your NodeJS projects and give you a set of tools to make JS development great again. DenoJS, BunJS, and even Golang and Rust are also (partially) supported (_see [Cross-runtime support](https://fuckingnode.github.io/cross-platform/) for more info._).
 
 It's not magic, it's FuckingNode—and that name is shipping to production.
 
@@ -41,10 +39,14 @@ fkn clean                 # autoclean all of your projects
 fkn clean < project >     # autoclean a specific project
 fkn release < project >   # release a project, automatically
 fkn commit < message >    # make a commit, safely
-fkn kickstart < git-url > # clones a repo, installs deps, and launches your fav editor instantly
+fkn kickstart < git-url > # clones it, installs deps, and launches your IDE
+fkn launch < project >    # runs "npm run dev" and opens your IDE
+# more commands exist!
 ```
 
-`fkn` and `fknode` aliases are auto-added when downloading via an `.sh` or `.ps1` installer. The standard command is `fuckingnode`, though.
+`fkn` and `fknode` aliases are auto-added when downloading via an `.sh` or `.ps1` installer. The standard command is `fuckingnode`, though. Command-specific aliases like `fkclean`, `fkadd`, `fkstart`, etc... do exist.
+
+Refer to our [documentation](https://fuckingnode.github.io/) to learn about our motivation, all our features, and more.
 
 ---
 
@@ -100,6 +102,9 @@ You can now either:
 ## Updates
 
 We auto-check for updates once every few days to tell you about new versions, and have an `upgrade` command so you can update the CLI whenever you want.
+
+> [!NOTE]
+> If it does not work, just run the install script you used for installation, your data will be preserved. Sometimes, self-updating from the executable itself tends to fail.
 
 ## Documentation
 
