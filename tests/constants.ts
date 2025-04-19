@@ -18,7 +18,7 @@ const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
         main: {
             path: ParsePath(`${CONSTANTS.ENV_PATH}/test-one/package.json`),
             name: "package.json",
-            stdContent: JSON.parse(await Deno.readTextFile(ParsePath(`${CONSTANTS.ENV_PATH}/test-one/package.json`))),
+            stdContent: JSON.parse(Deno.readTextFileSync(ParsePath(`${CONSTANTS.ENV_PATH}/test-one/package.json`))),
             cpfContent: {
                 name: "uwu.js",
                 version: "1.0.0",

@@ -65,7 +65,6 @@ export function Commander(
 
     const result: CommanderOutput = {
         success: process.code === 0,
-        // (doesn't work) stdout: `${new TextDecoder().decode((await process.output()).stdout)}\n${new TextDecoder().decode((await process.output()).stdout)}`,
     };
 
     return result;

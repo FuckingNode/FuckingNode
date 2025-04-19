@@ -7,9 +7,9 @@ import type { FnCPF } from "../src/types/platform.ts";
 
 Deno.test({
     name: "interop layer manages cargo pkg file",
-    fn: async () => {
+    fn: () => {
         const commonPkgFile = FkNodeInterop.PackageFileParsers.Cargo.CPF(
-            await Deno.readTextFile(JoinPaths(CONSTANTS.INTEROP_PATH, "Cargo.toml")),
+            Deno.readTextFileSync(JoinPaths(CONSTANTS.INTEROP_PATH, "Cargo.toml")),
             [],
         );
 
@@ -39,9 +39,9 @@ Deno.test({
 
 Deno.test({
     name: "interop layer manages golang pkg file",
-    fn: async () => {
+    fn: () => {
         const commonPkgFile = FkNodeInterop.PackageFileParsers.Golang.CPF(
-            await Deno.readTextFile(JoinPaths(CONSTANTS.INTEROP_PATH, "go.mod")),
+            Deno.readTextFileSync(JoinPaths(CONSTANTS.INTEROP_PATH, "go.mod")),
             "v1.1.0",
             [],
         );
@@ -118,9 +118,9 @@ Deno.test({
 
 Deno.test({
     name: "interop layer manages node/bun CPF",
-    fn: async () => {
+    fn: () => {
         const commonPkgFile = FkNodeInterop.PackageFileParsers.NodeBun.CPF(
-            await Deno.readTextFile(JoinPaths(CONSTANTS.INTEROP_PATH, "package.json")),
+            Deno.readTextFileSync(JoinPaths(CONSTANTS.INTEROP_PATH, "package.json")),
             "pnpm",
             [],
         );
@@ -161,9 +161,9 @@ Deno.test({
 
 Deno.test({
     name: "interop layer manages deno CPF",
-    fn: async () => {
+    fn: () => {
         const commonPkgFile = FkNodeInterop.PackageFileParsers.Deno.CPF(
-            await Deno.readTextFile(JoinPaths(CONSTANTS.INTEROP_PATH, "_deno.json")),
+            Deno.readTextFileSync(JoinPaths(CONSTANTS.INTEROP_PATH, "_deno.json")),
             [],
         );
 

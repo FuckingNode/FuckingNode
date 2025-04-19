@@ -13,10 +13,10 @@ const expected: ParsedNodeReport = {
 
 Deno.test({
     name: "pnpm audit works",
-    fn: async () => {
+    fn: () => {
         assertEquals(
             ParseNodeReport(
-                await Deno.readTextFile(
+                Deno.readTextFileSync(
                     JoinPaths(Deno.cwd(), "tests/environment/test-three/audits/audit-pnpm.txt"),
                 ),
                 "pnpm",
@@ -28,10 +28,10 @@ Deno.test({
 
 Deno.test({
     name: "npm audit works",
-    fn: async () => {
+    fn: () => {
         assertEquals(
             ParseNodeReport(
-                await Deno.readTextFile(
+                Deno.readTextFileSync(
                     JoinPaths(Deno.cwd(), "tests/environment/test-three/audits/audit-npm.txt"),
                 ),
                 "npm",
@@ -43,10 +43,10 @@ Deno.test({
 
 Deno.test({
     name: "yarn audit works",
-    fn: async () => {
+    fn: () => {
         assertEquals(
             ParseNodeReport(
-                await Deno.readTextFile(
+                Deno.readTextFileSync(
                     JoinPaths(Deno.cwd(), "tests/environment/test-three/audits/audit-yarn.txt"),
                 ),
                 "yarn",

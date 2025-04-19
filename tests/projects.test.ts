@@ -16,15 +16,15 @@ Deno.test({
 Deno.test({
     name: "returns all projects",
     fn: () => {
-        const originalReadTextFile = Deno.readTextFile;
+        const originalReadTextFileSync = Deno.readTextFileSync;
         // mock readTextFile
-        Deno.readTextFile = mocks.readTextFile();
+        Deno.readTextFileSync = mocks.readTextFileSync();
 
         const projects = GetAllProjects();
         assertEquals(projects, [TEST_ONE.root]);
 
         // Restore the original method
-        Deno.readTextFile = originalReadTextFile;
+        Deno.readTextFileSync = originalReadTextFileSync;
     },
 });
 
