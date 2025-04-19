@@ -314,14 +314,18 @@ async function main(command: string) {
     Deno.exit(0);
 }
 
-try {
-    if (!StringUtils.validate(flags[0])) {
-        await init();
-        TheHelper({});
-        Deno.exit(0);
-    }
+// I SWEAR - THE FACT THAT THIS IF WAS MISSING MADE ALL THE TEST SUITE NOT WORK LMFAO
+// javascript is definitely... something
+if (import.meta.main) {
+    try {
+        if (!StringUtils.validate(flags[0])) {
+            await init();
+            TheHelper({});
+            Deno.exit(0);
+        }
 
-    await main(flags[0]);
-} catch (e) {
-    GenericErrorHandler(e);
+        await main(flags[0]);
+    } catch (e) {
+        GenericErrorHandler(e);
+    }
 }
