@@ -16,6 +16,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Now the `setup` command respects earlier indent size on `tsconfig.json` and `.prettierrc` files.
 
+### Fixed
+
+- Fixed the "not fully supported" warning not showing up for Golang and Rust.
+
 ## [3.3.0] (13-04-2025)
 
 ### Added

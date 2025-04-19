@@ -123,15 +123,15 @@ export function AddProject(
             LogStuff(
                 // says 'good choice' because it's the same runtime as F*ckingNode. its not a real opinion lmao
                 // idk whats better, deno or bun. i have both installed, i could try. one day, maybe.
-                `This project uses the Deno runtime (good choice btw). Keep in mind it's not *fully* supported *yet*.`,
+                `This project uses the Deno runtime (good choice btw). Keep in mind it's not fully supported.`,
                 "bruh",
                 "italic",
             );
         }
-        if (env.runtime === "bun") {
+        if (!StringUtils.validateAgainst(env.runtime, ["node", "deno"])) {
             LogStuff(
-                `This project uses the Bun runtime. Keep in mind it's not *fully* supported *yet*.`,
-                "what",
+                `This project uses the ${StringUtils.toUpperCaseFirst(env.runtime)} runtime. Keep in mind it's not fully supported.`,
+                "bruh",
                 "italic",
             );
         }
