@@ -81,12 +81,12 @@ export function LogStuff(
 
         // deno-lint-ignore no-control-regex
         const regex = /\x1b\[[0-9;]*[a-zA-Z]/g;
+        const plainMessage = finalMessage.replace(regex, "");
 
-        const formattedMessage = `${new Date().toLocaleString()} / ${finalMessage}\n`
-            .replace(regex, "")
-            .replace("\n\n", "\n"); // (fix for adding \n to messages that already have an \n for whatever reason)
+        const formattedMessage = `${new Date().toLocaleString()} / ${plainMessage}\n`
+            .replace(/\n{2,}/g, "\n"); // (fix for adding \n to messages that already have an \n for whatever reason)
 
-        if (verbose === undefined || verbose === true) {
+        if (verbose ?? true) {
             if (color) {
                 if (Array.isArray(color)) {
                     console.log(ColorString(finalMessage, ...color));
@@ -103,11 +103,8 @@ export function LogStuff(
             formattedMessage,
             { append: true },
         );
-
-        return;
     } catch (e) {
-        console.error(`Error logging stuff: ${e}`);
-        throw e;
+        throw `Error logging stuff: ${e}`;
     }
 }
 
