@@ -5,7 +5,6 @@ const gitAliases: Record<string, (arg: string) => string> = {
     gh: (repo: string) => `https://github.com/${repo}.git`,
     gl: (repo: string) => `https://gitlab.com/${repo}.git`,
     bb: (repo: string) => `https://bitbucket.org/${repo}.git`,
-    git: (repo: string) => `https://git.example.com/${repo}.git`,
     sr: (repo: string) => `https://sourceforge.net/p/${repo}.git`,
     bbp: (repo: string) => `https://bitbucket.org/${repo}/pipelines.git`,
     gist: (repo: string) => `https://gist.github.com/${repo}.git`,

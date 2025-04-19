@@ -100,7 +100,6 @@ export default function TheCompater(params: TheCompaterConstructedParams) {
                 { "Alias": "gh", "Points to": "GitHub", "That means": "github.com/USER/REPO" },
                 { "Alias": "gl", "Points to": "GitLab", "That means": "gitlab.com/USER/REPO" },
                 { "Alias": "bb", "Points to": "Bitbucket", "That means": "bitbucket.org/USER/REPO" },
-                { "Alias": "git", "Points to": "Custom Git", "That means": "git.example.com/USER/REPO" },
                 { "Alias": "sr", "Points to": "SourceForge", "That means": "sourceforge.net/p/USER/REPO" },
                 { "Alias": "bbp", "Points to": "Bitbucket Pipelines", "That means": "bitbucket.org/USER/REPO/pipelines" },
                 { "Alias": "gist", "Points to": "GitHub Gist", "That means": "gist.github.com/USER/REPO" },

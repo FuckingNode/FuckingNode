@@ -483,6 +483,8 @@ export function GetWorkspaces(path: string): string[] {
     try {
         const workspacePaths: string[] = [];
 
+        const parse = (s: string[]): string[] => s.filter((s: UnknownString) => StringUtils.validate(s)).map((s: string) => JoinPaths(path, s));
+
         // Check package.json for Node, npm, and yarn (and Bun workspaces).
         const packageJsonPath = JoinPaths(path, "package.json");
         if (CheckForPath(packageJsonPath)) {
@@ -524,10 +526,7 @@ export function GetWorkspaces(path: string): string[] {
                 ),
             );
             if (denoConfig.workspace && Array.isArray(denoConfig.workspace)) {
-                for (const member of denoConfig.workspace) {
-                    const memberPath = JoinPaths(path, member);
-                    workspacePaths.push(memberPath);
-                }
+                for (const member of denoConfig.workspace) workspacePaths.push(member);
             }
         }
 
@@ -535,25 +534,22 @@ export function GetWorkspaces(path: string): string[] {
         const cargoTomlPath = JoinPaths(path, "Cargo.toml");
         if (CheckForPath(cargoTomlPath)) {
             const cargoToml = parseToml(Deno.readTextFileSync(cargoTomlPath)) as unknown as CargoPkgFile;
-            if (cargoToml.workspace && Array.isArray(cargoToml.workspace.members)) {
-                workspacePaths.push(...cargoToml.workspace.members);
-            }
+            if (cargoToml.workspace && Array.isArray(cargoToml.workspace.members)) workspacePaths.push(...cargoToml.workspace.members);
         }
 
         // Check for Golang configuration (go.work)
         const goWorkPath = JoinPaths(path, "go.work");
         if (CheckForPath(goWorkPath)) {
             const goWork = internalGolangRequireLikeStringParser((Deno.readTextFileSync(goWorkPath)).split("\n"), "use");
-            if (goWork.length > 0) workspacePaths.push(...goWork.filter((s) => !["(", ")"].includes(StringUtils.normalize(s))));
+            if (goWork.length > 0) workspacePaths.push(...(goWork.filter((s) => !["(", ")"].includes(StringUtils.normalize(s)))));
         }
 
         if (workspacePaths.length === 0) return [];
 
         const absoluteWorkspaces: string[] = [];
 
-        for (const workspacePath of workspacePaths) {
-            // TODO - instead of this stupid fix, assert that everywhere we either pre-append the path or not
-            const fullPath = workspacePath.startsWith(path) ? workspacePath : JoinPaths(path, workspacePath);
+        for (const workspacePath of parse(workspacePaths)) {
+            const fullPath = workspacePath;
             if (!CheckForPath(fullPath)) continue;
             for (const dir of expandGlobSync(fullPath)) {
                 if (dir.isDirectory) {
