@@ -147,7 +147,7 @@ function AnalyzeSecurityVectorKeywords(svKeywords: SV_KEYWORDS[]): string[] {
         }
     }
 
-    return Array.from(questions);
+    return ((Array.from(questions)).sort());
 }
 
 /** quickly parse semver */
@@ -262,7 +262,7 @@ export function ParseNodeReport(jsonString: string, platform: MANAGER_NODE): Par
     const breaking = brokenDeps.includes(true);
 
     return {
-        advisories,
+        advisories: Array.from(new Set(advisories)).sort(),
         severity,
         breaking,
         questions,

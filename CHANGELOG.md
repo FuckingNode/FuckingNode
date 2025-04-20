@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Fixed a situation where projects _might_ not get added (not awaiting an async function).
 - Fixed the "not fully supported" warning not showing up for Golang and Rust.
 - Fixed a lot of issues with Git URL parsing from the `fkstart` command.
+- Fixed the GHSA advisory list in audit containing duplicate entries.
 
 ## [3.3.0] (13-04-2025)
 
