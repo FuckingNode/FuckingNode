@@ -11,7 +11,7 @@ jobs:
 
     strategy:
       matrix:
-        system: [x86_64-linux, aarch64-linux]
+        system: [x86_64-linux, aarch64-linux, x86_64-darwin, aarch64-darwin]
 
     steps:
       - uses: actions/checkout@v4

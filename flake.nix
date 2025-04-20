@@ -2,99 +2,84 @@
   description = "FuckingNode Package";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
-  outputs = { self, nixpkgs }:
+  outputs = { self, nixpkgs }: 
   let
-    linux_arm = "aarch64-linux";
-    linux_x86 = "x86_64-linux";
+    systems = [
+      "x86_64-linux"
+      "aarch64-linux"
+      "x86_64-darwin"
+      "aarch64-darwin"
+    ];
+
     pname = "fuckingnode";
     version = "3.3.0";
 
-    pkgs_arm = import nixpkgs {
-      system = linux_arm;
+    urls = {
+      "x86_64-linux"   = "https://github.com/FuckingNode/FuckingNode/releases/download/${version}/FuckingNode-linux64";
+      "aarch64-linux"  = "https://github.com/FuckingNode/FuckingNode/releases/download/${version}/FuckingNode-linux_arm";
+      "x86_64-darwin"  = "https://github.com/FuckingNode/FuckingNode/releases/download/${version}/FuckingNode-macos64";
+      "aarch64-darwin" = "https://github.com/FuckingNode/FuckingNode/releases/download/${version}/FuckingNode-macos_arm";
     };
 
-    pkgs_x86 = import nixpkgs {
-      system = linux_x86;
+
+    sha256s = {
+      "x86_64-linux"   = "01qxzfdjyp5g35vdm6yz5ig74b5gc4gnnpqwqrbsd94rmsy05bdz";
+      "aarch64-linux"  = "11hkq1gjcqqhawpnpdg8vmhyihsisj84c166h50xr7sxjjdy2r0g";
+      "x86_64-darwin"  = "0p2yjcbrlvzb812q6p7cj52zccshvba38pnyb0hzcrv8akpbarif";
+      "aarch64-darwin" = "0dr9n6yn7xbv06668cz74mc2yfzgxfvc23p89ilvz0lvi4qckwhq";
     };
+
+    buildPackage = system: 
+      let
+        pkgs = import nixpkgs { inherit system; };
+      in pkgs.stdenv.mkDerivation {
+        inherit pname version;
+
+        src = pkgs.fetchurl {
+          url = urls.${system};
+          sha256 = sha256s.${system};
+        };
+
+        phases = [ "installPhase" "fixupPhase" ];
+        nativeBuildInputs = [ pkgs.makeWrapper ];
+
+        installPhase = ''
+          mkdir -p $out/bin
+          cp $src $out/bin/fuckingnode
+        '';
+
+        fixupPhase = ''
+          chmod +x $out/bin/fuckingnode
+        '';
+
+        meta = {
+          description = "FuckingNode CLI tool";
+          homepage = "https://github.com/FuckingNode/FuckingNode";
+          license = pkgs.lib.licenses.mit;
+          platforms = [ system ];
+          mainProgram = "fuckingnode";
+        };
+      };
+
+    buildDevShell = system:
+      let pkgs = import nixpkgs { inherit system; };
+      in pkgs.mkShell {
+        buildInputs = [ pkgs.deno ];
+      };
 
   in {
-    packages = {
-      ${linux_x86} = {
-        default = pkgs_x86.stdenv.mkDerivation {
-          inherit pname version;
+    packages = builtins.listToAttrs (map (system: {
+      name = system;
+      value.default = buildPackage system;
+    }) systems);
 
-          src = pkgs_x86.fetchurl {
-            url = "https://github.com/FuckingNode/FuckingNode/releases/download/${version}/FuckingNode-linux64";
-            sha256 = "01qxzfdjyp5g35vdm6yz5ig74b5gc4gnnpqwqrbsd94rmsy05bdz";
-          };
-
-          phases = [ "installPhase" "fixupPhase" ];
-
-          nativeBuildInputs = [ pkgs_x86.makeWrapper ];
-
-          installPhase = ''
-            mkdir -p $out
-            mkdir $out/bin
-            cp $src $out/bin/fuckingnode
-          '';
-
-          fixupPhase = ''
-            chmod +w $out/bin/fuckingnode
-            chmod +x $out/bin/fuckingnode
-          '';
-
-          meta = {
-            mainProgram = "fuckingnode";
-          };
-        };
-      };
-
-      ${linux_arm} = {
-        default = pkgs_arm.stdenv.mkDerivation {
-          inherit pname version;
-
-          src = pkgs_arm.fetchurl {
-            url = "https://github.com/FuckingNode/FuckingNode/releases/download/${version}/FuckingNode-linux_arm";
-            sha256 = "11hkq1gjcqqhawpnpdg8vmhyihsisj84c166h50xr7sxjjdy2r0g";
-          };
-
-          phases = [ "installPhase" "fixupPhase" ];
-
-          nativeBuildInputs = [ pkgs_arm.makeWrapper ];
-
-          installPhase = ''
-            mkdir -p $out
-            mkdir $out/bin
-            cp $src $out/bin/fuckingnode
-          '';
-
-          fixupPhase = ''
-            chmod +w $out/bin/fuckingnode
-            chmod +x $out/bin/fuckingnode
-          '';
-
-          meta = {
-            mainProgram = "fuckingnode";
-          };
-        };
-      };
-    };
-
-    devShell = {
-      ${linux_x86} = pkgs_x86.mkShell {
-        buildInputs = [
-          pkgs_x86.deno
-        ];
-      };
-      ${linux_arm} = pkgs_arm.mkShell {
-        buildInputs = [
-          pkgs_arm.deno
-        ];
-      };
-    };
+    devShells = builtins.listToAttrs (map (system: {
+      name = system;
+      value = buildDevShell system;
+    }) systems);
   };
 }
 
