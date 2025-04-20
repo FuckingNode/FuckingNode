@@ -44,7 +44,7 @@
         };
 
         phases = [ "installPhase" "fixupPhase" ];
-        nativeBuildInputs = [ pkgs.makeWrapper ];
+        nativeBuildInputs = [ pkgs.makeWrapper pkgs.bash ];
 
         installPhase = ''
           mkdir -p $out/bin
