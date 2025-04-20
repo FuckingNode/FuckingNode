@@ -71,7 +71,7 @@ curl -fsSL fuckingnode.github.io/install.sh | bash
 ### Nix/NixOS
 
 > [!NOTE]
-> ARM (`aarch64-linux`) support is available, but NOT tested!
+> `x86_64-darwin` and `aarch64-darwin` support is available, but NOT tested! There is a possibility of it working, but there is no confirmation.
 
 Add the repo to your `flake.nix`.
 
