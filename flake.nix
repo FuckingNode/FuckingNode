@@ -45,16 +45,19 @@
 
         phases = [ "installPhase" "fixupPhase" ];
         nativeBuildInputs = [ pkgs.makeWrapper pkgs.bash ];
-        shell = "${pkgs.bash}/bin/bash";
-
+        dontUnpack = true;
 
         installPhase = ''
-          mkdir -p $out/bin
-          cp $src $out/bin/fuckingnode
+          ${pkgs.bash}/bin/bash -c '
+            mkdir -p $out/bin
+            cp $src $out/bin/fuckingnode
+          '
         '';
 
         fixupPhase = ''
-          chmod +x $out/bin/fuckingnode
+          ${pkgs.bash}/bin/bash -c '
+            chmod +x $out/bin/fuckingnode
+          '
         '';
 
         meta = {
