@@ -1,9 +1,7 @@
 name: Nix Build
 
 on:
-  push:
-    branches: [master]
-  pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
