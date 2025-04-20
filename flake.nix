@@ -28,7 +28,7 @@
 
           src = pkgs_x86.fetchurl {
             url = "https://github.com/FuckingNode/FuckingNode/releases/download/${version}/FuckingNode-linux64";
-            sha256 = "1rdlgvvl7kj1mb8qfys1nqjjs1f17gqfmr6jwqzcdb5w6njhkc6b";
+            sha256 = "01qxzfdjyp5g35vdm6yz5ig74b5gc4gnnpqwqrbsd94rmsy05bdz";
           };
 
           phases = [ "installPhase" "fixupPhase" ];
@@ -58,7 +58,7 @@
 
           src = pkgs_arm.fetchurl {
             url = "https://github.com/FuckingNode/FuckingNode/releases/download/${version}/FuckingNode-linux_arm";
-            sha256 = "1hdvq6acv438z6cfyl45slaj2126764pxwcwlrfj0v6kb8p6i21w";
+            sha256 = "11hkq1gjcqqhawpnpdg8vmhyihsisj84c166h50xr7sxjjdy2r0g";
           };
 
           phases = [ "installPhase" "fixupPhase" ];
@@ -79,21 +79,6 @@
           meta = {
             mainProgram = "fuckingnode";
           };
-        };
-      };
-    };
-
-    app = {
-      ${linux_x86} = {
-        default = {
-          type = "app";
-          program = "${self.packages.${linux_x86}.default}/bin/fuckingnode";
-        };
-      };
-      ${linux_arm} = {
-        default = {
-          type = "app";
-          program = "${self.packages.${linux_arm}.default}/bin/fuckingnode";
         };
       };
     };
