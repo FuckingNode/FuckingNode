@@ -3,26 +3,25 @@ name: Nix Build
 on: workflow_dispatch
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+    build:
+        runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        system: [x86_64-linux, aarch64-linux]
+        strategy:
+            matrix:
+                system: [x86_64-linux, aarch64-linux]
 
-    steps:
-      - uses: actions/checkout@v4
+        steps:
+            - uses: actions/checkout@v4
 
-      - uses: docker/setup-qemu-action@v3
-        with:
-          platforms: all
+            - uses: docker/setup-qemu-action@v3
+              with:
+                  platforms: all
 
-      - uses: cachix/install-nix-action@v25
-        with:
-          nix_path: nixpkgs=channel:nixos-unstable
-          extra_nix_config: |
-            experimental-features = nix-command flakes
+            - uses: cachix/install-nix-action@v25
+              with:
+                  nix_path: nixpkgs=channel:nixos-unstable
+                  extra_nix_config: |
+                      experimental-features = nix-command flakes
 
-      - name: Build for ${{ matrix.system }}
-        run: nix build .# --system ${{ matrix.system }}
-
+            - name: Build for ${{ matrix.system }}
+              run: nix build .# --system ${{ matrix.system }}

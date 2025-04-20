@@ -393,4 +393,25 @@ export const Git = {
             return { current: "__ERROR", all: [] };
         }
     },
+    Clone: (repoUrl: string, clonePath: string): boolean => {
+        try {
+            const cloneOutput = Commander(
+                "git",
+                [
+                    "clone",
+                    repoUrl,
+                    clonePath,
+                ],
+                false,
+            );
+            if (!cloneOutput.success) throw new Error(cloneOutput.stdout);
+            return true;
+        } catch (e) {
+            LogStuff(
+                `Error - could not clone ${ColorString(repoUrl, "bold")} to ${ColorString(clonePath, "bold")} because of error: ${e}`,
+                "error",
+            );
+            return false;
+        }
+    },
 };
