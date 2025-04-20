@@ -16,11 +16,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: docker/setup-qemu-action@v3
+        with:
+          platforms: all
+
       - uses: cachix/install-nix-action@v25
         with:
           nix_path: nixpkgs=channel:nixos-unstable
           extra_nix_config: |
             experimental-features = nix-command flakes
 
-      - name: Build on ${{ matrix.system }}
+      - name: Build for ${{ matrix.system }}
         run: nix build .# --system ${{ matrix.system }}
+
