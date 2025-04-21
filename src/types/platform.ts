@@ -56,14 +56,6 @@ export interface DenoPkgFile extends GenericJsPkgFile {
     workspaces?: string[];
 }
 
-/** (Internal) `Cargo.toml`.package AND `Cargo.toml`.workspace.package. */
-type _rs_pkg = {
-    name: string;
-    version: string;
-    /** If unclear, the Rust "edition" is the Rust version to be used. */
-    edition?: string;
-};
-
 /**
  * Rust `Cargo.toml` props, only the ones we need.
  *
@@ -71,12 +63,22 @@ type _rs_pkg = {
  * @interface CargoPkgFile
  */
 export interface CargoPkgFile {
-    package?: _rs_pkg;
+    package?: {
+        name: string | { workspace: true };
+        version: string | { workspace: true };
+        /** If unclear, the Rust "edition" is the Rust version to be used. */
+        edition?: string | { workspace: true };
+    };
     dependencies?: Record<string, CargoDependency>;
     "dev-dependencies"?: Record<string, CargoDependency>;
     "build-dependencies"?: Record<string, CargoDependency>;
     workspace?: {
-        package?: _rs_pkg;
+        package?: {
+            name: string;
+            version: string;
+            /** If unclear, the Rust "edition" is the Rust version to be used. */
+            edition?: string;
+        };
         members?: string[];
     };
 }
