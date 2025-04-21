@@ -44,7 +44,7 @@ for (const file of files_in_project) {
 
 ## Chores and trivial tasks
 
-- [X] Rewrite audit to use JSON instead of raw strings (should've done this before...)
+- [x] Rewrite audit to use JSON instead of raw strings (should've done this before...)
 - [ ] Add error codes for all errors.
 - [ ] Cleanup the codebase (it's getting kinda messy ngl).
   - [ ] Follow my own f\*cking guidelines, there are different ways of coding mixed up in the same project :skull: (this means updating old code to match `CONTRIBUTING.md`).
