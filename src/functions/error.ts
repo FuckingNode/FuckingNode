@@ -1,5 +1,5 @@
 import { join } from "@std/path/join";
-import { APP_NAME, I_LIKE_JS, LOCAL_PLATFORM } from "../constants.ts";
+import { APP_NAME, FWORDS, LOCAL_PLATFORM } from "../constants.ts";
 import { ColorString } from "./io.ts";
 import type { GLOBAL_ERROR_CODES } from "../types/errors.ts";
 import { GetDateNow } from "./date.ts";
@@ -51,7 +51,7 @@ export class FknError extends Error {
                         LOCAL_PLATFORM.SYSTEM === "windows" ? "APPDATA env variable" : "XDG_CONFIG_HOME and HOME env variables",
                         "bold",
                     )
-                } but failed, meaning config files cannot be created and the CLI can't work. Something seriously went ${I_LIKE_JS.MFLY} wrong. If these aren't the right environment variables for your system's config path (currently using APPDATA on Windows, /home/user/.config on macOS and Linux), please raise an issue on GitHub.`;
+                } but failed, meaning config files cannot be created and the CLI can't work. Something seriously went ${FWORDS.MFLY} wrong. If these aren't the right environment variables for your system's config path (currently using APPDATA on Windows, /home/user/.config on macOS and Linux), please raise an issue on GitHub.`;
                 break;
             case "Project__NonFoundProject":
                 this.hint = `Check for typos or a wrong name. Given input (either a project's name or a file path) wasn't found.`;
@@ -160,10 +160,10 @@ export function GenericErrorHandler(e: unknown): never {
         e.exit();
         Deno.exit(1); // (never reached, but without this line typescript doesn't shut up)
     } else if (e instanceof Error) {
-        console.error(`${ColorString(I_LIKE_JS.FK, "red", "bold")}! Something happened: ${e.message}`);
+        console.error(`${ColorString(FWORDS.FK, "red", "bold")}! Something happened: ${e.message}`);
         Deno.exit(1);
     } else {
-        console.error(`${ColorString(I_LIKE_JS.FK, "red", "bold")}! Something strange happened: ${e}`);
+        console.error(`${ColorString(FWORDS.FK, "red", "bold")}! Something strange happened: ${e}`);
         Deno.exit(1);
     }
 }

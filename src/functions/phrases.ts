@@ -5,7 +5,7 @@
  * (bruh i spent my time writing all of this instead of studying)
  */
 
-import { APP_NAME, I_LIKE_JS } from "../constants.ts";
+import { APP_NAME, FWORDS } from "../constants.ts";
 import { GetAppPath } from "./config.ts";
 
 const internalJokes = [
@@ -15,7 +15,7 @@ const internalJokes = [
     "(not) powered by Vuelto <https://vuelto.pp.ua/>", // rewrite to Vuelto coming 2026
     "Proudly running on anything but a FireBlitz server", // those who know :skull:
     "not made in germany", // those who know :skull:
-    `(it's named this way because Node is ${I_LIKE_JS.FKN} annoying, not because I ${I_LIKE_JS.FK}ed it)`, // (someone really told me the 2nd one)
+    `(it's named this way because Node is ${FWORDS.FKN} annoying, not because I ${FWORDS.FK}ed it)`, // (someone really told me the 2nd one)
     "Proudly made by ZakaHaceCosas (translates to 'ZakaMakesStuff')", // YOO
     "Proudly developed in Spain (the S is silent)", // elections here don't work, i swear
     "i should be studying chemistry and i'm writing random phrases for this thing", // real btw
@@ -94,8 +94,8 @@ const brandingJokes = [
     "Make JavaScript great again!",
     "Make JavaScript great again! (not like it ever was)",
     `${APP_NAME.CASED}/Deno/Bun, actually`,
-    `${I_LIKE_JS.FKN}JSRuntimesInGeneral, actually`,
-    `${APP_NAME.CASED}? More like ${I_LIKE_JS.FKN}Cool!`,
+    `${FWORDS.FKN}JSRuntimesInGeneral, actually`,
+    `${APP_NAME.CASED}? More like ${FWORDS.FKN}Cool!`,
 ];
 
 const quotes = [

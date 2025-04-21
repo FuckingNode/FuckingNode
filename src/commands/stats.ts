@@ -1,5 +1,5 @@
 import { type UnknownString } from "@zakahacecosas/string-utils";
-import { I_LIKE_JS } from "../constants.ts";
+import { FWORDS } from "../constants.ts";
 import { ColorString, LogStuff } from "../functions/io.ts";
 import { GetProjectEnvironment, SpotProject } from "../functions/projects.ts";
 import { NameProject } from "../functions/projects.ts";
@@ -45,7 +45,7 @@ export default function TheStatistics(target: UnknownString) {
     if (!deps || deps.length === 0) {
         LogStuff("No dependencies found (impressive).");
     } else {
-        LogStuff(`\nDepends on ${ColorString(realDeps.length, "bold")} ${I_LIKE_JS.MFS}:`);
+        LogStuff(`\nDepends on ${ColorString(realDeps.length, "bold")} ${FWORDS.MFS}:`);
         LogStuff(
             deps,
         );

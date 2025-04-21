@@ -1,4 +1,4 @@
-import type { SUPPORTED_EMOJIS, tValidColors } from "../types/misc.ts";
+import type { VALID_COLORS, VALID_EMOJIS } from "../types/misc.ts";
 import { GetAppPath } from "./config.ts";
 import { stringify as stringifyYaml } from "@std/yaml";
 
@@ -7,11 +7,11 @@ import { stringify as stringifyYaml } from "@std/yaml";
  *
  * @export
  * @param {string} message Your message, e.g. `"hi chat"`.
- * @param {SUPPORTED_EMOJIS} emoji What emoji you'd like to append, e.g. `"bruh"`.
+ * @param {VALID_EMOJIS} emoji What emoji you'd like to append, e.g. `"bruh"`.
  * @returns {string} The message with your emoji, e.g. `"😐 hi chat"`.
  */
-export function Emojify(message: string, emoji: SUPPORTED_EMOJIS): string {
-    function GetEmoji(emoji: SUPPORTED_EMOJIS) {
+export function Emojify(message: string, emoji: VALID_EMOJIS): string {
+    function GetEmoji(emoji: VALID_EMOJIS) {
         switch (emoji) {
             case "danger":
                 return `🛑`;
@@ -65,15 +65,15 @@ export function Emojify(message: string, emoji: SUPPORTED_EMOJIS): string {
  *
  * @export
  * @param {string} message The message to be logged.
- * @param {?SUPPORTED_EMOJIS} [emoji] Additionally, add an emoji before the log.
- * @param {?(tValidColors | tValidColors[])} [color] Optionally, a color (or more) for the output.
+ * @param {?VALID_EMOJIS} [emoji] Additionally, add an emoji before the log.
+ * @param {?(VALID_COLORS | VALID_COLORS[])} [color] Optionally, a color (or more) for the output.
  * @param {?boolean} [verbose] If false, stuff will be saved to `.log` file but not written to the `stdout`. Pass here the variable you use to handle verbose logs.
  * @returns {void} Boolean value if it's a question depending on user input. If it's not a question, to avoid a type error for being `void`, it always returns false.
  */
 export function LogStuff(
     message: string,
-    emoji?: SUPPORTED_EMOJIS,
-    color?: tValidColors | tValidColors[],
+    emoji?: VALID_EMOJIS,
+    color?: VALID_COLORS | VALID_COLORS[],
     verbose?: boolean,
 ): void {
     try {
@@ -137,11 +137,11 @@ export function Interrogate(question: string, style?: "ask" | "warn" | "heads-up
  *
  * @export
  * @param {(string | number)} string String to color.
- * @param {...tValidColors[]} colors The color you wish to give it. Some styles that aren't "colors" are also allowed, e.g. `bold` or `half-opaque`. You can pass many values to add as many colors as you wish.
+ * @param {...VALID_COLORS[]} colors The color you wish to give it. Some styles that aren't "colors" are also allowed, e.g. `bold` or `half-opaque`. You can pass many values to add as many colors as you wish.
  * @returns {string} A colorful string.
  */
-export function ColorString(string: string | number, ...colors: tValidColors[]): string {
-    function internalColorString(string: string | number, color: tValidColors): string {
+export function ColorString(string: string | number, ...colors: VALID_COLORS[]): string {
+    function internalColorString(string: string | number, color: VALID_COLORS): string {
         const finalString = typeof string === "string" ? string : String(string);
         const RESET = "\x1b[0m";
         let colorCode = RESET;

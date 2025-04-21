@@ -13,7 +13,7 @@ import { ColorString, Interrogate, LogStuff } from "../../functions/io.ts";
 import { FkNodeSecurityAudit, ParsedNodeReport } from "../../types/audit.ts";
 import { GetProjectEnvironment, NameProject, SpotProject } from "../../functions/projects.ts";
 import { Commander } from "../../functions/cli.ts";
-import { APP_NAME, I_LIKE_JS } from "../../constants.ts";
+import { APP_NAME, FWORDS } from "../../constants.ts";
 import { DEBUG_LOG } from "../../functions/error.ts";
 import { VULNERABILITY_VECTORS } from "./vectors.ts";
 
@@ -429,7 +429,7 @@ function DisplayAudit(percentage: number): void {
     if (percentage < 20) {
         color = "bright-green";
         message =
-            `Seems like we're okay, one ${I_LIKE_JS.MFN} project less to take care of!\nNever forget the best risk is no risk - we still encourage you to fix the vulnerabilities if you can.`;
+            `Seems like we're okay, one ${FWORDS.MFN} project less to take care of!\nNever forget the best risk is no risk - we still encourage you to fix the vulnerabilities if you can.`;
     } else if (percentage >= 20 && percentage < 50) {
         color = "bright-yellow";
         message = `${ColorString("There is a potential risk", "bold")} of these vulnerabilities causing you a headache.\nWhile you ${
@@ -438,7 +438,7 @@ function DisplayAudit(percentage: number): void {
     } else {
         color = "red";
         message = `${
-            ColorString(`Oh ${I_LIKE_JS.FK}`, "bold")
+            ColorString(`Oh ${FWORDS.FK}`, "bold")
         }. This project really should get all vulnerabilities fixed.\nBreaking changes can hurt, but your app security's breaking hurts a lot more. ${
             ColorString("Please, fix this issue.", "bold")
         }`;

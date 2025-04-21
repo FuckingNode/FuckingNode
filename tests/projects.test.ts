@@ -3,6 +3,7 @@ import { assertEquals } from "@std/assert";
 import { TEST_ONE } from "./constants.ts";
 import { mocks } from "./mocks.ts";
 import { ColorString } from "../src/functions/io.ts";
+import { APP_NAME } from "../src/constants.ts";
 
 // ACTUAL TESTS
 Deno.test({
@@ -31,15 +32,15 @@ Deno.test({
 Deno.test({
     name: "names projects accordingly",
     fn: async () => {
-        const toName = SpotProject("@zakahacecosas/fuckingnode");
+        const toName = SpotProject(APP_NAME.SCOPE);
 
         assertEquals(
             NameProject(toName, "name-colorless"),
-            "@zakahacecosas/fuckingnode",
+            APP_NAME.SCOPE,
         );
         assertEquals(
             NameProject(toName, "name"),
-            ColorString("@zakahacecosas/fuckingnode", "bold"),
+            ColorString(APP_NAME.SCOPE, "bold"),
         );
     },
 });

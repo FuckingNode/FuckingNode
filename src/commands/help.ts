@@ -1,5 +1,5 @@
 import { StringUtils } from "@zakahacecosas/string-utils";
-import { APP_NAME } from "../constants.ts";
+import { APP_NAME, APP_URLs } from "../constants.ts";
 import { ColorString, LogStuff } from "../functions/io.ts";
 import type { TheHelperConstructedParams } from "./constructors/command.ts";
 
@@ -198,7 +198,7 @@ export default function TheHelper(params: TheHelperConstructedParams) {
         [
             "audit",
             "[project-path | --] [--strict, -s]",
-            "Runs your package manager's audit command, then asks you questions to tell if found vulnerabilities affect your project.\n  Run without a project or with '--' to audit all projects.\n  Learn more about it at https://fuckingnode.github.io/learn/audit/",
+            `Runs your package manager's audit command, then asks you questions to tell if found vulnerabilities affect your project.\n  Run without a project or with '--' to audit all projects.\n  Learn more about it at ${APP_URLs.WEBSITE}learn/audit/`,
         ],
     ]);
     const MIGRATE_OPTIONS = formatCmd([

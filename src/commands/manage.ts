@@ -1,4 +1,4 @@
-import { I_LIKE_JS } from "../constants.ts";
+import { FWORDS } from "../constants.ts";
 import { ColorString, LogStuff } from "../functions/io.ts";
 import { AddProject, GetAllProjects, GetProjectEnvironment, NameProject, RemoveProject } from "../functions/projects.ts";
 import TheHelper from "./help.ts";
@@ -42,7 +42,7 @@ function ListProjects(
     let message: string;
 
     if (ignore === "limit") {
-        message = `Here are the ${I_LIKE_JS.MFS} you added (and ignored) so far:\n`;
+        message = `Here are the ${FWORDS.MFS} you added (and ignored) so far:\n`;
         for (const entry of list) {
             const protection = (GetProjectEnvironment(entry)).settings.divineProtection; // array
             let protectionString: string;
@@ -62,12 +62,12 @@ function ListProjects(
             );
         }
     } else if (ignore === "exclude") {
-        message = `Here are the ${I_LIKE_JS.MFS} you added (and haven't ignored) so far:\n`;
+        message = `Here are the ${FWORDS.MFS} you added (and haven't ignored) so far:\n`;
         for (const entry of list) {
             toPrint.push(NameProject(entry, "all"));
         }
     } else {
-        message = `Here are the ${I_LIKE_JS.MFS} you added so far:\n`;
+        message = `Here are the ${FWORDS.MFS} you added so far:\n`;
         for (const entry of list) {
             toPrint.push(NameProject(entry, "all"));
         }

@@ -1,4 +1,4 @@
-import type { tURL } from "./types/misc.ts";
+import type { VALID_URL } from "./types/misc.ts";
 import type { SemVer } from "@std/semver/types";
 import { format, parse } from "@std/semver";
 import type { CF_FKNODE_SCHEDULE, CF_FKNODE_SETTINGS, FullFkNodeYaml } from "./types/config_files.ts";
@@ -36,8 +36,8 @@ export const APP_NAME: { CASED: string; CLI: string; STYLED: string; SCOPE: stri
 /** Full, cased name of the app in NAME vVERSION format. */
 export const FULL_NAME: string = `${APP_NAME.CASED} v${VERSION}`;
 
-/** URLs have trailing slash/ */
-export const APP_URLs: { REPO: tURL; WEBSITE: tURL } = {
+/** URLs have trailing slash (`url.com/`) */
+export const APP_URLs: { REPO: VALID_URL; WEBSITE: VALID_URL } = {
     REPO: "https://github.com/FuckingNode/FuckingNode/",
     WEBSITE: "https://fuckingnode.github.io/",
 };
@@ -45,9 +45,9 @@ export const APP_URLs: { REPO: tURL; WEBSITE: tURL } = {
 /**
  * Different variants of the f-word for in-app usage. Not fully "explicit" as an asterisk is used, like in f*ck.
  *
- * @interface HE_LIKES_JS
+ * @interface I_LIKE_JS
  */
-interface HE_LIKES_JS {
+interface I_LIKE_JS {
     /**
      * Base word. 4 letters.
      *
@@ -89,9 +89,9 @@ interface HE_LIKES_JS {
 /**
  * Different variants of the f-word for in-app usage. Not fully "explicit" as an asterisk is used, like in f*ck.
  *
- * @type {HE_LIKES_JS}
+ * @type {I_LIKE_JS}
  */
-export const I_LIKE_JS: HE_LIKES_JS = {
+export const FWORDS: I_LIKE_JS = {
     FK: "f*ck",
     FKN: "f*cking",
     MF: "m*therf*cker",
@@ -103,9 +103,9 @@ export const I_LIKE_JS: HE_LIKES_JS = {
 /**
  * GitHub REST API URL from where releases are obtained.
  *
- * @type {tURL}
+ * @type {VALID_URL}
  */
-export const RELEASE_URL: tURL = `https://api.github.com/repos/ZakaHaceCosas/${APP_NAME.CASED}/releases/latest`;
+export const RELEASE_URL: VALID_URL = `https://api.github.com/repos/ZakaHaceCosas/${APP_NAME.CASED}/releases/latest`;
 
 /**
  * Default app settings.

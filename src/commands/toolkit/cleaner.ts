@@ -1,4 +1,4 @@
-import { FULL_NAME, I_LIKE_JS, isDef, LOCAL_PLATFORM } from "../../constants.ts";
+import { FULL_NAME, FWORDS, isDef, LOCAL_PLATFORM } from "../../constants.ts";
 import { Commander, CommandExists } from "../../functions/cli.ts";
 import { GetAppPath, GetUserSettings } from "../../functions/config.ts";
 import { BulkRemoveFiles, CheckForPath, JoinPaths, ParsePath } from "../../functions/filesystem.ts";
@@ -469,7 +469,7 @@ export function PerformMaximCleanup(projects: string[]): void {
         );
         if (!CheckForPath(env.hall_of_trash)) {
             LogStuff(
-                `Maxim pruning didn't find the node_modules DIR at ${name}. Skipping this ${I_LIKE_JS.MF}...`,
+                `Maxim pruning didn't find the node_modules DIR at ${name}. Skipping this ${FWORDS.MF}...`,
                 "bruh",
             );
             return;

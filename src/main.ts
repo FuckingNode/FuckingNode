@@ -17,7 +17,7 @@ import TheSurrenderer from "./commands/surrender.ts";
 import TheSetuper from "./commands/setup.ts";
 import TheLauncher from "./commands/launch.ts";
 // other things
-import { APP_NAME, APP_URLs, FULL_NAME } from "./constants.ts";
+import { APP_NAME, APP_URLs, FULL_NAME, FWORDS } from "./constants.ts";
 import { ColorString, LogStuff } from "./functions/io.ts";
 import { FreshSetup, GetAppPath, GetUserSettings } from "./functions/config.ts";
 import { DEBUG_LOG, GenericErrorHandler } from "./functions/error.ts";
@@ -36,7 +36,7 @@ import { GetDateNow } from "./functions/date.ts";
 // ps. i don't use LogStuff because if something broke, well, it might not work
 if (StringUtils.normalize(Deno.args[0] ?? "") === "something-fucked-up") {
     console.log(
-        `This command will reset ${APP_NAME.CASED}'s settings, logs, and configs ENTIRELY (except for project list). Are you sure things fucked up that much?`,
+        `This command will reset ${APP_NAME.CASED}'s settings, logs, and configs ENTIRELY (except for project list). Are you sure things ${FWORDS.FK}ed up that much?`,
     );
     const c = confirm("Confirm reset?");
     if (c === true) {
@@ -52,9 +52,9 @@ if (StringUtils.normalize(Deno.args[0] ?? "") === "something-fucked-up") {
             Deno.removeSync(path, { recursive: true });
         }
 
-        console.log("Done. Don't fuck up again this time!");
+        console.log(`Done. Don't ${FWORDS.FK} up again this time.`);
     } else {
-        console.log("I knew it wasn't that bad...");
+        console.log(`I knew it wasn't that ${FWORDS.FK}ed up...`);
     }
     Deno.exit(0);
 }

@@ -2,7 +2,7 @@ import { parse as parseYaml } from "@std/yaml";
 import { parse as parseToml } from "@std/toml";
 import { parse as parseJsonc } from "@std/jsonc";
 import { expandGlobSync } from "@std/fs";
-import { APP_NAME, APP_URLs, DEFAULT_FKNODE_YAML, I_LIKE_JS } from "../constants.ts";
+import { APP_NAME, APP_URLs, DEFAULT_FKNODE_YAML, FWORDS } from "../constants.ts";
 import type { CargoPkgFile, NodePkgFile, ProjectEnvironment, UnderstoodProjectProtection } from "../types/platform.ts";
 import { CheckForPath, JoinPaths, ParsePath, ParsePathList } from "./filesystem.ts";
 import { ColorString, Interrogate, LogStuff } from "./io.ts";
@@ -150,7 +150,7 @@ export function AddProject(
         }
 
         const addWorkspaces = Interrogate(
-            `Hey! This looks like a ${I_LIKE_JS.FKN} monorepo. We've found these workspaces:\n\n${
+            `Hey! This looks like a ${FWORDS.FKN} monorepo. We've found these workspaces:\n\n${
                 workspaceString.join("\n")
             }.\n\nShould we add them to your list as well, so they're all cleaned?`,
         );
@@ -196,7 +196,7 @@ export function AddProject(
         }
 
         const addWorkspaces = Interrogate(
-            `Hey! This looks like a ${I_LIKE_JS.FKN} rootless monorepo. We've found these workspaces:\n\n${
+            `Hey! This looks like a ${FWORDS.FKN} rootless monorepo. We've found these workspaces:\n\n${
                 workspaces.join("\n")
             }.\n\nShould we add them to your list so they're all cleaned?`,
         );
@@ -379,7 +379,7 @@ function GetProjectSettings(path: string): FullFkNodeYaml {
         if (!content.includes("UPON INTERACTING")) {
             Deno.writeTextFileSync(
                 pathToDivineFile,
-                `\n# [NOTE (${GetDateNow()}): Invalid file format! (Auto-added by ${APP_NAME.CASED}). DEFAULT SETTINGS WILL BE USED UPON INTERACTING WITH THIS ${I_LIKE_JS.MF.toUpperCase()} UNTIL YOU FIX THIS! Refer to ${APP_URLs.WEBSITE} to learn about how fknode.yaml works.]\n`,
+                `\n# [NOTE (${GetDateNow()}): Invalid file format! (Auto-added by ${APP_NAME.CASED}). DEFAULT SETTINGS WILL BE USED UPON INTERACTING WITH THIS ${FWORDS.MF.toUpperCase()} UNTIL YOU FIX THIS! Refer to ${APP_URLs.WEBSITE} to learn about how fknode.yaml works.]\n`,
                 {
                     append: true,
                 },

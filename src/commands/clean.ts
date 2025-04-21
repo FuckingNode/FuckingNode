@@ -1,4 +1,4 @@
-import { I_LIKE_JS } from "../constants.ts";
+import { FWORDS } from "../constants.ts";
 import { CheckForPath } from "../functions/filesystem.ts";
 import { LogStuff } from "../functions/io.ts";
 import { GetAllProjects, NameProject, SpotProject } from "../functions/projects.ts";
@@ -33,7 +33,7 @@ export default function TheCleaner(params: TheCleanerConstructedParams) {
 
     if (projects.length === 0) {
         LogStuff(
-            `There isn't any ${I_LIKE_JS.MF} over here... yet...`,
+            `There isn't any ${FWORDS.MF} over here... yet...`,
             "moon-face",
         );
         return;
@@ -56,7 +56,7 @@ export default function TheCleaner(params: TheCleanerConstructedParams) {
 
         if (!CheckForPath(project)) {
             LogStuff(
-                `Path not found: ${project}. You might want to update your list of ${I_LIKE_JS.MFS}.`,
+                `Path not found: ${project}. You might want to update your list of ${FWORDS.MFS}.`,
                 "error",
                 "red",
             );
@@ -78,7 +78,7 @@ export default function TheCleaner(params: TheCleanerConstructedParams) {
             if (lockfiles.length > 0) {
                 if (lockfiles.length === 1) {
                     LogStuff(
-                        `Cleaning the ${NameProject(project)} ${I_LIKE_JS.MF}...`,
+                        `Cleaning the ${NameProject(project)} ${FWORDS.MF}...`,
                         "package",
                     );
                     PerformCleanup(
@@ -93,7 +93,7 @@ export default function TheCleaner(params: TheCleanerConstructedParams) {
                     );
                 } else {
                     LogStuff(
-                        `More than one lockfile is a bad practice; we can't handle this ${I_LIKE_JS.MF}.`,
+                        `More than one lockfile is a bad practice; we can't handle this ${FWORDS.MF}.`,
                         "error",
                         "bright-yellow",
                     );
@@ -106,7 +106,7 @@ export default function TheCleaner(params: TheCleanerConstructedParams) {
                 }
             } else if (CheckForPath("package.json")) {
                 LogStuff(
-                    `${project} has a package.json but not a lockfile. Can't ${I_LIKE_JS.FKN} clean.`,
+                    `${project} has a package.json but not a lockfile. Can't ${FWORDS.FKN} clean.`,
                     "warn",
                     "bright-yellow",
                 );
@@ -118,7 +118,7 @@ export default function TheCleaner(params: TheCleanerConstructedParams) {
                 continue;
             } else {
                 LogStuff(
-                    `No supported lockfile was found at ${project}. Skipping this ${I_LIKE_JS.MF}...`,
+                    `No supported lockfile was found at ${project}. Skipping this ${FWORDS.MF}...`,
                     "warn",
                     "bright-yellow",
                 );
@@ -156,7 +156,7 @@ export default function TheCleaner(params: TheCleanerConstructedParams) {
     // go back home
     Deno.chdir(originalLocation);
     LogStuff(
-        `All your ${I_LIKE_JS.MFN} JavaScript projects have been cleaned! Back to ${originalLocation}.`,
+        `All your ${FWORDS.MFN} JavaScript projects have been cleaned! Back to ${originalLocation}.`,
         "tick",
         "bright-green",
     );

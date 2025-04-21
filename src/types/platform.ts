@@ -1,5 +1,5 @@
 import type { FullFkNodeYaml } from "./config_files.ts";
-import type { tValidColors } from "./misc.ts";
+import type { VALID_COLORS } from "./misc.ts";
 
 /**
  * Understood version of a project's protection settings.
@@ -160,7 +160,7 @@ interface GenericProjectEnvironment {
         name: LOCKFILE_GLOBAL;
     };
     /**
-     * Where this project is running it, named after the so called JS runtimes.
+     * On what is this project running. Named after the so called JS runtimes.
      *
      * @type {("node" | "deno" | "bun" | "golang" | "rust")}
      */
@@ -168,9 +168,9 @@ interface GenericProjectEnvironment {
     /**
      * A brand color that's associated with this runtime. {@linkcode ColorString} compatible.
      *
-     * @type {tValidColors}
+     * @type {VALID_COLORS}
      */
-    runtimeColor: tValidColors;
+    runtimeColor: VALID_COLORS;
     /**
      * Package manager. For Deno and Bun it just says "deno" and "bun" instead of JSR or NPM (afaik Bun uses NPM) to avoid confusion.
      *
