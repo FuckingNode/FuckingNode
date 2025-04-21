@@ -10,13 +10,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- Added Git aliases to `fkstart`. For example, `fkstart gh:ZakaHaceCosas/dev-utils` will translate into `https://github.com/ZakaHaceCosas/dev-utils.git`. More than 10 Git providers are supported, run `compat kickstart` to see them all.
+- Added Git aliases to `fkstart`. For example, `fkstart gh:ZakaHaceCosas/dev-utils` will translate into `https://github.com/ZakaHaceCosas/dev-utils.git`. 10 Git providers are supported, run `compat kickstart` to see them all.
 - Added missing `compat launch` command, listing launch-able IDEs.
 - Added more vectors & questions to `audit`.
 
 ### Changed
 
 - Now the `setup` command respects earlier indent size on `tsconfig.json` and `.prettierrc` files.
+- Now `Cargo.toml` are better understood, reducing error proneness.
 
 ### Fixed
 

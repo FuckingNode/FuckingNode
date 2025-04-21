@@ -234,12 +234,16 @@ export const Parsers = {
             processCargoDependencies(parsedContent["dev-dependencies"], "univ:devD", deps);
             processCargoDependencies(parsedContent["build-dependencies"], "rst:buildD", deps);
 
+            const name = parsedContent.package?.name ?? parsedContent.workspace?.package?.name ?? "unknown-name";
+            const version = parsedContent.package?.version ?? parsedContent.workspace?.package?.version ?? "unknown-ver";
+            const cargo_edt = parsedContent.package?.edition ?? parsedContent.workspace?.package?.edition ?? "unknown-rust-edt";
+
             return {
-                name: parsedContent.package.name,
-                version: parsedContent.package.version,
+                name,
+                version,
                 rm: "cargo",
                 perPlatProps: {
-                    cargo_edt: parsedContent.package.edition,
+                    cargo_edt,
                 },
                 deps: dedupeDependencies(deps),
                 ws,

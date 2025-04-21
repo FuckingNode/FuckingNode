@@ -15,7 +15,8 @@ export interface UnderstoodProjectProtection {
     doDestroy: boolean;
 }
 
-export type CargoDependency = string | { version: string; [key: string]: unknown };
+/** A Cargo dependency. */
+export type CargoDependency = string | { version: string; optional?: boolean; features?: string[] };
 
 /**
  * Use this when you just need the name or version of a package, to avoid Node-Deno type issues.
@@ -55,6 +56,14 @@ export interface DenoPkgFile extends GenericJsPkgFile {
     workspaces?: string[];
 }
 
+/** (Internal) `Cargo.toml`.package AND `Cargo.toml`.workspace.package. */
+type _rs_pkg = {
+    name: string;
+    version: string;
+    /** If unclear, the Rust "edition" is the Rust version to be used. */
+    edition?: string;
+};
+
 /**
  * Rust `Cargo.toml` props, only the ones we need.
  *
@@ -62,16 +71,14 @@ export interface DenoPkgFile extends GenericJsPkgFile {
  * @interface CargoPkgFile
  */
 export interface CargoPkgFile {
-    package: {
-        name: string;
-        version: string;
-        /** If unclear, the Rust "edition" is the Rust version to be used. */
-        edition?: string;
-    };
+    package?: _rs_pkg;
     dependencies?: Record<string, CargoDependency>;
     "dev-dependencies"?: Record<string, CargoDependency>;
     "build-dependencies"?: Record<string, CargoDependency>;
-    workspace?: { members?: string[] };
+    workspace?: {
+        package?: _rs_pkg;
+        members?: string[];
+    };
 }
 
 /**
