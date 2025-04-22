@@ -29,8 +29,8 @@ export interface CommanderOutput {
  * @async
  * @param {string} main Main command.
  * @param {string[]} stuff Additional args for the command.
- * @param {?boolean} showOutput Defaults to true. If false, the output of the command won't be shown and it'll be returned in the `CommanderOutput` promise instead.
- * @returns {Promise<CommanderOutput>} An object with a boolean telling if it was successful and its output.
+ * @param {?boolean} showOutput Defaults to true. If false, the output of the command won't be shown and it'll be returned in the `CommanderOutput` object instead.
+ * @returns {CommanderOutput} An object with a boolean telling if it was successful and its output.
  */
 export function Commander(
     main: string,

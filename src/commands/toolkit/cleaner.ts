@@ -238,8 +238,8 @@ export function PerformCleanup(
         boolean
     > = {
         update: doUpdate || (workingEnv.settings.flagless?.flaglessUpdate === true),
-        lint: doPrettify || (workingEnv.settings.flagless?.flaglessLint === true),
-        pretty: doLint || (workingEnv.settings.flagless?.flaglessPretty === true),
+        lint: doLint || (workingEnv.settings.flagless?.flaglessLint === true),
+        pretty: doPrettify || (workingEnv.settings.flagless?.flaglessPretty === true),
         destroy: doDestroy || (workingEnv.settings.flagless?.flaglessDestroy === true),
         commit: shouldCommit || (workingEnv.settings.flagless?.flaglessCommit === true),
     };

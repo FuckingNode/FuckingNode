@@ -24,7 +24,8 @@ from_git = { git = "https://github.com/FuckingNode/FuckingRust.git", branch = "d
 from_tarball = { url = "https://somewhere.com/some_crate-1.0.0.tar.gz" }
 ```
 
-- [ ] Linting CAN be supported via a _glue fix_. The same we use on this repository, actually.
+- [x] Linting CAN be supported via a _glue fix_. The same we use on this repository, actually.
+  - (note: the "glue fix" wasn't used to resolve this)
 
 ```js
 // get files using a dir walking function or something
@@ -37,10 +38,6 @@ for (const file of files_in_project) {
 ### Golang
 
 - [ ] `pkggen` is still missing.
-
-### Deno
-
-- [ ] Linting CAN be supported here too. Read [Cargo](#cargo) section to see what I mean. Funnily enough, this repo uses that fix (see `tasks/good.ts`).
 
 ## Chores and trivial tasks
 
