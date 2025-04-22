@@ -363,19 +363,19 @@ export function deepMerge(
  */
 function GetProjectSettings(path: string): FullFkNodeYaml {
     const pathToDivineFile = JoinPaths(path, "fknode.yaml");
-    DEBUG_LOG("READING", pathToDivineFile);
+    DEBUG_LOG("FKN YAML / READING", pathToDivineFile);
 
     if (!CheckForPath(pathToDivineFile)) {
-        DEBUG_LOG("\nRESORTING TO DEFAULTS 1\n");
+        DEBUG_LOG("FKN YAML / RESORTING TO DEFAULTS (no fknode.yaml)");
         return DEFAULT_FKNODE_YAML;
     }
 
     const content = Deno.readTextFileSync(pathToDivineFile);
     const divineContent = parseYaml(content);
-    DEBUG_LOG("RAW DIVINE CONTENT", divineContent);
+    DEBUG_LOG("FKN YAML / RAW DIVINE CONTENT", path, divineContent);
 
     if (!ValidateFkNodeYaml(divineContent)) {
-        DEBUG_LOG("\nRESORTING TO DEFAULTS 2\n");
+        DEBUG_LOG("FKN YAML / RESORTING TO DEFAULTS (invalid fknode.yaml)");
         if (!content.includes("UPON INTERACTING")) {
             Deno.writeTextFileSync(
                 pathToDivineFile,
@@ -389,7 +389,7 @@ function GetProjectSettings(path: string): FullFkNodeYaml {
     }
 
     const mergedSettings = deepMerge(DEFAULT_FKNODE_YAML, divineContent);
-    DEBUG_LOG("DEEP MERGE", mergedSettings);
+    DEBUG_LOG("FKN YAML / DEEP MERGE", path, mergedSettings);
 
     return mergedSettings;
 }

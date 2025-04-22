@@ -88,7 +88,7 @@ function hasFlag(flag: string, allowQuickFlag: boolean, firstOnly: boolean = fal
 if (hasFlag("help", true)) {
     try {
         await init();
-        TheHelper({ query: flags[1] });
+        TheHelper({ query: flags[1] ?? "help" });
         Deno.exit(0);
     } catch (e) {
         console.error("Critical error", e);
@@ -109,10 +109,9 @@ function isNotFlag(arg: UnknownString): arg is string {
 }
 
 async function main(command: string) {
-    await init();
-    DEBUG_LOG(flags[1], isNotFlag(flags[1]));
+    DEBUG_LOG("FLAGS[1]", flags[1], isNotFlag(flags[1]));
     const projectArg = (isNotFlag(flags[1]) || flags[1] === "--self") ? flags[1] : 0 as const;
-    DEBUG_LOG(flags[2], isNotFlag(flags[2]));
+    DEBUG_LOG("FLAGS[2]", flags[2], isNotFlag(flags[2]));
     const intensityArg = isNotFlag(flags[2]) ? flags[2] : GetUserSettings().defaultIntensity;
 
     const cleanerArgs: TheCleanerConstructedParams = {
@@ -308,7 +307,7 @@ async function main(command: string) {
             );
             break;
         default:
-            TheHelper({ query: flags[0] });
+            TheHelper({ query: flags[1] });
     }
 
     Deno.exit(0);
@@ -318,8 +317,9 @@ async function main(command: string) {
 // javascript is definitely... something
 if (import.meta.main) {
     try {
+        await init();
+
         if (!StringUtils.validate(flags[0])) {
-            await init();
             TheHelper({});
             Deno.exit(0);
         }

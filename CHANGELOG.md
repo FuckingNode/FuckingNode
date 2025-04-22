@@ -6,7 +6,7 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
-## Unreleased
+## [3.3.1] (Unreleased)
 
 ### Added
 
@@ -17,7 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Changed
 
 - Now the `setup` command respects earlier indent size on `tsconfig.json` and `.prettierrc` files.
-- Now `Cargo.toml` are better understood, reducing error proneness.
+- Now `Cargo.toml` files are better understood, reducing a lot error proneness.
 
 ### Fixed
 
@@ -25,6 +25,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Fixed the "not fully supported" warning not showing up for Golang and Rust.
 - Fixed a lot of issues with Git URL parsing from the `fkstart` command.
 - Fixed the GHSA advisory list in audit containing duplicate entries.
+- Fixed initialization checks running twice.
+- Fixed `help` not properly taking user input.
 
 ## [3.3.0] (13-04-2025)
 

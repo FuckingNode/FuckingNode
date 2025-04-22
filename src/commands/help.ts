@@ -68,6 +68,11 @@ export default function TheHelper(params: TheHelperConstructedParams) {
             "Allows to change the CLIs setting. Run it without args to see current settings.",
         ],
         [
+            "audit",
+            "[project | --]",
+            "Runs a security audit and determines if any found vulnerability actually affects your project. NodeJS-only.",
+        ],
+        [
             "migrate",
             "<target>",
             "Migrates a project from one package manager to another and reinstalls deps.",
@@ -93,17 +98,6 @@ export default function TheHelper(params: TheHelperConstructedParams) {
             "Shows this menu, or the help menu for a specific command, if provided.",
         ],
     ]);
-
-    function NoParamProvided() {
-        LogStuff(
-            `Usage: ${ColorString(APP_NAME.CLI, "bright-green")} <command> [params...]\n\n${USAGE}\n`,
-        );
-        LogStuff(
-            "Pro tip: Run --help <command-name> to get help with a specific command.",
-            "bulb",
-            "bright-yellow",
-        );
-    }
 
     const MANAGER_OPTIONS = formatCmd([
         [
@@ -197,8 +191,8 @@ export default function TheHelper(params: TheHelperConstructedParams) {
     const AUDIT_OPTIONS = formatCmd([
         [
             "audit",
-            "[project-path | --] [--strict, -s]",
-            `Runs your package manager's audit command, then asks you questions to tell if found vulnerabilities affect your project.\n  Run without a project or with '--' to audit all projects.\n  Learn more about it at ${APP_URLs.WEBSITE}learn/audit/`,
+            "[project-path | --]",
+            `Runs your manager's audit command, then asks questions to tell if any vulnerability affects the project.\n  Run without a project or with '--' to audit all projects.\n  Learn more about it at ${APP_URLs.WEBSITE}learn/audit/`,
         ],
     ]);
     const MIGRATE_OPTIONS = formatCmd([
@@ -255,13 +249,6 @@ export default function TheHelper(params: TheHelperConstructedParams) {
             "about",
             null,
             "Shows a simple (but cool looking!) about screen. Includes random quotes.",
-        ],
-    ]);
-    const HELP_OPTIONS = formatCmd([
-        [
-            "help",
-            "[command]",
-            "Shows help for the given command, or general help if no command (or invalid command) given.",
         ],
     ]);
 
@@ -329,10 +316,19 @@ export default function TheHelper(params: TheHelperConstructedParams) {
             LogStuff(ABOUT_OPTIONS);
             break;
         case "help":
-            LogStuff(HELP_OPTIONS);
+            LogStuff(
+                `Usage: ${ColorString(APP_NAME.CLI, "bright-green")} <command> [params...]\n\n${USAGE}`,
+            );
             break;
         default:
-            NoParamProvided();
+            LogStuff(
+                `Usage: ${ColorString(APP_NAME.CLI, "bright-green")} <command> [params...]\n\n${USAGE}\n`,
+            );
+            LogStuff(
+                "Pro tip: Run --help <command-name> to get help with a specific command.",
+                "bulb",
+                "bright-yellow",
+            );
             break;
     }
 }
