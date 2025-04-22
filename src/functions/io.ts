@@ -1,6 +1,7 @@
 import type { VALID_COLORS, VALID_EMOJIS } from "../types/misc.ts";
 import { GetAppPath } from "./config.ts";
 import { stringify as stringifyYaml } from "@std/yaml";
+import { GetDateNow } from "./date.ts";
 
 /**
  * Appends an emoji at the beginning of a message.
@@ -83,7 +84,7 @@ export function LogStuff(
         const regex = /\x1b\[[0-9;]*[a-zA-Z]/g;
         const plainMessage = finalMessage.replace(regex, "");
 
-        const formattedMessage = `${new Date().toLocaleString()} / ${plainMessage}\n`
+        const formattedMessage = `${GetDateNow()} / ${plainMessage}\n`
             .replace(/\n{2,}/g, "\n"); // (fix for adding \n to messages that already have an \n for whatever reason)
 
         if (verbose ?? true) {

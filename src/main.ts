@@ -60,9 +60,11 @@ if (StringUtils.normalize(Deno.args[0] ?? "") === "something-fucked-up") {
 }
 
 async function init() {
+    const dir = Deno.cwd();
     FreshSetup();
     await RunScheduledTasks();
     CleanupProjects();
+    Deno.chdir(dir);
 }
 
 /** Normalized Deno.args */

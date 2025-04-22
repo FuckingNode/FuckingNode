@@ -21,6 +21,7 @@ const ProjectCleaningFeatures = {
         env: ProjectEnvironment,
         verbose: boolean,
     ) => {
+        Deno.chdir(env.root);
         LogStuff(
             `Updating dependencies for ${projectName}.`,
             "working",
@@ -42,6 +43,7 @@ const ProjectCleaningFeatures = {
         env: ProjectEnvironment,
         verbose: boolean,
     ) => {
+        Deno.chdir(env.root);
         const { commands } = env;
         if (commands.clean === "__UNSUPPORTED") {
             LogStuff(
@@ -68,6 +70,7 @@ const ProjectCleaningFeatures = {
         env: ProjectEnvironment,
         verbose: boolean,
     ) => {
+        Deno.chdir(env.root);
         LogStuff(
             `Linting ${projectName}.`,
             "working",
@@ -89,6 +92,7 @@ const ProjectCleaningFeatures = {
         env: ProjectEnvironment,
         verbose: boolean,
     ) => {
+        Deno.chdir(env.root);
         LogStuff(
             `Prettifying ${projectName}.`,
             "working",
@@ -111,6 +115,7 @@ const ProjectCleaningFeatures = {
         intensity: CleanerIntensity,
         verbose: boolean,
     ) => {
+        Deno.chdir(env.root);
         try {
             if (!env.settings.destroy) return;
             if (
@@ -166,6 +171,7 @@ const ProjectCleaningFeatures = {
             LogStuff("Tree isn't clean, can't commit", "bruh");
             return;
         }
+        Deno.chdir(env.root);
         function getCommitMessage() {
             if (
                 StringUtils.validate(env.settings.commitMessage) && !(isDef(env.settings.commitMessage))

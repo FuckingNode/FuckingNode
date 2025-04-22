@@ -6,6 +6,7 @@ import type { TheCleanerConstructedParams } from "./constructors/command.ts";
 import { PerformCleanup, PerformHardCleanup, PerformMaximCleanup, ResolveLockfiles, ShowReport, ValidateIntensity } from "./toolkit/cleaner.ts";
 import type { CleanerIntensity } from "../types/config_params.ts";
 import { GetElapsedTime } from "../functions/date.ts";
+import { DEBUG_LOG } from "../functions/error.ts";
 
 export type tRESULT = { path: string; status: string; elapsedTime: string };
 
@@ -53,23 +54,26 @@ export default function TheCleaner(params: TheCleanerConstructedParams) {
     for (const project of workingProjects) {
         // start time of each cleanup
         const startTime = new Date();
-
-        if (!CheckForPath(project)) {
-            LogStuff(
-                `Path not found: ${project}. You might want to update your list of ${FWORDS.MFS}.`,
-                "error",
-                "red",
-            );
-            results.push({
-                path: project,
-                status: "Not found",
-                elapsedTime: GetElapsedTime(startTime),
-            });
-            continue;
-        }
-
         try {
+            if (!CheckForPath(project)) {
+                LogStuff(
+                    `Path not found: ${project}. You might want to update your list of ${FWORDS.MFS}.`,
+                    "error",
+                    "red",
+                );
+                results.push({
+                    path: project,
+                    status: "Not found",
+                    elapsedTime: GetElapsedTime(startTime),
+                });
+                continue;
+            }
+
+            // TODO - i think THIS line is behind the ctx mismatch
             Deno.chdir(project);
+
+            DEBUG_LOG("ASSIGNED", project);
+            DEBUG_LOG("DIRECTED", Deno.cwd());
 
             const lockfiles = ResolveLockfiles(project);
 

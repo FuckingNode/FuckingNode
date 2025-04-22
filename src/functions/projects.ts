@@ -362,6 +362,7 @@ export function deepMerge(
  * @returns {FullFkNodeYaml} A `FullFkNodeYaml` object.
  */
 function GetProjectSettings(path: string): FullFkNodeYaml {
+    DEBUG_LOG("FKN YAML / ARGS", path);
     const pathToDivineFile = JoinPaths(path, "fknode.yaml");
     DEBUG_LOG("FKN YAML / READING", pathToDivineFile);
 
@@ -573,6 +574,7 @@ export function GetWorkspaces(path: string): string[] {
  * @returns {ProjectEnvironment}
  */
 export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
+    DEBUG_LOG("CALLED GetProjectEnvironment WITH path", path);
     const root = SpotProject(path);
 
     if (!CheckForPath(root)) throw new FknError("Internal__Projects__CantDetermineEnv", `Path ${root} doesn't exist.`);
@@ -663,6 +665,7 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
         : paths.node.json;
 
     const mainString: string = Deno.readTextFileSync(mainPath);
+    DEBUG_LOG("GETTING SETTINGS FROM", root);
     const settings: FullFkNodeYaml = GetProjectSettings(root);
 
     const runtimeColor = isBun ? "pink" : isNode ? "bright-green" : isDeno ? "bright-blue" : isRust ? "orange" : "cyan";
@@ -956,9 +959,9 @@ export function SpotProject(name: UnknownString): string {
  * Cleans up projects that are invalid and probably we won't be able to clean.
  *
  * @export
- * @returns {Promise<0 | 1>} 0 if success, 1 if no projects to remove.
+ * @returns {void}
  */
-export function CleanupProjects(): 0 | 1 {
+export function CleanupProjects(): void {
     const listOfRemovals: { project: string; issue: PROJECT_ERROR_CODES }[] = [];
 
     const allProjects = GetAllProjects();
@@ -967,23 +970,23 @@ export function CleanupProjects(): 0 | 1 {
         const validation = ValidateProject(project, true);
 
         if (validation !== true) {
-            listOfRemovals.push({
-                project,
-                issue: validation,
-            });
+            listOfRemovals.push({ project, issue: validation });
         }
     }
 
-    // remove duplicates
-    const result = Array.from(
-        new Map(
-            listOfRemovals.map((item) => [JSON.stringify(item), item]), // make it a string so we can actually compare it's values
-        ).values(),
+    if (listOfRemovals.length === 0) return;
+
+    DEBUG_LOG("INVALIDATED", listOfRemovals);
+
+    for (const { project } of listOfRemovals) {
+        RemoveProject(project, false);
+    }
+
+    // dedupe the list
+    Deno.writeTextFileSync(
+        GetAppPath("MOTHERFKRS"),
+        Array.from(new Set(GetAllProjects())).join("\n") + "\n",
     );
 
-    if (result.length === 0) return 1;
-
-    for (const target of result) RemoveProject(target.project, false);
-
-    return 0;
+    return;
 }
