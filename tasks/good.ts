@@ -1,9 +1,6 @@
-import { walkSync } from "@std/fs/walk";
-import { join } from "@std/path";
+import { ColorString } from "../src/functions/io.ts";
 
-console.log("we making this good");
-
-const dir = Deno.cwd(); // as the CWD from where you'll run deno task will always be the root of the project
+console.log(ColorString("we making this good", "bright-blue"));
 
 function Run(...args: string[]) {
     const output = new Deno.Command("deno", {
@@ -14,29 +11,7 @@ function Run(...args: string[]) {
     console.log(args, "went right");
 }
 
-function GetAllTsFiles(): string[] {
-    const exclude = [join(dir, "tests/environment")];
-    const tsFiles: string[] = [];
-
-    for (
-        const entry of walkSync(dir, {
-            includeDirs: false,
-            exts: [".ts"],
-            skip: [
-                ...exclude.map((excluded) => new RegExp(`(^|/)${excluded}(/|$)`)),
-                /\.ignore\.ts$/,
-            ],
-        })
-    ) {
-        tsFiles.push(entry.path);
-    }
-
-    return tsFiles;
-}
-
-const toPrepare: string[] = GetAllTsFiles();
-
-for (const unprepared of toPrepare) Run("check", unprepared); // ensure code is right
+Run("check", "."); // ensure code is right
 
 Run("fmt"); // ensure code is formatted
 
