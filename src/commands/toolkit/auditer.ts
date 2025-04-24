@@ -279,12 +279,20 @@ type InterrogatoryResponse = "true+1" | "true+2" | "false+1" | "false+2";
  * @param {boolean} isFollowUp If true, question is a follow up to another question.
  * @param {boolean} isReversed If true, responding "yes" to the question means it's not a vulnerability (opposite logic).
  * @param {1 | 2} worth What is the question worth? +1 to pos/neg or +2?
- * @returns {"true" | "false"}
+ * @returns {InterrogatoryResponse} An `InterrogatoryResponse`
  */
-function askQuestion(question: string, isFollowUp: boolean, isReversed: boolean, worth: 1 | 2): InterrogatoryResponse {
+function askQuestion(
+    question: string,
+    isFollowUp: boolean,
+    isReversed: boolean,
+    worth: 1 | 2,
+): InterrogatoryResponse {
     const formattedQuestion = ColorString(question, isFollowUp ? "bright-blue" : "bright-yellow", "italic");
-    if (Interrogate(formattedQuestion)) return isReversed ? (worth === 2 ? "false+1" : "false+2") : (worth === 2 ? "true+1" : "true+2");
-    return isReversed ? (worth === 2 ? "true+1" : "true+2") : (worth === 2 ? "false+1" : "false+2");
+    const answered = Interrogate(formattedQuestion);
+    const truthValue = isReversed ? !answered : answered;
+    const value = worth === 1 ? "+1" : "+2";
+
+    return `${truthValue ? "true" : "false"}${value}`;
 }
 
 /**
@@ -322,8 +330,6 @@ export function InterrogateVulnerableProject(questions: string[]): Omit<
         const response = handleQuestion({ q: question, f: false, r: true, w: 1 });
 
         // specific follow-up questions based on user responses
-        // to further interrogate da vulnerability
-        // im the king of naming functions fr fr
         if (!isTrue(response) && question.includes("V:CKS")) {
             handleQuestion(
                 { q: "Are cookies being set with the 'Secure' and 'HttpOnly' flags?", f: true, r: false, w: 1 },

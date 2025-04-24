@@ -25,7 +25,7 @@ const featureCompatibility = [
 
 const advancedFeatureCompatibility = [
     { Option: "Lint", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
-    { Option: "Pretty", NodeJS: labels.y, Deno: labels.p, Bun: labels.y, Go: labels.y, Cargo: labels.y },
+    { Option: "Pretty", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
     { Option: "Destroy", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
     { Option: "Update", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
 ];

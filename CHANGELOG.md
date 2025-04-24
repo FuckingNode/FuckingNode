@@ -6,6 +6,17 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
+## Unreleased
+
+### Changed
+
+- Now `FKNDBG` itself doesn't work. Set the environment variable `FKNODE_SHALL_WE_DEBUG` to the string `yeah` in order to show debug logs.
+- Now more `FKNDBG_*` commands are available. They just show some debug info, nothing special.
+
+### Fixed
+
+- Fixed `audit` miscalculating the score.
+
 ## [3.4.0] (22-04-2025)
 
 ### Added

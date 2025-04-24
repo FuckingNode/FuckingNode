@@ -4,7 +4,7 @@ import { ColorString } from "./io.ts";
 import type { GLOBAL_ERROR_CODES } from "../types/errors.ts";
 import { GetDateNow } from "./date.ts";
 import { StringUtils, type UnknownString } from "@zakahacecosas/string-utils";
-import { __FKNODE_SHALL_WE_DEBUG } from "../main.ts";
+import { FKNODE_SHALL_WE_DEBUG } from "../main.ts";
 
 /**
  * Errors that we know about, or that are caused by the user.
@@ -168,11 +168,15 @@ export function GenericErrorHandler(e: unknown): never {
     }
 }
 
-// constant case instead of pascal case so i can better recognize this
+/** function to write debug logs, only visible if env variable FKNODE_SHALL_WE_DEBUG is set to `yeah`
+ *
+ * (constant case instead of pascal case so i can better recognize this)
+ */
 export function DEBUG_LOG(...a: unknown[]): void {
-    if (__FKNODE_SHALL_WE_DEBUG) console.debug(a);
+    if (FKNODE_SHALL_WE_DEBUG) console.debug(a);
 }
 
+/** Throws a `FknError` and writes any debuggable content. */
 export function DebugFknErr(code: GLOBAL_ERROR_CODES, message: UnknownString, debuggableContent: UnknownString): never {
     const err = new FknError(code, StringUtils.validate(message) ? message : undefined);
     err.debug(

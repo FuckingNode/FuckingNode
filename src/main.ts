@@ -76,8 +76,8 @@ const flags = Deno.args.map((arg) =>
     })
 );
 
-export const __FKNODE_SHALL_WE_DEBUG = flags.some((s) => StringUtils.normalize(s) === "fkndbg");
-DEBUG_LOG("Initialized __FKNODE_SHALL_WE_DEBUG constant (ENTRY POINT)");
+export const FKNODE_SHALL_WE_DEBUG = Deno.env.get("FKNODE_SHALL_WE_DEBUG") === "yeah";
+DEBUG_LOG("Initialized FKNODE_SHALL_WE_DEBUG constant (ENTRY POINT)");
 DEBUG_LOG("ARGS", flags);
 
 function hasFlag(flag: string, allowQuickFlag: boolean, firstOnly: boolean = false): boolean {
@@ -110,7 +110,57 @@ function isNotFlag(arg: UnknownString): arg is string {
     return !str.startsWith("-") && !str.startsWith("--");
 }
 
-async function main(command: string) {
+async function main(command: UnknownString) {
+    // debug commands
+    if (FKNODE_SHALL_WE_DEBUG || Deno.args[0]?.startsWith("FKNDBG")) {
+        console.log(ColorString("FKNDBG at " + GetDateNow(), "italic"));
+        console.log("FKNDBG Logs aren't stored into the .log file.");
+        console.log("-".repeat(37));
+    }
+    if (Deno.args[0] === "FKNDBG_PROC") {
+        console.log(
+            "PROC NAME",
+            new TextDecoder().decode(
+                new Deno.Command("ps", {
+                    args: ["-p", Deno.pid.toString(), "-o", "comm="],
+                }).outputSync().stdout,
+            ).trim(),
+        );
+        console.log(
+            "PROC ID",
+            Deno.pid,
+            "PROC PARENT ID",
+            Deno.ppid,
+        );
+        return;
+    }
+    if (Deno.args[0] === "FKNDBG_WHERE") {
+        console.log("AT", Deno.cwd());
+        console.log("FROM", Deno.execPath());
+        console.log("CONCRETELY", import.meta.url);
+        return;
+    }
+    if (Deno.args[0] === "FKNDBG_MEM") {
+        const mem = Deno.memoryUsage();
+        console.log("MEM USAGE:");
+        for (const [k, v] of Object.entries(mem)) {
+            console.log(`${k.padEnd(10)}: ${(v / 1024 / 1024).toFixed(2)} MB`);
+        }
+        return;
+    }
+    if (Deno.args[0] === "FKNDBG_WHO") {
+        console.log("System info:", {
+            ...Deno.build,
+            hostname: Deno.hostname(),
+        });
+        return;
+    }
+
+    if (!StringUtils.validate(command)) {
+        TheHelper({});
+        Deno.exit(0);
+    }
+
     DEBUG_LOG("FLAGS[1]", flags[1], isNotFlag(flags[1]));
     const projectArg = (isNotFlag(flags[1]) || flags[1] === "--self") ? flags[1] : 0 as const;
     DEBUG_LOG("FLAGS[2]", flags[2], isNotFlag(flags[2]));
@@ -130,30 +180,6 @@ async function main(command: string) {
             project: projectArg,
         },
     };
-
-    // debug commands
-    if (Deno.args[0]?.startsWith("FKNDBG")) {
-        console.log(ColorString("FKNDBG at " + GetDateNow(), "italic"));
-        console.log("This isn't stored into the .log file.");
-        console.log("-".repeat(37));
-    }
-    if (Deno.args[0] === "FKNDBG_PROC") {
-        console.log(
-            "PROC NAME",
-            new TextDecoder().decode(
-                new Deno.Command("ps", {
-                    args: ["-p", Deno.pid.toString(), "-o", "comm="],
-                }).outputSync().stdout,
-            ).trim(),
-        );
-        console.log(
-            "PROC ID && PROC PAREN ID",
-            Deno.pid,
-            "&&",
-            Deno.ppid,
-        );
-        return;
-    }
 
     switch (
         StringUtils.normalize(command, {
@@ -299,6 +325,7 @@ async function main(command: string) {
         case "sokoballs":
             LaunchWebsite("https://tenor.com/view/sokora-dunk-ice-skate-ice-dunk-balling-gif-7665972654807661282?quality=lossless");
             break;
+        case "tip":
         case "hint":
         case "protip":
         case "pro-tip":
@@ -320,11 +347,6 @@ async function main(command: string) {
 if (import.meta.main) {
     try {
         await init();
-
-        if (!StringUtils.validate(flags[0])) {
-            TheHelper({});
-            Deno.exit(0);
-        }
 
         await main(flags[0]);
     } catch (e) {
