@@ -1,39 +1,38 @@
 {
   "version": "4",
   "specifiers": {
-    "jsr:@std/assert@^1.0.12": "1.0.12",
-    "jsr:@std/collections@^1.0.10": "1.0.10",
+    "jsr:@std/assert@^1.0.13": "1.0.13",
+    "jsr:@std/collections@^1.0.11": "1.0.11",
     "jsr:@std/datetime@~0.225.4": "0.225.4",
-    "jsr:@std/fmt@^1.0.6": "1.0.6",
-    "jsr:@std/fs@^1.0.16": "1.0.16",
+    "jsr:@std/fmt@^1.0.7": "1.0.7",
+    "jsr:@std/fs@^1.0.17": "1.0.17",
     "jsr:@std/internal@^1.0.6": "1.0.6",
-    "jsr:@std/json@1": "1.0.1",
-    "jsr:@std/jsonc@^1.0.1": "1.0.1",
-    "jsr:@std/path@^1.0.8": "1.0.8",
+    "jsr:@std/jsonc@^1.0.2": "1.0.2",
+    "jsr:@std/path@^1.0.9": "1.0.9",
     "jsr:@std/semver@1.0.5": "1.0.5",
-    "jsr:@std/toml@^1.0.4": "1.0.4",
-    "jsr:@std/yaml@*": "1.0.5",
+    "jsr:@std/toml@^1.0.5": "1.0.5",
+    "jsr:@std/yaml@1.0.6": "1.0.6",
     "jsr:@zakahacecosas/string-utils@^2.2.1": "2.2.1",
     "npm:@types/node@*": "22.12.0"
   },
   "jsr": {
-    "@std/assert@1.0.12": {
-      "integrity": "08009f0926dda9cbd8bef3a35d3b6a4b964b0ab5c3e140a4e0351fbf34af5b9a",
+    "@std/assert@1.0.13": {
+      "integrity": "ae0d31e41919b12c656c742b22522c32fb26ed0cba32975cb0de2a273cb68b29",
       "dependencies": [
         "jsr:@std/internal"
       ]
     },
-    "@std/collections@1.0.10": {
-      "integrity": "903af106a3d92970d74e20f7ebff77d9658af9bef4403f1dc42a7801c0575899"
+    "@std/collections@1.0.11": {
+      "integrity": "2f62cf9587484b1fff364f6c3e1f83478eea53dbb6faed6ffeda92ddb6b172f0"
     },
     "@std/datetime@0.225.4": {
       "integrity": "682bc21738b941a4ed1465be6da01704e8010a3a6d9b615de9458202b84e00ec"
     },
-    "@std/fmt@1.0.6": {
-      "integrity": "a2c56a69a2369876ddb3ad6a500bb6501b5bad47bb3ea16bfb0c18974d2661fc"
+    "@std/fmt@1.0.7": {
+      "integrity": "2a727c043d8df62cd0b819b3fb709b64dd622e42c3b1bb817ea7e6cc606360fb"
     },
-    "@std/fs@1.0.16": {
-      "integrity": "81878f62b6eeda0bf546197fc3daa5327c132fee1273f6113f940784a468b036",
+    "@std/fs@1.0.17": {
+      "integrity": "1c00c632677c1158988ef7a004cb16137f870aafdb8163b9dce86ec652f3952b",
       "dependencies": [
         "jsr:@std/path"
       ]
@@ -41,29 +40,23 @@
     "@std/internal@1.0.6": {
       "integrity": "9533b128f230f73bd209408bb07a4b12f8d4255ab2a4d22a1fd6d87304aca9a4"
     },
-    "@std/json@1.0.1": {
-      "integrity": "1f0f70737e8827f9acca086282e903677bc1bb0c8ffcd1f21bca60039563049f"
+    "@std/jsonc@1.0.2": {
+      "integrity": "909605dae3af22bd75b1cbda8d64a32cf1fd2cf6efa3f9e224aba6d22c0f44c7"
     },
-    "@std/jsonc@1.0.1": {
-      "integrity": "6b36956e2a7cbb08ca5ad7fbec72e661e6217c202f348496ea88747636710dda",
-      "dependencies": [
-        "jsr:@std/json"
-      ]
-    },
-    "@std/path@1.0.8": {
-      "integrity": "548fa456bb6a04d3c1a1e7477986b6cffbce95102d0bb447c67c4ee70e0364be"
+    "@std/path@1.0.9": {
+      "integrity": "260a49f11edd3db93dd38350bf9cd1b4d1366afa98e81b86167b4e3dd750129e"
     },
     "@std/semver@1.0.5": {
       "integrity": "529f79e83705714c105ad0ba55bec0f9da0f24d2f726b6cc1c15e505cc2c0624"
     },
-    "@std/toml@1.0.4": {
-      "integrity": "8781e687d04c8fbe246b9c5714be01925792a94d943462c33777675ab557cff1",
+    "@std/toml@1.0.5": {
+      "integrity": "08061156e9c5716443a144b6e40a8668738b8b424ad99ab0b6fdf1b6ea4da806",
       "dependencies": [
         "jsr:@std/collections"
       ]
     },
-    "@std/yaml@1.0.5": {
-      "integrity": "71ba3d334305ee2149391931508b2c293a8490f94a337eef3a09cade1a2a2742"
+    "@std/yaml@1.0.6": {
+      "integrity": "c9a5a914e1d51c46756cb10e356710035cfa905e713c90d3b711413fd3aead27"
     },
     "@zakahacecosas/string-utils@2.2.1": {
       "integrity": "2a7f2148599fc10b16dc806bbf1b5b6c50e5c2fb2efbf71a6c8ca01cf97b4ca1"
@@ -82,15 +75,15 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@std/assert@^1.0.12",
+      "jsr:@std/assert@^1.0.13",
       "jsr:@std/datetime@~0.225.4",
-      "jsr:@std/fmt@^1.0.6",
-      "jsr:@std/fs@^1.0.16",
-      "jsr:@std/jsonc@^1.0.1",
-      "jsr:@std/path@^1.0.8",
+      "jsr:@std/fmt@^1.0.7",
+      "jsr:@std/fs@^1.0.17",
+      "jsr:@std/jsonc@^1.0.2",
+      "jsr:@std/path@^1.0.9",
       "jsr:@std/semver@1.0.5",
-      "jsr:@std/toml@^1.0.4",
-      "jsr:@std/yaml@*",
+      "jsr:@std/toml@^1.0.5",
+      "jsr:@std/yaml@1.0.6",
       "jsr:@zakahacecosas/string-utils@^2.2.1"
     ]
   }
