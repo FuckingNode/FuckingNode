@@ -12,7 +12,7 @@
     pkgs = import nixpkgs { inherit system; };
 
     pname = "fuckingnode";
-    version = "3.3.0";
+    version = "3.4.0";
 
     urls = {
       "x86_64-linux"   = "https://github.com/FuckingNode/FuckingNode/releases/download/${version}/FuckingNode-linux64";
@@ -21,11 +21,12 @@
       "aarch64-darwin" = "https://github.com/FuckingNode/FuckingNode/releases/download/${version}/FuckingNode-macos_arm";
     };
 
+
     sha256s = {
-      "x86_64-linux"   = "01qxzfdjyp5g35vdm6yz5ig74b5gc4gnnpqwqrbsd94rmsy05bdz";
-      "aarch64-linux"  = "11hkq1gjcqqhawpnpdg8vmhyihsisj84c166h50xr7sxjjdy2r0g";
-      "x86_64-darwin"  = "0p2yjcbrlvzb812q6p7cj52zccshvba38pnyb0hzcrv8akpbarif";
-      "aarch64-darwin" = "0dr9n6yn7xbv06668cz74mc2yfzgxfvc23p89ilvz0lvi4qckwhq";
+      "aarch64-linux" = "06w785csh0kvmry984s6ax5gb9nhkh47s8yyw018ga9i4h73rppp";
+      "x86_64-linux" = "1r0gmhc7xpi5p7cbcbr9s1298wis3bhsq3nip7ykzd1ivbql3aif";
+      "x86_64-darwin" = "1v9s1g90nhqxvbizfrzi70hzqm5124c5rfzy19cxh4g1w23dxi1v";
+      "aarch64-darwin" = "00b02bb9mw83cza7sdra6akl2ravvyl2ndxlp0l14rbk38v5qa3x";
     };
 
   in {
@@ -57,6 +58,29 @@
         mainProgram = "fuckingnode";
       };
     };
+
+    packages.hashes = pkgs.writeShellScriptBin "update_hashes" ''
+      #!/usr/bin/env bash
+      set -euo pipefail
+
+      version="${version}"
+      base_url="https://github.com/FuckingNode/FuckingNode/releases/download/$version"
+
+      declare -A urls=(
+        ["x86_64-linux"]="$base_url/FuckingNode-linux64"
+        ["aarch64-linux"]="$base_url/FuckingNode-linux_arm"
+        ["x86_64-darwin"]="$base_url/FuckingNode-macos64"
+        ["aarch64-darwin"]="$base_url/FuckingNode-macos_arm"
+      )
+
+      echo "  sha256s = {"
+      for platform in "''${!urls[@]}"; do
+        url="''${urls[$platform]}"
+        hash=$(nix-prefetch-url --type sha256 "$url" 2>/dev/null)
+        printf '    "%s" = "%s";\n' "$platform" "$hash"
+      done
+      echo "  };"
+    '';
 
     devShell = pkgs.mkShell {
       buildInputs = [
