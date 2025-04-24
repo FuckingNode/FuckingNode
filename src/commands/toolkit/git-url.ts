@@ -8,7 +8,7 @@ const gitAliases: Record<string, (arg: string) => string> = {
     sr: (repo: string) => `https://sourceforge.net/p/${repo}.git`,
     bbp: (repo: string) => `https://bitbucket.org/${repo}/pipelines.git`,
     gist: (repo: string) => `https://gist.github.com/${repo}.git`,
-    gb: (repo: string) => `https://codeberg.org/${repo}.git`,
+    cb: (repo: string) => `https://codeberg.org/${repo}.git`,
     gt: (repo: string) => `https://gitee.com/${repo}.git`,
     fg: (repo: string) => `https://framagit.org/${repo}.git`,
     op: (repo: string) => `https://git.openprivacy.ca/${repo}.git`,
@@ -65,6 +65,8 @@ export function GenerateGitUrl(str: UnknownString): {
             throw new Error(`${str} is not a valid Git URL!`);
         }
     }
+
+    if (!str.includes(":")) throw new Error("Git URL must be a valid URL or scope!");
 
     const [alias, repo] = str.split(":");
 

@@ -2,7 +2,7 @@ import { parse as parseYaml } from "@std/yaml";
 import { parse as parseToml } from "@std/toml";
 import { parse as parseJsonc } from "@std/jsonc";
 import { expandGlobSync } from "@std/fs";
-import { APP_NAME, APP_URLs, DEFAULT_FKNODE_YAML, I_LIKE_JS } from "../constants.ts";
+import { APP_NAME, APP_URLs, DEFAULT_FKNODE_YAML, FWORDS } from "../constants.ts";
 import type { CargoPkgFile, NodePkgFile, ProjectEnvironment, UnderstoodProjectProtection } from "../types/platform.ts";
 import { CheckForPath, JoinPaths, ParsePath, ParsePathList } from "./filesystem.ts";
 import { ColorString, Interrogate, LogStuff } from "./io.ts";
@@ -150,7 +150,7 @@ export function AddProject(
         }
 
         const addWorkspaces = Interrogate(
-            `Hey! This looks like a ${I_LIKE_JS.FKN} monorepo. We've found these workspaces:\n\n${
+            `Hey! This looks like a ${FWORDS.FKN} monorepo. We've found these workspaces:\n\n${
                 workspaceString.join("\n")
             }.\n\nShould we add them to your list as well, so they're all cleaned?`,
         );
@@ -196,7 +196,7 @@ export function AddProject(
         }
 
         const addWorkspaces = Interrogate(
-            `Hey! This looks like a ${I_LIKE_JS.FKN} rootless monorepo. We've found these workspaces:\n\n${
+            `Hey! This looks like a ${FWORDS.FKN} rootless monorepo. We've found these workspaces:\n\n${
                 workspaces.join("\n")
             }.\n\nShould we add them to your list so they're all cleaned?`,
         );
@@ -362,24 +362,25 @@ export function deepMerge(
  * @returns {FullFkNodeYaml} A `FullFkNodeYaml` object.
  */
 function GetProjectSettings(path: string): FullFkNodeYaml {
+    DEBUG_LOG("FKN YAML / ARGS", path);
     const pathToDivineFile = JoinPaths(path, "fknode.yaml");
-    DEBUG_LOG("READING", pathToDivineFile);
+    DEBUG_LOG("FKN YAML / READING", pathToDivineFile);
 
     if (!CheckForPath(pathToDivineFile)) {
-        DEBUG_LOG("\nRESORTING TO DEFAULTS 1\n");
+        DEBUG_LOG("FKN YAML / RESORTING TO DEFAULTS (no fknode.yaml)");
         return DEFAULT_FKNODE_YAML;
     }
 
     const content = Deno.readTextFileSync(pathToDivineFile);
     const divineContent = parseYaml(content);
-    DEBUG_LOG("RAW DIVINE CONTENT", divineContent);
+    DEBUG_LOG("FKN YAML / RAW DIVINE CONTENT", path, divineContent);
 
     if (!ValidateFkNodeYaml(divineContent)) {
-        DEBUG_LOG("\nRESORTING TO DEFAULTS 2\n");
+        DEBUG_LOG("FKN YAML / RESORTING TO DEFAULTS (invalid fknode.yaml)");
         if (!content.includes("UPON INTERACTING")) {
             Deno.writeTextFileSync(
                 pathToDivineFile,
-                `\n# [NOTE (${GetDateNow()}): Invalid file format! (Auto-added by ${APP_NAME.CASED}). DEFAULT SETTINGS WILL BE USED UPON INTERACTING WITH THIS ${I_LIKE_JS.MF.toUpperCase()} UNTIL YOU FIX THIS! Refer to ${APP_URLs.WEBSITE} to learn about how fknode.yaml works.]\n`,
+                `\n# [NOTE (${GetDateNow()}): Invalid file format! (Auto-added by ${APP_NAME.CASED}). DEFAULT SETTINGS WILL BE USED UPON INTERACTING WITH THIS ${FWORDS.MF.toUpperCase()} UNTIL YOU FIX THIS! Refer to ${APP_URLs.WEBSITE} to learn about how fknode.yaml works.]\n`,
                 {
                     append: true,
                 },
@@ -389,7 +390,7 @@ function GetProjectSettings(path: string): FullFkNodeYaml {
     }
 
     const mergedSettings = deepMerge(DEFAULT_FKNODE_YAML, divineContent);
-    DEBUG_LOG("DEEP MERGE", mergedSettings);
+    DEBUG_LOG("FKN YAML / DEEP MERGE", path, mergedSettings);
 
     return mergedSettings;
 }
@@ -573,6 +574,7 @@ export function GetWorkspaces(path: string): string[] {
  * @returns {ProjectEnvironment}
  */
 export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
+    DEBUG_LOG("CALLED GetProjectEnvironment WITH path", path);
     const root = SpotProject(path);
 
     if (!CheckForPath(root)) throw new FknError("Internal__Projects__CantDetermineEnv", `Path ${root} doesn't exist.`);
@@ -663,6 +665,7 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
         : paths.node.json;
 
     const mainString: string = Deno.readTextFileSync(mainPath);
+    DEBUG_LOG("GETTING SETTINGS FROM", root);
     const settings: FullFkNodeYaml = GetProjectSettings(root);
 
     const runtimeColor = isBun ? "pink" : isNode ? "bright-green" : isDeno ? "bright-blue" : isRust ? "orange" : "cyan";
@@ -956,9 +959,9 @@ export function SpotProject(name: UnknownString): string {
  * Cleans up projects that are invalid and probably we won't be able to clean.
  *
  * @export
- * @returns {Promise<0 | 1>} 0 if success, 1 if no projects to remove.
+ * @returns {void}
  */
-export function CleanupProjects(): 0 | 1 {
+export function CleanupProjects(): void {
     const listOfRemovals: { project: string; issue: PROJECT_ERROR_CODES }[] = [];
 
     const allProjects = GetAllProjects();
@@ -967,23 +970,23 @@ export function CleanupProjects(): 0 | 1 {
         const validation = ValidateProject(project, true);
 
         if (validation !== true) {
-            listOfRemovals.push({
-                project,
-                issue: validation,
-            });
+            listOfRemovals.push({ project, issue: validation });
         }
     }
 
-    // remove duplicates
-    const result = Array.from(
-        new Map(
-            listOfRemovals.map((item) => [JSON.stringify(item), item]), // make it a string so we can actually compare it's values
-        ).values(),
+    if (listOfRemovals.length === 0) return;
+
+    DEBUG_LOG("INVALIDATED", listOfRemovals);
+
+    for (const { project } of listOfRemovals) {
+        RemoveProject(project, false);
+    }
+
+    // dedupe the list
+    Deno.writeTextFileSync(
+        GetAppPath("MOTHERFKRS"),
+        Array.from(new Set(GetAllProjects())).join("\n") + "\n",
     );
 
-    if (result.length === 0) return 1;
-
-    for (const target of result) RemoveProject(target.project, false);
-
-    return 0;
+    return;
 }

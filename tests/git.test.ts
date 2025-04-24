@@ -47,5 +47,8 @@ Deno.test({
         assertEquals(GenerateGitUrl("gh:user/repo.").full, "https://github.com/user/repo.git");
         assertEquals(GenerateGitUrl("bb:user/repo").full, "https://bitbucket.org/user/repo.git");
         assertEquals(GenerateGitUrl("gl:me/code...").full, "https://gitlab.com/me/code.git");
+
+        assertEquals(GenerateGitUrl("gh:user/cool-repo").name, "cool-repo");
+        assertEquals(GenerateGitUrl("https://github.com/user/cool-repo..git").name, "cool-repo");
     },
 });

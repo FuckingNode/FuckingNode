@@ -25,4 +25,3 @@ jobs:
 
       - name: Build for ${{ matrix.system }}
         run: nix build .# --system ${{ matrix.system }}
-

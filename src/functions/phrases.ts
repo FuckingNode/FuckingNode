@@ -5,8 +5,9 @@
  * (bruh i spent my time writing all of this instead of studying)
  */
 
-import { APP_NAME, I_LIKE_JS } from "../constants.ts";
+import { APP_NAME, FWORDS } from "../constants.ts";
 import { GetAppPath } from "./config.ts";
+import { ColorString } from "./io.ts";
 
 const internalJokes = [
     "Dima definitely approves", // indeed he does
@@ -15,7 +16,7 @@ const internalJokes = [
     "(not) powered by Vuelto <https://vuelto.pp.ua/>", // rewrite to Vuelto coming 2026
     "Proudly running on anything but a FireBlitz server", // those who know :skull:
     "not made in germany", // those who know :skull:
-    `(it's named this way because Node is ${I_LIKE_JS.FKN} annoying, not because I ${I_LIKE_JS.FK}ed it)`, // (someone really told me the 2nd one)
+    `(it's named this way because Node is ${FWORDS.FKN} annoying, not because I ${FWORDS.FK}ed it)`, // (someone really told me the 2nd one)
     "Proudly made by ZakaHaceCosas (translates to 'ZakaMakesStuff')", // YOO
     "Proudly developed in Spain (the S is silent)", // elections here don't work, i swear
     "i should be studying chemistry and i'm writing random phrases for this thing", // real btw
@@ -68,13 +69,17 @@ const devJokes = [
 
 /** (used to be secretHints...) */
 export const HINTS = [
-    `F\*ckingProTip: try running with "FKNDBG" at the end next time`,
-    "F\*ckingProTip: run 'fkn sokoballs'",
-    "F\*ckingProTip: cleanup supports a '--verbose' flag that shows CLI output in real time from tasks that are being automated",
-    `F\*ckingProTip: critical errors get logged to ${GetAppPath("ERRORS")} in a fairly readable format`,
-    `F\*ckingProTip: run 'fkn export <project>', it'll show you what we REALLY understand about your project (and care enough about)`,
-    `F\*ckingProTip: 'fkn surrender' has aliases that do the exact same thing but more properly representing why you chose to surrender on a project, for example 'fkn im-done-with <project>', or 'fkn i-give-up <project>'`,
-    `F\*ckingProTip: if your drive is nearly full and you desperately need storage, run 'fkn storage-emergency'. thank me later. note: desperate situations require desperate measures, be advised.`,
+    `F\*ckingProTip (01): try setting this env variable: ${ColorString("FKNODE_SHALL_WE_DEBUG", "bold")}=${ColorString("yea", "bright-green")}`,
+    "F\*ckingProTip (02): run 'fkn sokoballs'",
+    "F\*ckingProTip (03): cleanup supports a '--verbose' flag that shows CLI output in real time from tasks that are being automated",
+    `F\*ckingProTip (04): critical errors get logged to ${GetAppPath("ERRORS")} in a fairly readable format`,
+    `F\*ckingProTip (05): run 'fkn export <project>', it'll show you what we REALLY understand about your project (and care enough about)`,
+    `F\*ckingProTip (06): 'fkn surrender' has aliases that do the exact same thing but more properly representing why you chose to surrender on a project, for example 'fkn im-done-with <project>', or 'fkn i-give-up <project>'`,
+    `F\*ckingProTip (07): if your drive is nearly full and you desperately need storage, run 'fkn storage-emergency'. thank me later. note: desperate situations require desperate measures, be advised.`,
+    `F\*ckingProTip (08): you can kickstart a project with a git prefix (or shorthand or alias or whatever).\nfor example, kickstart gh:cool-guy/cool-repo maps to https://github.com/cool-guy/cool-repo.git - so you type less\nthere's 10 aliases, run 'compat kickstart' to see them all`,
+    `F\*ckingProTip (09): all our config files live at ${GetAppPath("BASE")}. touch anything there if you want.`,
+    `F\*ckingProTip (10): if you touched any config file and broke whatever (or something broke because yes), run 'fkn something-fucked-up'. it'll reset all config files, except for your project list.`,
+    `F\*ckingProTip (11): here's an actually good recommendation: use DenoJS, or BunJS, or learn another language - avoid Node.`,
 ];
 
 const appRelatedJokes = [
@@ -94,8 +99,8 @@ const brandingJokes = [
     "Make JavaScript great again!",
     "Make JavaScript great again! (not like it ever was)",
     `${APP_NAME.CASED}/Deno/Bun, actually`,
-    `${I_LIKE_JS.FKN}JSRuntimesInGeneral, actually`,
-    `${APP_NAME.CASED}? More like ${I_LIKE_JS.FKN}Cool!`,
+    `${FWORDS.FKN}JSRuntimesInGeneral, actually`,
+    `${APP_NAME.CASED}? More like ${FWORDS.FKN}Cool!`,
 ];
 
 const quotes = [

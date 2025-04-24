@@ -79,13 +79,26 @@ export const InteropedFeatures = {
 
                 return true;
             }
-        } else if (StringUtils.validateAgainst(env.runtime, ["deno", "rust"])) {
-            LogStuff(
-                `Linting is unsupported for ${StringUtils.toUpperCaseFirst(env.runtime)}. Skipping task...", "warn", "bright-yellow`,
+        } else if (env.runtime === "rust") {
+            const output = Commander(
+                "cargo",
+                ["check", "--all-targets", "--workspace"],
+                verbose,
             );
-            // TODO - funnily enough, our repository itself has a gluefix for this (iterates thru all code files running the check command individually)
-            // both Deno and cargo use <rt> check <file> cmd, so we should do that later on
+
+            if (!output.success) HandleError("Unknown__CleanerTask__Lint", output.stdout);
+
             return false;
+        } else if (env.runtime === "deno") {
+            const output = Commander(
+                env.commands.run[0],
+                ["check", "."],
+                verbose,
+            );
+
+            if (!output.success) HandleError("Unknown__CleanerTask__Lint", output.stdout);
+
+            return true;
         } else {
             const output = Commander(
                 "go",

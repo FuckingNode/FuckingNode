@@ -1,10 +1,10 @@
 import { join } from "@std/path/join";
-import { APP_NAME, I_LIKE_JS, LOCAL_PLATFORM } from "../constants.ts";
+import { APP_NAME, FWORDS, LOCAL_PLATFORM } from "../constants.ts";
 import { ColorString } from "./io.ts";
 import type { GLOBAL_ERROR_CODES } from "../types/errors.ts";
 import { GetDateNow } from "./date.ts";
 import { StringUtils, type UnknownString } from "@zakahacecosas/string-utils";
-import { __FKNODE_SHALL_WE_DEBUG } from "../main.ts";
+import { FKNODE_SHALL_WE_DEBUG } from "../main.ts";
 
 /**
  * Errors that we know about, or that are caused by the user.
@@ -51,7 +51,7 @@ export class FknError extends Error {
                         LOCAL_PLATFORM.SYSTEM === "windows" ? "APPDATA env variable" : "XDG_CONFIG_HOME and HOME env variables",
                         "bold",
                     )
-                } but failed, meaning config files cannot be created and the CLI can't work. Something seriously went ${I_LIKE_JS.MFLY} wrong. If these aren't the right environment variables for your system's config path (currently using APPDATA on Windows, /home/user/.config on macOS and Linux), please raise an issue on GitHub.`;
+                } but failed, meaning config files cannot be created and the CLI can't work. Something seriously went ${FWORDS.MFLY} wrong. If these aren't the right environment variables for your system's config path (currently using APPDATA on Windows, /home/user/.config on macOS and Linux), please raise an issue on GitHub.`;
                 break;
             case "Project__NonFoundProject":
                 this.hint = `Check for typos or a wrong name. Given input (either a project's name or a file path) wasn't found.`;
@@ -160,19 +160,23 @@ export function GenericErrorHandler(e: unknown): never {
         e.exit();
         Deno.exit(1); // (never reached, but without this line typescript doesn't shut up)
     } else if (e instanceof Error) {
-        console.error(`${ColorString(I_LIKE_JS.FK, "red", "bold")}! Something happened: ${e.message}`);
+        console.error(`${ColorString(FWORDS.FK, "red", "bold")}! Something happened: ${e.message}`);
         Deno.exit(1);
     } else {
-        console.error(`${ColorString(I_LIKE_JS.FK, "red", "bold")}! Something strange happened: ${e}`);
+        console.error(`${ColorString(FWORDS.FK, "red", "bold")}! Something strange happened: ${e}`);
         Deno.exit(1);
     }
 }
 
-// constant case instead of pascal case so i can better recognize this
+/** function to write debug logs, only visible if env variable FKNODE_SHALL_WE_DEBUG is set to `yeah`
+ *
+ * (constant case instead of pascal case so i can better recognize this)
+ */
 export function DEBUG_LOG(...a: unknown[]): void {
-    if (__FKNODE_SHALL_WE_DEBUG) console.debug(a);
+    if (FKNODE_SHALL_WE_DEBUG) console.debug(a);
 }
 
+/** Throws a `FknError` and writes any debuggable content. */
 export function DebugFknErr(code: GLOBAL_ERROR_CODES, message: UnknownString, debuggableContent: UnknownString): never {
     const err = new FknError(code, StringUtils.validate(message) ? message : undefined);
     err.debug(

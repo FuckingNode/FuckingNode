@@ -1,4 +1,4 @@
-import { FULL_NAME, I_LIKE_JS, isDef, LOCAL_PLATFORM } from "../../constants.ts";
+import { FULL_NAME, FWORDS, isDef, LOCAL_PLATFORM } from "../../constants.ts";
 import { Commander, CommandExists } from "../../functions/cli.ts";
 import { GetAppPath, GetUserSettings } from "../../functions/config.ts";
 import { BulkRemoveFiles, CheckForPath, JoinPaths, ParsePath } from "../../functions/filesystem.ts";
@@ -21,6 +21,7 @@ const ProjectCleaningFeatures = {
         env: ProjectEnvironment,
         verbose: boolean,
     ) => {
+        Deno.chdir(env.root);
         LogStuff(
             `Updating dependencies for ${projectName}.`,
             "working",
@@ -42,6 +43,7 @@ const ProjectCleaningFeatures = {
         env: ProjectEnvironment,
         verbose: boolean,
     ) => {
+        Deno.chdir(env.root);
         const { commands } = env;
         if (commands.clean === "__UNSUPPORTED") {
             LogStuff(
@@ -68,6 +70,7 @@ const ProjectCleaningFeatures = {
         env: ProjectEnvironment,
         verbose: boolean,
     ) => {
+        Deno.chdir(env.root);
         LogStuff(
             `Linting ${projectName}.`,
             "working",
@@ -89,6 +92,7 @@ const ProjectCleaningFeatures = {
         env: ProjectEnvironment,
         verbose: boolean,
     ) => {
+        Deno.chdir(env.root);
         LogStuff(
             `Prettifying ${projectName}.`,
             "working",
@@ -111,6 +115,7 @@ const ProjectCleaningFeatures = {
         intensity: CleanerIntensity,
         verbose: boolean,
     ) => {
+        Deno.chdir(env.root);
         try {
             if (!env.settings.destroy) return;
             if (
@@ -166,6 +171,7 @@ const ProjectCleaningFeatures = {
             LogStuff("Tree isn't clean, can't commit", "bruh");
             return;
         }
+        Deno.chdir(env.root);
         function getCommitMessage() {
             if (
                 StringUtils.validate(env.settings.commitMessage) && !(isDef(env.settings.commitMessage))
@@ -232,8 +238,8 @@ export function PerformCleanup(
         boolean
     > = {
         update: doUpdate || (workingEnv.settings.flagless?.flaglessUpdate === true),
-        lint: doPrettify || (workingEnv.settings.flagless?.flaglessLint === true),
-        pretty: doLint || (workingEnv.settings.flagless?.flaglessPretty === true),
+        lint: doLint || (workingEnv.settings.flagless?.flaglessLint === true),
+        pretty: doPrettify || (workingEnv.settings.flagless?.flaglessPretty === true),
         destroy: doDestroy || (workingEnv.settings.flagless?.flaglessDestroy === true),
         commit: shouldCommit || (workingEnv.settings.flagless?.flaglessCommit === true),
     };
@@ -469,7 +475,7 @@ export function PerformMaximCleanup(projects: string[]): void {
         );
         if (!CheckForPath(env.hall_of_trash)) {
             LogStuff(
-                `Maxim pruning didn't find the node_modules DIR at ${name}. Skipping this ${I_LIKE_JS.MF}...`,
+                `Maxim pruning didn't find the node_modules DIR at ${name}. Skipping this ${FWORDS.MF}...`,
                 "bruh",
             );
             return;

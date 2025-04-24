@@ -1,6 +1,6 @@
 import { compare, parse } from "@std/semver";
 import { FetchGitHub } from "../functions/http.ts";
-import { LOCAL_PLATFORM, RELEASE_URL, VERSION } from "../constants.ts";
+import { APP_URLs, LOCAL_PLATFORM, RELEASE_URL, VERSION } from "../constants.ts";
 import type { GITHUB_RELEASE } from "../types/misc.ts";
 import { GetDateNow } from "../functions/date.ts";
 import type { TheUpdaterConstructedParams } from "./constructors/command.ts";
@@ -71,7 +71,7 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
     if (!Interrogate("Should we auto-update the CLI for you?")) return;
     const filename = LOCAL_PLATFORM.SYSTEM === "windows" ? "install.ps1" : "install.sh";
     const buffer = await (await fetch(
-        `https://fuckingnode.github.io/${filename}`,
+        `${APP_URLs.WEBSITE}${filename}`,
     )).arrayBuffer();
 
     const path = Deno.makeTempDirSync({ prefix: "UPDATE-SH" });

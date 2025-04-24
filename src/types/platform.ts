@@ -1,5 +1,5 @@
 import type { FullFkNodeYaml } from "./config_files.ts";
-import type { tValidColors } from "./misc.ts";
+import type { VALID_COLORS } from "./misc.ts";
 
 /**
  * Understood version of a project's protection settings.
@@ -15,7 +15,8 @@ export interface UnderstoodProjectProtection {
     doDestroy: boolean;
 }
 
-export type CargoDependency = string | { version: string; [key: string]: unknown };
+/** A Cargo dependency. */
+export type CargoDependency = string | { version: string; optional?: boolean; features?: string[] };
 
 /**
  * Use this when you just need the name or version of a package, to avoid Node-Deno type issues.
@@ -62,16 +63,24 @@ export interface DenoPkgFile extends GenericJsPkgFile {
  * @interface CargoPkgFile
  */
 export interface CargoPkgFile {
-    package: {
-        name: string;
-        version: string;
+    package?: {
+        name: string | { workspace: true };
+        version: string | { workspace: true };
         /** If unclear, the Rust "edition" is the Rust version to be used. */
-        edition?: string;
+        edition?: string | { workspace: true };
     };
     dependencies?: Record<string, CargoDependency>;
     "dev-dependencies"?: Record<string, CargoDependency>;
     "build-dependencies"?: Record<string, CargoDependency>;
-    workspace?: { members?: string[] };
+    workspace?: {
+        package?: {
+            name: string;
+            version: string;
+            /** If unclear, the Rust "edition" is the Rust version to be used. */
+            edition?: string;
+        };
+        members?: string[];
+    };
 }
 
 /**
@@ -151,7 +160,7 @@ interface GenericProjectEnvironment {
         name: LOCKFILE_GLOBAL;
     };
     /**
-     * Where this project is running it, named after the so called JS runtimes.
+     * On what is this project running. Named after the so called JS runtimes.
      *
      * @type {("node" | "deno" | "bun" | "golang" | "rust")}
      */
@@ -159,9 +168,9 @@ interface GenericProjectEnvironment {
     /**
      * A brand color that's associated with this runtime. {@linkcode ColorString} compatible.
      *
-     * @type {tValidColors}
+     * @type {VALID_COLORS}
      */
-    runtimeColor: tValidColors;
+    runtimeColor: VALID_COLORS;
     /**
      * Package manager. For Deno and Bun it just says "deno" and "bun" instead of JSR or NPM (afaik Bun uses NPM) to avoid confusion.
      *

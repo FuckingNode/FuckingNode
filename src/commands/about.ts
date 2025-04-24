@@ -1,7 +1,7 @@
-import { APP_NAME, APP_URLs, I_LIKE_JS, VERSION } from "../constants.ts";
+import { APP_NAME, APP_URLs, FWORDS, VERSION } from "../constants.ts";
 import { ColorString } from "../functions/io.ts";
 import { LogStuff } from "../functions/io.ts";
-import type { tValidColors } from "../types/misc.ts";
+import type { VALID_COLORS } from "../types/misc.ts";
 import { ASCII } from "../functions/ascii.ts";
 import { phrases } from "../functions/phrases.ts";
 
@@ -11,8 +11,8 @@ function getRandomPhrase(): string {
     return ColorString(string, "bright-green", "italic");
 }
 
-function getRandomColor(): tValidColors {
-    const colors: tValidColors[] = [
+function getRandomColor(): VALID_COLORS {
+    const colors: VALID_COLORS[] = [
         "bright-blue",
         "cyan",
         "blue",
@@ -51,7 +51,7 @@ export default function TheAbouter() {
         `See cool trailer on ${coolStrings.yt} / ${APP_URLs.WEBSITE}follow-us`,
     );
     LogStuff(
-        `${I_LIKE_JS.FK} communism, love freedom. this one's open-source: ${coolStrings.gitUrl}\n`,
+        `${FWORDS.FK} communism, love freedom. this one's open-source: ${coolStrings.gitUrl}\n`,
     );
     LogStuff(
         `${coolStrings.side}, born ${coolStrings.date} (a bit earlier but 'Initial commit' in the 1st repo was then)`,

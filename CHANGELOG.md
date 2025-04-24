@@ -8,21 +8,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## Unreleased
 
+### Changed
+
+- Now `FKNDBG` itself doesn't work. Set the environment variable `FKNODE_SHALL_WE_DEBUG` to the string `yeah` in order to show debug logs.
+- Now more `FKNDBG_*` commands are available. They just show some debug info, nothing special.
+
+### Fixed
+
+- Fixed `audit` miscalculating the score.
+
+## [3.4.0] (22-04-2025)
+
 ### Added
 
-- Added Git aliases to `fkstart`. For example, `fkstart gh:ZakaHaceCosas/dev-utils` will translate into `https://github.com/ZakaHaceCosas/dev-utils.git`. More than 10 Git providers are supported, run `compat kickstart` to see them all.
+- Added linting support to Deno and Cargo. Now when running `fkclean` for these platforms with `--lint`, `-l`, or `flaglessLint` set to true, `deno check .` and `cargo check --all-targets --workspaces` will be used respectively.
+- Added Git aliases to `fkstart`. For example, `fkstart gh:ZakaHaceCosas/dev-utils` will translate into `https://github.com/ZakaHaceCosas/dev-utils.git`. 10 Git providers are supported, run `compat kickstart` to see them all.
 - Added missing `compat launch` command, listing launch-able IDEs.
 - Added more vectors & questions to `audit`.
 
 ### Changed
 
 - Now the `setup` command respects earlier indent size on `tsconfig.json` and `.prettierrc` files.
+- Now `Cargo.toml` files are better understood, reducing a lot error proneness.
 
 ### Fixed
 
 - Fixed a situation where projects _might_ not get added (not awaiting an async function).
+- Fixed lint and prettify flags being swapped (`--lint` prettifying and `--pretty` linting).
 - Fixed the "not fully supported" warning not showing up for Golang and Rust.
 - Fixed a lot of issues with Git URL parsing from the `fkstart` command.
+- Fixed the GHSA advisory list in audit containing duplicate entries.
+- Fixed initialization checks running twice.
+- Fixed `help` not properly taking user input.
 
 ## [3.3.0] (13-04-2025)
 

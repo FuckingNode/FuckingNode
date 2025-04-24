@@ -99,6 +99,9 @@ You can now either:
 - Run `deno task compile` and get the output executable from `dist/`.
 - Run `deno -A src/main.ts [...commands]` from the root.
 
+> [!NOTE]
+> After compiling, some tasks will run that likely won't work for you (Konbini hashing and GPG signing). Just ignore them, the executables will work fine without these tasks being fulfilled.
+
 ## Updates
 
 We auto-check for updates once every few days to tell you about new versions, and have an `upgrade` command so you can update the CLI whenever you want.

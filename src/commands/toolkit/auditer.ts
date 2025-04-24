@@ -13,7 +13,7 @@ import { ColorString, Interrogate, LogStuff } from "../../functions/io.ts";
 import { FkNodeSecurityAudit, ParsedNodeReport } from "../../types/audit.ts";
 import { GetProjectEnvironment, NameProject, SpotProject } from "../../functions/projects.ts";
 import { Commander } from "../../functions/cli.ts";
-import { APP_NAME, I_LIKE_JS } from "../../constants.ts";
+import { APP_NAME, FWORDS } from "../../constants.ts";
 import { DEBUG_LOG } from "../../functions/error.ts";
 import { VULNERABILITY_VECTORS } from "./vectors.ts";
 
@@ -147,7 +147,7 @@ function AnalyzeSecurityVectorKeywords(svKeywords: SV_KEYWORDS[]): string[] {
         }
     }
 
-    return Array.from(questions);
+    return ((Array.from(questions)).sort());
 }
 
 /** quickly parse semver */
@@ -262,7 +262,7 @@ export function ParseNodeReport(jsonString: string, platform: MANAGER_NODE): Par
     const breaking = brokenDeps.includes(true);
 
     return {
-        advisories,
+        advisories: Array.from(new Set(advisories)).sort(),
         severity,
         breaking,
         questions,
@@ -279,12 +279,20 @@ type InterrogatoryResponse = "true+1" | "true+2" | "false+1" | "false+2";
  * @param {boolean} isFollowUp If true, question is a follow up to another question.
  * @param {boolean} isReversed If true, responding "yes" to the question means it's not a vulnerability (opposite logic).
  * @param {1 | 2} worth What is the question worth? +1 to pos/neg or +2?
- * @returns {"true" | "false"}
+ * @returns {InterrogatoryResponse} An `InterrogatoryResponse`
  */
-function askQuestion(question: string, isFollowUp: boolean, isReversed: boolean, worth: 1 | 2): InterrogatoryResponse {
+function askQuestion(
+    question: string,
+    isFollowUp: boolean,
+    isReversed: boolean,
+    worth: 1 | 2,
+): InterrogatoryResponse {
     const formattedQuestion = ColorString(question, isFollowUp ? "bright-blue" : "bright-yellow", "italic");
-    if (Interrogate(formattedQuestion)) return isReversed ? (worth === 2 ? "false+1" : "false+2") : (worth === 2 ? "true+1" : "true+2");
-    return isReversed ? (worth === 2 ? "true+1" : "true+2") : (worth === 2 ? "false+1" : "false+2");
+    const answered = Interrogate(formattedQuestion);
+    const truthValue = isReversed ? !answered : answered;
+    const value = worth === 1 ? "+1" : "+2";
+
+    return `${truthValue ? "true" : "false"}${value}`;
 }
 
 /**
@@ -322,8 +330,6 @@ export function InterrogateVulnerableProject(questions: string[]): Omit<
         const response = handleQuestion({ q: question, f: false, r: true, w: 1 });
 
         // specific follow-up questions based on user responses
-        // to further interrogate da vulnerability
-        // im the king of naming functions fr fr
         if (!isTrue(response) && question.includes("V:CKS")) {
             handleQuestion(
                 { q: "Are cookies being set with the 'Secure' and 'HttpOnly' flags?", f: true, r: false, w: 1 },
@@ -429,7 +435,7 @@ function DisplayAudit(percentage: number): void {
     if (percentage < 20) {
         color = "bright-green";
         message =
-            `Seems like we're okay, one ${I_LIKE_JS.MFN} project less to take care of!\nNever forget the best risk is no risk - we still encourage you to fix the vulnerabilities if you can.`;
+            `Seems like we're okay, one ${FWORDS.MFN} project less to take care of!\nNever forget the best risk is no risk - we still encourage you to fix the vulnerabilities if you can.`;
     } else if (percentage >= 20 && percentage < 50) {
         color = "bright-yellow";
         message = `${ColorString("There is a potential risk", "bold")} of these vulnerabilities causing you a headache.\nWhile you ${
@@ -438,7 +444,7 @@ function DisplayAudit(percentage: number): void {
     } else {
         color = "red";
         message = `${
-            ColorString(`Oh ${I_LIKE_JS.FK}`, "bold")
+            ColorString(`Oh ${FWORDS.FK}`, "bold")
         }. This project really should get all vulnerabilities fixed.\nBreaking changes can hurt, but your app security's breaking hurts a lot more. ${
             ColorString("Please, fix this issue.", "bold")
         }`;

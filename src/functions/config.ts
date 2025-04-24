@@ -1,4 +1,4 @@
-import { APP_NAME, DEFAULT_SCHEDULE_FILE, DEFAULT_SETTINGS, I_LIKE_JS, LOCAL_PLATFORM } from "../constants.ts";
+import { APP_NAME, DEFAULT_SCHEDULE_FILE, DEFAULT_SETTINGS, FWORDS, LOCAL_PLATFORM } from "../constants.ts";
 import type { CF_FKNODE_SETTINGS } from "../types/config_files.ts";
 import { FknError } from "./error.ts";
 import { BulkRemoveFiles, CheckForPath, JoinPaths, ParsePathList } from "./filesystem.ts";
@@ -28,7 +28,7 @@ export function GetAppPath(
         );
     }
 
-    const funny = I_LIKE_JS.MFS.toLowerCase().replace("*", "o").replace("*", "u");
+    const funny = FWORDS.MFS.toLowerCase().replace("*", "o").replace("*", "u");
 
     function formatDir(name: string) {
         return JoinPaths(BASE_DIR, `${APP_NAME.CLI}-${name}`);

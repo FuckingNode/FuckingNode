@@ -234,12 +234,34 @@ export const Parsers = {
             processCargoDependencies(parsedContent["dev-dependencies"], "univ:devD", deps);
             processCargoDependencies(parsedContent["build-dependencies"], "rst:buildD", deps);
 
+            const name =
+                (typeof parsedContent.package?.name === "string"
+                    ? parsedContent.package?.name
+                    : parsedContent.package?.name?.workspace === true
+                    ? parsedContent.workspace?.package?.name
+                    : "unknown-name") ??
+                    "unknown-name";
+            const version =
+                (typeof parsedContent.package?.version === "string"
+                    ? parsedContent.package?.version
+                    : parsedContent.package?.version?.workspace === true
+                    ? parsedContent.workspace?.package?.version
+                    : "unknown-ver") ??
+                    "unknown-ver";
+            const cargo_edt =
+                (typeof parsedContent.package?.edition === "string"
+                    ? parsedContent.package?.edition
+                    : parsedContent.package?.edition?.workspace === true
+                    ? parsedContent.workspace?.package?.edition
+                    : "unknown-edt") ??
+                    "unknown-edt";
+
             return {
-                name: parsedContent.package.name,
-                version: parsedContent.package.version,
+                name,
+                version,
                 rm: "cargo",
                 perPlatProps: {
-                    cargo_edt: parsedContent.package.edition,
+                    cargo_edt,
                 },
                 deps: dedupeDependencies(deps),
                 ws,

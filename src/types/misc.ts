@@ -3,7 +3,7 @@
  *
  * @export
  */
-export type SUPPORTED_EMOJIS =
+export type VALID_EMOJIS =
     | "danger"
     | "prohibited"
     | "wip"
@@ -66,12 +66,12 @@ export interface GITHUB_RELEASE {
  *
  * @export
  */
-export type tURL = `https://${string}`;
+export type VALID_URL = `https://${string}`;
 
 /**
  * Colors that can be used to spice up the CLI's stdout.
  */
-export type tValidColors =
+export type VALID_COLORS =
     | "red"
     | "white"
     | "bold"

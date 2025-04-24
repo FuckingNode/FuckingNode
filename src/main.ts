@@ -17,7 +17,7 @@ import TheSurrenderer from "./commands/surrender.ts";
 import TheSetuper from "./commands/setup.ts";
 import TheLauncher from "./commands/launch.ts";
 // other things
-import { APP_NAME, APP_URLs, FULL_NAME } from "./constants.ts";
+import { APP_NAME, APP_URLs, FULL_NAME, FWORDS } from "./constants.ts";
 import { ColorString, LogStuff } from "./functions/io.ts";
 import { FreshSetup, GetAppPath, GetUserSettings } from "./functions/config.ts";
 import { DEBUG_LOG, GenericErrorHandler } from "./functions/error.ts";
@@ -36,7 +36,7 @@ import { GetDateNow } from "./functions/date.ts";
 // ps. i don't use LogStuff because if something broke, well, it might not work
 if (StringUtils.normalize(Deno.args[0] ?? "") === "something-fucked-up") {
     console.log(
-        `This command will reset ${APP_NAME.CASED}'s settings, logs, and configs ENTIRELY (except for project list). Are you sure things fucked up that much?`,
+        `This command will reset ${APP_NAME.CASED}'s settings, logs, and configs ENTIRELY (except for project list). Are you sure things ${FWORDS.FK}ed up that much?`,
     );
     const c = confirm("Confirm reset?");
     if (c === true) {
@@ -52,17 +52,19 @@ if (StringUtils.normalize(Deno.args[0] ?? "") === "something-fucked-up") {
             Deno.removeSync(path, { recursive: true });
         }
 
-        console.log("Done. Don't fuck up again this time!");
+        console.log(`Done. Don't ${FWORDS.FK} up again this time.`);
     } else {
-        console.log("I knew it wasn't that bad...");
+        console.log(`I knew it wasn't that ${FWORDS.FK}ed up...`);
     }
     Deno.exit(0);
 }
 
 async function init() {
+    const dir = Deno.cwd();
     FreshSetup();
     await RunScheduledTasks();
     CleanupProjects();
+    Deno.chdir(dir);
 }
 
 /** Normalized Deno.args */
@@ -74,8 +76,8 @@ const flags = Deno.args.map((arg) =>
     })
 );
 
-export const __FKNODE_SHALL_WE_DEBUG = flags.some((s) => StringUtils.normalize(s) === "fkndbg");
-DEBUG_LOG("Initialized __FKNODE_SHALL_WE_DEBUG constant (ENTRY POINT)");
+export const FKNODE_SHALL_WE_DEBUG = Deno.env.get("FKNODE_SHALL_WE_DEBUG") === "yeah";
+DEBUG_LOG("Initialized FKNODE_SHALL_WE_DEBUG constant (ENTRY POINT)");
 DEBUG_LOG("ARGS", flags);
 
 function hasFlag(flag: string, allowQuickFlag: boolean, firstOnly: boolean = false): boolean {
@@ -88,7 +90,7 @@ function hasFlag(flag: string, allowQuickFlag: boolean, firstOnly: boolean = fal
 if (hasFlag("help", true)) {
     try {
         await init();
-        TheHelper({ query: flags[1] });
+        TheHelper({ query: flags[1] ?? "help" });
         Deno.exit(0);
     } catch (e) {
         console.error("Critical error", e);
@@ -108,11 +110,60 @@ function isNotFlag(arg: UnknownString): arg is string {
     return !str.startsWith("-") && !str.startsWith("--");
 }
 
-async function main(command: string) {
-    await init();
-    DEBUG_LOG(flags[1], isNotFlag(flags[1]));
+async function main(command: UnknownString) {
+    // debug commands
+    if (FKNODE_SHALL_WE_DEBUG || Deno.args[0]?.startsWith("FKNDBG")) {
+        console.log(ColorString("FKNDBG at " + GetDateNow(), "italic"));
+        console.log("FKNDBG Logs aren't stored into the .log file.");
+        console.log("-".repeat(37));
+    }
+    if (Deno.args[0] === "FKNDBG_PROC") {
+        console.log(
+            "PROC NAME",
+            new TextDecoder().decode(
+                new Deno.Command("ps", {
+                    args: ["-p", Deno.pid.toString(), "-o", "comm="],
+                }).outputSync().stdout,
+            ).trim(),
+        );
+        console.log(
+            "PROC ID",
+            Deno.pid,
+            "PROC PARENT ID",
+            Deno.ppid,
+        );
+        return;
+    }
+    if (Deno.args[0] === "FKNDBG_WHERE") {
+        console.log("AT", Deno.cwd());
+        console.log("FROM", Deno.execPath());
+        console.log("CONCRETELY", import.meta.url);
+        return;
+    }
+    if (Deno.args[0] === "FKNDBG_MEM") {
+        const mem = Deno.memoryUsage();
+        console.log("MEM USAGE:");
+        for (const [k, v] of Object.entries(mem)) {
+            console.log(`${k.padEnd(10)}: ${(v / 1024 / 1024).toFixed(2)} MB`);
+        }
+        return;
+    }
+    if (Deno.args[0] === "FKNDBG_WHO") {
+        console.log("System info:", {
+            ...Deno.build,
+            hostname: Deno.hostname(),
+        });
+        return;
+    }
+
+    if (!StringUtils.validate(command)) {
+        TheHelper({});
+        Deno.exit(0);
+    }
+
+    DEBUG_LOG("FLAGS[1]", flags[1], isNotFlag(flags[1]));
     const projectArg = (isNotFlag(flags[1]) || flags[1] === "--self") ? flags[1] : 0 as const;
-    DEBUG_LOG(flags[2], isNotFlag(flags[2]));
+    DEBUG_LOG("FLAGS[2]", flags[2], isNotFlag(flags[2]));
     const intensityArg = isNotFlag(flags[2]) ? flags[2] : GetUserSettings().defaultIntensity;
 
     const cleanerArgs: TheCleanerConstructedParams = {
@@ -129,30 +180,6 @@ async function main(command: string) {
             project: projectArg,
         },
     };
-
-    // debug commands
-    if (Deno.args[0]?.startsWith("FKNDBG")) {
-        console.log(ColorString("FKNDBG at " + GetDateNow(), "italic"));
-        console.log("This isn't stored into the .log file.");
-        console.log("-".repeat(37));
-    }
-    if (Deno.args[0] === "FKNDBG_PROC") {
-        console.log(
-            "PROC NAME",
-            new TextDecoder().decode(
-                new Deno.Command("ps", {
-                    args: ["-p", Deno.pid.toString(), "-o", "comm="],
-                }).outputSync().stdout,
-            ).trim(),
-        );
-        console.log(
-            "PROC ID && PROC PAREN ID",
-            Deno.pid,
-            "&&",
-            Deno.ppid,
-        );
-        return;
-    }
 
     switch (
         StringUtils.normalize(command, {
@@ -298,6 +325,7 @@ async function main(command: string) {
         case "sokoballs":
             LaunchWebsite("https://tenor.com/view/sokora-dunk-ice-skate-ice-dunk-balling-gif-7665972654807661282?quality=lossless");
             break;
+        case "tip":
         case "hint":
         case "protip":
         case "pro-tip":
@@ -308,7 +336,7 @@ async function main(command: string) {
             );
             break;
         default:
-            TheHelper({ query: flags[0] });
+            TheHelper({ query: flags[1] });
     }
 
     Deno.exit(0);
@@ -318,11 +346,7 @@ async function main(command: string) {
 // javascript is definitely... something
 if (import.meta.main) {
     try {
-        if (!StringUtils.validate(flags[0])) {
-            await init();
-            TheHelper({});
-            Deno.exit(0);
-        }
+        await init();
 
         await main(flags[0]);
     } catch (e) {

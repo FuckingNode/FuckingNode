@@ -1,4 +1,4 @@
-import { Commander, CommandExists } from "../functions/cli.ts";
+import { CommandExists } from "../functions/cli.ts";
 import { CheckForDir, JoinPaths, ParsePath } from "../functions/filesystem.ts";
 import { ColorString, LogStuff } from "../functions/io.ts";
 import { AddProject, GetProjectEnvironment, NameProject } from "../functions/projects.ts";
@@ -11,6 +11,7 @@ import { LaunchUserIDE } from "../functions/user.ts";
 import { FknError } from "../functions/error.ts";
 import { GetUserSettings } from "../functions/config.ts";
 import { GenerateGitUrl } from "./toolkit/git-url.ts";
+import { Git } from "../functions/git.ts";
 
 export default function TheKickstarter(params: TheKickstarterConstructedParams) {
     const { gitUrl, path, manager } = params;
@@ -21,18 +22,15 @@ export default function TheKickstarter(params: TheKickstarterConstructedParams) 
     const clonePath: string = ParsePath(StringUtils.validate(path) ? path : JoinPaths(cwd, projectName));
 
     const clonePathValidator = CheckForDir(clonePath);
-    if (clonePathValidator === "ValidButNotEmpty") {
-        throw new Error(`${clonePath} is not empty! Stuff may break if we kickstart to this path, so choose another one!`);
-    }
-    if (clonePathValidator === "NotDir") {
-        throw new Error(`${path} is not a directory...`);
-    }
+    if (clonePathValidator === "ValidButNotEmpty") throw new Error(`${clonePath} is not empty! Choose somewhere else to clone this.`);
+
+    if (clonePathValidator === "NotDir") throw new Error(`${path} is not a directory...`);
 
     LogStuff("Let's begin! Wait a moment please...", "tick-clear", ["bright-green", "bold"]);
     LogStuff(`Cloning from ${repoUrl}`);
 
-    const gitOutput = Commander("git", ["clone", repoUrl, clonePath], true);
-    if (!gitOutput.success) throw new Error(`Error cloning repository: ${gitOutput.stdout}`);
+    const gitOutput = Git.Clone(repoUrl, clonePath);
+    if (!gitOutput) Deno.exit(1);
 
     Deno.chdir(clonePath);
 
@@ -63,10 +61,6 @@ export default function TheKickstarter(params: TheKickstarterConstructedParams) 
         }
     }
 
-    // glue fix
-    // Deno.writeTextFileSync(GetAppPath("MOTHERFKRS"), `${ParsePath(Deno.cwd())}\n`, {
-    //     append: true,
-    // });
     AddProject(Deno.cwd());
 
     // assume we skipped error
@@ -84,7 +78,7 @@ export default function TheKickstarter(params: TheKickstarterConstructedParams) 
         throw new FknError(
             "Generic__MissingRuntime",
             StringUtils.validate(manager)
-                ? `Neither your specified manager (${manager}) nor the repo's runtime (${env.manager}) are installed on this system. What the heck?`
+                ? `Neither your specified package manager (${manager}) nor the repo's manager (${env.manager}) is installed on this system. What the heck?`
                 : `This repo uses ${env.manager} as a package manager, but it isn't installed locally.`,
         );
     }
@@ -102,9 +96,9 @@ export default function TheKickstarter(params: TheKickstarterConstructedParams) 
         FkNodeInterop.Installers.UniJs(Deno.cwd(), managerToUse);
     }
 
-    LaunchUserIDE();
-
     LogStuff(`Great! ${NameProject(Deno.cwd(), "name-ver")} is now setup. Enjoy!`, "tick-clear");
+
+    LaunchUserIDE();
 
     Deno.chdir(cwd);
 }

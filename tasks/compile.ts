@@ -43,11 +43,22 @@ const ALL_COMMANDS = Object.entries(TARGETS).map(([key, [target, output]]) => {
         "src/main.ts",
     ];
 
-    // hash and signature stuff is for
+    // hash and signature stuff
     const hasherArguments = [
         "kbd-hash",
         `dist/${compiledName}`,
         "--porcelain",
+    ];
+
+    const signerArguments = [
+        "--armor",
+        "--output",
+        `dist/${compiledName}.asc`,
+        "--detach-sig",
+        "--digest-algo",
+        "SHA512",
+        "--armor",
+        `dist/${compiledName}`,
     ];
 
     let newTarget: "linux_64_sha" | "linux_arm_sha" | "mac_64_sha" | "mac_arm_sha" | "win64_sha" | null = null;
@@ -70,6 +81,7 @@ const ALL_COMMANDS = Object.entries(TARGETS).map(([key, [target, output]]) => {
         target: newTarget,
         compileCmd: new Deno.Command("deno", { args: compilerArguments }),
         hashCmd: new Deno.Command("kbi", { args: hasherArguments }),
+        signCmd: new Deno.Command("gpg", { args: signerArguments }),
     };
 });
 
@@ -94,10 +106,15 @@ for (const CMD of ALL_COMMANDS) {
     const hash = new TextDecoder().decode(hashing.stdout).trim();
     hashes[CMD.target] = hash;
     console.log(CMD.target, "HASH", hash);
-    Deno.writeTextFileSync("konbini.hash.yaml", stringifyYaml(hashes));
+    Deno.writeTextFileSync("dist/konbini.hash.yaml", stringifyYaml(hashes));
 }
 
-// for nix, run "nix-prefetch-url URL_TO_LATEST_LINUX_64_86_EXE"
+confirm("Ready? You've gotta open the password manager to sign all executables.");
 
-// for konbini asc, run:
-// gpg --armor --output dist/FuckingNode-A.asc --detach-sig --digest-algo SHA512 --armor dist/FuckingNode-A
+// last
+for (const CMD of ALL_COMMANDS) {
+    CMD.signCmd.outputSync();
+    console.log("Signed", CMD.target);
+}
+
+console.log("Don't forget running nix-prefetch-url <URL_TO_RELEASE_EXE> for all Linux releases!");
