@@ -4,7 +4,7 @@ import { LogStuff } from "../../functions/io.ts";
 import type { ProjectEnvironment } from "../../types/platform.ts";
 import { DebugFknErr, FknError } from "../../functions/error.ts";
 import { FkNodeInterop } from "./interop.ts";
-import { isDef } from "../../constants.ts";
+import { isDef, isDis } from "../../constants.ts";
 import { NameProject } from "../../functions/projects.ts";
 
 function HandleError(
@@ -206,6 +206,8 @@ export const InteropedFeatures = {
     Launch: (params: InteropedFeatureParams): boolean => {
         const { env, verbose } = params;
         const script = env.settings.launchCmd;
+
+        if (isDis(script)) return true;
 
         if (isDef(script)) {
             if (StringUtils.validateAgainst(env.manager, ["go", "deno", "cargo"]) && !env.settings.launchFile) {

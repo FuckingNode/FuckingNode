@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- Fixed `launch` showing an error in the CLI (despite working fine) because of a non-existent "`__DISABLE`" task.
 - Fixed `audit` miscalculating the score.
 
 ## [3.4.0] (22-04-2025)
