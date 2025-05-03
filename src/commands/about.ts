@@ -1,4 +1,4 @@
-import { APP_NAME, APP_URLs, FWORDS, VERSION } from "../constants.ts";
+import { APP_NAME, APP_URLs, VERSION } from "../constants.ts";
 import { ColorString } from "../functions/io.ts";
 import { LogStuff } from "../functions/io.ts";
 import type { VALID_COLORS } from "../types/misc.ts";
@@ -8,7 +8,7 @@ import { phrases } from "../functions/phrases.ts";
 function getRandomPhrase(): string {
     const randomIndex = Math.floor(Math.random() * phrases.length);
     const string = phrases[randomIndex] ?? "Make JS fun again!";
-    return ColorString(string, "bright-green", "italic");
+    return string;
 }
 
 function getRandomColor(): VALID_COLORS {
@@ -30,28 +30,36 @@ function colorizeText(text: string): string {
 }
 
 const coolStrings = {
+    ver: ColorString(`${APP_NAME.STYLED} ${VERSION}`, "bold", "red"),
     ts: ColorString(`TypeScript ${Deno.version.typescript}`, "bright-blue"),
     deno: ColorString(`Deno ${Deno.version.deno}`, "bright-yellow"),
     spain: ColorString("Spain", "red"),
     zakaOne: ColorString("ZakaHaceCosas", "bright-green"),
-    zakaTwo: ColorString("ZakaMakesStuff", "italic"),
+    zakaTwo: ColorString('"ZakaMakesStuff"', "italic"),
     gitUrl: ColorString(`https://github.com/${APP_NAME.CASED}/${APP_NAME.CASED}`, "orange"),
     side: ColorString("Another side project", "italic"),
     date: ColorString("September 28, 2024", "cyan"),
-    yt: ColorString("YouTube", "red"),
 };
+
+const phrase = getRandomPhrase();
+const index = phrases.indexOf(phrase) + 1;
+const dashLength = Math.min(phrase.length, 45);
 
 export default function TheAbouter() {
     LogStuff(colorizeText(ASCII));
-    LogStuff(`${"-".repeat(30)}\n${ColorString(VERSION, "bright-yellow")} · ${getRandomPhrase()}\n`);
     LogStuff(
-        `Written in ${coolStrings.ts}. Running in ${coolStrings.deno}.\nDeveloped in ${coolStrings.spain} by ${coolStrings.zakaOne} (${coolStrings.zakaTwo} in spanish).\n`,
+        `${"-".repeat(dashLength)}\n${ColorString(phrase, "bright-green", "italic")}\n${
+            ColorString(`(random quote/tip ${index}/${phrases.length})`, "half-opaque", "italic")
+        }\n`,
     );
     LogStuff(
-        `See cool trailer on ${coolStrings.yt} / ${APP_URLs.WEBSITE}follow-us`,
+        `Running ${coolStrings.ver}. Written in ${coolStrings.ts}. Powered by ${coolStrings.deno}.\nDeveloped in ${coolStrings.spain} by ${coolStrings.zakaOne} (${coolStrings.zakaTwo} in spanish).\n`,
     );
     LogStuff(
-        `${FWORDS.FK} communism, love freedom. this one's open-source: ${coolStrings.gitUrl}\n`,
+        `Follow us and join our Discord at ${APP_URLs.WEBSITE}follow-us`,
+    );
+    LogStuff(
+        `We all love freedom, right? This is open-source: ${coolStrings.gitUrl}\n`,
     );
     LogStuff(
         `${coolStrings.side}, born ${coolStrings.date} (a bit earlier but 'Initial commit' in the 1st repo was then)`,

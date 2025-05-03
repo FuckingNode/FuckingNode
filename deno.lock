@@ -1,5 +1,5 @@
 {
-  "version": "4",
+  "version": "5",
   "specifiers": {
     "jsr:@std/assert@^1.0.13": "1.0.13",
     "jsr:@std/collections@^1.0.11": "1.0.11",
@@ -13,7 +13,7 @@
     "jsr:@std/semver@1.0.5": "1.0.5",
     "jsr:@std/toml@^1.0.5": "1.0.5",
     "jsr:@std/yaml@1.0.6": "1.0.6",
-    "jsr:@zakahacecosas/string-utils@^2.2.1": "2.2.1",
+    "jsr:@zakahacecosas/string-utils@^2.2.2": "2.2.2",
     "npm:@types/node@*": "22.12.0"
   },
   "jsr": {
@@ -65,8 +65,8 @@
     "@std/yaml@1.0.6": {
       "integrity": "c9a5a914e1d51c46756cb10e356710035cfa905e713c90d3b711413fd3aead27"
     },
-    "@zakahacecosas/string-utils@2.2.1": {
-      "integrity": "2a7f2148599fc10b16dc806bbf1b5b6c50e5c2fb2efbf71a6c8ca01cf97b4ca1"
+    "@zakahacecosas/string-utils@2.2.2": {
+      "integrity": "29f87f1a036028ac8ecab53bccd83a85d72e6f2325573b0c109febcce667155b"
     }
   },
   "npm": {
@@ -91,7 +91,7 @@
       "jsr:@std/semver@1.0.5",
       "jsr:@std/toml@^1.0.5",
       "jsr:@std/yaml@1.0.6",
-      "jsr:@zakahacecosas/string-utils@^2.2.1"
+      "jsr:@zakahacecosas/string-utils@^2.2.2"
     ]
   }
 }

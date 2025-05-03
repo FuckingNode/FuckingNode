@@ -99,8 +99,9 @@ if (hasFlag("help", true)) {
 }
 
 if (hasFlag("version", true, true) && !flags[1]) {
-    await init();
-    LogStuff(FULL_NAME, "bulb", "bright-green");
+    console.log(FULL_NAME, "built for", Deno.build.target);
+    console.log("Deno JavaScript runtime", Deno.version.deno, "| TypeScript", Deno.version.typescript, "| V8 Engine", Deno.version.v8);
+    console.log("Run 'fuckingnode about' for details.");
     Deno.exit(0);
 }
 
@@ -138,6 +139,7 @@ async function main(command: UnknownString) {
         console.log("AT", Deno.cwd());
         console.log("FROM", Deno.execPath());
         console.log("CONCRETELY", import.meta.url);
+        console.log("MAIN?", import.meta.main);
         return;
     }
     if (Deno.args[0] === "FKNDBG_MEM") {
@@ -342,7 +344,7 @@ async function main(command: UnknownString) {
     Deno.exit(0);
 }
 
-// I SWEAR - THE FACT THAT THIS IF WAS MISSING MADE ALL THE TEST SUITE NOT WORK LMFAO
+// I SWEAR - THE FACT THAT THIS "IF" WAS MISSING MADE ALL THE TEST SUITE NOT WORK LMFAO
 // javascript is definitely... something
 if (import.meta.main) {
     try {

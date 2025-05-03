@@ -54,33 +54,16 @@ export function ParsePath(target: UnknownString): string {
     try {
         if (!StringUtils.validate(target)) throw new Error("Target must be (obviously) a string.");
 
-        if (StringUtils.normalize(target) === "--self") {
-            return Deno.cwd();
-        }
+        if (StringUtils.normalize(target) === "--self") return Deno.cwd();
 
         let workingTarget: string;
 
-        // if (LOCAL_PLATFORM.SYSTEM === "chad") {
-        //     let unification = `${parse(target).dir}/${parse(target).name}`;
-        //     for (const entry of Deno.readDirSync(parse(target).dir)) {
-        //         if (!(StringUtils.normalize(entry.name) === StringUtils.normalize(parse(target).dir))) continue;
-        //         unification = `${entry}/${parse(target).name}`;
-        //     }
-
-        //     try {
-        //         workingTarget = Deno.realPathSync(unification);
-        //     } catch {
-        //         // fallback
-        //         workingTarget = unification;
-        //     }
-        // } else {
         try {
             workingTarget = Deno.realPathSync(target.trim());
         } catch {
             // fallback
             workingTarget = target.trim();
         }
-        // }
 
         const cleanEntry = normalize(workingTarget);
 

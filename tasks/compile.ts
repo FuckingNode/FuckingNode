@@ -1,6 +1,8 @@
 import { APP_NAME } from "../src/constants.ts";
 import { stringify as stringifyYaml } from "@std/yaml";
 
+const release = Deno.args.includes("--release");
+
 try {
     Deno.statSync("./dist/");
     Deno.removeSync("./dist/", {
@@ -24,7 +26,7 @@ const TARGETS: Record<
 };
 
 const ALL_COMMANDS = Object.entries(TARGETS).map(([key, [target, output]]) => {
-    const compiledName = `${APP_NAME.CASED}-${output}${key === "win64" ? ".exe" : ""}`;
+    const compiledName = `${APP_NAME.CLI}-${output}${key === "win64" ? ".exe" : ""}`;
 
     const compilerArguments = [
         "compile",
@@ -90,31 +92,33 @@ for (const CMD of ALL_COMMANDS) {
     CMD.compileCmd.outputSync();
 }
 
-// then
-const hashes: Record<
-    "linux_64_sha" | "linux_arm_sha" | "mac_64_sha" | "mac_arm_sha" | "win64_sha",
-    string
-> = {
-    linux_64_sha: "",
-    linux_arm_sha: "",
-    mac_64_sha: "",
-    mac_arm_sha: "",
-    win64_sha: "",
-};
-for (const CMD of ALL_COMMANDS) {
-    const hashing = CMD.hashCmd.outputSync();
-    const hash = new TextDecoder().decode(hashing.stdout).trim();
-    hashes[CMD.target] = hash;
-    console.log(CMD.target, "HASH", hash);
-    Deno.writeTextFileSync("dist/konbini.hash.yaml", stringifyYaml(hashes));
+if (release) {
+    // then
+    const hashes: Record<
+        "linux_64_sha" | "linux_arm_sha" | "mac_64_sha" | "mac_arm_sha" | "win64_sha",
+        string
+    > = {
+        linux_64_sha: "",
+        linux_arm_sha: "",
+        mac_64_sha: "",
+        mac_arm_sha: "",
+        win64_sha: "",
+    };
+    for (const CMD of ALL_COMMANDS) {
+        const hashing = CMD.hashCmd.outputSync();
+        const hash = new TextDecoder().decode(hashing.stdout).trim();
+        hashes[CMD.target] = hash;
+        console.log(CMD.target, "HASH", hash);
+        Deno.writeTextFileSync("dist/konbini.hash.yaml", stringifyYaml(hashes));
+    }
+
+    confirm("Ready? You've gotta open the password manager to sign all executables.");
+
+    // last
+    for (const CMD of ALL_COMMANDS) {
+        CMD.signCmd.outputSync();
+        console.log("Signed", CMD.target);
+    }
+
+    console.log("Don't forget running nix-prefetch-url <URL_TO_RELEASE_EXE> for all Linux releases!");
 }
-
-confirm("Ready? You've gotta open the password manager to sign all executables.");
-
-// last
-for (const CMD of ALL_COMMANDS) {
-    CMD.signCmd.outputSync();
-    console.log("Signed", CMD.target);
-}
-
-console.log("Don't forget running nix-prefetch-url <URL_TO_RELEASE_EXE> for all Linux releases!");

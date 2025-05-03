@@ -7,23 +7,19 @@
 
 import { APP_NAME, FWORDS } from "../constants.ts";
 import { GetAppPath } from "./config.ts";
-import { ColorString } from "./io.ts";
 
 const internalJokes = [
     "Dima definitely approves", // indeed he does
     "Sokora Seal of Approval", // and i'm proud of it
-    "verified, just as sokora", // indeed
     "(not) powered by Vuelto <https://vuelto.pp.ua/>", // rewrite to Vuelto coming 2026
     "Proudly running on anything but a FireBlitz server", // those who know :skull:
     "not made in germany", // those who know :skull:
-    `(it's named this way because Node is ${FWORDS.FKN} annoying, not because I ${FWORDS.FK}ed it)`, // (someone really told me the 2nd one)
+    `(it's named this way because Node is ${FWORDS.FKN} annoying, not because I ${FWORDS.FK}ed it)`, // (someone really asked me)
     "Proudly made by ZakaHaceCosas (translates to 'ZakaMakesStuff')", // YOO
     "Proudly developed in Spain (the S is silent)", // elections here don't work, i swear
     "i should be studying chemistry and i'm writing random phrases for this thing", // real btw
     "weeb > furry", // indeed
-    "i'm grounded", // this is real btw
     "haccing skill #3: download a CLI tool", // the 3rd one in a series
-    "brick",
 ];
 
 const internalQuotes = [
@@ -51,6 +47,8 @@ const devJokes = [
     "git commit -m 'rewrite to Lua'",
     "git commit -m 'send help'",
     "git commit -m 'fix previous fix again'",
+    "git commit -m 'change CRLF to LF, again'",
+    "git commit -m 'Create .env'\ngit commit -m 'Delete .env'\ngit commit -m 'Update .gitignore'",
     "curl parrot.live",
     "midudev would approve",
     "#RewriteToBrainF\*ck",
@@ -69,7 +67,7 @@ const devJokes = [
 
 /** (used to be secretHints...) */
 export const HINTS = [
-    `F\*ckingProTip (01): try setting this env variable: ${ColorString("FKNODE_SHALL_WE_DEBUG", "bold")}=${ColorString("yea", "bright-green")}`,
+    `F\*ckingProTip (01): try setting the FKNODE_SHALL_WE_DEBUG environment variable to "yeah" in your machine`,
     "F\*ckingProTip (02): run 'fkn sokoballs'",
     "F\*ckingProTip (03): cleanup supports a '--verbose' flag that shows CLI output in real time from tasks that are being automated",
     `F\*ckingProTip (04): critical errors get logged to ${GetAppPath("ERRORS")} in a fairly readable format`,
@@ -98,14 +96,26 @@ const appRelatedJokes = [
 const brandingJokes = [
     "Make JavaScript great again!",
     "Make JavaScript great again! (not like it ever was)",
-    `${APP_NAME.CASED}/Deno/Bun, actually`,
+    `${APP_NAME.CASED}/Deno/Bun/Golang/Rust, actually`,
     `${FWORDS.FKN}JSRuntimesInGeneral, actually`,
     `${APP_NAME.CASED}? More like ${FWORDS.FKN}Cool!`,
 ];
 
 const quotes = [
-    "'Anything that can be written in JavaScript, will be eventually written in JavaScript' - Jeff Atwood",
+    "'Anything that can be written in JavaScript, will be eventually written in JavaScript.' - Jeff Atwood",
     "'It just works' - Steve Jobs",
+    "'Good programmers know what to write. Great ones know what to rewrite and reuse.' - Eric S. Raymond",
+    "'Software and cathedrals are much the same; first we build them, then we pray' - (anonymous)",
+    "'Any fool can write code that a computer can understand. Good programmers write code that humans can understand.' - Martin Fowler",
+    "'Make it work, make it right, make it fast.' - Kent Beck",
+    "'When in doubt, use brute force.' - Ken Thompson",
+    "'If you can’t write it down in English, you can't code it.' - Peter Halpern",
+    "'Get your data structures correct first, and the rest of the program will write itself.' - David Jones",
+    "'Always code as if the guy who ends up maintaining your code will be a violent psychopath who knows where you live.' - Rick Osborne",
+    "'Don't comment bad code. Rewrite it.' - Brian Kernighan", // if only i wasn't that lazy...
+    "'If the code and the comments disagree, then both are probably wrong.' - Norm Schryer",
+    "'When explaining a command, or language feature, or hardware widget, first describe the problem it is designed to solve.' - David Martin",
+    "'Code is like humor. When you have to explain it, it's bad.' - Cory House",
 ];
 
 export const phrases = [

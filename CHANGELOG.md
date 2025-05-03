@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Now `FKNDBG` itself doesn't work. Set the environment variable `FKNODE_SHALL_WE_DEBUG` to the string `yeah` in order to show debug logs.
 - Now more `FKNDBG_*` commands are available. They just show some debug info, nothing special.
+- Now the `about` command looks better. Also, added several random quotes.
+- Now `--version` (`-v`) returns colorless output and includes more details (current platform and TS/V8/DENO versioning).
 
 ### Fixed
 
