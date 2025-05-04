@@ -10,22 +10,10 @@ import { BareValidators } from "./validate-module.ts";
  */
 export const FkNodeInterop = {
     PackageFileParsers: {
-        Golang: {
-            CPF: Parsers.Golang.CPF,
-            STD: Parsers.Golang.STD,
-        },
-        Cargo: {
-            CPF: Parsers.Cargo.CPF,
-            STD: Parsers.Cargo.STD,
-        },
-        Deno: {
-            CPF: Parsers.Deno.CPF,
-            STD: Parsers.Deno.STD,
-        },
-        NodeBun: {
-            CPF: Parsers.NodeBun.CPF,
-            STD: Parsers.NodeBun.STD,
-        },
+        Golang: Parsers.Golang,
+        Cargo: Parsers.Cargo,
+        Deno: Parsers.Deno,
+        NodeBun: Parsers.NodeBun,
     },
     BareValidators: BareValidators,
     PackageFileUtils: {
