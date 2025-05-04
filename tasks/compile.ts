@@ -48,7 +48,7 @@ const ALL_COMMANDS = Object.entries(TARGETS).map(([key, [target, output]]) => {
     // hash and signature stuff
     const hasherArguments = [
         "kbd-hash",
-        `dist/${compiledName}`,
+        `dist\\${compiledName}`,
         "--porcelain",
     ];
 
@@ -82,7 +82,7 @@ const ALL_COMMANDS = Object.entries(TARGETS).map(([key, [target, output]]) => {
     return {
         target: newTarget,
         compileCmd: new Deno.Command("deno", { args: compilerArguments }),
-        hashCmd: new Deno.Command("kbi", { args: hasherArguments }),
+        hashCmd: new Deno.Command(".\\kbi.exe", { args: hasherArguments }),
         signCmd: new Deno.Command("gpg", { args: signerArguments }),
     };
 });
@@ -120,5 +120,8 @@ if (release) {
         console.log("Signed", CMD.target);
     }
 
-    console.log("Don't forget running nix-prefetch-url <URL_TO_RELEASE_EXE> for all Linux releases!");
+    console.log(
+        "Don't forget hashing Nix releases! From Linux or WSL, run:",
+        "nix run .#hashes --extra-experimental-features nix-command --extra-experimental-features flakes",
+    );
 }

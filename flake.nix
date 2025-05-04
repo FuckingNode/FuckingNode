@@ -12,7 +12,7 @@
     pkgs = import nixpkgs { inherit system; };
 
     pname = "fuckingnode";
-    version = "3.4.0";
+    version = "3.4.1";
 
     urls = {
       "x86_64-linux"   = "https://github.com/FuckingNode/FuckingNode/releases/download/${version}/FuckingNode-linux64";
@@ -23,10 +23,10 @@
 
 
     sha256s = {
-      "aarch64-linux" = "06w785csh0kvmry984s6ax5gb9nhkh47s8yyw018ga9i4h73rppp";
-      "x86_64-linux" = "1r0gmhc7xpi5p7cbcbr9s1298wis3bhsq3nip7ykzd1ivbql3aif";
-      "x86_64-darwin" = "1v9s1g90nhqxvbizfrzi70hzqm5124c5rfzy19cxh4g1w23dxi1v";
-      "aarch64-darwin" = "00b02bb9mw83cza7sdra6akl2ravvyl2ndxlp0l14rbk38v5qa3x";
+     "aarch64-linux" = "1k12jsbng9v7hzpcyfgkq9ga1magxlf2m46gs0x1lwlgw34f1znc";
+     "x86_64-linux" = "12pm08y8d20y40mfzxhn8pqbmh681bnrjzfm7nckj2z23zgj2dgx";
+     "x86_64-darwin" = "08wzjaka5fvbpkniaislv72kavc0bdfdmyrikn7xca72ci5xdvim";
+     "aarch64-darwin" = "0yhhzznfdx7hzk94wjva6g0iwqa08mq86vw8q9bvmm7cjmaphkgg";
     };
 
   in {
