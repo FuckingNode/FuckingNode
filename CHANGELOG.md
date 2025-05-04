@@ -6,7 +6,7 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
-## Unreleased
+## [3.4.1] (04-05-2025)
 
 ### Changed
 
@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Now more `FKNDBG_*` commands are available. They just show some debug info, nothing special.
 - Now the `about` command looks better. Also, added several random quotes.
 - Now `--version` (`-v`) returns colorless output and includes more details (current platform and TS/V8/DENO versioning).
+- Now executables are released with fully lowercase names. Casing between Linux and Windows filesystems is really a headache.
 
 ### Fixed
 
