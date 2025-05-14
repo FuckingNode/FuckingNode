@@ -32,6 +32,7 @@ const internalQuotes = [
     "'it's sokover' - Serge", // from the creators of it's joever (not)
     "'Dookie in da pookie' - Dima",
     "'learn as if you will live forever, live like you will die tomorrow' - EpicSprout",
+    "'widnwos sucsk' - Serge", // he got a point, kind of
 ];
 
 const coolJokes = [
