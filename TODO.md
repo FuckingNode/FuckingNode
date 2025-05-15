@@ -39,6 +39,10 @@ for (const file of files_in_project) {
 
 - [ ] `pkggen` is still missing.
 
+## Better UX
+
+- [ ] Allow for DIR-based running; in simpler terms, compute things like `fkn stats` to `fkn stats --self` or `fkadd` to `fkadd --self`, so the `--self` flag isn't necessary (except for commands like `fkclean` where it does make sense to have it).
+
 ## Chores and trivial tasks
 
 - [x] Rewrite audit to use JSON instead of raw strings (should've done this before...)
