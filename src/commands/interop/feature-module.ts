@@ -1,4 +1,4 @@
-import { StringUtils, type UnknownString } from "@zakahacecosas/string-utils";
+import { type UnknownString, validateAgainst } from "@zakahacecosas/string-utils";
 import { Commander } from "../../functions/cli.ts";
 import { LogStuff } from "../../functions/io.ts";
 import type { ProjectEnvironment } from "../../types/platform.ts";
@@ -38,7 +38,7 @@ export const InteropedFeatures = {
         const { env, verbose } = params;
         const script = env.settings.lintCmd;
 
-        if (StringUtils.validateAgainst(env.runtime, ["bun", "node"])) {
+        if (validateAgainst(env.runtime, ["bun", "node"])) {
             if (isDef(script)) {
                 if (FkNodeInterop.PackageFileUtils.SpotDependency("eslint", env.main.cpfContent.deps) === undefined) {
                     LogStuff(
@@ -115,7 +115,7 @@ export const InteropedFeatures = {
         const { env, verbose } = params;
         const script = env.settings.prettyCmd;
 
-        if (StringUtils.validateAgainst(env.runtime, ["bun", "node"])) {
+        if (validateAgainst(env.runtime, ["bun", "node"])) {
             if (isDef(script)) {
                 if (FkNodeInterop.PackageFileUtils.SpotDependency("prettier", env.main.cpfContent.deps) === undefined) {
                     LogStuff(
@@ -186,7 +186,7 @@ export const InteropedFeatures = {
             return true;
         }
 
-        if (StringUtils.validateAgainst(env.runtime, ["rust", "golang"])) {
+        if (validateAgainst(env.runtime, ["rust", "golang"])) {
             throw new FknError(
                 "Interop__CannotRunJsLike",
                 `${env.manager} does not support JavaScript-like "run" commands, however you've set updateCmdOverride in your fknode.yaml to ${script}. Since we don't know what you're doing, update task wont proceed for this project.`,
@@ -210,7 +210,7 @@ export const InteropedFeatures = {
         if (isDis(script)) return true;
 
         if (isDef(script)) {
-            if (StringUtils.validateAgainst(env.manager, ["go", "deno", "cargo"]) && !env.settings.launchFile) {
+            if (validateAgainst(env.manager, ["go", "deno", "cargo"]) && !env.settings.launchFile) {
                 throw new FknError(
                     "Unknown__CleanerTask__Launch",
                     `You tried to launch project ${
@@ -224,9 +224,7 @@ export const InteropedFeatures = {
 
             const output = Commander(
                 env.commands.base,
-                StringUtils.validateAgainst(env.manager, ["go", "deno", "cargo"])
-                    ? [env.commands.start, env.settings.launchFile]
-                    : [env.commands.start],
+                validateAgainst(env.manager, ["go", "deno", "cargo"]) ? [env.commands.start, env.settings.launchFile] : [env.commands.start],
                 verbose,
             );
 

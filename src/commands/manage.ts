@@ -3,7 +3,7 @@ import { ColorString, LogStuff } from "../functions/io.ts";
 import { AddProject, GetAllProjects, GetProjectEnvironment, NameProject, RemoveProject } from "../functions/projects.ts";
 import TheHelper from "./help.ts";
 import { DEBUG_LOG } from "../functions/error.ts";
-import { StringUtils } from "@zakahacecosas/string-utils";
+import { sortAlphabetically, testFlag } from "@zakahacecosas/string-utils";
 
 /**
  * Lists all projects.
@@ -74,7 +74,7 @@ function ListProjects(
     }
 
     LogStuff(message, "bulb");
-    for (const entry of StringUtils.sortAlphabetically(toPrint)) LogStuff(entry);
+    for (const entry of sortAlphabetically(toPrint)) LogStuff(entry);
 
     return;
 }
@@ -103,9 +103,9 @@ export default function TheManager(args: string[]) {
         case "list":
             if (secondArg) {
                 let ignoreParam: false | "limit" | "exclude" = false;
-                if (StringUtils.testFlag(secondArg, "ignored")) {
+                if (testFlag(secondArg, "ignored")) {
                     ignoreParam = "limit";
-                } else if (StringUtils.testFlag(secondArg, "alive")) {
+                } else if (testFlag(secondArg, "alive")) {
                     ignoreParam = "exclude";
                 }
                 ListProjects(

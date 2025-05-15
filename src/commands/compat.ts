@@ -1,4 +1,4 @@
-import { StringUtils } from "@zakahacecosas/string-utils";
+import { normalize, table, validate } from "@zakahacecosas/string-utils";
 import { ColorString, LogStuff } from "../functions/io.ts";
 import type { TheCompaterConstructedParams } from "./constructors/command.ts";
 import { APP_URLs } from "../constants.ts";
@@ -63,7 +63,7 @@ const migrateCompatibility = [
 
 function overallSupport() {
     LogStuff("OVERALL SUPPORT ---");
-    LogStuff(StringUtils.table(featureCompatibility));
+    LogStuff(table(featureCompatibility));
     LogStuff(
         "For specific compatibility details, run 'compat' followed by any of these: cleaner, kickstart, release, migrate, commit, audit, launch.",
     );
@@ -78,25 +78,25 @@ export default function TheCompater(params: TheCompaterConstructedParams) {
         "bulb",
     );
 
-    if (!StringUtils.validate(params.target)) {
+    if (!validate(params.target)) {
         overallSupport();
         return;
     }
 
-    switch (StringUtils.normalize(params.target, { strict: true })) {
+    switch (normalize(params.target, { strict: true })) {
         case "cleaner":
         case "advanced":
             LogStuff("ADVANCED CLEANER FEATURES SUPPORT ---");
-            LogStuff(StringUtils.table(advancedFeatureCompatibility));
+            LogStuff(table(advancedFeatureCompatibility));
             return;
         case "kickstart":
             LogStuff("KICKSTART FEATURE SUPPORT ---");
-            LogStuff(StringUtils.table(kickstartCompatibility));
+            LogStuff(table(kickstartCompatibility));
             // IDEs too, this is simple so i ain't extracting to a constant
             LogStuff(`Supported IDEs: ${["VSCode", "VSCodium", "Notepad++", "Sublime", "Emacs", "Atom"].join(", ")}`);
             // git clients too, this is simple too so i ain't extracting to a constant
             LogStuff("Supported Git client aliases:");
-            LogStuff(StringUtils.table([
+            LogStuff(table([
                 { "Alias": "gh", "Points to": "GitHub", "That means": "github.com/USER/REPO" },
                 { "Alias": "gl", "Points to": "GitLab", "That means": "gitlab.com/USER/REPO" },
                 { "Alias": "bb", "Points to": "Bitbucket", "That means": "bitbucket.org/USER/REPO" },
@@ -111,23 +111,23 @@ export default function TheCompater(params: TheCompaterConstructedParams) {
             return;
         case "commit":
             LogStuff("COMMIT FEATURE SUPPORT ---");
-            LogStuff(StringUtils.table(commitCompatibility));
+            LogStuff(table(commitCompatibility));
             return;
         case "migrate":
             LogStuff("MIGRATE FEATURE SUPPORT ---");
-            LogStuff(StringUtils.table(migrateCompatibility));
+            LogStuff(table(migrateCompatibility));
             return;
         case "release":
             LogStuff("RELEASE FEATURE SUPPORT ---");
-            LogStuff(StringUtils.table(releaseCompatibility));
+            LogStuff(table(releaseCompatibility));
             return;
         case "audit":
             LogStuff("AUDIT FEATURE SUPPORT ---");
-            LogStuff(StringUtils.table(auditCompatibility));
+            LogStuff(table(auditCompatibility));
             return;
         case "launch":
             LogStuff("LAUNCH FEATURE SUPPORT ---");
-            LogStuff(StringUtils.table(launchCompatibility));
+            LogStuff(table(launchCompatibility));
             // IDEs too, this is simple so i ain't extracting to a constant
             LogStuff(`Supported IDEs: ${["VSCode", "VSCodium", "Notepad++", "Sublime", "Emacs", "Atom"].join(", ")}`);
             return;

@@ -1,4 +1,4 @@
-import { StringUtils } from "@zakahacecosas/string-utils";
+import { normalize, spaceString } from "@zakahacecosas/string-utils";
 import { APP_NAME, APP_URLs } from "../constants.ts";
 import { ColorString, LogStuff } from "../functions/io.ts";
 import type { TheHelperConstructedParams } from "./constructors/command.ts";
@@ -14,7 +14,7 @@ function formatCmd(obj: helpThing): string {
         const params: string = thingy[1] ? ColorString(thingy[1], "italic") : "";
         const desc: string = thingy[2];
 
-        strings.push(`${cmd} ${ColorString(params, "bold")}\n${StringUtils.spaceString(desc, 2, 0)}`);
+        strings.push(`${cmd} ${ColorString(params, "bold")}\n${spaceString(desc, 2, 0)}`);
     }
 
     return strings.join("\n----\n");
@@ -151,9 +151,9 @@ export default function TheHelper(params: TheHelperConstructedParams) {
             "--commit",
             null,
             `Commit any action that changes the code (e.g. --pretty or --update) when all of these are true:\n${
-                StringUtils.spaceString(`- "commitActions" is set to true in your fknode.yaml.`, 4, 0)
-            }\n${StringUtils.spaceString(`- Local working tree was clean before ${APP_NAME.CASED} touched it.`, 4, 0)}\n${
-                StringUtils.spaceString(`- Local repo is not behind upstream.`, 4, 0)
+                spaceString(`- "commitActions" is set to true in your fknode.yaml.`, 4, 0)
+            }\n${spaceString(`- Local working tree was clean before ${APP_NAME.CASED} touched it.`, 4, 0)}\n${
+                spaceString(`- Local repo is not behind upstream.`, 4, 0)
             }\n  Uses a default commit message; override it by setting "commitMessage" in your fknode.yaml.`,
         ],
     ]);
@@ -252,7 +252,7 @@ export default function TheHelper(params: TheHelperConstructedParams) {
         ],
     ]);
 
-    switch (StringUtils.normalize(query ?? "", { strict: true })) {
+    switch (normalize(query ?? "", { strict: true })) {
         case "clean":
             LogStuff(
                 `'clean' will clean your added projects. Options and flags:\n${CLEAN_OPTIONS}`,

@@ -7,7 +7,7 @@
  * (send help)
  */
 
-import { StringUtils } from "@zakahacecosas/string-utils";
+import { normalize, normalizeArray, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import type { MANAGER_NODE } from "../../types/platform.ts";
 import { ColorString, Interrogate, LogStuff } from "../../functions/io.ts";
 import { FkNodeSecurityAudit, ParsedNodeReport } from "../../types/audit.ts";
@@ -94,12 +94,12 @@ function AnalyzeSecurityVectorKeywords(svKeywords: SV_KEYWORDS[]): string[] {
     const questions: Set<string> = new Set<string>();
 
     function includes(target: string, substrings: string[]): boolean {
-        return substrings.some((substring) => target.includes(StringUtils.normalize(substring)));
+        return substrings.some((substring) => target.includes(normalize(substring)));
     }
 
     function has(keywords: SV_KEYWORDS, values: string[]): boolean {
-        const details = StringUtils.validate(keywords.summary) ? StringUtils.normalize(keywords.summary) : "";
-        const summary = StringUtils.validate(keywords.overview) ? StringUtils.normalize(keywords.overview) : "";
+        const details = validate(keywords.summary) ? normalize(keywords.summary) : "";
+        const summary = validate(keywords.overview) ? normalize(keywords.overview) : "";
         return includes(summary, values) || includes(details, values);
     }
 
@@ -173,7 +173,7 @@ export function ParseNodeReport(jsonString: string, platform: MANAGER_NODE): Par
      * ```
      * which is stupid, BECAUSE THAT IS _NOT_ VALID JSON! therefore the name of the variable
      */
-    const yarnStupidJsonFormat = StringUtils.softlyNormalizeArray(jsonString.split("\n")).filter((s) => s.includes('{"type":"auditAdvisory"'))
+    const yarnStupidJsonFormat = normalizeArray(jsonString.split("\n"), "soft").filter((s) => s.includes('{"type":"auditAdvisory"'))
         .map((
             s,
         ) => JSON.parse(s));
@@ -323,7 +323,7 @@ export function InterrogateVulnerableProject(questions: string[]): Omit<
         return qu;
     }
 
-    const isTrue = (s: InterrogatoryResponse): boolean => StringUtils.validateAgainst(s, ["true+2", "true+1"]);
+    const isTrue = (s: InterrogatoryResponse): boolean => validateAgainst(s, ["true+2", "true+1"]);
 
     // TODO - add detailed questions for new vectors
     for (const question of questions) {

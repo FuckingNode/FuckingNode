@@ -9,7 +9,7 @@ import type { LOCKFILE_GLOBAL, MANAGER_GLOBAL, ProjectEnvironment } from "../../
 import { FknError } from "../../functions/error.ts";
 import { Git } from "../../functions/git.ts";
 import type { tRESULT } from "../clean.ts";
-import { StringUtils } from "@zakahacecosas/string-utils";
+import { sortAlphabetically, validate } from "@zakahacecosas/string-utils";
 import { FkNodeInterop } from "../interop/interop.ts";
 
 /**
@@ -174,7 +174,7 @@ const ProjectCleaningFeatures = {
         Deno.chdir(env.root);
         function getCommitMessage() {
             if (
-                StringUtils.validate(env.settings.commitMessage) && !(isDef(env.settings.commitMessage))
+                validate(env.settings.commitMessage) && !(isDef(env.settings.commitMessage))
             ) {
                 return env.settings.commitMessage;
             }
@@ -554,7 +554,7 @@ export function ShowReport(results: tRESULT[]): void {
         const theResult = `${name} -> ${status}, taking us ${elapsedTime}`;
         report.push(theResult);
     }
-    const sortedReport = StringUtils.sortAlphabetically(report).join("\n");
+    const sortedReport = sortAlphabetically(report).join("\n");
     LogStuff(sortedReport, undefined);
     LogStuff(
         `Cleaning completed at ${new Date().toLocaleString()}`,

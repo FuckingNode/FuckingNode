@@ -3,7 +3,7 @@ import { CheckForPath, JoinPaths, ParsePath } from "../functions/filesystem.ts";
 import { ColorString, LogStuff } from "../functions/io.ts";
 import { GetProjectEnvironment, SpotProject } from "../functions/projects.ts";
 import { FULL_NAME } from "../constants.ts";
-import { StringUtils } from "@zakahacecosas/string-utils";
+import { normalize, normalizeArray, sortAlphabetically, validate } from "@zakahacecosas/string-utils";
 import { FknError } from "./error.ts";
 
 function __isRepo(path: string): boolean {
@@ -23,7 +23,7 @@ function __isRepo(path: string): boolean {
         );
         if (
             !output.success ||
-            StringUtils.normalize(output.stdout ?? "", { strict: true, stripCliColors: true }) !== "true"
+            normalize(output.stdout ?? "", { strict: true, removeCliColors: true }) !== "true"
         ) return false; // anything unsuccessful means uncommitted changes
 
         return true;
@@ -327,8 +327,8 @@ export const Git = {
                 false,
             );
             if (!getFilesOutput.success) throw new Error(getFilesOutput.stdout);
-            if (!StringUtils.validate(getFilesOutput.stdout)) return [];
-            return StringUtils.softlyNormalizeArray(getFilesOutput.stdout.split("\n"));
+            if (!validate(getFilesOutput.stdout)) return [];
+            return normalizeArray(getFilesOutput.stdout.split("\n"), "soft");
         } catch (e) {
             LogStuff(
                 `Error - could not get files ready for commit (staged) at ${ColorString(project, "bold")} because of error: ${e}`,
@@ -357,7 +357,7 @@ export const Git = {
             if (!getBranchesOutput.success) {
                 throw new Error(getBranchesOutput.stdout);
             }
-            if (!StringUtils.validate(getBranchesOutput.stdout)) {
+            if (!validate(getBranchesOutput.stdout)) {
                 // fallback to status
                 // this is an edge case for newly made repositories
                 const statusOutput = Commander(
@@ -380,8 +380,8 @@ export const Git = {
             const current = getBranchesOutput.stdout.match(/^\* (.+)$/m)![1]!;
             return {
                 current,
-                all: StringUtils.sortAlphabetically(
-                    StringUtils.softlyNormalizeArray(getBranchesOutput.stdout.replace("*", "").split("\n")),
+                all: sortAlphabetically(
+                    normalizeArray(getBranchesOutput.stdout.replace("*", "").split("\n"), "soft"),
                 ),
             };
         } catch (e) {

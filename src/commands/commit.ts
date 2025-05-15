@@ -2,11 +2,11 @@ import { ColorString, Interrogate, LogStuff } from "../functions/io.ts";
 import { GetProjectEnvironment, NameProject, SpotProject } from "../functions/projects.ts";
 import type { TheCommitterConstructedParams } from "./constructors/command.ts";
 import { Git } from "../functions/git.ts";
-import { StringUtils } from "@zakahacecosas/string-utils";
+import { normalize, testFlag, validate } from "@zakahacecosas/string-utils";
 import { RunUserCmd, ValidateUserCmd } from "../functions/user.ts";
 
 export default function TheCommitter(params: TheCommitterConstructedParams) {
-    if (!StringUtils.validate(params.message)) throw new Error("No commit message specified!");
+    if (!validate(params.message)) throw new Error("No commit message specified!");
 
     const CWD = Deno.cwd();
     const project = SpotProject(CWD);
@@ -37,12 +37,12 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
 
     const gitProps = {
         fileCount: Git.GetFilesReadyForCommit(project).length,
-        branch: (params.branch && !StringUtils.testFlag(params.branch, "push", { allowQuickFlag: true, allowSingleDash: true }))
-            ? branches.all.includes(StringUtils.normalize(params.branch)) ? params.branch : "__ERROR"
+        branch: (params.branch && !testFlag(params.branch, "push", { allowQuickFlag: true, allowSingleDash: true }))
+            ? branches.all.includes(normalize(params.branch)) ? params.branch : "__ERROR"
             : branches.current,
     };
 
-    if (!StringUtils.validate(gitProps.branch) || gitProps.branch === "__ERROR") {
+    if (!validate(gitProps.branch) || gitProps.branch === "__ERROR") {
         throw new Error(
             params.branch
                 ? `Given branch ${params.branch} wasn't found! These are your repo's branches:\n${

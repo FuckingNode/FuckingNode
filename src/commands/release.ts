@@ -5,11 +5,11 @@ import type { TheReleaserConstructedParams } from "./constructors/command.ts";
 import type { DenoPkgFile, NodePkgFile } from "../types/platform.ts";
 import { Commander } from "../functions/cli.ts";
 import { Git } from "../functions/git.ts";
-import { StringUtils } from "@zakahacecosas/string-utils";
 import { RunUserCmd, ValidateUserCmd } from "../functions/user.ts";
+import { validate } from "@zakahacecosas/string-utils";
 
 export default function TheReleaser(params: TheReleaserConstructedParams) {
-    if (!StringUtils.validate(params.version)) {
+    if (!validate(params.version)) {
         throw new Error("No version specified!");
     }
 

@@ -2,14 +2,14 @@ import { CheckForPath, JoinPaths } from "../functions/filesystem.ts";
 import { ColorString, Interrogate, LogStuff, StringifyYaml } from "../functions/io.ts";
 import { deepMerge, GetProjectEnvironment, NameProject, SpotProject } from "../functions/projects.ts";
 import type { TheSetuperConstructedParams } from "./constructors/command.ts";
-import { StringUtils } from "@zakahacecosas/string-utils";
 import { parse as parseYaml } from "@std/yaml";
 import { parse as parseJsonc } from "@std/jsonc";
 import { SETUPS, VISIBLE_SETUPS } from "./toolkit/setups.ts";
+import { normalize, table, validate } from "@zakahacecosas/string-utils";
 
 export default function TheSetuper(params: TheSetuperConstructedParams) {
-    if (!StringUtils.validate(params.setup) || !StringUtils.validate(params.project)) {
-        LogStuff(StringUtils.table(VISIBLE_SETUPS));
+    if (!validate(params.setup) || !validate(params.project)) {
+        LogStuff(table(VISIBLE_SETUPS));
         LogStuff(
             `You didn't provide a ${params.setup ? "project" : "target setup"} or provided an invalid one, so up here are all possible setups.`,
         );
@@ -18,8 +18,8 @@ export default function TheSetuper(params: TheSetuperConstructedParams) {
 
     const project = SpotProject(params.project);
     const env = GetProjectEnvironment(project);
-    const desiredSetup = StringUtils.normalize(params.setup, { strict: true });
-    const setupToUse = SETUPS.find((s) => (StringUtils.normalize(s.name, { strict: true })) === desiredSetup);
+    const desiredSetup = normalize(params.setup, { strict: true });
+    const setupToUse = SETUPS.find((s) => (normalize(s.name, { strict: true })) === desiredSetup);
 
     if (
         !setupToUse

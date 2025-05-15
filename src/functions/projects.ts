@@ -14,7 +14,7 @@ import type { PROJECT_ERROR_CODES } from "../types/errors.ts";
 import { FkNodeInterop } from "../commands/interop/interop.ts";
 import { Git } from "../functions/git.ts";
 import { internalGolangRequireLikeStringParser } from "../commands/interop/parse-module.ts";
-import { StringUtils, type UnknownString } from "@zakahacecosas/string-utils";
+import { normalize, normalizeArray, toUpperCaseFirst, type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
 
 /**
  * Gets all the users projects and returns their absolute root paths as a `string[]`.
@@ -60,7 +60,7 @@ export function GetAllProjects(ignored?: false | "limit" | "exclude"): string[] 
 export function AddProject(
     entry: UnknownString,
 ): void {
-    if (!StringUtils.validate(entry)) {
+    if (!validate(entry)) {
         throw new FknError(
             "Generic__InteractionInvalidCauseNoPathProvided",
             "You didn't provide a path.",
@@ -128,9 +128,9 @@ export function AddProject(
                 "italic",
             );
         }
-        if (!StringUtils.validateAgainst(env.runtime, ["node", "deno"])) {
+        if (!validateAgainst(env.runtime, ["node", "deno"])) {
             LogStuff(
-                `This project uses the ${StringUtils.toUpperCaseFirst(env.runtime)} runtime. Keep in mind it's not fully supported.`,
+                `This project uses the ${toUpperCaseFirst(env.runtime)} runtime. Keep in mind it's not fully supported.`,
                 "bruh",
                 "italic",
             );
@@ -404,11 +404,11 @@ export function UnderstandProjectProtection(settings: FkNodeYaml, options: {
     lint: boolean;
     destroy: boolean;
 }): UnderstoodProjectProtection {
-    const protection = StringUtils.normalizeArray(
+    const protection = normalizeArray(
         Array.isArray(settings.divineProtection) ? settings.divineProtection : [settings.divineProtection],
     );
 
-    if (!StringUtils.validate(protection[0]) || protection[0] === "disabled") {
+    if (!validate(protection[0]) || protection[0] === "disabled") {
         return {
             doClean: true,
             doUpdate: options.update,
@@ -466,7 +466,7 @@ export function ValidateProject(entry: string, existing: boolean): true | PROJEC
     }
 
     const isDuplicate = (GetAllProjects()).filter(
-        (item) => StringUtils.normalize(item) === StringUtils.normalize(workingEntry),
+        (item) => normalize(item) === normalize(workingEntry),
     ).length > (existing ? 1 : 0);
 
     if (isDuplicate) return "IsDuplicate";
@@ -484,7 +484,7 @@ export function GetWorkspaces(path: string): string[] {
     try {
         const workspacePaths: string[] = [];
 
-        const parse = (s: string[]): string[] => s.filter((s: UnknownString) => StringUtils.validate(s)).map((s: string) => JoinPaths(path, s));
+        const parse = (s: string[]): string[] => s.filter((s: UnknownString) => validate(s)).map((s: string) => JoinPaths(path, s));
 
         // Check package.json for Node, npm, and yarn (and Bun workspaces).
         const packageJsonPath = JoinPaths(path, "package.json");
@@ -542,7 +542,7 @@ export function GetWorkspaces(path: string): string[] {
         const goWorkPath = JoinPaths(path, "go.work");
         if (CheckForPath(goWorkPath)) {
             const goWork = internalGolangRequireLikeStringParser((Deno.readTextFileSync(goWorkPath)).split("\n"), "use");
-            if (goWork.length > 0) workspacePaths.push(...(goWork.filter((s) => !["(", ")"].includes(StringUtils.normalize(s)))));
+            if (goWork.length > 0) workspacePaths.push(...(goWork.filter((s) => !["(", ")"].includes(normalize(s)))));
         }
 
         if (workspacePaths.length === 0) return [];
@@ -923,7 +923,7 @@ export function ParseLockfile(lockfilePath: string): unknown {
  * @returns {Promise<string>}
  */
 export function SpotProject(name: UnknownString): string {
-    if (!StringUtils.validate(name)) {
+    if (!validate(name)) {
         throw new FknError(
             "Generic__InteractionInvalidCauseNoPathProvided",
             `Either didn't provide a project name / path or the CLI failed internally somewhere`,
@@ -936,12 +936,12 @@ export function SpotProject(name: UnknownString): string {
         return workingProject;
     }
 
-    const toSpot = StringUtils.normalize(name, { strict: false, preserveCase: true, stripCliColors: true });
+    const toSpot = normalize(name, { strict: false, preserveCase: true, removeCliColors: true });
 
     for (const project of allProjects) {
-        const projectName = StringUtils.normalize(
+        const projectName = normalize(
             NameProject(project, "name-colorless"),
-            { strict: false, preserveCase: true, stripCliColors: true },
+            { strict: false, preserveCase: true, removeCliColors: true },
         );
         if (toSpot === projectName) {
             return project;

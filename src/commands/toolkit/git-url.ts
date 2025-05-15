@@ -1,4 +1,4 @@
-import { StringUtils, UnknownString } from "@zakahacecosas/string-utils";
+import { type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { LogStuff } from "../../functions/io.ts";
 
 const gitAliases: Record<string, (arg: string) => string> = {
@@ -18,7 +18,7 @@ export function GenerateGitUrl(str: UnknownString): {
     full: string;
     name: string;
 } {
-    if (!StringUtils.validate(str)) throw new Error("Git URL is required!");
+    if (!validate(str)) throw new Error("Git URL is required!");
 
     const gitUrlRegex = /^(https?:\/\/.*?\/)([^\/]+)(?:\.git)?$/;
     const regexMatch = str.match(gitUrlRegex);
@@ -26,7 +26,7 @@ export function GenerateGitUrl(str: UnknownString): {
         const splitted = str.split(".").filter((s) => s.trim() !== "");
         const userForgotDotGit = splitted[splitted.length - 1] !== "git";
 
-        const splitIndex = StringUtils.validateAgainst(
+        const splitIndex = validateAgainst(
                 splitted[splitted.length - 1],
                 [
                     "gi",
@@ -70,8 +70,8 @@ export function GenerateGitUrl(str: UnknownString): {
 
     const [alias, repo] = str.split(":");
 
-    if (!StringUtils.validate(alias)) throw new Error("Missing alias.");
-    if (!StringUtils.validate(repo)) throw new Error("Missing repository.");
+    if (!validate(alias)) throw new Error("Missing alias.");
+    if (!validate(repo)) throw new Error("Missing repository.");
 
     if (!gitAliases[alias]) {
         throw new Error(

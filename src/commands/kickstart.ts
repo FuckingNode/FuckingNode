@@ -4,7 +4,6 @@ import { ColorString, LogStuff } from "../functions/io.ts";
 import { AddProject, GetProjectEnvironment, NameProject } from "../functions/projects.ts";
 import type { TheKickstarterConstructedParams } from "./constructors/command.ts";
 import { FkNodeInterop } from "./interop/interop.ts";
-import { StringUtils } from "@zakahacecosas/string-utils";
 import { NameLockfile, ResolveLockfiles } from "./toolkit/cleaner.ts";
 import type { MANAGER_GLOBAL } from "../types/platform.ts";
 import { LaunchUserIDE } from "../functions/user.ts";
@@ -12,6 +11,7 @@ import { FknError } from "../functions/error.ts";
 import { GetUserSettings } from "../functions/config.ts";
 import { GenerateGitUrl } from "./toolkit/git-url.ts";
 import { Git } from "../functions/git.ts";
+import { validate, validateAgainst } from "@zakahacecosas/string-utils";
 
 export default function TheKickstarter(params: TheKickstarterConstructedParams) {
     const { gitUrl, path, manager } = params;
@@ -19,7 +19,7 @@ export default function TheKickstarter(params: TheKickstarterConstructedParams) 
     const { full: repoUrl, name: projectName } = GenerateGitUrl(gitUrl);
 
     const cwd = Deno.cwd();
-    const clonePath: string = ParsePath(StringUtils.validate(path) ? path : JoinPaths(cwd, projectName));
+    const clonePath: string = ParsePath(validate(path) ? path : JoinPaths(cwd, projectName));
 
     const clonePathValidator = CheckForDir(clonePath);
     if (clonePathValidator === "ValidButNotEmpty") throw new Error(`${clonePath} is not empty! Choose somewhere else to clone this.`);
@@ -37,7 +37,7 @@ export default function TheKickstarter(params: TheKickstarterConstructedParams) 
     const lockfiles = ResolveLockfiles(Deno.cwd());
 
     if (lockfiles.length === 0) {
-        if (StringUtils.validateAgainst(manager, ["npm", "pnpm", "yarn", "bun", "deno", "cargo", "go"])) {
+        if (validateAgainst(manager, ["npm", "pnpm", "yarn", "bun", "deno", "cargo", "go"])) {
             LogStuff(`This project lacks a lockfile. We'll generate it right away!`, "warn");
             Deno.writeTextFileSync(
                 JoinPaths(Deno.cwd(), NameLockfile(manager)),
@@ -66,7 +66,7 @@ export default function TheKickstarter(params: TheKickstarterConstructedParams) 
     // assume we skipped error
     const env = GetProjectEnvironment(Deno.cwd());
 
-    const initialManager = StringUtils.validateAgainst(manager, ["npm", "pnpm", "yarn", "deno", "bun"]) ? manager : env.manager;
+    const initialManager = validateAgainst(manager, ["npm", "pnpm", "yarn", "deno", "bun"]) ? manager : env.manager;
 
     const managerToUse: MANAGER_GLOBAL = CommandExists(initialManager)
         ? initialManager
@@ -77,7 +77,7 @@ export default function TheKickstarter(params: TheKickstarterConstructedParams) 
     if (!managerToUse) {
         throw new FknError(
             "Generic__MissingRuntime",
-            StringUtils.validate(manager)
+            validate(manager)
                 ? `Neither your specified package manager (${manager}) nor the repo's manager (${env.manager}) is installed on this system. What the heck?`
                 : `This repo uses ${env.manager} as a package manager, but it isn't installed locally.`,
         );

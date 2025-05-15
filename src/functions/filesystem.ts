@@ -1,5 +1,5 @@
 import { join, normalize } from "@std/path";
-import { StringUtils, type UnknownString } from "@zakahacecosas/string-utils";
+import { kominator, sortAlphabetically, type UnknownString, validate } from "@zakahacecosas/string-utils";
 import { FknError } from "./error.ts";
 
 /**
@@ -52,9 +52,9 @@ export function CheckForDir(path: string): "NotDir" | "Valid" | "ValidButNotEmpt
  */
 export function ParsePath(target: UnknownString): string {
     try {
-        if (!StringUtils.validate(target)) throw new Error("Target must be (obviously) a string.");
+        if (!validate(target)) throw new Error("Target must be (obviously) a string.");
 
-        if (StringUtils.normalize(target) === "--self") return Deno.cwd();
+        if (normalize(target) === "--self") return Deno.cwd();
 
         let workingTarget: string;
 
@@ -83,16 +83,15 @@ export function ParsePath(target: UnknownString): string {
  * @returns {string[]} Your `string[]`.
  */
 export function ParsePathList(target: UnknownString): string[] {
-    if (!StringUtils.validate(target)) return [];
+    if (!validate(target)) return [];
 
-    return StringUtils
-        .sortAlphabetically(
-            StringUtils
-                .kominator(target, "\n")
-                .map((line) => line.trim().replace(/,$/, ""))
-                .filter((line) => line.length > 0)
-                .map(ParsePath),
-        );
+    // TODO for dev-utils: add these methods to StringArray so they're chainable
+    return sortAlphabetically(
+        kominator(target, "\n")
+            .map((line) => line.trim().replace(/,$/, ""))
+            .filter((line) => line.length > 0)
+            .map(ParsePath),
+    );
 }
 
 /**

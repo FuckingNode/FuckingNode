@@ -4,7 +4,7 @@ import { FknError } from "./error.ts";
 import { BulkRemoveFiles, CheckForPath, JoinPaths, ParsePathList } from "./filesystem.ts";
 import { parse as parseYaml } from "@std/yaml";
 import { ColorString, Interrogate, LogStuff, StringifyYaml } from "./io.ts";
-import { StringUtils, type UnknownString } from "@zakahacecosas/string-utils";
+import { type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { format } from "@std/fmt/bytes";
 
 /**
@@ -19,7 +19,7 @@ export function GetAppPath(
 ): string {
     const appDataPath: string = LOCAL_PLATFORM.APPDATA;
 
-    if (!StringUtils.validate(appDataPath) || !CheckForPath(appDataPath)) {
+    if (!validate(appDataPath) || !CheckForPath(appDataPath)) {
         throw new FknError(
             "Internal__NoEnvForConfigPath",
             `We searched for ${
@@ -158,7 +158,7 @@ export function ChangeSetting(
     const currentSettings = GetUserSettings();
 
     if (setting === "defaultIntensity") {
-        if (!StringUtils.validateAgainst(value, ["normal", "hard", "hard-only", "maxim", "maxim-only"])) {
+        if (!validateAgainst(value, ["normal", "hard", "hard-only", "maxim", "maxim-only"])) {
             LogStuff(`${value} is not valid. Enter either 'normal', 'hard', 'hard-only', or 'maxim'.`);
             return;
         }
@@ -185,7 +185,7 @@ export function ChangeSetting(
             StringifyYaml(newSettings),
         );
     } else if (setting === "favEditor") {
-        if (!StringUtils.validateAgainst(value, ["vscode", "sublime", "emacs", "atom", "notepad++", "vscodium"])) {
+        if (!validateAgainst(value, ["vscode", "sublime", "emacs", "atom", "notepad++", "vscodium"])) {
             LogStuff(
                 `${value} is not valid. Enter either:\n'vscode', 'sublime', 'emacs', 'atom', 'notepad++', or 'vscodium'.`,
             );
@@ -214,7 +214,7 @@ export function ChangeSetting(
             StringifyYaml(newSettings),
         );
     } else {
-        if (!StringUtils.validateAgainst(value, ["npm", "pnpm", "yarn", "bun", "deno", "cargo", "go"])) {
+        if (!validateAgainst(value, ["npm", "pnpm", "yarn", "bun", "deno", "cargo", "go"])) {
             LogStuff(`${value} is not valid. Enter a valid package manager (npm, pnpm, yarn, bun, deno, cargo, go).`);
             return;
         }
@@ -272,7 +272,7 @@ export function DisplaySettings(): void {
  * @returns {void}
  */
 export function FlushConfigFiles(target: UnknownString, force: boolean, silent: boolean = false): void {
-    if (!StringUtils.validateAgainst(target, ["logs", "projects", "schedules", "errors", "all"])) {
+    if (!validateAgainst(target, ["logs", "projects", "schedules", "errors", "all"])) {
         LogStuff(
             "Specify what to flush. Either 'logs', 'projects', 'schedules', 'errors', or 'all'.",
             "warn",

@@ -1,4 +1,4 @@
-import { StringUtils } from "@zakahacecosas/string-utils";
+import { normalize, validate } from "@zakahacecosas/string-utils";
 import { FULL_NAME } from "../constants.ts";
 import { GetDateNow } from "../functions/date.ts";
 import { CheckForPath, JoinPaths } from "../functions/filesystem.ts";
@@ -99,12 +99,12 @@ function handler(
 export default function TheMigrator(params: TheMigratorConstructedParams): void {
     const { projectPath, wantedManager } = params;
 
-    if (!StringUtils.validate(wantedManager)) throw new Error("No target (pnpm, npm, yarn, deno, bun) specified.");
+    if (!validate(wantedManager)) throw new Error("No target (pnpm, npm, yarn, deno, bun) specified.");
 
-    const desiredManager = StringUtils.normalize(wantedManager);
+    const desiredManager = normalize(wantedManager);
 
     const MANAGERS = ["pnpm", "npm", "yarn", "deno", "bun"];
-    if (!MANAGERS.includes(StringUtils.normalize(desiredManager))) {
+    if (!MANAGERS.includes(normalize(desiredManager))) {
         throw new Error("Target isn't a valid package manager. Only JS environments (NodeJS, Deno, Bun) support migrate.");
     }
 

@@ -1,4 +1,4 @@
-import { StringUtils, type UnknownString } from "@zakahacecosas/string-utils";
+import { normalize, type UnknownString, validate } from "@zakahacecosas/string-utils";
 import { GetProjectEnvironment, RemoveProject, SpotProject } from "../functions/projects.ts";
 import type { TheSurrendererConstructedParams } from "./constructors/command.ts";
 import { ColorString, Interrogate, LogStuff } from "../functions/io.ts";
@@ -35,8 +35,8 @@ export default function TheSurrenderer(params: TheSurrendererConstructedParams) 
     Deno.chdir(project);
 
     function valid(str: UnknownString): str is string {
-        if (!StringUtils.validate(str)) return false;
-        const normalized = StringUtils.normalize(str);
+        if (!validate(str)) return false;
+        const normalized = normalize(str);
         return normalized !== "--" && normalized !== "-";
     }
 

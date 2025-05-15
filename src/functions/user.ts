@@ -1,4 +1,4 @@
-import { StringUtils } from "@zakahacecosas/string-utils";
+import { normalize, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { DebugFknErr, FknError } from "./error.ts";
 import type { ProjectEnvironment } from "../types/platform.ts";
 import { Commander } from "./cli.ts";
@@ -9,7 +9,7 @@ import { GetUserSettings } from "./config.ts";
 export function ValidateUserCmd(env: ProjectEnvironment, key: "commitCmd" | "releaseCmd"): string {
     const command = key === "commitCmd" ? env.settings.commitCmd : env.settings.releaseCmd;
 
-    const cmd = (StringUtils.validate(command) && !isDis(command)) ? StringUtils.normalize(command) : "disable";
+    const cmd = (validate(command) && !isDis(command)) ? normalize(command) : "disable";
 
     if (cmd !== "disable" && env.commands.run === "__UNSUPPORTED") {
         throw new FknError(
@@ -44,7 +44,7 @@ export function RunUserCmd(params: { key: "commitCmd" | "releaseCmd"; env: Proje
 export function LaunchUserIDE() {
     const IDE: CF_FKNODE_SETTINGS["favEditor"] = GetUserSettings().favEditor;
 
-    if (!StringUtils.validateAgainst(IDE, ["vscode", "sublime", "emacs", "notepad++", "atom", "vscodium"])) {
+    if (!validateAgainst(IDE, ["vscode", "sublime", "emacs", "notepad++", "atom", "vscodium"])) {
         throw new Error(`${IDE} is not a supported editor! Cannot launch it.`);
     }
 

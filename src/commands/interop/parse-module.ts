@@ -3,7 +3,7 @@
  * @author ZakaHaceCosas
  */
 
-import { StringUtils, type UnknownString } from "@zakahacecosas/string-utils";
+import { normalize, type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import type { CargoPkgFile, DenoPkgFile, FnCPF, GolangPkgFile, MANAGER_JS, NodePkgFile } from "../../types/platform.ts";
 import { VERSION } from "../../constants.ts";
 import { FknError } from "../../functions/error.ts";
@@ -35,8 +35,8 @@ export function internalGolangRequireLikeStringParser(content: string[], kw: str
     let requireCount = 0;
 
     content.map((line) => {
-        const l = StringUtils.normalize(line);
-        if (l === `${StringUtils.normalize(kw, { strict: true, stripCliColors: true })} (`) {
+        const l = normalize(line);
+        if (l === `${normalize(kw, { strict: true, removeCliColors: true })} (`) {
             if (requireCount === 0) toReturn.push(l);
             requireCount++;
         } else if (l === ")") {
@@ -107,7 +107,7 @@ const internalParsers = {
                 }
             }
 
-            if (!StringUtils.validate(module) || !StringUtils.validate(go)) {
+            if (!validate(module) || !validate(go)) {
                 throw new FknError("Env__UnparsableMainFile", `Given go.mod contents are unparsable.\n${content}`);
             }
 
@@ -161,8 +161,8 @@ export const dedupeDependencies = (deps: FnCPF["deps"]) => {
 
 export const findDependency = (target: string, deps: FnCPF["deps"]): FnCPF["deps"][0] | undefined => {
     return deps.find((dep) =>
-        StringUtils.normalize(dep.name, { strict: true, preserveCase: true, stripCliColors: true }) ===
-            StringUtils.normalize(target, { strict: true, preserveCase: true, stripCliColors: true })
+        normalize(dep.name, { strict: true, preserveCase: true, removeCliColors: true }) ===
+            normalize(target, { strict: true, preserveCase: true, removeCliColors: true })
     );
 };
 
@@ -319,7 +319,7 @@ export const Parsers = {
                 const t = v.match(denoImportRegex); // Directly use the match result
                 if (
                     t && t.groups && t.groups["package"] && t.groups["version"] &&
-                    StringUtils.validateAgainst(t.groups["source"], ["npm", "jsr"])
+                    validateAgainst(t.groups["source"], ["npm", "jsr"])
                 ) {
                     deps.push({
                         name: t.groups["package"], // Scope/package

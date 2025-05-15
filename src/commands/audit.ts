@@ -4,14 +4,13 @@ import { GetAllProjects, NameProject } from "../functions/projects.ts";
 import { PerformAuditing } from "./toolkit/auditer.ts";
 import type { FkNodeSecurityAudit } from "../types/audit.ts";
 import type { TheAuditerConstructedParams } from "./constructors/command.ts";
-import { StringUtils } from "@zakahacecosas/string-utils";
+import { normalize, testFlag, validate } from "@zakahacecosas/string-utils";
 
 export default function TheAuditer(params: TheAuditerConstructedParams) {
     const { project } = params;
 
-    const shouldAuditAll = !StringUtils.validate(project) ||
-        StringUtils.testFlag(project, "all", { allowQuickFlag: true, allowSingleDash: true, normalize: true }) ||
-        StringUtils.normalize(project) === "--";
+    const shouldAuditAll = !validate(project) ||
+        testFlag(project, "all", { allowQuickFlag: true, allowSingleDash: true, allowNonExactString: true }) || normalize(project) === "--";
 
     if (shouldAuditAll) {
         const projects = GetAllProjects();

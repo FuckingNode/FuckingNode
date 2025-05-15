@@ -4,7 +4,7 @@ import { format, parse } from "@std/semver";
 import type { CF_FKNODE_SCHEDULE, CF_FKNODE_SETTINGS, FullFkNodeYaml } from "./types/config_files.ts";
 import * as DenoJson from "../deno.json" with { type: "json" };
 import { GetDateNow } from "./functions/date.ts";
-import { StringUtils, type UnknownString } from "@zakahacecosas/string-utils";
+import { normalize, type UnknownString } from "@zakahacecosas/string-utils";
 import { CommandExists } from "./functions/cli.ts";
 
 /**
@@ -171,12 +171,12 @@ export const DEFAULT_FKNODE_YAML: FullFkNodeYaml = {
 
 /** Checks if a given command is __USE_DEFAULT */
 export function isDef(str: UnknownString): str is "usedefault" {
-    return StringUtils.normalize(str ?? "", { strict: true, preserveCase: false, stripCliColors: true }) === "usedefault";
+    return normalize(str ?? "", { strict: true, preserveCase: false, removeCliColors: true }) === "usedefault";
 }
 
 /** Checks if a given command is __DISABLE */
 export function isDis(str: UnknownString): str is "disable" {
-    return StringUtils.normalize(str ?? "", { strict: true, preserveCase: false, stripCliColors: true }) === "disable";
+    return normalize(str ?? "", { strict: true, preserveCase: false, removeCliColors: true }) === "disable";
 }
 
 // deno-lint-ignore no-explicit-any

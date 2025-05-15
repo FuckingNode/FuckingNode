@@ -3,7 +3,7 @@ import { APP_NAME, FWORDS, LOCAL_PLATFORM } from "../constants.ts";
 import { ColorString } from "./io.ts";
 import type { GLOBAL_ERROR_CODES } from "../types/errors.ts";
 import { GetDateNow } from "./date.ts";
-import { StringUtils, type UnknownString } from "@zakahacecosas/string-utils";
+import { stripCliColors, type UnknownString, validate } from "@zakahacecosas/string-utils";
 import { FKNODE_SHALL_WE_DEBUG } from "../main.ts";
 
 /**
@@ -124,7 +124,7 @@ ${this.stack}
 -
 below goes the debugged content dump. this could be, for example, an entire project main file, dumped here for reviewal. it could be a sh*t ton of stuff to read
 - DEBUGGABLE CONTENT (in most cases, what the CLI command that was executed returned, in case we were able to gather it)
-${StringUtils.stripCliColors(debuggableContent ?? "UNKNOWN OUTPUT - No debuggableContent was provided, or it was empty.")}
+${stripCliColors(debuggableContent ?? "UNKNOWN OUTPUT - No debuggableContent was provided, or it was empty.")}
 ---
 # END   FknERROR ${this.code} # GOOD LUCK FIXING THIS
 ---\n
@@ -178,7 +178,7 @@ export function DEBUG_LOG(...a: unknown[]): void {
 
 /** Throws a `FknError` and writes any debuggable content. */
 export function DebugFknErr(code: GLOBAL_ERROR_CODES, message: UnknownString, debuggableContent: UnknownString): never {
-    const err = new FknError(code, StringUtils.validate(message) ? message : undefined);
+    const err = new FknError(code, validate(message) ? message : undefined);
     err.debug(
         debuggableContent,
     );

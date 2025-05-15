@@ -1,4 +1,4 @@
-import { StringUtils } from "@zakahacecosas/string-utils";
+import { validateAgainst } from "@zakahacecosas/string-utils";
 import { ProjectEnvironment } from "../../types/platform.ts";
 import { ColorString, LogStuff } from "../../functions/io.ts";
 import { parse } from "@std/semver";
@@ -7,7 +7,7 @@ export function RecommendedCommunityStandards(env: ProjectEnvironment) {
     // deno-lint-ignore no-explicit-any
     const content = env.main.stdContent as any;
 
-    const isNodeJs = StringUtils.validateAgainst(env.runtime, ["node", "bun"]);
+    const isNodeJs = validateAgainst(env.runtime, ["node", "bun"]);
     const isDenoJs = env.runtime === "deno";
 
     if (isNodeJs) {

@@ -23,7 +23,7 @@ import { FreshSetup, GetAppPath, GetUserSettings } from "./functions/config.ts";
 import { DEBUG_LOG, GenericErrorHandler } from "./functions/error.ts";
 import type { TheCleanerConstructedParams } from "./commands/constructors/command.ts";
 import { RunScheduledTasks } from "./functions/schedules.ts";
-import { StringUtils, UnknownString } from "@zakahacecosas/string-utils";
+import { normalize, testFlag, testFlags, type UnknownString, validate } from "@zakahacecosas/string-utils";
 import { CleanupProjects } from "./functions/projects.ts";
 import { LaunchWebsite } from "./functions/http.ts";
 import { HINTS } from "./functions/phrases.ts";
@@ -34,7 +34,7 @@ import { GetDateNow } from "./functions/date.ts";
 // yes i added this feature because of a breaking change i wasn't expecting
 
 // ps. i don't use LogStuff because if something broke, well, it might not work
-if (StringUtils.normalize(Deno.args[0] ?? "") === "something-fucked-up") {
+if (normalize(Deno.args[0] ?? "") === "something-fucked-up") {
     console.log(
         `This command will reset ${APP_NAME.CASED}'s settings, logs, and configs ENTIRELY (except for project list). Are you sure things ${FWORDS.FK}ed up that much?`,
     );
@@ -69,10 +69,10 @@ async function init() {
 
 /** Normalized Deno.args */
 const flags = Deno.args.map((arg) =>
-    StringUtils.normalize(arg, {
+    normalize(arg, {
         preserveCase: true,
         strict: false,
-        stripCliColors: true,
+        removeCliColors: true,
     })
 );
 
@@ -81,10 +81,8 @@ DEBUG_LOG("Initialized FKNODE_SHALL_WE_DEBUG constant (ENTRY POINT)");
 DEBUG_LOG("ARGS", flags);
 
 function hasFlag(flag: string, allowQuickFlag: boolean, firstOnly: boolean = false): boolean {
-    if (firstOnly === true) {
-        return StringUtils.testFlag(flags[0] ?? "", flag, { allowQuickFlag, normalize: true });
-    }
-    return StringUtils.testFlags(flags, flag, { allowQuickFlag, normalize: true });
+    if (firstOnly === true) return testFlag(flags[0] ?? "", flag, { allowQuickFlag, allowNonExactString: true });
+    return testFlags(flags, flag, { allowQuickFlag, allowNonExactString: true });
 }
 
 if (hasFlag("help", true)) {
@@ -106,8 +104,8 @@ if (hasFlag("version", true, true) && !flags[1]) {
 }
 
 function isNotFlag(arg: UnknownString): arg is string {
-    if (!StringUtils.validate(arg)) return false;
-    const str = StringUtils.normalize(arg, { preserveCase: true, strict: false, stripCliColors: true });
+    if (!validate(arg)) return false;
+    const str = normalize(arg, { preserveCase: true, strict: false, removeCliColors: true });
     return !str.startsWith("-") && !str.startsWith("--");
 }
 
@@ -158,7 +156,7 @@ async function main(command: UnknownString) {
         return;
     }
 
-    if (!StringUtils.validate(command)) {
+    if (!validate(command)) {
         TheHelper({});
         Deno.exit(0);
     }
@@ -184,10 +182,10 @@ async function main(command: UnknownString) {
     };
 
     switch (
-        StringUtils.normalize(command, {
+        normalize(command, {
             strict: true,
             preserveCase: true,
-            stripCliColors: true,
+            removeCliColors: true,
         })
     ) {
         case "clean":
