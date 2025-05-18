@@ -1,0 +1,11 @@
+flagless:
+    flaglessUpdate: true
+    flaglessDestroy: true
+    flaglessLint: true
+    flaglessPretty: true
+    flaglessCommit: false
+destroy:
+    intensities:
+        - "*"
+    targets:
+        - "node_modules/" # bad practice

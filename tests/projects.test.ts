@@ -3,12 +3,14 @@ import { assertEquals } from "@std/assert";
 import { TEST_ONE } from "./constants.ts";
 import { mocks } from "./mocks.ts";
 import { ColorString } from "../src/functions/io.ts";
-import { APP_NAME } from "../src/constants.ts";
+import { APP_NAME, DEFAULT_FKNODE_YAML } from "../src/constants.ts";
+import { parse as parseYaml } from "@std/yaml";
+import { JoinPaths } from "../src/functions/filesystem.ts";
 
 // ACTUAL TESTS
 Deno.test({
     name: "reads node env",
-    fn: async () => {
+    fn: () => {
         const env = GetProjectEnvironment(TEST_ONE.root);
         assertEquals(env, TEST_ONE);
     },
@@ -31,7 +33,7 @@ Deno.test({
 
 Deno.test({
     name: "names projects accordingly",
-    fn: async () => {
+    fn: () => {
         const toName = SpotProject(APP_NAME.SCOPE);
 
         assertEquals(
@@ -42,5 +44,18 @@ Deno.test({
             NameProject(toName, "name"),
             ColorString(APP_NAME.SCOPE, "bold"),
         );
+    },
+});
+
+// ! this test is failing as of now
+// this is new info, maybe the ctx mismatch comes from here instead?
+Deno.test({
+    name: "gets the right fknode.yaml",
+    fn: () => {
+        const settings = GetProjectEnvironment(TEST_ONE.root).settings;
+        assertEquals(settings, {
+            ...DEFAULT_FKNODE_YAML,
+            ...(parseYaml(Deno.readTextFileSync(JoinPaths(TEST_ONE.root, "fknode.yaml"))) as any),
+        });
     },
 });

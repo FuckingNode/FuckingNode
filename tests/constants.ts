@@ -13,7 +13,24 @@ export const CONSTANTS = {
 const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
     ONE: {
         root: ParsePath(`${CONSTANTS.ENV_PATH}/test-one`),
-        settings: DEFAULT_FKNODE_YAML,
+        settings: {
+            ...DEFAULT_FKNODE_YAML,
+            destroy: {
+                intensities: [
+                    "*",
+                ],
+                targets: [
+                    "node_modules/",
+                ],
+            },
+            flagless: {
+                flaglessCommit: false,
+                flaglessDestroy: true,
+                flaglessLint: true,
+                flaglessPretty: true,
+                flaglessUpdate: true,
+            },
+        },
         runtimeColor: "bright-green",
         main: {
             path: ParsePath(`${CONSTANTS.ENV_PATH}/test-one/package.json`),

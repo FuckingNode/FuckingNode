@@ -16,6 +16,9 @@ import { Git } from "../functions/git.ts";
 import { internalGolangRequireLikeStringParser } from "../commands/interop/parse-module.ts";
 import { normalize, normalizeArray, toUpperCaseFirst, type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
 
+// CONTEXT MISMATCH FIX part 1/2
+Object.freeze(DEFAULT_FKNODE_YAML);
+
 /**
  * Gets all the users projects and returns their absolute root paths as a `string[]`.
  *
@@ -366,6 +369,8 @@ function GetProjectSettings(path: string): FullFkNodeYaml {
     const pathToDivineFile = JoinPaths(path, "fknode.yaml");
     DEBUG_LOG("FKN YAML / READING", pathToDivineFile);
 
+    DEBUG_LOG("FKN YAML / CHECKING FOR FILE", pathToDivineFile);
+    DEBUG_LOG("FKN YAML / EXISTS?", CheckForPath(pathToDivineFile));
     if (!CheckForPath(pathToDivineFile)) {
         DEBUG_LOG("FKN YAML / RESORTING TO DEFAULTS (no fknode.yaml)");
         return DEFAULT_FKNODE_YAML;
@@ -375,7 +380,7 @@ function GetProjectSettings(path: string): FullFkNodeYaml {
     const divineContent = parseYaml(content);
     DEBUG_LOG("FKN YAML / RAW DIVINE CONTENT", path, divineContent);
 
-    if (!ValidateFkNodeYaml(divineContent)) {
+    if (!divineContent || typeof divineContent !== "object" || !ValidateFkNodeYaml(divineContent)) {
         DEBUG_LOG("FKN YAML / RESORTING TO DEFAULTS (invalid fknode.yaml)");
         if (!content.includes("UPON INTERACTING")) {
             Deno.writeTextFileSync(
@@ -389,10 +394,18 @@ function GetProjectSettings(path: string): FullFkNodeYaml {
         return DEFAULT_FKNODE_YAML;
     }
 
-    const mergedSettings = deepMerge(DEFAULT_FKNODE_YAML, divineContent);
+    const mergedSettings = deepMerge(
+        // CONTEXT MISMATCH FIX part 2/2
+        structuredClone(DEFAULT_FKNODE_YAML),
+        divineContent,
+    );
+    if (!ValidateFkNodeYaml(mergedSettings)) {
+        DEBUG_LOG("FKN YAML / RESORTING TO DEFAULTS (invalid fknode.yaml after merge)");
+        return DEFAULT_FKNODE_YAML;
+    }
     DEBUG_LOG("FKN YAML / DEEP MERGE", path, mergedSettings);
 
-    return mergedSettings;
+    return mergedSettings as FullFkNodeYaml;
 }
 
 /**

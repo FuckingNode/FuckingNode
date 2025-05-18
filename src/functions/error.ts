@@ -173,7 +173,7 @@ export function GenericErrorHandler(e: unknown): never {
  * (constant case instead of pascal case so i can better recognize this)
  */
 export function DEBUG_LOG(...a: unknown[]): void {
-    if (FKNODE_SHALL_WE_DEBUG) console.debug(a);
+    if (FKNODE_SHALL_WE_DEBUG) console.debug(" >>> FKNDBG >>>", ...a);
 }
 
 /** Throws a `FknError` and writes any debuggable content. */

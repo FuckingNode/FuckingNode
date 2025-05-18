@@ -6,6 +6,14 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
+## Unreleased
+
+Next update will be a major 4.0 release.
+
+### Fixed
+
+- Fixed the biggest error of the CLI so far, codenamed "context mismatch" - though it actually was a mutation issue, the CLI was overwriting its own defaults. More info in [#15](https://github.com/FuckingNode/FuckingNode/issues/15).
+
 ## [3.4.1] (04-05-2025)
 
 ### Changed

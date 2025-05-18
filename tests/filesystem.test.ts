@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { JoinPaths, ParsePath, ParsePathList } from "../src/functions/filesystem.ts";
+import { CheckForDir, CheckForPath, JoinPaths, ParsePath, ParsePathList } from "../src/functions/filesystem.ts";
 
 Deno.test({
     name: "paths are parsed correctly",
@@ -20,6 +20,31 @@ Deno.test({
                 Deno.cwd(),
                 JoinPaths(Deno.cwd(), "test"),
             ],
+        );
+    },
+});
+
+Deno.test({
+    name: "checks for paths and DIRs correctly",
+    fn: () => {
+        assertEquals(
+            CheckForPath(JoinPaths(Deno.cwd(), "fknode.yaml")),
+            true,
+        );
+
+        assertEquals(
+            CheckForPath("non-existing-path"),
+            false,
+        );
+
+        assertEquals(
+            CheckForDir(Deno.cwd()),
+            "ValidButNotEmpty",
+        );
+
+        assertEquals(
+            CheckForPath(Deno.cwd()),
+            true,
         );
     },
 });

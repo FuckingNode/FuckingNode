@@ -13,7 +13,7 @@
     "jsr:@std/semver@1.0.5": "1.0.5",
     "jsr:@std/toml@^1.0.6": "1.0.6",
     "jsr:@std/yaml@1.0.6": "1.0.6",
-    "jsr:@zakahacecosas/string-utils@3": "3.0.0",
+    "jsr:@zakahacecosas/string-utils@^3.2.0": "3.2.0",
     "npm:@types/node@*": "22.12.0"
   },
   "jsr": {
@@ -68,8 +68,8 @@
     "@std/yaml@1.0.6": {
       "integrity": "c9a5a914e1d51c46756cb10e356710035cfa905e713c90d3b711413fd3aead27"
     },
-    "@zakahacecosas/string-utils@3.0.0": {
-      "integrity": "8bb1426a6b396f60c3da4abd973f198b60d298b8bee26737c12362b429c89af2"
+    "@zakahacecosas/string-utils@3.2.0": {
+      "integrity": "8bbaf23dc158ffd0df9764c8698fa4ed1e325f4409f34e4dc98d5f1958af7cab"
     }
   },
   "npm": {
@@ -94,7 +94,7 @@
       "jsr:@std/semver@1.0.5",
       "jsr:@std/toml@^1.0.6",
       "jsr:@std/yaml@1.0.6",
-      "jsr:@zakahacecosas/string-utils@3"
+      "jsr:@zakahacecosas/string-utils@^3.2.0"
     ]
   }
 }

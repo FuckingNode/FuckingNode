@@ -6,7 +6,6 @@ import type { TheCleanerConstructedParams } from "./constructors/command.ts";
 import { PerformCleanup, PerformHardCleanup, PerformMaximCleanup, ResolveLockfiles, ShowReport, ValidateIntensity } from "./toolkit/cleaner.ts";
 import type { CleanerIntensity } from "../types/config_params.ts";
 import { GetElapsedTime } from "../functions/date.ts";
-import { DEBUG_LOG } from "../functions/error.ts";
 
 export type tRESULT = { path: string; status: string; elapsedTime: string };
 
@@ -69,74 +68,77 @@ export default function TheCleaner(params: TheCleanerConstructedParams) {
                 continue;
             }
 
-            // TODO - i think THIS line is behind the ctx mismatch
             Deno.chdir(project);
-
-            DEBUG_LOG("ASSIGNED", project);
-            DEBUG_LOG("DIRECTED", Deno.cwd());
 
             const lockfiles = ResolveLockfiles(project);
 
             // TODO - readd preliminary status (basically showing '... # * protected' in report and a log warning for the user)
 
-            if (lockfiles.length > 0) {
-                if (lockfiles.length === 1) {
-                    LogStuff(
-                        `Cleaning the ${NameProject(project)} ${FWORDS.MF}...`,
-                        "package",
-                    );
-                    PerformCleanup(
-                        project,
-                        update,
-                        lint,
-                        prettify,
-                        destroy,
-                        commit,
-                        realIntensity,
-                        verbose,
-                    );
-                } else {
-                    LogStuff(
-                        `More than one lockfile is a bad practice; we can't handle this ${FWORDS.MF}.`,
-                        "error",
-                        "bright-yellow",
-                    );
-                    results.push({
-                        path: project,
-                        status: "Too many lockfiles.",
-                        elapsedTime: GetElapsedTime(startTime),
-                    });
-                    continue;
-                }
-            } else if (CheckForPath("package.json")) {
+            if (lockfiles.length === 1) {
                 LogStuff(
-                    `${project} has a package.json but not a lockfile. Can't ${FWORDS.FKN} clean.`,
-                    "warn",
+                    `Cleaning the ${NameProject(project)} ${FWORDS.MF}...`,
+                    "package",
+                );
+                PerformCleanup(
+                    project,
+                    update,
+                    lint,
+                    prettify,
+                    destroy,
+                    commit,
+                    realIntensity,
+                    verbose,
+                );
+            }
+            if (lockfiles.length > 1) {
+                LogStuff(
+                    `Having more than one lockfile is a bad practice; and we can't handle this ${FWORDS.MF}.`,
+                    "error",
                     "bright-yellow",
                 );
                 results.push({
                     path: project,
-                    status: "No lockfile.",
-                    elapsedTime: GetElapsedTime(startTime),
-                });
-                continue;
-            } else {
-                LogStuff(
-                    `No supported lockfile was found at ${project}. Skipping this ${FWORDS.MF}...`,
-                    "warn",
-                    "bright-yellow",
-                );
-                results.push({
-                    path: project,
-                    status: "No package.json.",
+                    status: "Too many lockfiles.",
                     elapsedTime: GetElapsedTime(startTime),
                 });
                 continue;
             }
+            if (lockfiles.length === 0) {
+                if (
+                    CheckForPath("package.json") || CheckForPath("deno.json") || CheckForPath("package.jsonc") || CheckForPath("Cargo.toml") ||
+                    CheckForPath("go.mod")
+                ) {
+                    LogStuff(
+                        `${project} has a package file but not a lockfile. Can't ${FWORDS.FKN} clean.`,
+                        "warn",
+                        "bright-yellow",
+                    );
+                    results.push({
+                        path: project,
+                        status: "No lockfile.",
+                        elapsedTime: GetElapsedTime(startTime),
+                    });
+                    continue;
+                } else {
+                    LogStuff(
+                        `No supported package file was found at ${project}. Skipping this ${FWORDS.MF}...`,
+                        "warn",
+                        "bright-yellow",
+                    );
+                    results.push({
+                        path: project,
+                        status: "No package file.",
+                        elapsedTime: GetElapsedTime(startTime),
+                    });
+                    continue;
+                }
+            }
+
+            const status = "Success"; // preliminaryStatus ? `Success # ${preliminaryStatus}` : "Success";
 
             results.push({
                 path: project,
-                status: /* preliminaryStatus ? `Success # ${preliminaryStatus}` : */ "Success",
+                status,
                 elapsedTime: GetElapsedTime(startTime),
             });
         } catch (e) {
@@ -160,7 +162,7 @@ export default function TheCleaner(params: TheCleanerConstructedParams) {
     // go back home
     Deno.chdir(originalLocation);
     LogStuff(
-        `All your ${FWORDS.MFN} JavaScript projects have been cleaned! Back to ${originalLocation}.`,
+        `All your ${FWORDS.MFN} projects have been cleaned! Back to ${originalLocation}.`,
         "tick",
         "bright-green",
     );
