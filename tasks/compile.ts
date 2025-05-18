@@ -82,7 +82,7 @@ const ALL_COMMANDS = Object.entries(TARGETS).map(([key, [target, output]]) => {
     return {
         target: newTarget,
         compileCmd: new Deno.Command("deno", { args: compilerArguments }),
-        hashCmd: new Deno.Command(".\\kbi.exe", { args: hasherArguments }),
+        hashCmd: new Deno.Command("kbi", { args: hasherArguments }),
         signCmd: new Deno.Command("gpg", { args: signerArguments }),
     };
 });
