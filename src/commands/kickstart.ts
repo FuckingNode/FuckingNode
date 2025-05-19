@@ -10,7 +10,7 @@ import { LaunchUserIDE } from "../functions/user.ts";
 import { FknError } from "../functions/error.ts";
 import { GetUserSettings } from "../functions/config.ts";
 import { GenerateGitUrl } from "./toolkit/git-url.ts";
-import { Git } from "../functions/git.ts";
+import { Clone } from "../functions/git.ts";
 import { validate, validateAgainst } from "@zakahacecosas/string-utils";
 
 export default function TheKickstarter(params: TheKickstarterConstructedParams) {
@@ -29,7 +29,7 @@ export default function TheKickstarter(params: TheKickstarterConstructedParams) 
     LogStuff("Let's begin! Wait a moment please...", "tick-clear", ["bright-green", "bold"]);
     LogStuff(`Cloning from ${repoUrl}`);
 
-    const gitOutput = Git.Clone(repoUrl, clonePath);
+    const gitOutput = Clone(repoUrl, clonePath);
     if (!gitOutput) Deno.exit(1);
 
     Deno.chdir(clonePath);

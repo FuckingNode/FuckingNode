@@ -4,7 +4,7 @@ import type { TheSurrendererConstructedParams } from "./constructors/command.ts"
 import { ColorString, Interrogate, LogStuff } from "../functions/io.ts";
 import { NameProject } from "../functions/projects.ts";
 import { APP_URLs, FULL_NAME } from "../constants.ts";
-import { Git } from "../functions/git.ts";
+import { Commit, GetBranches, Push } from "../functions/git.ts";
 import { CheckForPath, JoinPaths } from "../functions/filesystem.ts";
 import { FkNodeInterop } from "./interop/interop.ts";
 
@@ -65,7 +65,7 @@ export default function TheSurrenderer(params: TheSurrendererConstructedParams) 
         confirmation === false
     ) return;
 
-    const commitOne = Git.Commit(
+    const commitOne = Commit(
         project,
         `Add all uncommitted changes (automated by ${FULL_NAME})`,
         "all",
@@ -80,7 +80,7 @@ export default function TheSurrenderer(params: TheSurrendererConstructedParams) 
 
     if (CheckForPath(README)) Deno.writeTextFileSync(README, `${message}\n${Deno.readTextFileSync(README)}`);
 
-    const commitTwo = Git.Commit(
+    const commitTwo = Commit(
         project,
         `Add deprecation notice (automated by ${FULL_NAME})`,
         "all",
@@ -91,7 +91,7 @@ export default function TheSurrenderer(params: TheSurrendererConstructedParams) 
 
     FkNodeInterop.Features.Update({ env, verbose: true });
 
-    const commitThree = Git.Commit(
+    const commitThree = Commit(
         project,
         "Update dependencies one last time",
         "all",
@@ -100,7 +100,7 @@ export default function TheSurrenderer(params: TheSurrendererConstructedParams) 
 
     if (commitThree === 1) throw new Error("Error committing last dependency update.");
 
-    const finalPush = Git.Push(project, (Git.GetBranches(project)).current);
+    const finalPush = Push(project, GetBranches(project).current);
 
     if (finalPush === 1) {
         throw new Error("Error pushing changes (ERROR SHOULD APPEAR ABOVE THIS, OPEN A GITHUB ISSUE OTHERWISE).");

@@ -1,7 +1,7 @@
 import { ColorString, Interrogate, LogStuff } from "../functions/io.ts";
 import { GetProjectEnvironment, NameProject, SpotProject } from "../functions/projects.ts";
 import type { TheCommitterConstructedParams } from "./constructors/command.ts";
-import { Git } from "../functions/git.ts";
+import { CanCommit, Commit, GetBranches, GetCommittableFiles, GetStagedFiles, IsRepo, Push, StageFiles } from "../functions/git.ts";
 import { normalize, pluralOrNot, testFlag, validate } from "@zakahacecosas/string-utils";
 import { RunUserCmd, ValidateUserCmd } from "../functions/user.ts";
 import { GIT_FILES } from "../types/misc.ts";
@@ -17,8 +17,8 @@ import { CheckForPath } from "../functions/filesystem.ts";
  * when showing the "Staged files" message, we shouldn't actually stage the files until whatever commit task from the user is run.
 */
 
-function StageFiles(path: string, files: GIT_FILES): "ok" | "abort" {
-    const canCommit = Git.CanCommit(path);
+function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
+    const canCommit = CanCommit(path);
     if (canCommit === false) {
         LogStuff("Nothing to commit, sir!", "tick");
         return "abort";
@@ -33,14 +33,14 @@ function StageFiles(path: string, files: GIT_FILES): "ok" | "abort" {
     if (files !== "A" && files.filter(validate).filter(CheckForPath).length === 0) {
         LogStuff(
             `No files specified for committing. Specify any of the ${
-                ColorString(Git.GetFilesAvailableForCommit(path).length, "bold")
+                ColorString(GetCommittableFiles(path).length, "bold")
             } modified files (run '${ColorString('fkcommit "message" file1 folder/file2', "bold")}').`,
             "bruh",
         );
         return "abort";
     }
     try {
-        const out = Git.AddFiles(path, files);
+        const out = StageFiles(path, files);
         if (out === "nothingToStage") return "abort";
         const filtered = Array.isArray(files)
             ? files
@@ -71,7 +71,7 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
     const CWD = Deno.cwd();
     const project = SpotProject(CWD);
 
-    if (!Git.IsRepo(project)) {
+    if (!IsRepo(project)) {
         LogStuff(
             "Are you serious right now? Making a commit without being on a Git repo...\nThis project isn't a Git repository. We can't commit to it.",
             "error",
@@ -81,16 +81,16 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
 
     const env = GetProjectEnvironment(project);
 
-    const staging = StageFiles(project, params.files);
+    const staging = StagingHandler(project, params.files);
 
     if (staging === "abort") Deno.exit(1);
 
     const commitCmd = ValidateUserCmd(env, "commitCmd");
 
-    const branches = Git.GetBranches(project);
+    const branches = GetBranches(project);
 
     const gitProps = {
-        fileCount: Git.GetFilesReadyForCommit(project).length,
+        fileCount: GetStagedFiles(project).length,
         branch: (params.branch && !testFlag(params.branch, "push", { allowQuickFlag: true, allowSingleDash: true }))
             ? branches.all.includes(normalize(params.branch)) ? params.branch : "__ERROR"
             : branches.current,
@@ -152,7 +152,7 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
     });
 
     // by this point we assume prev task succeeded
-    Git.Commit(
+    Commit(
         project,
         params.message,
         "none",
@@ -161,7 +161,7 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
 
     if (params.push) {
         // push stuff to git
-        const pushOutput = Git.Push(project, gitProps.branch);
+        const pushOutput = Push(project, gitProps.branch);
         if (pushOutput === 1) {
             throw new Error(`Git push failed unexpectedly.`);
         }

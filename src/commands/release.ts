@@ -4,7 +4,7 @@ import { GetProjectEnvironment, NameProject, SpotProject } from "../functions/pr
 import type { TheReleaserConstructedParams } from "./constructors/command.ts";
 import type { DenoPkgFile, NodePkgFile } from "../types/platform.ts";
 import { Commander } from "../functions/cli.ts";
-import { Git } from "../functions/git.ts";
+import { AddToGitIgnore, Commit, IsRepo, Push, Tag } from "../functions/git.ts";
 import { RunUserCmd, ValidateUserCmd } from "../functions/user.ts";
 import { validate } from "@zakahacecosas/string-utils";
 
@@ -25,7 +25,7 @@ export default function TheReleaser(params: TheReleaserConstructedParams) {
     const project = SpotProject(params.project);
     const CWD = Deno.cwd();
     const env = GetProjectEnvironment(project);
-    const canUseGit = Git.IsRepo(project);
+    const canUseGit = IsRepo(project);
 
     Deno.chdir(env.root);
 
@@ -102,19 +102,19 @@ export default function TheReleaser(params: TheReleaserConstructedParams) {
 
     // just in case
     if (canUseGit) {
-        Git.Ignore(
+        AddToGitIgnore(
             project,
             `${env.main.name}.bak`,
         );
 
-        Git.Commit(
+        Commit(
             project,
             `Release v${format(parsedVersion)} (automated by F*ckingNode)`,
             [env.main.path],
             [],
         );
 
-        Git.Tag(
+        Tag(
             project,
             format(parsedVersion),
             params.push,
@@ -122,7 +122,7 @@ export default function TheReleaser(params: TheReleaserConstructedParams) {
 
         if (params.push) {
             // push stuff to git
-            const pushOutput = Git.Push(project, false);
+            const pushOutput = Push(project, false);
             if (pushOutput === 1) {
                 throw new Error(`Git push failed unexpectedly.`);
             }

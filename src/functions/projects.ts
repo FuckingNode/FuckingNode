@@ -12,7 +12,7 @@ import { GetAppPath } from "./config.ts";
 import { GetDateNow } from "./date.ts";
 import type { PROJECT_ERROR_CODES } from "../types/errors.ts";
 import { FkNodeInterop } from "../commands/interop/interop.ts";
-import { Git } from "../functions/git.ts";
+import { GetLatestTag } from "../functions/git.ts";
 import { internalGolangRequireLikeStringParser } from "../commands/interop/parse-module.ts";
 import { normalize, normalizeArray, toUpperCaseFirst, type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
 
@@ -694,7 +694,7 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
                 path: mainPath,
                 name: "go.mod",
                 stdContent: PackageFileParsers.Golang.STD(mainString),
-                cpfContent: PackageFileParsers.Golang.CPF(mainString, Git.GetLatestTag(root), workspaces),
+                cpfContent: PackageFileParsers.Golang.CPF(mainString, GetLatestTag(root), workspaces),
             },
             lockfile: {
                 name: "go.sum",
