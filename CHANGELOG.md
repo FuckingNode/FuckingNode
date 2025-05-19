@@ -15,6 +15,10 @@ Next update will be a major 4.0 release.
 - Fixed the biggest error of the CLI so far, codenamed "context mismatch" - though it actually was a mutation issue, the CLI was overwriting its own defaults. More info in [#15](https://github.com/FuckingNode/FuckingNode/issues/15).
 - Fixed the CLI running 3 CLI commands instead of 1 to check if a package manager is installed, consuming more resources and time.
 
+### Removed
+
+- Removed the ability to auto-update from the CLI, because it never really worked. If we get it to work it'll be added back, but for now it's better not to have it than to have a broken implementation.
+
 ## [3.4.1] (04-05-2025)
 
 ### Changed

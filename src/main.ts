@@ -230,9 +230,10 @@ async function main(command: UnknownString) {
             break;
         case "self-update":
         case "upgrade":
+        case "update":
             LogStuff(`Currently using ${ColorString(FULL_NAME, "green")}`);
             LogStuff("Checking for updates...");
-            await TheUpdater({ silent: false, install: true });
+            await TheUpdater({ silent: false });
             break;
         case "about":
             TheAbouter();

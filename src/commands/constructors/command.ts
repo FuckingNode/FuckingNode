@@ -102,12 +102,6 @@ export interface TheSettingsConstructedParams {
  */
 export interface TheUpdaterConstructedParams {
     /**
-     * If true, update will be auto installed.
-     *
-     * @type {boolean}
-     */
-    install: boolean;
-    /**
      * If true, when you're up to date nothing's shown.
      *
      * @type {boolean}

@@ -1,22 +1,20 @@
 import { compare, parse } from "@std/semver";
 import { FetchGitHub } from "../functions/http.ts";
-import { APP_URLs, LOCAL_PLATFORM, RELEASE_URL, VERSION } from "../constants.ts";
+import { RELEASE_URL, VERSION } from "../constants.ts";
 import type { GITHUB_RELEASE } from "../types/misc.ts";
 import { GetDateNow } from "../functions/date.ts";
 import type { TheUpdaterConstructedParams } from "./constructors/command.ts";
-import { ColorString, Interrogate, LogStuff, StringifyYaml } from "../functions/io.ts";
+import { ColorString, LogStuff, StringifyYaml } from "../functions/io.ts";
 import { parse as parseYaml } from "@std/yaml";
 import { GetAppPath } from "../functions/config.ts";
 import type { CF_FKNODE_SCHEDULE } from "../types/config_files.ts";
-import { Commander } from "../functions/cli.ts";
-import { JoinPaths } from "../functions/filesystem.ts";
 
 /**
  * Checks for updates.
  *
  * @async
  * @export
- * @returns {Promise<void>}
+ * @returns {void}
  */
 export default async function TheUpdater(params: TheUpdaterConstructedParams): Promise<void> {
     const scheduleFilePath = GetAppPath("SCHEDULE");
@@ -67,18 +65,5 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
         `There's a new version! ${latestVer}. You're on ${VERSION}, btw.`,
         "bulb",
     );
-    if (!params.install) return;
-    if (!Interrogate("Should we auto-update the CLI for you?")) return;
-    const filename = LOCAL_PLATFORM.SYSTEM === "windows" ? "install.ps1" : "install.sh";
-    const buffer = await (await fetch(
-        `${APP_URLs.WEBSITE}${filename}`,
-    )).arrayBuffer();
-
-    const path = Deno.makeTempDirSync({ prefix: "UPDATE-SH" });
-    Deno.writeTextFileSync(JoinPaths(path, filename), new TextDecoder().decode(new Uint8Array(buffer)));
-
-    Commander(
-        LOCAL_PLATFORM.SYSTEM === "windows" ? "iex" : "bash",
-        [JoinPaths(path, filename)],
-    );
+    return;
 }
