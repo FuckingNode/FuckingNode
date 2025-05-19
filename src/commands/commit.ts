@@ -2,10 +2,20 @@ import { ColorString, Interrogate, LogStuff } from "../functions/io.ts";
 import { GetProjectEnvironment, NameProject, SpotProject } from "../functions/projects.ts";
 import type { TheCommitterConstructedParams } from "./constructors/command.ts";
 import { Git } from "../functions/git.ts";
-import { normalize, testFlag, validate } from "@zakahacecosas/string-utils";
+import { normalize, pluralOrNot, testFlag, validate } from "@zakahacecosas/string-utils";
 import { RunUserCmd, ValidateUserCmd } from "../functions/user.ts";
 import { GIT_FILES } from "../types/misc.ts";
 import { CheckForPath } from "../functions/filesystem.ts";
+
+/*
+ TODO for stage area
+ * if you add a folder, the file count will say 1 even if you added 10 files
+ * what if you add a file that's already staged?
+ * "If everything above went alright, commit 1 file(s) to branch main with message "bla"" shows the wrong amount.
+ * overall the Git toolkit needs reviewing
+ * most important todo: TESTS. i need to manually test everything + write tests to ensure everything works.
+ * when showing the "Staged files" message, we shouldn't actually stage the files until whatever commit task from the user is run.
+*/
 
 function StageFiles(path: string, files: GIT_FILES): "ok" | "abort" {
     const canCommit = Git.CanCommit(path);
@@ -20,16 +30,31 @@ function StageFiles(path: string, files: GIT_FILES): "ok" | "abort" {
         }
         return "ok"; // nothing to do, files alr staged
     }
-    try {
-        Git.AddFiles(path, files);
+    if (files !== "A" && files.filter(validate).filter(CheckForPath).length === 0) {
         LogStuff(
-            files === "A" ? "Staged all files for commit." : `Staged ${files.length} file(s) for commit:\n${
-                files
-                    .filter(validate)
-                    .filter(CheckForPath)
-                    .map((file) => `- ${ColorString(file, "bold")}`)
-                    .join("\n")
-            }`,
+            `No files specified for committing. Specify any of the ${
+                ColorString(Git.GetFilesAvailableForCommit(path).length, "bold")
+            } modified files (run '${ColorString('fkcommit "message" file1 folder/file2', "bold")}').`,
+            "bruh",
+        );
+        return "abort";
+    }
+    try {
+        const out = Git.AddFiles(path, files);
+        if (out === "nothingToStage") return "abort";
+        const filtered = Array.isArray(files)
+            ? files
+                .filter(validate)
+                .filter(CheckForPath)
+            : ["(this should never appear in the cli)"];
+        LogStuff(
+            files === "A"
+                ? "Staged all files for commit."
+                : `Staged ${filtered.length} ${pluralOrNot("file", filtered.length)} for commit:\n${
+                    filtered
+                        .map((file) => ColorString("- " + file, "bold", "white"))
+                        .join("\n")
+                }`,
             "tick",
             ["bold", "bright-green"],
         );

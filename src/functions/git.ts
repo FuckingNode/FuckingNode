@@ -321,9 +321,9 @@ export const Git = {
                 [
                     "-C",
                     path,
-                    "diff",
-                    "--cached",
-                    "--name-only",
+                    "status",
+                    "-s",
+                    "--porcelain",
                 ],
                 false,
             );
@@ -333,6 +333,33 @@ export const Git = {
         } catch (e) {
             LogStuff(
                 `Error - could not get files ready for commit (staged) at ${ColorString(project, "bold")} because of error: ${e}`,
+                "error",
+            );
+            return [];
+        }
+    },
+    GetFilesAvailableForCommit: (project: string): string[] => {
+        try {
+            const path = SpotProject(project);
+            const getFilesOutput = Commander(
+                "git",
+                [
+                    "-C",
+                    path,
+                    "status",
+                    "-s",
+                    "--porcelain",
+                ],
+                false,
+            );
+            if (!getFilesOutput.success) throw new Error(getFilesOutput.stdout);
+            if (!validate(getFilesOutput.stdout)) return [];
+            return normalizeArray(getFilesOutput.stdout.split("\n"), "soft");
+        } catch (e) {
+            LogStuff(
+                `Error - could not get files available for commit (created, deleted, or modified) at ${
+                    ColorString(project, "bold")
+                } because of error: ${e}`,
                 "error",
             );
             return [];
@@ -420,7 +447,7 @@ export const Git = {
      * @param project Project path. **Assumes it's parsed & spotted.**
      * @returns
      */
-    AddFiles: (project: string, files: GIT_FILES): void => {
+    AddFiles: (project: string, files: GIT_FILES): "ok" | "nothingToStage" | "error" => {
         try {
             if (files === "A") {
                 const stageAllOutput = Commander(
@@ -433,16 +460,23 @@ export const Git = {
                     ],
                     false,
                 );
-                if (!stageAllOutput.success) {
-                    throw new Error(stageAllOutput.stdout);
-                }
-                return;
+                if (!stageAllOutput.success) throw new Error(stageAllOutput.stdout);
+                return "ok";
             }
-            if (files === "S") return;
+            if (files === "S") return "ok";
 
             const filesToStage = files
                 .filter((file) => validate(file))
                 .filter(CheckForPath);
+
+            if (filesToStage.length === 0) {
+                LogStuff(
+                    `No files to stage at ${ColorString(project, "bold")}`,
+                    "warn",
+                    ["bold", "bright-yellow"],
+                );
+                return "nothingToStage";
+            }
 
             const stageFilesOutput = Commander(
                 "git",
@@ -454,16 +488,14 @@ export const Git = {
                 ],
                 false,
             );
-            if (!stageFilesOutput.success) {
-                throw new Error(stageFilesOutput.stdout);
-            }
+            if (!stageFilesOutput.success) throw new Error(stageFilesOutput.stdout);
+            return "ok";
         } catch (e) {
             LogStuff(
                 `Error - could not stage files at ${ColorString(project, "bold")} because of error: ${e}`,
                 "error",
             );
-
-            return;
+            return "error";
         }
     },
 };

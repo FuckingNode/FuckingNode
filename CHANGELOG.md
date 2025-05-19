@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Next update will be a major 4.0 release.
 
+### Added
+
+- Added the ability to stage files directly from `fkcommit`, removing the need to do `git add` first.
+
 ### Fixed
 
 - Fixed the biggest error of the CLI so far, codenamed "context mismatch" - though it actually was a mutation issue, the CLI was overwriting its own defaults. More info in [#15](https://github.com/FuckingNode/FuckingNode/issues/15).

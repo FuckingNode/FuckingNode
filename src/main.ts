@@ -247,14 +247,18 @@ async function main(command: UnknownString) {
                 dry: hasFlag("dry-run", true),
             });
             break;
-        case "commit":
+        case "commit": {
+            const indexBranch = flags.indexOf("--branch");
+            const indexB = flags.indexOf("-b");
+            const filesEnd = indexBranch !== -1 ? indexBranch : (indexB !== -1 ? indexB : undefined);
             TheCommitter({
                 message: flags[1],
-                branch: flags[2],
-                files: flags.slice(3),
+                files: flags.slice(2, filesEnd),
+                branch: indexBranch !== -1 ? flags[indexBranch + 1] : (indexB !== -1 ? flags[indexB + 1] : undefined),
                 push: hasFlag("push", true),
             });
             break;
+        }
         case "surrender":
         case "give-up":
         case "i-give-up":
