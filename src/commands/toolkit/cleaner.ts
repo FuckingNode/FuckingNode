@@ -1,5 +1,5 @@
 import { FULL_NAME, FWORDS, isDef, LOCAL_PLATFORM } from "../../constants.ts";
-import { Commander, CommandExists } from "../../functions/cli.ts";
+import { Commander, ManagerExists } from "../../functions/cli.ts";
 import { GetAppPath, GetUserSettings } from "../../functions/config.ts";
 import { BulkRemoveFiles, CheckForPath, JoinPaths, ParsePath } from "../../functions/filesystem.ts";
 import { ColorString, Interrogate, LogStuff } from "../../functions/io.ts";
@@ -327,7 +327,7 @@ export function PerformHardCleanup(
     // cross platform!!
     const golangHardPruneArgs: string[] = ["clean", "-modcache"];
 
-    if (CommandExists("npm")) {
+    if (ManagerExists("npm")) {
         LogStuff(
             "NPM",
             "package",
@@ -336,7 +336,7 @@ export function PerformHardCleanup(
         Commander("npm", npmHardPruneArgs, verboseLogging);
         LogStuff("Done", "tick");
     }
-    if (CommandExists("pnpm")) {
+    if (ManagerExists("pnpm")) {
         LogStuff(
             "PNPM",
             "package",
@@ -345,7 +345,7 @@ export function PerformHardCleanup(
         Commander("pnpm", pnpmHardPruneArgs, true);
         LogStuff("Done", "tick");
     }
-    if (CommandExists("yarn")) {
+    if (ManagerExists("yarn")) {
         LogStuff(
             "YARN",
             "package",
@@ -355,7 +355,7 @@ export function PerformHardCleanup(
         LogStuff("Done", "tick");
     }
 
-    if (CommandExists("bun")) {
+    if (ManagerExists("bun")) {
         LogStuff(
             "BUN",
             "package",
@@ -366,7 +366,7 @@ export function PerformHardCleanup(
         LogStuff("Done", "tick");
     }
 
-    if (CommandExists("go")) {
+    if (ManagerExists("go")) {
         LogStuff(
             "GOLANG",
             "package",
@@ -375,7 +375,7 @@ export function PerformHardCleanup(
         Commander("go", golangHardPruneArgs, verboseLogging);
         LogStuff("Done", "tick");
     }
-    /* if (CommandExists("deno")) {
+    /* if (ManagerExists("deno")) {
         Commander("deno", ["init"], false); // placebo 2
         Commander("deno", denoHardPruneArgs, true);
     } */
@@ -385,7 +385,7 @@ export function PerformHardCleanup(
     // using a program thats written in deno
     // and it throws an error and exits the CLI
     // epic.
-    if (CommandExists("deno")) {
+    if (ManagerExists("deno")) {
         try {
             const denoDir: string | undefined = Deno.env.get("DENO_DIR");
             if (!denoDir) throw "lmao";
@@ -406,7 +406,7 @@ export function PerformHardCleanup(
     }
 
     // rust requires a gluefix too
-    if (CommandExists("cargo")) {
+    if (ManagerExists("cargo")) {
         try {
             const paths: string[] = [];
             if (LOCAL_PLATFORM.SYSTEM === "windows") {

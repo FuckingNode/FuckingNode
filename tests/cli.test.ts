@@ -1,5 +1,5 @@
 import { LOCAL_PLATFORM } from "../src/constants.ts";
-import { Commander, CommandExists } from "../src/functions/cli.ts";
+import { Commander, ManagerExists } from "../src/functions/cli.ts";
 import { assertEquals } from "@std/assert";
 
 // ACTUAL TESTS
@@ -8,13 +8,13 @@ import { assertEquals } from "@std/assert";
 Deno.test({
     name: "detects all managers and runtimes",
     fn: () => {
-        assertEquals(CommandExists("npm"), true);
-        assertEquals(CommandExists("pnpm"), true);
-        assertEquals(CommandExists("yarn"), true);
-        assertEquals(CommandExists("deno"), true);
-        assertEquals(CommandExists("bun"), true);
-        assertEquals(CommandExists("go"), true);
-        assertEquals(CommandExists("cargo"), true);
+        assertEquals(ManagerExists("npm"), true);
+        assertEquals(ManagerExists("pnpm"), true);
+        assertEquals(ManagerExists("yarn"), true);
+        assertEquals(ManagerExists("deno"), true);
+        assertEquals(ManagerExists("bun"), true);
+        assertEquals(ManagerExists("go"), true);
+        assertEquals(ManagerExists("cargo"), true);
     },
 });
 

@@ -1,4 +1,4 @@
-import { CommandExists } from "../functions/cli.ts";
+import { ManagerExists } from "../functions/cli.ts";
 import { CheckForDir, JoinPaths, ParsePath } from "../functions/filesystem.ts";
 import { ColorString, LogStuff } from "../functions/io.ts";
 import { AddProject, GetProjectEnvironment, NameProject } from "../functions/projects.ts";
@@ -68,9 +68,9 @@ export default function TheKickstarter(params: TheKickstarterConstructedParams) 
 
     const initialManager = validateAgainst(manager, ["npm", "pnpm", "yarn", "deno", "bun"]) ? manager : env.manager;
 
-    const managerToUse: MANAGER_GLOBAL = CommandExists(initialManager)
+    const managerToUse: MANAGER_GLOBAL = ManagerExists(initialManager)
         ? initialManager
-        : CommandExists(env.manager)
+        : ManagerExists(env.manager)
         ? env.manager
         : GetUserSettings().defaultManager;
 

@@ -5,7 +5,7 @@ import type { CF_FKNODE_SCHEDULE, CF_FKNODE_SETTINGS, FullFkNodeYaml } from "./t
 import * as DenoJson from "../deno.json" with { type: "json" };
 import { GetDateNow } from "./functions/date.ts";
 import { normalize, type UnknownString } from "@zakahacecosas/string-utils";
-import { CommandExists } from "./functions/cli.ts";
+import { ManagerExists } from "./functions/cli.ts";
 
 /**
  * Current app version as a SemVer object. **Change it from `deno.json`.**
@@ -117,7 +117,7 @@ export const DEFAULT_SETTINGS: CF_FKNODE_SETTINGS = {
     flushFreq: 14,
     defaultIntensity: "normal",
     favEditor: "vscode",
-    defaultManager: CommandExists("pnpm") ? "pnpm" : "npm",
+    defaultManager: ManagerExists("pnpm") ? "pnpm" : "npm",
 };
 
 /**

@@ -71,32 +71,22 @@ export function Commander(
 }
 
 /**
- * Validates if a command exists. Useful to check if the user has some tool installed before running anything. Uses `-v` and `--version` as an arg to whatever command you pass.
+ * Validates if a package manager is installed, to check before running anything. Uses `-v` and `--version` as an arg to the command you pass.
  *
  * @export
  * @param {MANAGER_GLOBAL} cmd
- * @returns {boolean}
+ * @returns {boolean} True if it exists, false if it doesn't.
  */
-export function CommandExists(cmd: MANAGER_GLOBAL): boolean {
+export function ManagerExists(cmd: MANAGER_GLOBAL): boolean {
     try {
         const process = new Deno.Command(cmd, {
-            args: ["-v"], // this single line fixed a bug that has been present for at least two months 😭
-            stdout: "null",
-            stderr: "null",
-        });
-        const processTwo = new Deno.Command(cmd, {
-            args: ["--version"],
-            stdout: "null",
-            stderr: "null",
-        });
-        const processThree = new Deno.Command(cmd, {
-            args: ["help"], // platform-specific fix (go)
+            args: cmd === "go" ? ["help"] : ["-v"],
             stdout: "null",
             stderr: "null",
         });
 
         // sync on purpose so we pause execution until we 100% know if command exists or not
-        return (process.outputSync()).success || (processTwo.outputSync()).success || (processThree.outputSync()).success;
+        return process.outputSync().success;
     } catch {
         // error = false
         return false;
