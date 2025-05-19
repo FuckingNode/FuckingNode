@@ -76,7 +76,7 @@ const flags = Deno.args.map((arg) =>
     })
 );
 
-export const FKNODE_SHALL_WE_DEBUG = Deno.env.get("FKNODE_SHALL_WE_DEBUG") === "yeah";
+export const FKNODE_SHALL_WE_DEBUG = import.meta.main === false ? false : Deno.env.get("FKNODE_SHALL_WE_DEBUG") === "yeah";
 DEBUG_LOG("Initialized FKNODE_SHALL_WE_DEBUG constant (ENTRY POINT)");
 DEBUG_LOG("ARGS", flags);
 
@@ -250,6 +250,7 @@ async function main(command: UnknownString) {
             TheCommitter({
                 message: flags[1],
                 branch: flags[2],
+                files: flags.slice(3),
                 push: hasFlag("push", true),
             });
             break;

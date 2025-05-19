@@ -3,8 +3,9 @@ import { CheckForPath, JoinPaths, ParsePath } from "../functions/filesystem.ts";
 import { ColorString, LogStuff } from "../functions/io.ts";
 import { GetProjectEnvironment, SpotProject } from "../functions/projects.ts";
 import { FULL_NAME } from "../constants.ts";
-import { normalize, normalizeArray, sortAlphabetically, validate } from "@zakahacecosas/string-utils";
+import { normalize, normalizeArray, StringArray, validate } from "@zakahacecosas/string-utils";
 import { FknError } from "./error.ts";
+import { GIT_FILES } from "../types/misc.ts";
 
 function __isRepo(path: string): boolean {
     try {
@@ -380,9 +381,8 @@ export const Git = {
             const current = getBranchesOutput.stdout.match(/^\* (.+)$/m)![1]!;
             return {
                 current,
-                all: sortAlphabetically(
-                    normalizeArray(getBranchesOutput.stdout.replace("*", "").split("\n"), "soft"),
-                ),
+                all: new StringArray(getBranchesOutput.stdout.replace("*", "").split("\n"))
+                    .sortAlphabetically().normalize("soft"),
             };
         } catch (e) {
             LogStuff(
@@ -412,6 +412,58 @@ export const Git = {
                 "error",
             );
             return false;
+        }
+    },
+    /**
+     * Stages files for a Git repo.
+     *
+     * @param project Project path. **Assumes it's parsed & spotted.**
+     * @returns
+     */
+    AddFiles: (project: string, files: GIT_FILES): void => {
+        try {
+            if (files === "A") {
+                const stageAllOutput = Commander(
+                    "git",
+                    [
+                        "-C",
+                        project,
+                        "add",
+                        "-A",
+                    ],
+                    false,
+                );
+                if (!stageAllOutput.success) {
+                    throw new Error(stageAllOutput.stdout);
+                }
+                return;
+            }
+            if (files === "S") return;
+
+            const filesToStage = files
+                .filter((file) => validate(file))
+                .filter(CheckForPath);
+
+            const stageFilesOutput = Commander(
+                "git",
+                [
+                    "-C",
+                    project,
+                    "add",
+                    ...filesToStage,
+                ],
+                false,
+            );
+            if (!stageFilesOutput.success) {
+                throw new Error(stageFilesOutput.stdout);
+            }
+        } catch (e) {
+            LogStuff(
+                `Error - could not stage files at ${ColorString(project, "bold")} because of error: ${e}`,
+                "error",
+            );
+
+            return;
         }
     },
 };

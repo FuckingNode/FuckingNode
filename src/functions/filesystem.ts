@@ -1,5 +1,5 @@
 import { join, normalize } from "@std/path";
-import { kominator, sortAlphabetically, type UnknownString, validate } from "@zakahacecosas/string-utils";
+import { StringArray, type UnknownString, validate } from "@zakahacecosas/string-utils";
 import { FknError } from "./error.ts";
 
 /**
@@ -85,13 +85,11 @@ export function ParsePath(target: UnknownString): string {
 export function ParsePathList(target: UnknownString): string[] {
     if (!validate(target)) return [];
 
-    // TODO for dev-utils: add these methods to StringArray so they're chainable
-    return sortAlphabetically(
-        kominator(target, "\n")
-            .map((line) => line.trim().replace(/,$/, ""))
-            .filter((line) => line.length > 0)
-            .map(ParsePath),
-    );
+    return StringArray.fromKominator(target, "\n")
+        .sortAlphabetically()
+        .map((line) => line.trim().replace(/,$/, ""))
+        .filter((line) => line.length > 0)
+        .map(ParsePath);
 }
 
 /**

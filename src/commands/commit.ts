@@ -4,6 +4,41 @@ import type { TheCommitterConstructedParams } from "./constructors/command.ts";
 import { Git } from "../functions/git.ts";
 import { normalize, testFlag, validate } from "@zakahacecosas/string-utils";
 import { RunUserCmd, ValidateUserCmd } from "../functions/user.ts";
+import { GIT_FILES } from "../types/misc.ts";
+import { CheckForPath } from "../functions/filesystem.ts";
+
+function StageFiles(path: string, files: GIT_FILES): "ok" | "abort" {
+    const canCommit = Git.CanCommit(path);
+    if (canCommit === false) {
+        LogStuff("Nothing to commit, sir!", "tick");
+        return "abort";
+    }
+    if (files === "S") {
+        if (canCommit === "nonAdded") {
+            LogStuff('There are changes, but none of them is added. Use "git add <file>" for that.', "what");
+            return "abort";
+        }
+        return "ok"; // nothing to do, files alr staged
+    }
+    try {
+        Git.AddFiles(path, files);
+        LogStuff(
+            files === "A" ? "Staged all files for commit." : `Staged ${files.length} file(s) for commit:\n${
+                files
+                    .filter(validate)
+                    .filter(CheckForPath)
+                    .map((file) => `- ${ColorString(file, "bold")}`)
+                    .join("\n")
+            }`,
+            "tick",
+            ["bold", "bright-green"],
+        );
+        return "ok";
+    } catch {
+        LogStuff("Something went wrong while staging files. Aborting.", "error");
+        return "abort";
+    }
+}
 
 export default function TheCommitter(params: TheCommitterConstructedParams) {
     if (!validate(params.message)) throw new Error("No commit message specified!");
@@ -21,15 +56,9 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
 
     const env = GetProjectEnvironment(project);
 
-    const canCommit = Git.CanCommit(project);
+    const staging = StageFiles(project, params.files);
 
-    if (canCommit !== true) {
-        if (canCommit === "nonAdded") {
-            LogStuff('There are changes, but none of them is added. Use "git add <file>" for that.', "what");
-        }
-        LogStuff("Nothing to commit, sir!", "tick");
-        return;
-    }
+    if (staging === "abort") Deno.exit(1);
 
     const commitCmd = ValidateUserCmd(env, "commitCmd");
 

@@ -235,6 +235,12 @@ export interface TheCommitterConstructedParams {
      */
     message: UnknownString;
     /**
+     * Files to commit. Either an array of paths or "A" for all files or "S" for staged files.
+     *
+     * @type {UnknownString[] | "A" | "S"}
+     */
+    files: UnknownString[] | "A" | "S";
+    /**
      * Whether to push changes to remote or not.
      *
      * @type {boolean}
