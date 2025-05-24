@@ -3,7 +3,7 @@ import { APP_NAME, APP_URLs } from "../constants.ts";
 import { ColorString, LogStuff } from "../functions/io.ts";
 import type { TheHelperConstructedParams } from "./constructors/command.ts";
 
-type helpItem = [string, string | null, string];
+type helpItem = [string, string | null, string] | [string, string | null, string, boolean];
 type helpThing = helpItem[];
 
 function formatCmd(obj: helpThing): string {
@@ -11,20 +11,22 @@ function formatCmd(obj: helpThing): string {
 
     for (const thingy of obj) {
         const cmd: string = ColorString(thingy[0], "bright-blue");
-        const params: string = thingy[1] ? ColorString(thingy[1], "italic") : "";
+        const params: string = thingy[1] ? ColorString(thingy[1], "bold") : ColorString("No parameters.", "italic", "half-opaque");
         const desc: string = thingy[2];
 
-        strings.push(`${cmd} ${ColorString(params, "bold")}\n${spaceString(desc, 2, 0)}`);
+        strings.push(
+            `${spaceString(cmd, 0, 30 - (thingy[0].length))}${desc}${((thingy[3] ?? false) === true) ? `\nparams: ${params}` : ""}`,
+        );
     }
 
-    return strings.join("\n----\n");
+    return strings.join("\n");
 }
 
 function pathReminder() {
     LogStuff(
-        `----\nNote: <project-path> is either a file path OR the "--self" flag which uses the Current Working Directory.\nE.g., running 'fkadd --self' here equals 'fkadd ${Deno.cwd()}'.\n\nAdditionally, in some places where we assume the project is already added (like clean or stats),\nyou can pass the project's name (as it appears in the package file) and it'll work as well.`,
+        `----\nNote: <project> is either a file path OR the "--self" flag which uses the Current Working Directory.\nE.g., running 'fkadd --self' here equals 'fkadd ${Deno.cwd()}'.\n\nAdditionally, in some places where we assume the project is already added (like clean or stats),\nyou can pass the project's name (as it appears in the package file) and it'll work as well.`,
         undefined,
-        "italic",
+        ["italic", "half-opaque"],
     );
 }
 
@@ -39,7 +41,7 @@ export default function TheHelper(params: TheHelperConstructedParams) {
         ],
         [
             "manager",
-            "add <project path> | remove <project path> | list",
+            "add <project> | remove <project> | list",
             "Manages your added projects.",
         ],
         [
@@ -97,12 +99,13 @@ export default function TheHelper(params: TheHelperConstructedParams) {
             "[command]",
             "Shows this menu, or the help menu for a specific command, if provided.",
         ],
-    ]);
+    ]
+        .map((item) => [...item, true]) as helpItem[]);
 
     const MANAGER_OPTIONS = formatCmd([
         [
             "manager",
-            "add <project-path>",
+            "add <project>",
             "Adds a project to your list.",
         ],
         [
@@ -119,8 +122,8 @@ export default function TheHelper(params: TheHelperConstructedParams) {
     const CLEAN_OPTIONS = formatCmd([
         [
             "clean",
-            "<project-path | --> <intensity | -->",
-            "Where the project equals a <project-path> and intensity is either 'normal' | 'hard' | 'hard-only' | 'maxim' | 'maxim-only'.\n  The higher the intensity, the deeper (but more time-consuming) the cleaning will be.\n  Use '--' as a project to clean all your projects at once, and as the intensity to use your default one.\n  You can also just run 'clean' without flags to clean everything.",
+            "<project | --> <intensity | -->",
+            "Where the project equals a <project> and intensity is either 'normal' | 'hard' | 'hard-only' | 'maxim' | 'maxim-only'.\n  The higher the intensity, the deeper (but more time-consuming) the cleaning will be.\n  Use '--' as a project to clean all your projects at once, and as the intensity to use your default one.\n  You can also just run 'clean' without flags to clean everything.",
         ],
         [
             "--update",
@@ -177,8 +180,8 @@ export default function TheHelper(params: TheHelperConstructedParams) {
     const KICKSTART_OPTIONS = formatCmd([
         [
             "kickstart",
-            "<git-url> [project-path] [manager]",
-            "Clones <git-url> to [project-path] (or ./<repo-name> by default), installs deps with [manager] (or default (pnpm, bun, or deno) if not given), opens your editor (VSCode by default, change from settings), and adds the project to your list.",
+            "<git-url> [path] [manager]",
+            "Clones <git-url> to [path] (or ./<repo-name> by default), installs deps with [manager] (or default (pnpm, bun, or deno) if not given), opens your editor (VSCode by default, change from settings), and adds the project to your list.",
         ],
     ]);
     const SURRENDER_OPTIONS = formatCmd([
@@ -191,15 +194,15 @@ export default function TheHelper(params: TheHelperConstructedParams) {
     const AUDIT_OPTIONS = formatCmd([
         [
             "audit",
-            "[project-path | --]",
+            "[project | --]",
             `Runs your manager's audit command, then asks questions to tell if any vulnerability affects the project.\n  Run without a project or with '--' to audit all projects.\n  Learn more about it at ${APP_URLs.WEBSITE}learn/audit/`,
         ],
     ]);
     const MIGRATE_OPTIONS = formatCmd([
         [
             "migrate",
-            "<project-path> <target>",
-            "Automatically migrates a given <project-path> to a given <target> package manager (npm, pnpm, yarn, deno, or bun).\n  Relies as of now on each manager's ability to understand the other one's package manager formats.",
+            "<project> <target>",
+            "Automatically migrates a given <project> to a given <target> package manager (npm, pnpm, yarn, deno, or bun).\n  Relies as of now on each manager's ability to understand the other one's package manager formats.",
         ],
     ]);
     const COMMIT_OPTIONS = formatCmd([
@@ -212,21 +215,21 @@ export default function TheHelper(params: TheHelperConstructedParams) {
     const RELEASE_OPTIONS = formatCmd([
         [
             "release",
-            "<project-path> <version> [--push] [--dry]",
+            "<project> <version> [--push] [--dry]",
             "Runs our maintenance task and a script specified by you (if any).\n  Then bumps version in your package file to given <version> and commits that.\n  If these tasks succeed, releases the project as an npm / jsr package (autodetected).\n  Run with --push to push commit as well.\n  Use '--dry' to make everything (commit, push, run script) but without publishing to npm / jsr.",
         ],
     ]);
     const EXPORT_OPTIONS = formatCmd([
         [
             "export",
-            "<project-path> [--json] [--cli]",
+            "<project> [--json] [--cli]",
             "Exports a project's FnCPF (an internal file used by us to work with them) so you can see it.\n  Defaults to .yaml format, use '--json' to use JSONC format instead.\n  Add '--cli' to also show the output file in your terminal.",
         ],
     ]);
     const SETUP_OPTIONS = formatCmd([
         [
             "setup",
-            "<project-path> <setup>",
+            "<project> <setup>",
             "Allows you to 'add a setup' to your project (setup = preset text-config file).\n  For now, .gitignore, tsconfig.json, and of course fknode.yaml setups exist.\n  Run 'setup' with no args to see the list of available options.",
         ],
     ]);
@@ -325,7 +328,7 @@ export default function TheHelper(params: TheHelperConstructedParams) {
                 `Usage: ${ColorString(APP_NAME.CLI, "bright-green")} <command> [params...]\n\n${USAGE}\n`,
             );
             LogStuff(
-                "Pro tip: Run --help <command-name> to get help with a specific command.",
+                "Pro tip: Run 'help <command-name>' to get help with a specific command.",
                 "bulb",
                 "bright-yellow",
             );
