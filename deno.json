@@ -32,6 +32,11 @@
             "description": "Makes the code good by formatting and type-checking it.",
             "command": "deno -A tasks/good.ts"
         },
+        "precommit": {
+            "description": "Formats, type-checks, and tests the code.",
+            "command": "deno -A tasks/good.ts",
+            "dependencies": ["test"]
+        },
         "compile": {
             "description": "Compiles the CLI",
             "command": "deno -A tasks/compile.ts",

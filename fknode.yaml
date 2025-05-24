@@ -5,3 +5,4 @@ destroy:
     targets:
         - "dist"
 commitActions: false
+commitCmd: "precommit"
