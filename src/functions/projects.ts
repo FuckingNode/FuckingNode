@@ -933,7 +933,7 @@ export function ParseLockfile(lockfilePath: string): unknown {
  *
  * @export
  * @param {UnknownString} name Project's name, path, or `--self`.
- * @returns {Promise<string>}
+ * @returns {string}
  */
 export function SpotProject(name: UnknownString): string {
     if (!validate(name)) {
@@ -961,11 +961,8 @@ export function SpotProject(name: UnknownString): string {
         }
     }
 
-    if (CheckForPath(workingProject)) {
-        return workingProject;
-    } else {
-        throw new FknError("Project__NonFoundProject", `'${name.trim()}' (=> '${toSpot}') does not exist.`);
-    }
+    if (CheckForPath(workingProject)) return workingProject;
+    throw new FknError("Project__NonFoundProject", `'${name.trim()}' (=> '${toSpot}') does not exist.`);
 }
 
 /**
