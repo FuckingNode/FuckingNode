@@ -13,6 +13,14 @@ Next update will be a major 4.0 release.
 ### Added
 
 - Added the ability to stage files directly from `fkcommit`, removing the need to do `git add` first.
+- Added the ability to include previously staged files when `fkcommit`ing with `--keep-staged` / `-k`. (1)
+- Added the ability to skip the confirmation at `fkcommit` with `--yes` / `-y`.
+
+### Changed
+
+- Now (1) `fkcommit` will unstage previously staged files. This is to avoid committing files you forgot were staged, or were staged, modified, then not staged again. Use `-k` to prevent unstaging.
+- Now `fkcommit` tells more clearly when the commit was aborted due to an error in your `commitCmd`.
+- Now the `help` command should look a bit better.
 
 ### Fixed
 

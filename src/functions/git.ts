@@ -352,7 +352,7 @@ export function GetBranches(project: string): { current: string; all: string[] }
         return {
             current,
             all: new StringArray(getBranchesOutput.stdout.replace("*", "").split("\n"))
-                .sortAlphabetically().normalize("soft"),
+                .sortAlphabetically().normalize("soft").arr(),
         };
     } catch (e) {
         LogStuff(
@@ -385,9 +385,14 @@ export function Clone(repoUrl: string, clonePath: string): boolean {
     }
 }
 /**
- * Stages files for a Git repo.
+ * Stages files for a Git repo. Takes an array of strings (file paths) or a special string to:
+ *
+ * - `"A"`: stage all files.
+ * - `"-A"`: unstage all files.
+ * - `"S"`: stage all files that are staged, but not committed (this is a no-op).
  *
  * @param project Project path. **Assumes it's parsed & spotted.**
+ * @param files An array of files to stage, or a special string.
  * @returns
  */
 export function StageFiles(project: string, files: GIT_FILES): "ok" | "nothingToStage" | "error" {
@@ -401,6 +406,16 @@ export function StageFiles(project: string, files: GIT_FILES): "ok" | "nothingTo
                 ],
             );
             if (!stageAllOutput.success) throw new Error(stageAllOutput.stdout);
+            return "ok";
+        }
+        if (files === "-A") {
+            const unstageAllOutput = g(
+                project,
+                [
+                    "reset",
+                ],
+            );
+            if (!unstageAllOutput.success) throw new Error(unstageAllOutput.stdout);
             return "ok";
         }
         if (files === "S") return "ok";

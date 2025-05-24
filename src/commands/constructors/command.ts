@@ -246,6 +246,18 @@ export interface TheCommitterConstructedParams {
      * @type {?UnknownString}
      */
     branch?: UnknownString;
+    /**
+     * Whether to keep previously staged files for committing.
+     *
+     * @type {boolean}
+     */
+    keepStagedFiles: boolean;
+    /**
+     * If true, no confirmation is asked before committing.
+     *
+     * @type {?boolean}
+     */
+    y: boolean;
 }
 
 /**

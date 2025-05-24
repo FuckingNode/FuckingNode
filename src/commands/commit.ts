@@ -30,7 +30,7 @@ function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
         }
         return "ok"; // nothing to do, files alr staged
     }
-    if (files !== "A" && files.filter(validate).filter(CheckForPath).length === 0) {
+    if (Array.isArray(files) && files.filter(validate).filter(CheckForPath).length === 0) {
         LogStuff(
             `No files specified for committing. Specify any of the ${
                 ColorString(GetCommittableFiles(path).length, "bold")
@@ -49,7 +49,7 @@ function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
             : ["(this should never appear in the cli)"];
         LogStuff(
             files === "A"
-                ? "Staged all files for commit."
+                ? `Staged all files for commit (${filtered.length}).`
                 : `Staged ${filtered.length} ${pluralOrNot("file", filtered.length)} for commit:\n${
                     filtered
                         .map((file) => ColorString("- " + file, "bold", "white"))
@@ -80,10 +80,14 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
     }
 
     const env = GetProjectEnvironment(project);
+    const prevStaged = GetStagedFiles(project).length;
 
+    if (!params.keepStagedFiles) StageFiles(project, "-A");
     const staging = StagingHandler(project, params.files);
-
     if (staging === "abort") Deno.exit(1);
+    if (params.keepStagedFiles) {
+        LogStuff(`Also, keeping ${prevStaged} previously staged ${pluralOrNot("file", prevStaged)} for committing.`, "warn");
+    }
 
     const commitCmd = ValidateUserCmd(env, "commitCmd");
 
@@ -122,10 +126,15 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
         );
     }
 
+    const fBold = ColorString(gitProps.fileCount, "bold");
+    const bBold = ColorString(gitProps.branch, "bold");
+    const mBold = ColorString(params.message.trim(), "bold", "italic");
+    const fCount = pluralOrNot("file", gitProps.fileCount);
+
     actions.push(
-        `If everything above went alright, commit ${ColorString(gitProps.fileCount, "bold")} file(s) to branch ${
-            ColorString(gitProps.branch, "bold")
-        } with message "${ColorString(params.message.trim(), "bold", "italic")}"`,
+        actions.length === 0
+            ? `Commit ${fBold} ${fCount} to branch ${bBold} with message "${mBold}"`
+            : `If everything above went alright, commit ${fBold} ${fCount} to branch ${bBold} with message "${mBold}"`,
     );
 
     if (params.push) {
@@ -135,21 +144,34 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
     }
 
     if (
-        !Interrogate(
-            `Heads up! We're about to take the following actions:\n${actions.join("\n")}\n\n- all of this at ${
+        !params.y && !Interrogate(
+            `Heads up! We're about to take the following actions:\n\n${actions.join("\n")}\n\n- all of this at ${
                 NameProject(
                     project,
                     "all",
                 )
-            }`,
+            }\n`,
         )
-    ) return;
+    ) {
+        LogStuff("Aborting commit.", "bruh");
+        return;
+    }
 
     // run their commitCmd
-    RunUserCmd({
-        key: "commitCmd",
-        env,
-    });
+    try {
+        RunUserCmd({
+            key: "commitCmd",
+            env,
+        });
+    } catch {
+        LogStuff(
+            `${
+                ColorString("Your commitCmd failed. For your safety, we've aborted the commit.", "bold")
+            }\nCheck above for your test suite's (or whatever your commitCmd is) output.`,
+            "error",
+        );
+        return;
+    }
 
     // by this point we assume prev task succeeded
     Commit(

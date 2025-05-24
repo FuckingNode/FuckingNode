@@ -256,6 +256,8 @@ async function main(command: UnknownString) {
                 files: flags.slice(2, filesEnd),
                 branch: indexBranch !== -1 ? flags[indexBranch + 1] : (indexB !== -1 ? flags[indexB + 1] : undefined),
                 push: hasFlag("push", true),
+                keepStagedFiles: hasFlag("keep-staged", true),
+                y: hasFlag("yes", true),
             });
             break;
         }
