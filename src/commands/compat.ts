@@ -19,7 +19,7 @@ const featureCompatibility = [
     { Feature: "Stats", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.p, Cargo: labels.y },
     { Feature: "Surrender", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
     { Feature: "Setup", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
-    { Feature: "Audit", NodeJS: labels.y, Deno: labels.n, Bun: labels.n, Go: labels.n, Cargo: labels.n },
+    { Feature: "Audit", NodeJS: labels.y, Deno: labels.n, Bun: labels.y, Go: labels.n, Cargo: labels.n },
     { Feature: "Launch", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
 ];
 
@@ -47,7 +47,7 @@ const releaseCompatibility = [
 ];
 
 const auditCompatibility = [
-    { NodeJS: labels.y, Deno: labels.n, Bun: labels.n, Go: labels.n, Cargo: labels.n },
+    { NodeJS: labels.y, Deno: labels.n, Bun: labels.y, Go: labels.n, Cargo: labels.n },
 ];
 
 const migrateCompatibility = [

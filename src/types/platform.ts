@@ -267,7 +267,7 @@ interface BunEnvironment extends GenericProjectEnvironment {
         run: ["bun", "run"];
         update: ["update", "--save-text-lockfile"];
         clean: "__UNSUPPORTED";
-        audit: "__UNSUPPORTED";
+        audit: ["audit", "--json"];
         publish: ["publish"];
         start: "start";
     };

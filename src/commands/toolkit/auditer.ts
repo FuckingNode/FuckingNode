@@ -7,7 +7,7 @@
  * (send help)
  */
 
-import { normalize, normalizeArray, validate, validateAgainst } from "@zakahacecosas/string-utils";
+import { normalize, normalizeArray, stripCliColors, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import type { MANAGER_NODE } from "../../types/platform.ts";
 import { ColorString, Interrogate, LogStuff } from "../../functions/io.ts";
 import { FkNodeSecurityAudit, ParsedNodeReport } from "../../types/audit.ts";
@@ -65,6 +65,19 @@ interface PNPM_REPORT {
         PNPM_REPORT_ITEM
     >;
 }
+
+/**
+ * **BUN report.** This "interface" only types properties of our interest.
+ */
+type BUN_REPORT = Record<
+    string,
+    {
+        url: string;
+        severity: "low" | "moderate" | "high" | "critical";
+        vulnerable_versions: string;
+        title: string;
+    }[]
+>;
 
 /**
  * **YARN report.** This interface only types properties of our interest.
@@ -163,7 +176,7 @@ const qps = (s: string): string => s.replaceAll(">", "").replaceAll("<", "").rep
  * @param {string} jsonString Report string (JSON PLEASE).
  * @param {MANAGER_NODE} platform Package manager used for the report.
  */
-export function ParseNodeReport(jsonString: string, platform: MANAGER_NODE): ParsedNodeReport {
+export function ParseNodeBunReport(jsonString: string, platform: MANAGER_NODE | "bun"): ParsedNodeReport {
     /**
      * `yarn audit --json` returns something like THIS:
      * ```json
@@ -178,7 +191,13 @@ export function ParseNodeReport(jsonString: string, platform: MANAGER_NODE): Par
             s,
         ) => JSON.parse(s));
 
-    const parsedJson = platform === "yarn" ? yarnStupidJsonFormat : JSON.parse(jsonString);
+    const halfCleanJsonString = stripCliColors(jsonString).split("\n");
+    const ib = halfCleanJsonString.findIndex((s) => s.includes("audit v"));
+    const cleanJsonString = halfCleanJsonString.filter((s) => s.trim() !== halfCleanJsonString[ib]).filter(validate).join("\n");
+
+    const parsedJson = platform === "yarn" ? yarnStupidJsonFormat : JSON.parse(
+        cleanJsonString,
+    );
 
     const brokenDeps: boolean[] = [false];
     const advisories: string[] = [];
@@ -226,6 +245,25 @@ export function ParseNodeReport(jsonString: string, platform: MANAGER_NODE): Par
                     overview: e.name,
                 };
             }));
+        }
+    } else if (platform === "bun") {
+        // * STUPIDN'T BUN IMPLEMENTATION * //
+        // (kind of, it is a bit stupid to not copy the npm one... but it is what it is)
+        const report = parsedJson as BUN_REPORT;
+
+        for (const _entry of Object.values(report)) {
+            for (const entry of _entry) {
+                const advisory = entry.url
+                    .split("https://github.com/advisories/")[1];
+
+                if (advisory) advisories.push(advisory);
+                severities.push(entry.severity);
+                // ! this is technically wrong
+                // but since we can't tell, we say it is true, for safety
+                brokenDeps.push(true);
+                // bun reports do not include a detailed description, so we gotta live with this
+                initialKws.push({ summary: entry.title, overview: entry.title });
+            }
         }
     } else {
         // * STUPIDN'T PNPM IMPLEMENTATION * //
@@ -351,7 +389,6 @@ export function InterrogateVulnerableProject(questions: string[]): Omit<
                 );
             }
         }
-
         if (!isTrue(response) && question.includes("V:NTW")) {
             handleQuestion(
                 {
@@ -386,8 +423,7 @@ export function InterrogateVulnerableProject(questions: string[]): Omit<
                 );
             }
         }
-
-        if (isTrue(response) && question.includes("V:JSC")) {
+        if (!isTrue(response) && question.includes("V:JSC")) {
             handleQuestion(
                 {
                     q: "Does that include risky methods? For example, in Discord you can get an account's token from the JS console (risky method).",
@@ -515,7 +551,7 @@ export function PerformAuditing(project: string): FkNodeSecurityAudit | 0 | 1 {
     const current = Deno.cwd();
     // === "__UNSUPPORTED" already does the job, but typescript wants me to specify
     if (
-        env.commands.audit === "__UNSUPPORTED" || env.manager === "deno" || env.manager === "bun" || env.manager === "cargo" ||
+        env.commands.audit === "__UNSUPPORTED" || env.manager === "deno" || env.manager === "cargo" ||
         env.manager === "go"
     ) {
         LogStuff(
@@ -550,7 +586,7 @@ export function PerformAuditing(project: string): FkNodeSecurityAudit | 0 | 1 {
         return 1;
     }
 
-    const audit = AuditProject(ParseNodeReport(res.stdout, env.manager));
+    const audit = AuditProject(ParseNodeBunReport(res.stdout, env.manager));
 
     Deno.chdir(current);
 
