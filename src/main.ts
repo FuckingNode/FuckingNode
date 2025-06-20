@@ -282,8 +282,8 @@ async function main(command: UnknownString) {
         case "configure":
         case "preset":
             TheSetuper({
-                project: flags[1],
-                setup: flags[2],
+                setup: flags[1],
+                project: flags[2],
             });
             break;
         case "launch":

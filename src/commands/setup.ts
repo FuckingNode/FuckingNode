@@ -8,15 +8,15 @@ import { SETUPS, VISIBLE_SETUPS } from "./toolkit/setups.ts";
 import { normalize, table, validate } from "@zakahacecosas/string-utils";
 
 export default function TheSetuper(params: TheSetuperConstructedParams) {
-    if (!validate(params.setup) || !validate(params.project)) {
+    if (!validate(params.setup) || (validate(params.project) && !CheckForPath(params.project ?? ""))) {
         LogStuff(table(VISIBLE_SETUPS));
         LogStuff(
-            `You didn't provide a ${params.setup ? "project" : "target setup"} or provided an invalid one, so up here are all possible setups.`,
+            `You didn't provide any argument, or provided invalid ones, so up here are all possible setups.`,
         );
         return;
     }
 
-    const project = SpotProject(params.project);
+    const project = SpotProject(validate(params.project) ? params.project : ".");
     const env = GetProjectEnvironment(project);
     const desiredSetup = normalize(params.setup, { strict: true });
     const setupToUse = SETUPS.find((s) => (normalize(s.name, { strict: true })) === desiredSetup);
