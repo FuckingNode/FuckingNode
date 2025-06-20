@@ -4,7 +4,6 @@
  * @export
  */
 export type GLOBAL_ERROR_CODES =
-    | "Generic__InteractionInvalidCauseNoPathProvided"
     | "Cleaner__InvalidCleanerIntensity"
     | "Internal__Projects__CantDetermineEnv"
     | "Generic__NonExistingPath"
@@ -25,4 +24,4 @@ export type GLOBAL_ERROR_CODES =
 /**
  * All possible project validation error codes.
  */
-export type PROJECT_ERROR_CODES = "IsDuplicate" | "NoPkgFile" | "NotFound" | "NoLockfile" | "NoName" | "NoVersion" | "CantGetProjectEnv";
+export type PROJECT_ERROR_CODES = "IsDuplicate" | "NoPkgFile" | "NotFound" | "NoName" | "NoVersion" | "CantGetProjectEnv";

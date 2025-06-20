@@ -29,10 +29,6 @@ export class FknError extends Error {
         this.name = "FknError";
         this.code = code;
         switch (this.code) {
-            case "Generic__InteractionInvalidCauseNoPathProvided":
-                this.hint =
-                    `Provide the project's path or name to the project.\n    It can be a file path ("../node-project" OR "C:\\Users\\coolDev\\node-project"),\n    It can be "--self" to use the current working DIR (${Deno.cwd()}).\n    Or it can be a project's name (type the exact name as it is on package.json's "name" field).`;
-                break;
             case "Cleaner__InvalidCleanerIntensity":
                 this.hint =
                     "Valid intensity levels are 'normal', 'hard', 'hard-only', 'maxim', and 'maxim-only'.\nIf you want to use flags without providing an intensity (e.g. 'clean --verbose'), prepend '-- --' to the command ('clean -- -- -verbose'). Run 'help clean' for more info onto what does each level do.";

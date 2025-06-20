@@ -162,9 +162,11 @@ async function main(command: UnknownString) {
     }
 
     DEBUG_LOG("FLAGS[1]", flags[1], isNotFlag(flags[1]));
-    const projectArg = (isNotFlag(flags[1]) || flags[1] === "--self") ? flags[1] : 0 as const;
+    const projectArg = (isNotFlag(flags[1])) ? flags[1] : 0 as const;
+    DEBUG_LOG("PROJECT ARG IS", projectArg);
     DEBUG_LOG("FLAGS[2]", flags[2], isNotFlag(flags[2]));
     const intensityArg = isNotFlag(flags[2]) ? flags[2] : GetUserSettings().defaultIntensity;
+    DEBUG_LOG("INTENSITY ARG IS", intensityArg);
 
     const cleanerArgs: TheCleanerConstructedParams = {
         flags: {

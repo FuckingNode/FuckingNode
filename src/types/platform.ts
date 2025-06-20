@@ -147,13 +147,13 @@ interface GenericProjectEnvironment {
      */
     lockfile: {
         /**
-         * Parsed path to lockfile.
+         * Parsed path to lockfile. `null` if it doesn't exist (that may happen).
          *
-         * @type {string}
+         * @type {string | null}
          */
-        path: string;
+        path: string | null;
         /**
-         * Bare name of the lockfile (`package-lock.json`, `deno.lock`, `go.sum`...)
+         * Bare name of the lockfile (`package-lock.json`, `deno.lock`, `go.sum`...).
          *
          * @type {LOCKFILE_GLOBAL}
          */

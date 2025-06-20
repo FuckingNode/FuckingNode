@@ -44,7 +44,7 @@ export function CheckForDir(path: string): "NotDir" | "Valid" | "ValidButNotEmpt
 }
 
 /**
- * Parses a string path, to ensure string cleanness and handle things like relative paths or `--self`.
+ * Parses a string path, to ensure string cleanness and handle things like relative paths.
  *
  * @export
  * @param {UnknownString} target The string to parse.
@@ -53,8 +53,6 @@ export function CheckForDir(path: string): "NotDir" | "Valid" | "ValidButNotEmpt
 export function ParsePath(target: UnknownString): string {
     try {
         if (!validate(target)) throw new Error("Target must be (obviously) a string.");
-
-        if (normalize(target) === "--self") return Deno.cwd();
 
         let workingTarget: string;
 

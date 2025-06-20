@@ -3,7 +3,7 @@ import { CheckForPath } from "../functions/filesystem.ts";
 import { LogStuff } from "../functions/io.ts";
 import { GetAllProjects, NameProject, SpotProject } from "../functions/projects.ts";
 import type { TheCleanerConstructedParams } from "./constructors/command.ts";
-import { PerformCleanup, PerformHardCleanup, PerformMaximCleanup, ResolveLockfiles, ShowReport, ValidateIntensity } from "./toolkit/cleaner.ts";
+import { PerformCleanup, PerformHardCleanup, PerformMaximCleanup, ShowReport, ValidateIntensity } from "./toolkit/cleaner.ts";
 import type { CleanerIntensity } from "../types/config_params.ts";
 import { GetElapsedTime } from "../functions/date.ts";
 
@@ -70,69 +70,22 @@ export default function TheCleaner(params: TheCleanerConstructedParams) {
 
             Deno.chdir(project);
 
-            const lockfiles = ResolveLockfiles(project);
-
             // TODO - readd preliminary status (basically showing '... # * protected' in report and a log warning for the user)
 
-            if (lockfiles.length === 1) {
-                LogStuff(
-                    `Cleaning the ${NameProject(project)} ${FWORDS.MF}...`,
-                    "package",
-                );
-                PerformCleanup(
-                    project,
-                    update,
-                    lint,
-                    prettify,
-                    destroy,
-                    commit,
-                    realIntensity,
-                    verbose,
-                );
-            }
-            if (lockfiles.length > 1) {
-                LogStuff(
-                    `Having more than one lockfile is a bad practice; and we can't handle this ${FWORDS.MF}.`,
-                    "error",
-                    "bright-yellow",
-                );
-                results.push({
-                    path: project,
-                    status: "Too many lockfiles.",
-                    elapsedTime: GetElapsedTime(startTime),
-                });
-                continue;
-            }
-            if (lockfiles.length === 0) {
-                if (
-                    CheckForPath("package.json") || CheckForPath("deno.json") || CheckForPath("package.jsonc") || CheckForPath("Cargo.toml") ||
-                    CheckForPath("go.mod")
-                ) {
-                    LogStuff(
-                        `${project} has a package file but not a lockfile. Can't ${FWORDS.FKN} clean.`,
-                        "warn",
-                        "bright-yellow",
-                    );
-                    results.push({
-                        path: project,
-                        status: "No lockfile.",
-                        elapsedTime: GetElapsedTime(startTime),
-                    });
-                    continue;
-                } else {
-                    LogStuff(
-                        `No supported package file was found at ${project}. Skipping this ${FWORDS.MF}...`,
-                        "warn",
-                        "bright-yellow",
-                    );
-                    results.push({
-                        path: project,
-                        status: "No package file.",
-                        elapsedTime: GetElapsedTime(startTime),
-                    });
-                    continue;
-                }
-            }
+            LogStuff(
+                `Cleaning the ${NameProject(project)} ${FWORDS.MF}...`,
+                "package",
+            );
+            PerformCleanup(
+                project,
+                update,
+                lint,
+                prettify,
+                destroy,
+                commit,
+                realIntensity,
+                verbose,
+            );
 
             const status = "Success"; // preliminaryStatus ? `Success # ${preliminaryStatus}` : "Success";
 

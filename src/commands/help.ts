@@ -24,7 +24,7 @@ function formatCmd(obj: helpThing): string {
 
 function pathReminder() {
     LogStuff(
-        `----\nNote: <project> is either a file path OR the "--self" flag which uses the Current Working Directory.\nE.g., running 'fkadd --self' here equals 'fkadd ${Deno.cwd()}'.\n\nAdditionally, in some places where we assume the project is already added (like clean or stats),\nyou can pass the project's name (as it appears in the package file) and it'll work as well.`,
+        `----\nNote: <project> is either a file path OR a project's name.\nIn places where we assume the project is already added (like clean or stats),\nyou can pass the project's name (as it appears in the package file) and it should work as well.`,
         undefined,
         ["italic", "half-opaque"],
     );

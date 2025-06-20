@@ -69,22 +69,26 @@ function handler(
         );
 
         LogStuff("Making a backup of your previous lockfile (4/6)...", "working");
-        if (env.lockfile.name === "bun.lockb" && CheckForPath(JoinPaths(env.root, "bun.lock"))) {
-            // handle case where bun.lockb was replaced with bun.lock
-            rename(env.lockfile.path, JoinPaths(env.root, "bun.lockb.bak"), (e) => {
-                if (e) throw e;
-                LogStuff(
-                    "Your bun.lockb file will be backed up and replaced with a text-based lockfile (bun.lock).",
-                    "bruh",
+        if (env.lockfile.path) {
+            if (env.lockfile.name === "bun.lockb" && CheckForPath(JoinPaths(env.root, "bun.lock"))) {
+                // handle case where bun.lockb was replaced with bun.lock
+                rename(env.lockfile.path, JoinPaths(env.root, "bun.lockb.bak"), (e) => {
+                    if (e) throw e;
+                    LogStuff(
+                        "Your bun.lockb file will be backed up and replaced with a text-based lockfile (bun.lock).",
+                        "bruh",
+                    );
+                });
+                Deno.removeSync(env.lockfile.path);
+            } else {
+                Deno.writeTextFileSync(
+                    JoinPaths(env.root, `${env.lockfile.name}.bak`),
+                    Deno.readTextFileSync(env.lockfile.path),
                 );
-            });
-            Deno.removeSync(env.lockfile.path);
+                Deno.removeSync(env.lockfile.path);
+            }
         } else {
-            Deno.writeTextFileSync(
-                JoinPaths(env.root, `${env.lockfile.name}.bak`),
-                Deno.readTextFileSync(env.lockfile.path),
-            );
-            Deno.removeSync(env.lockfile.path);
+            LogStuff("No lockfile found, skipping backup.", "warn");
         }
 
         LogStuff("Installing modules with the desired manager (5/6)...", "working");

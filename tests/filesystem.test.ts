@@ -5,7 +5,7 @@ Deno.test({
     name: "paths are parsed correctly",
     fn: () => {
         assertEquals(
-            ParsePath("--self"),
+            ParsePath("."),
             Deno.cwd(),
         );
     },
