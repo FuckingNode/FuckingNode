@@ -74,11 +74,11 @@ export const HINTS = [
     `F\*ckingProTip (04): critical errors get logged to ${GetAppPath("ERRORS")} in a fairly readable format`,
     `F\*ckingProTip (05): run 'fkn export <project>', it'll show you what we REALLY understand about your project (and care enough about)`,
     `F\*ckingProTip (06): 'fkn surrender' has aliases that do the exact same thing but more properly representing why you chose to surrender on a project, for example 'fkn im-done-with <project>', or 'fkn i-give-up <project>'`,
-    `F\*ckingProTip (07): if your drive is nearly full and you desperately need storage, run 'fkn storage-emergency'. thank me later. note: desperate situations require desperate measures, be advised.`,
+    `F\*ckingProTip (07): if your drive is nearly full and you desperately need storage, run 'fkn storage-emergency'.\nthank me later. note: desperate situations require desperate measures, be advised.`,
     `F\*ckingProTip (08): you can kickstart a project with a git prefix (or shorthand or alias or whatever).\nfor example, kickstart gh:cool-guy/cool-repo maps to https://github.com/cool-guy/cool-repo.git - so you type less\nthere's 10 aliases, run 'compat kickstart' to see them all`,
-    `F\*ckingProTip (09): all our config files live at ${GetAppPath("BASE")}. touch anything there if you want.`,
-    `F\*ckingProTip (10): if you touched any config file and broke whatever (or something broke because yes), run 'fkn something-fucked-up'. it'll reset all config files, except for your project list.`,
-    `F\*ckingProTip (11): here's an actually good recommendation: use DenoJS, or BunJS, or learn another language - avoid Node.`,
+    `F\*ckingProTip (09): all config files live at ${GetAppPath("BASE")}. touch anything there if you want.`,
+    `F\*ckingProTip (10): if you touch and break any config file (or it breaks because yes), run 'fkn something-fucked-up'. it'll reset all config files except for your project list.`,
+    `F\*ckingProTip (11): here's an actually good pro tip: use DenoJS, or BunJS, or learn another language - just. avoid. Node.`,
 ];
 
 const appRelatedJokes = [

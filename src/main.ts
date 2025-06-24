@@ -184,11 +184,7 @@ async function main(command: UnknownString) {
     };
 
     switch (
-        normalize(command, {
-            strict: true,
-            preserveCase: true,
-            removeCliColors: true,
-        })
+        command.toLowerCase()
     ) {
         case "clean":
             TheCleaner(cleanerArgs);

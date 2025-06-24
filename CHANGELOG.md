@@ -32,6 +32,7 @@ Next update will be a major 4.0 release.
 - Fixed the biggest error of the CLI so far, codenamed "context mismatch" - though it actually was a mutation issue, the CLI was overwriting its own defaults. More info in [#15](https://github.com/FuckingNode/FuckingNode/issues/15).
 - Fixed the CLI running 3 CLI commands instead of 1 to check if a package manager is installed, consuming more resources and time.
 - Fixed several issues with project environment inference.
+- Fixed commands with dashes (e.g. `storage-emergency` or `im-done-with`) not working.
 
 ### Removed
 

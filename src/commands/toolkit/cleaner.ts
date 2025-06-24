@@ -526,7 +526,7 @@ export function ValidateIntensity(intensity: string): CleanerIntensity {
 
     if (workingIntensity === "maxim" || workingIntensity === "maxim-only") {
         const confirmMaxim = Interrogate(
-            "Are you sure you want to use maxim cleanup? It'll entirely remove the node_modules DIR for ALL of your projects.",
+            ' Are you sure you want to use maxim cleanup? It\'ll entirely remove "./node_modules" from all of your added projects.',
             "warn",
         );
         return confirmMaxim === true ? workingIntensity : defaultIntensity;
