@@ -30,7 +30,7 @@ function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
         }
         return "ok"; // nothing to do, files alr staged
     }
-    if (Array.isArray(files) && files.filter(validate).filter(CheckForPath).length === 0) {
+    if (Array.isArray(files) && files[0] !== "-A" && files.filter(validate).filter(CheckForPath).length === 0) {
         LogStuff(
             `No files specified for committing. Specify any of the ${
                 ColorString(GetCommittableFiles(path).length, "bold")
@@ -40,16 +40,16 @@ function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
         return "abort";
     }
     try {
-        const out = StageFiles(path, files);
-        if (out === "nothingToStage") return "abort";
+        const out = GetCommittableFiles(path);
+        if (out.length === 0) return "abort";
         const filtered = Array.isArray(files)
             ? files
                 .filter(validate)
                 .filter(CheckForPath)
             : ["(this should never appear in the cli)"];
         LogStuff(
-            files === "A"
-                ? `Staged all files for commit (${filtered.length}).`
+            (files === "A" || files[0] === "-A")
+                ? `Staged all files for commit (${GetStagedFiles(path).length}).`
                 : `Staged ${filtered.length} ${pluralOrNot("file", filtered.length)} for commit:\n${
                     filtered
                         .map((file) => ColorString("- " + file, "bold", "white"))
@@ -82,7 +82,8 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
     const env = GetProjectEnvironment(project);
     const prevStaged = GetStagedFiles(project).length;
 
-    if (!params.keepStagedFiles) StageFiles(project, "-A");
+    if (!params.keepStagedFiles) StageFiles(project, "!A");
+    if (params.files[0] === "-A") StageFiles(project, "A");
     const staging = StagingHandler(project, params.files);
     if (staging === "abort") Deno.exit(1);
     if (params.keepStagedFiles) {

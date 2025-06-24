@@ -388,7 +388,7 @@ export function Clone(repoUrl: string, clonePath: string): boolean {
  * Stages files for a Git repo. Takes an array of strings (file paths) or a special string to:
  *
  * - `"A"`: stage all files.
- * - `"-A"`: unstage all files.
+ * - `"!A"`: unstage all files.
  * - `"S"`: stage all files that are staged, but not committed (this is a no-op).
  *
  * @param project Project path. **Assumes it's parsed & spotted.**
@@ -408,7 +408,7 @@ export function StageFiles(project: string, files: GIT_FILES): "ok" | "nothingTo
             if (!stageAllOutput.success) throw new Error(stageAllOutput.stdout);
             return "ok";
         }
-        if (files === "-A") {
+        if (files === "!A") {
             const unstageAllOutput = g(
                 project,
                 [

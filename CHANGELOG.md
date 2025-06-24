@@ -15,6 +15,7 @@ Next update will be a major 4.0 release.
 - Added the ability to stage files directly from `fkcommit`, removing the need to do `git add` first.
 - Added the ability to include previously staged files when `fkcommit`ing with `--keep-staged` / `-k`. **(1)**
 - Added the ability to skip the confirmation at `fkcommit` with `--yes` / `-y`.
+- Added the ability to bulk-stage all files with `-A` to `fkcommit`, just as in regular `git commit`.
 - Added `audit` support for Bun.
 - Added a `projectEnvOverride` field to `fknode.yaml` files, to override our project environment inference system.
 
@@ -24,6 +25,7 @@ Next update will be a major 4.0 release.
 - Now `fkcommit` tells more clearly when the commit was aborted due to an error in your `commitCmd`.
 - Now the `help` command should look a bit better.
 - Now when no path is provided and it makes sense to, the CWD will be used, without needing to specify it.
+- Now `setup` takes FIRST the setup to use, THEN the path of the project. This is for the command to work in the CWD without specifying a path, as explained above.
 
 ### Fixed
 

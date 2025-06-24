@@ -94,4 +94,4 @@ export type VALID_COLORS =
  *
  * @export
  */
-export type GIT_FILES = UnknownString[] | "A" | "-A" | "S";
+export type GIT_FILES = UnknownString[] | "A" | "!A" | "S";
