@@ -26,6 +26,7 @@ Next update will be a major 4.0 release.
 - Now the `help` command should look a bit better.
 - Now when no path is provided and it makes sense to, the CWD will be used, without needing to specify it.
 - Now `setup` takes FIRST the setup to use, THEN the path of the project. This is for the command to work in the CWD without specifying a path, as explained above.
+- Now `package.json` files do not crash the program if no `version` was specified.
 
 ### Fixed
 

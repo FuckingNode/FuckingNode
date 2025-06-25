@@ -29,12 +29,6 @@ export const BareValidators = {
 
     // deno-lint-ignore no-explicit-any
     NodeBun: (obj: any): obj is NodePkgFile => {
-        try {
-            parse(obj.version);
-        } catch {
-            return false;
-        }
-
-        return isObject(obj) && validate(obj["name"]) && validate(obj["version"]);
+        return isObject(obj) && validate(obj["name"]);
     },
 };

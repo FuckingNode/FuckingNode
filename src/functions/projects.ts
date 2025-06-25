@@ -16,6 +16,8 @@ import { GetLatestTag } from "../functions/git.ts";
 import { internalGolangRequireLikeStringParser } from "../commands/interop/parse-module.ts";
 import { normalize, normalizeArray, toUpperCaseFirst, type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { ResolveLockfiles } from "../commands/toolkit/cleaner.ts";
+import { isGlob } from "@std/path/is-glob";
+import { joinGlobs, normalizeGlob } from "@std/path";
 
 /**
  * Gets all the users projects and returns their absolute root paths as a `string[]`.
@@ -474,14 +476,17 @@ export function GetWorkspaces(path: string): string[] {
     try {
         const workspacePaths: string[] = [];
 
-        const parse = (s: string[]): string[] => s.filter((s: UnknownString) => validate(s)).map((s: string) => JoinPaths(path, s));
+        const parse = (s: string[]): string[] =>
+            s
+                .filter((s: UnknownString) => validate(s))
+                .map((s: string) => joinGlobs([path, s]));
 
         // Check package.json for Node, npm, and yarn (and Bun workspaces).
         const packageJsonPath = JoinPaths(path, "package.json");
         if (CheckForPath(packageJsonPath)) {
             const pkgJson: NodePkgFile = JSON.parse(Deno.readTextFileSync(packageJsonPath));
             if (pkgJson.workspaces) {
-                const pkgWorkspaces = Array.isArray(pkgJson.workspaces) ? pkgJson.workspaces : pkgJson.workspaces?.packages || [];
+                const pkgWorkspaces = Array.isArray(pkgJson.workspaces) ? pkgJson.workspaces : pkgJson.workspaces.packages || [];
                 workspacePaths.push(...pkgWorkspaces);
             }
         }
@@ -540,9 +545,21 @@ export function GetWorkspaces(path: string): string[] {
         const absoluteWorkspaces: string[] = [];
 
         for (const workspacePath of parse(workspacePaths)) {
-            const fullPath = workspacePath;
-            if (!CheckForPath(fullPath)) continue;
+            const fullPath = normalizeGlob(workspacePath);
+            DEBUG_LOG("POSSIBLY GLOB STRING:", fullPath, "IS", isGlob(fullPath) ? "CONSIDERED" : "NOT CONSIDERED");
+            // ! TODO: FIX
+            // for whatever reason GLOB strings like "C:\Users\Zaka\code\project\packages\*"
+            // are NOT being considered globs
+            if (!isGlob(fullPath)) {
+                if (CheckForPath(fullPath)) {
+                    console.debug("EXISTS");
+                    absoluteWorkspaces.push(ParsePath(fullPath));
+                }
+                continue;
+            }
             for (const dir of expandGlobSync(fullPath)) {
+                console.debug("GLOBED", dir);
+                if (!CheckForPath(dir.path)) continue;
                 if (dir.isDirectory) {
                     absoluteWorkspaces.push(dir.path);
                 }
@@ -681,65 +698,69 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
 
     // cargo and golang aren't extracted as constants because their parsers
     // don't support JSON, so they always throw an error when parsing a JSON string
-    const bunEnv: ProjectEnvironment = {
-        root,
-        settings,
-        runtimeColor,
-        main: {
-            path: mainPath,
-            name: "package.json",
-            stdContent: PackageFileParsers.NodeBun.STD(mainString),
-            cpfContent: PackageFileParsers.NodeBun.CPF(mainString, "bun", workspaces),
-        },
-        lockfile: {
-            name: pathChecks.bun["lockb"] ? "bun.lockb" : "bun.lock",
-            path: CheckForPath(paths.bun.lock) ? paths.bun.lock : null,
-        },
-        runtime: "bun",
-        manager: "bun",
-        hall_of_trash,
-        commands: {
-            base: "bun",
-            exec: ["bunx"],
-            update: ["update", "--save-text-lockfile"],
-            // ["install", "--analyze src/**/*.ts"]
-            clean: "__UNSUPPORTED",
-            run: ["bun", "run"],
-            audit: ["audit", "--json"],
-            publish: ["publish"],
-            start: "start",
-        },
-        workspaces,
-    };
-    const denoEnv: ProjectEnvironment = {
-        root,
-        settings,
-        runtimeColor,
-        main: {
-            path: mainPath,
-            name: pathChecks.deno["jsonc"] ? "deno.jsonc" : "deno.json",
-            stdContent: PackageFileParsers.Deno.STD(mainString),
-            cpfContent: PackageFileParsers.Deno.CPF(mainString, workspaces),
-        },
-        lockfile: {
-            name: "deno.lock",
-            path: paths.deno.lock,
-        },
-        runtime: "deno",
-        manager: "deno",
-        hall_of_trash,
-        commands: {
-            base: "deno",
-            exec: ["deno", "run"],
-            update: ["outdated", "--update"],
-            clean: "__UNSUPPORTED",
-            run: ["deno", "task"],
-            audit: "__UNSUPPORTED",
-            publish: ["publish", "--check=all"],
-            start: "run",
-        },
-        workspaces,
-    };
+    if (isBun || settings.projectEnvOverride === "bun") {
+        return {
+            root,
+            settings,
+            runtimeColor,
+            main: {
+                path: mainPath,
+                name: "package.json",
+                stdContent: PackageFileParsers.NodeBun.STD(mainString),
+                cpfContent: PackageFileParsers.NodeBun.CPF(mainString, "bun", workspaces),
+            },
+            lockfile: {
+                name: pathChecks.bun["lockb"] ? "bun.lockb" : "bun.lock",
+                path: CheckForPath(paths.bun.lock) ? paths.bun.lock : null,
+            },
+            runtime: "bun",
+            manager: "bun",
+            hall_of_trash,
+            commands: {
+                base: "bun",
+                exec: ["bunx"],
+                update: ["update", "--save-text-lockfile"],
+                // ["install", "--analyze src/**/*.ts"]
+                clean: "__UNSUPPORTED",
+                run: ["bun", "run"],
+                audit: ["audit", "--json"],
+                publish: ["publish"],
+                start: "start",
+            },
+            workspaces,
+        };
+    }
+    if (isDeno || settings.projectEnvOverride === "deno") {
+        return {
+            root,
+            settings,
+            runtimeColor,
+            main: {
+                path: mainPath,
+                name: pathChecks.deno["jsonc"] ? "deno.jsonc" : "deno.json",
+                stdContent: PackageFileParsers.Deno.STD(mainString),
+                cpfContent: PackageFileParsers.Deno.CPF(mainString, workspaces),
+            },
+            lockfile: {
+                name: "deno.lock",
+                path: paths.deno.lock,
+            },
+            runtime: "deno",
+            manager: "deno",
+            hall_of_trash,
+            commands: {
+                base: "deno",
+                exec: ["deno", "run"],
+                update: ["outdated", "--update"],
+                clean: "__UNSUPPORTED",
+                run: ["deno", "task"],
+                audit: "__UNSUPPORTED",
+                publish: ["publish", "--check=all"],
+                start: "run",
+            },
+            workspaces,
+        };
+    }
     const yarnEnv: ProjectEnvironment = {
         root,
         settings,
@@ -890,10 +911,6 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
     }
 
     switch (settings.projectEnvOverride) {
-        case "bun":
-            return bunEnv;
-        case "deno":
-            return denoEnv;
         case "npm":
             return npmEnv;
         case "pnpm":
@@ -917,9 +934,6 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
             "Either leave just one lockfile, or manually specify the package manager you use via the 'fknode.yaml' file, by adding the 'projectEnvOverride' field with the value of 'npm', 'pnpm', 'bun', 'deno', 'golang', or 'rust'.";
         throw err;
     }
-
-    if (isDeno) return denoEnv;
-    if (isBun) return bunEnv;
 
     const isPnpm = pathChecks.node["lockPnpm"] ||
         pathChecks.node["pnpmInfer1"] ||
