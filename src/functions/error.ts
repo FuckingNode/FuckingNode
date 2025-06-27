@@ -136,7 +136,7 @@ ${stripCliColors(debuggableContent ?? "UNKNOWN OUTPUT - No debuggableContent was
     }
 
     /**
-     * Handles the error and exits the CLI. Don't use this directly, use {@linkcode GenericErrorHandler} instead.
+     * Handles the error and exits the CLI. Don't use this directly, use {@linkcode ErrorHandler} instead.
      */
     public exit(): never {
         this.handleMessage();
@@ -147,21 +147,21 @@ ${stripCliColors(debuggableContent ?? "UNKNOWN OUTPUT - No debuggableContent was
 /**
  * Handles an error and quits. Save up a few lines of code by using this in the `catch` block.
  *
- * @export
  * @param {unknown} e The error.
  * @returns {never} _Below any call to this function nothing can happen. It exits the CLI with code 1._
  */
-export function GenericErrorHandler(e: unknown): never {
+export function ErrorHandler(e: unknown): never {
     if (e instanceof FknError) {
         e.exit();
         Deno.exit(1); // (never reached, but without this line typescript doesn't shut up)
-    } else if (e instanceof Error) {
-        console.error(`${ColorString(FWORDS.FK, "red", "bold")}! Something happened: ${e.message}`);
-        Deno.exit(1);
-    } else {
-        console.error(`${ColorString(FWORDS.FK, "red", "bold")}! Something strange happened: ${e}`);
+    }
+    const fk = ColorString(FWORDS.FK, "red", "bold");
+    if (Error.isError(e)) {
+        console.error(`${fk}! Something happened: ${e.message} (${e.cause})\n${e.stack}`);
         Deno.exit(1);
     }
+    console.error(`${fk}! Something strange happened: ${e}`);
+    Deno.exit(1);
 }
 
 /** function to write debug logs, only visible if env variable FKNODE_SHALL_WE_DEBUG is set to `yeah`

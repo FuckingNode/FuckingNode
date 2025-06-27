@@ -110,16 +110,7 @@ export function AddProject(
             return;
         }
 
-        if (env.runtime === "deno") {
-            LogStuff(
-                // says 'good choice' because it's the same runtime as F*ckingNode. its not a real opinion lmao
-                // idk whats better, deno or bun. i have both installed, i could try. one day, maybe.
-                `This project uses the Deno runtime (good choice btw). Keep in mind it's not fully supported.`,
-                "bruh",
-                "italic",
-            );
-        }
-        if (!validateAgainst(env.runtime, ["node", "deno"])) {
+        if (!validateAgainst(env.runtime, ["node", "deno", "bun"])) {
             LogStuff(
                 `This project uses the ${toUpperCaseFirst(env.runtime)} runtime. Keep in mind it's not fully supported.`,
                 "bruh",
@@ -143,7 +134,9 @@ export function AddProject(
         const addWorkspaces = Interrogate(
             `Hey! This looks like a ${FWORDS.FKN} monorepo. We've found these workspaces:\n\n${
                 workspaceString.join("\n")
-            }.\n\nShould we add them to your list as well, so they're all cleaned?`,
+            }.\n\nShould we add them to your list as well?\nWe recommend this to keep all your code clean - ${
+                ColorString("HOWEVER", "bold")
+            } if your linter and prettifier are already setup from the root to handle all workspace members, it's actually better to skip this.`,
         );
 
         if (!addWorkspaces) {
@@ -280,30 +273,27 @@ export function NameProject(
     const workingPath = ParsePath(path);
     const formattedPath = ColorString(workingPath, "italic", "half-opaque");
 
-    try {
-        if (!CheckForPath(workingPath)) throw new Error("(this won't be shown and formatted path will be returned instead)");
-        const env = GetProjectEnvironment(workingPath);
+    // if it's not possible to name it, just give it the raw path
+    if (CheckForPath(workingPath)) return formattedPath;
+    const env = GetProjectEnvironment(workingPath);
 
-        const pkgFile = env.main.cpfContent;
+    const pkgFile = env.main.cpfContent;
 
-        if (!pkgFile.name) return formattedPath;
+    if (!pkgFile.name) return formattedPath;
 
-        const formattedName = ColorString(pkgFile.name, "bold");
+    const formattedName = ColorString(pkgFile.name, "bold", env.runtimeColor);
 
-        const formattedVersion = pkgFile.version ? `@${ColorString(pkgFile.version, "purple")}` : "";
+    const formattedVersion = pkgFile.version ? `@${ColorString(pkgFile.version, "purple")}` : "";
 
-        const formattedNameVer = `${ColorString(formattedName, env.runtimeColor)}${formattedVersion}`;
+    const formattedNameVer = `${formattedName}${formattedVersion}`;
 
-        const fullNamedProject = `${formattedNameVer} ${formattedPath}`;
+    const fullNamedProject = `${formattedNameVer} ${formattedPath}`;
 
-        if (wanted === "all") return fullNamedProject;
-        else if (wanted === "name") return formattedName;
-        else if (wanted === "name-colorless") return pkgFile.name;
-        else if (wanted === "path") return formattedPath;
-        else return formattedNameVer;
-    } catch {
-        return formattedPath; // if it's not possible to name it, just give it the raw path
-    }
+    if (wanted === "all") return fullNamedProject;
+    else if (wanted === "name") return formattedName;
+    else if (wanted === "path") return formattedPath;
+    else if (wanted === "name-colorless") return pkgFile.name;
+    else return formattedNameVer;
 }
 
 /**
@@ -545,20 +535,17 @@ export function GetWorkspaces(path: string): string[] {
         const absoluteWorkspaces: string[] = [];
 
         for (const workspacePath of parse(workspacePaths)) {
-            const fullPath = normalizeGlob(workspacePath);
+            const fullPath = normalizeGlob(workspacePath).replaceAll("\\", "/");
             DEBUG_LOG("POSSIBLY GLOB STRING:", fullPath, "IS", isGlob(fullPath) ? "CONSIDERED" : "NOT CONSIDERED");
-            // ! TODO: FIX
-            // for whatever reason GLOB strings like "C:\Users\Zaka\code\project\packages\*"
-            // are NOT being considered globs
             if (!isGlob(fullPath)) {
-                if (CheckForPath(fullPath)) {
-                    console.debug("EXISTS");
+                if (CheckForPath(ParsePath(fullPath))) {
+                    DEBUG_LOG("NON-GLOB EXISTS", fullPath);
                     absoluteWorkspaces.push(ParsePath(fullPath));
                 }
                 continue;
             }
             for (const dir of expandGlobSync(fullPath)) {
-                console.debug("GLOBED", dir);
+                DEBUG_LOG("GLOBED", dir);
                 if (!CheckForPath(dir.path)) continue;
                 if (dir.isDirectory) {
                     absoluteWorkspaces.push(dir.path);
@@ -626,8 +613,12 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
      * this resorts to a less conventional method, seeing if user scripts begin with "pnpm", to INFER what the environment is
      */
     function scriptHas(str: string) {
+        const f = Deno.readTextFileSync(paths.node.json);
+        if (!f) return false;
+        const s = JSON.parse(f).scripts;
+        if (!s) return false;
         return JSON.stringify(
-            (JSON.parse(Deno.readTextFileSync(paths.node.json))).scripts,
+            s,
         ).includes(str);
     }
 

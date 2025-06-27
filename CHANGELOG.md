@@ -6,9 +6,7 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
-## Unreleased
-
-Next update will be a major 4.0 release.
+## Upcoming major (v4)
 
 ### Added
 
@@ -21,16 +19,18 @@ Next update will be a major 4.0 release.
 
 ### Changed
 
-- Now **(1)** `fkcommit` will unstage previously staged files. This is to avoid committing files you forgot were staged, or were staged, modified, then not staged again. Use `-k` to prevent unstaging.
+- Now **(1)** `fkcommit` will unstage previously staged files. This is to avoid committing files you forgot were staged, or were staged, modified, then not staged again. Use `-k` to keep prev. staged files.
 - Now `fkcommit` tells more clearly when the commit was aborted due to an error in your `commitCmd`.
 - Now the `help` command should look a bit better.
 - Now when no path is provided and it makes sense to, the CWD will be used, without needing to specify it.
 - Now `setup` takes FIRST the setup to use, THEN the path of the project. This is for the command to work in the CWD without specifying a path, as explained above.
 - Now `package.json` files do not crash the program if no `version` was specified.
+- Now glob patterns are supported when seeking for monorepos when adding a project.
+- Now we no longer show a "partial support" warning when adding DenoJS or BunJS projects, and when cleaning, "Cleanup is unsupported" was replaced with "This runtime lacks cleanup/deduping commands".
 
 ### Fixed
 
-- Fixed the biggest error of the CLI so far, codenamed "context mismatch" - though it actually was a mutation issue, the CLI was overwriting its own defaults. More info in [#15](https://github.com/FuckingNode/FuckingNode/issues/15).
+- Fixed the biggest error of the CLI so far, codenamed ["context mismatch"](https://github.com/FuckingNode/FuckingNode/issues/15) - though it actually was a mutation issue, the CLI was overwriting its own defaults. More info in [#15](https://github.com/FuckingNode/FuckingNode/issues/15).
 - Fixed the CLI running 3 CLI commands instead of 1 to check if a package manager is installed, consuming more resources and time.
 - Fixed several issues with project environment inference.
 - Fixed commands with dashes (e.g. `storage-emergency` or `im-done-with`) not working.
@@ -96,11 +96,6 @@ Next update will be a major 4.0 release.
 - Removed `--strict` flag from audit, now all audits are "strict" per se.
 
 ## [3.2.1] (11-04-2025)
-
-### Changed
-
-- Changed compile script to fix some issues and add Konbini support.
-  - (That's a separate project I'm personally working on, don't expect to find any info related to it as of now).
 
 ### Fixed
 

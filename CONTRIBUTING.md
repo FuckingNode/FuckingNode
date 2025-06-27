@@ -68,9 +68,7 @@ Another case where you can't choose is function objects, like the `FkNodeInterop
 
 ### Error handling
 
-F\*ckingNode is wrapped in an error boundary (`GenericErrorHandler()`), so no need to try/catch every function. When throwing an error, `throw new Error()` is perfectly fine, however you'll see we sometimes use `FknError()` instead. It's a superset of `Error` with error codes and hints for our users. If you can and care, mind adding an error code and throwing a FknError instead.
-
-Keep in mind the error boundary stops execution immediately. Places where you know an error might happen and want execution to continue somehow are the only places where you should use try/catch blocks.
+F\*ckingNode is wrapped in an error boundary (`ErrorHandler()`) that automatically stops execution and handles the error, so no need to try/catch every function. When throwing an error, `throw new Error()` is perfectly fine, however you'll see we sometimes use `FknError()` instead. It's a superset of `Error` with error codes and hints for our users. If you can, attempt to add an error code and throwing a FknError instead.
 
 ### Comment in a readable manner
 

@@ -20,7 +20,7 @@ import TheLauncher from "./commands/launch.ts";
 import { APP_NAME, APP_URLs, FULL_NAME, FWORDS } from "./constants.ts";
 import { ColorString, LogStuff } from "./functions/io.ts";
 import { FreshSetup, GetAppPath, GetUserSettings } from "./functions/config.ts";
-import { DEBUG_LOG, GenericErrorHandler } from "./functions/error.ts";
+import { DEBUG_LOG, ErrorHandler } from "./functions/error.ts";
 import type { TheCleanerConstructedParams } from "./commands/constructors/command.ts";
 import { RunScheduledTasks } from "./functions/schedules.ts";
 import { normalize, testFlag, testFlags, type UnknownString, validate } from "@zakahacecosas/string-utils";
@@ -356,6 +356,6 @@ if (import.meta.main) {
 
         await main(flags[0]);
     } catch (e) {
-        GenericErrorHandler(e);
+        ErrorHandler(e);
     }
 }

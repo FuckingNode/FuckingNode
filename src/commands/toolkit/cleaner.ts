@@ -47,7 +47,7 @@ const ProjectCleaningFeatures = {
         const { commands } = env;
         if (commands.clean === "__UNSUPPORTED") {
             LogStuff(
-                `Cannot clean ${projectName}: cleanup is unsupported for ${env.manager}.`,
+                `${projectName}'s cleanup is limited, as ${env.manager} doesn't have cleaning commands. If no other feature (linting, prettifying...) was specified, we'll just skip it.`,
                 "warn",
                 "bright-yellow",
             );
