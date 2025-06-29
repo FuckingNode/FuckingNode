@@ -27,10 +27,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Now `package.json` files do not crash the program if no `version` was specified.
 - Now glob patterns are supported when seeking for monorepos when adding a project.
 - Now we no longer show a "partial support" warning when adding DenoJS or BunJS projects, and when cleaning, "Cleanup is unsupported" was replaced with "This runtime lacks cleanup/deduping commands".
+- Now `fkcommit` does not require the CWD to be an added project, making it tech-stack agnostic.
 
 ### Fixed
 
 - Fixed the biggest error of the CLI so far, codenamed ["context mismatch"](https://github.com/FuckingNode/FuckingNode/issues/15) - though it actually was a mutation issue, the CLI was overwriting its own defaults. More info in [#15](https://github.com/FuckingNode/FuckingNode/issues/15).
+- Fixed your `commitCmd` not actually working (it did run but with the files staged, AKA unmodifiable, making it stupidly useless). Now, if your commitCmd altered any committed file, these changes will properly reflect in the made commit.
 - Fixed the CLI running 3 CLI commands instead of 1 to check if a package manager is installed, consuming more resources and time.
 - Fixed several issues with project environment inference.
 - Fixed commands with dashes (e.g. `storage-emergency` or `im-done-with`) not working.

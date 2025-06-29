@@ -1,6 +1,6 @@
 {
     "name": "@zakahacecosas/fuckingnode",
-    "version": "4.0.0-internal-test",
+    "version": "3.4.1",
     "exports": {
         ".": "./src/main.ts"
     },

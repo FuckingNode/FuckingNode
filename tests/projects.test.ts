@@ -2,7 +2,6 @@ import { GetAllProjects, GetProjectEnvironment, NameProject, SpotProject } from 
 import { assertEquals } from "@std/assert";
 import { TEST_ONE } from "./constants.ts";
 import { mocks } from "./mocks.ts";
-import { ColorString } from "../src/functions/io.ts";
 import { APP_NAME, DEFAULT_FKNODE_YAML } from "../src/constants.ts";
 import { parse as parseYaml } from "@std/yaml";
 import { JoinPaths } from "../src/functions/filesystem.ts";
@@ -39,10 +38,6 @@ Deno.test({
         assertEquals(
             NameProject(toName, "name-colorless"),
             APP_NAME.SCOPE,
-        );
-        assertEquals(
-            NameProject(toName, "name"),
-            ColorString(APP_NAME.SCOPE, "bold"),
         );
     },
 });

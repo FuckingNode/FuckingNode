@@ -1,5 +1,5 @@
 import { ColorString, Interrogate, LogStuff } from "../functions/io.ts";
-import { GetProjectEnvironment, NameProject, SpotProject } from "../functions/projects.ts";
+import { GetProjectEnvironment, NameProject } from "../functions/projects.ts";
 import type { TheCommitterConstructedParams } from "./constructors/command.ts";
 import { CanCommit, Commit, GetBranches, GetCommittableFiles, GetStagedFiles, IsRepo, Push, StageFiles } from "../functions/git.ts";
 import { normalize, pluralOrNot, testFlag, validate } from "@zakahacecosas/string-utils";
@@ -68,8 +68,7 @@ function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
 export default function TheCommitter(params: TheCommitterConstructedParams) {
     if (!validate(params.message)) throw new Error("No commit message specified!");
 
-    const CWD = Deno.cwd();
-    const project = SpotProject(CWD);
+    const project = Deno.cwd();
 
     if (!IsRepo(project)) {
         LogStuff(
@@ -158,7 +157,15 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
         return;
     }
 
-    // run their commitCmd
+    // hear me out
+    // 1. UNSTAGE their files (they probably won't even realize) so we can modify them
+    const toReStage = GetStagedFiles(project);
+    const out = StageFiles(project, "!A");
+    if (out !== "ok") {
+        throw `Not OK code for staging handler.`;
+    }
+
+    // 2. run their commitCmd over UNSTAGED, MODIFIABLE files
     try {
         RunUserCmd({
             key: "commitCmd",
@@ -175,6 +182,12 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
     }
 
     // by this point we assume prev task succeeded
+    // 3. RESTAGE the files like nothing happened
+    // i'm genius developer fr fr
+
+    StageFiles(project, toReStage);
+
+    // and now, commit :D
     Commit(
         project,
         params.message,
@@ -190,7 +203,6 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
         }
     }
 
-    Deno.chdir(CWD);
     LogStuff(`That worked out! Commit "${params.message}" should be live now.`, "tick", ["bold", "bright-green"]);
     return;
 }

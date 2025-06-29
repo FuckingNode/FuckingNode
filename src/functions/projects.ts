@@ -273,8 +273,8 @@ export function NameProject(
     const workingPath = ParsePath(path);
     const formattedPath = ColorString(workingPath, "italic", "half-opaque");
 
-    // if it's not possible to name it, just give it the raw path
-    if (CheckForPath(workingPath)) return formattedPath;
+    // if the path cannot be found, just return it, so the user sees it
+    if (!CheckForPath(workingPath)) return formattedPath;
     const env = GetProjectEnvironment(workingPath);
 
     const pkgFile = env.main.cpfContent;
