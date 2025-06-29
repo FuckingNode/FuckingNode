@@ -312,7 +312,7 @@ interface CargoEnvironment extends GenericProjectEnvironment {
         update: ["update"];
         clean: [["clean"]];
         audit: "__UNSUPPORTED";
-        publish: "__UNSUPPORTED";
+        publish: ["publish"];
         start: "run";
     };
 }

@@ -239,8 +239,8 @@ async function main(command: UnknownString) {
         case "release":
         case "publish":
             TheReleaser({
-                project: flags[1],
-                version: flags[2],
+                version: flags[1],
+                project: (flags[2] ?? Deno.cwd()),
                 push: hasFlag("push", true),
                 dry: hasFlag("dry-run", true),
             });

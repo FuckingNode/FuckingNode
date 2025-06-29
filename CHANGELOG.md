@@ -10,24 +10,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- Added the ability to stage files directly from `fkcommit`, removing the need to do `git add` first.
-- Added the ability to include previously staged files when `fkcommit`ing with `--keep-staged` / `-k`. **(1)**
-- Added the ability to skip the confirmation at `fkcommit` with `--yes` / `-y`.
-- Added the ability to bulk-stage all files with `-A` to `fkcommit`, just as in regular `git commit`.
+- Added the ability to stage files directly from `commit`, removing the need to do `git add` first.
+- Added the ability to include previously staged files when `commit`ing with `--keep-staged` / `-k`. **(1)**
+- Added the ability to skip the confirmation at `commit` with `--yes` / `-y`.
+- Added the ability to bulk-stage all files with `-A` to `commit`, just as in regular `git commit`.
 - Added `audit` support for Bun.
 - Added a `projectEnvOverride` field to `fknode.yaml` files, to override our project environment inference system.
+- Added Cargo support for `release`.
 
 ### Changed
 
-- Now **(1)** `fkcommit` will unstage previously staged files. This is to avoid committing files you forgot were staged, or were staged, modified, then not staged again. Use `-k` to keep prev. staged files.
-- Now `fkcommit` tells more clearly when the commit was aborted due to an error in your `commitCmd`.
+- (Breaking) Now `setup` takes FIRST the setup to use, THEN the path of the project. This is for the command to work in the CWD without specifying a path, as explained above.
+- (Breaking) Now `release` takes FIRST the version, THEN the path of the project, which is now optional (if not provided, the CWD is used, as explained above).
+- Now **(1)** `commit` will unstage previously staged files. This is to avoid committing files you forgot were staged, or were staged, modified, then not staged again. Use `-k` to keep prev. staged files.
+- Now `commit` tells more clearly when the commit was aborted due to an error in your `commitCmd`.
 - Now the `help` command should look a bit better.
 - Now when no path is provided and it makes sense to, the CWD will be used, without needing to specify it.
-- Now `setup` takes FIRST the setup to use, THEN the path of the project. This is for the command to work in the CWD without specifying a path, as explained above.
 - Now `package.json` files do not crash the program if no `version` was specified.
 - Now glob patterns are supported when seeking for monorepos when adding a project.
 - Now we no longer show a "partial support" warning when adding DenoJS or BunJS projects, and when cleaning, "Cleanup is unsupported" was replaced with "This runtime lacks cleanup/deduping commands".
-- Now `fkcommit` does not require the CWD to be an added project, making it tech-stack agnostic.
+- Now `commit` does not require the CWD to be an added project, making it tech-stack agnostic.
+- Now, when using dry-run with `release` (which should mean "no *real action*"), this will actually be respected (before, commits would be made and even pushed despite having this flag). Now with this flag only your `releaseCmd` gets to run.
+- Now `release` will always use `--dry-run` with your package manager's release command before publishing, and tell you to check if everything's alright. If you find something wrong, you'll be able to abort.
 
 ### Fixed
 
@@ -73,7 +77,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
-- Fixed a situation where projects _might_ not get added (not awaiting an async function).
+- Fixed a situation where projects *might* not get added (not awaiting an async function).
 - Fixed lint and prettify flags being swapped (`--lint` prettifying and `--pretty` linting).
 - Fixed the "not fully supported" warning not showing up for Golang and Rust.
 - Fixed a lot of issues with Git URL parsing from the `fkstart` command.
@@ -101,7 +105,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
-- Fixed schedules and update checks being one hour ahead. This wasn't causing any trouble _per se_, but it still wasn't right anyway; now it should be.
+- Fixed schedules and update checks being one hour ahead. This wasn't causing any trouble *per se*, but it still wasn't right anyway; now it should be.
 
 ## [3.2.0] (07-04-2025)
 
@@ -110,14 +114,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Added the ability to run a script/file when launching a project.
 - Added `fklist` alias to `fuckingnode manager list`.
 - Added two new setups to `fkn setup`
-- Added `fkn hint` to randomly show one of the hints / _F\*ckingProTips_ shown in the about page. A few more hints were added as well.
+- Added `fkn hint` to randomly show one of the hints / *F\*ckingProTips* shown in the about page. A few more hints were added as well.
 
 ### Changed
 
 - Now several more methods are sync, for error fixing.
 - Now you can specify GitHub URLs without `.git` (`https://github.com/me/my-repo`).
-- Now `migrate` _technically_ respects the lockfile's versions.
-  - Note it does not actually _read_ the versions from the lockfile _per se_ (as that would take too long on projects with 20K LOC+ lockfiles). It instead uses the `update` command, which typically ensures version coherence.
+- Now `migrate` *technically* respects the lockfile's versions.
+  - Note it does not actually *read* the versions from the lockfile *per se* (as that would take too long on projects with 20K LOC+ lockfiles). It instead uses the `update` command, which typically ensures version coherence.
 - Now `fkn repo` and `fkn website` will launch the corresponding URL automatically.
 
 ### Fixed
@@ -125,14 +129,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Fixed the CLI not handling "rootless workspaces" (workspaces where the root itself is not a project - thus lacking `"name"` or `"version"`). Closes issue [#13](https://github.com/FuckingNode/FuckingNode/issues/13).
   - There's a known issue for this - if the workspace lacks a lockfile, this will silently fail and it will not be added even though the CLI will say it did.
 - Fixed workspaces sometimes not being detected because of some path handling issues.
-- Fixed the CLI never being able to run if an invalid project is mistakenly added _once_.
+- Fixed the CLI never being able to run if an invalid project is mistakenly added *once*.
 
 ## [3.1.1] (29-03-2025)
 
 ### Added
 
 - Added the ability for the CLI to update itself. From now on, running `fkn upgrade` on outdated installations will download the installer script for the latest version and proceed with the installation.
-- Added `stats` Recommended Community Standards for DenoJS. It is _very basic_, though.
+- Added `stats` Recommended Community Standards for DenoJS. It is *very basic*, though.
 
 ## [3.1.0] (03-03-2025)
 
@@ -184,7 +188,7 @@ Acknowledgements to [@MrSerge01](https://github.com/MrSerge01) and [@dimkauzh](h
 
 - Added a new logo.
 - Added **cross-platform support** - Golang and Rust projects can now benefit from FuckingNode (just as with Deno/Bun, unbridgeable features won't work but won't interrupt the flow either). While compatibility is more limited, it's better than nothing.
-  - Added a new `export <project>` command to export a project's FnCPF (an internal "file" used for interoperability purposes). If something's not working, it _might_ help out, as it'll show whether we're correctly reading your project's info or not.
+  - Added a new `export <project>` command to export a project's FnCPF (an internal "file" used for interoperability purposes). If something's not working, it *might* help out, as it'll show whether we're correctly reading your project's info or not.
 - Added a **new command** `release`. Automatically runs a task of your choice, bumps SemVer version from your package file, commits your changes, creates a Git tag, pushes to mainstream, and **automatically publishes to `npm` or `jsr`**, from a single command.
   - `dry-run` and other options are available to prevent Git commit and npm/jsr publish tasks from running, if desired.
   - While the process is fully automated you'll still have to move your hands in these cases (we still save you time with this addition :wink:):
@@ -214,7 +218,7 @@ Acknowledgements to [@MrSerge01](https://github.com/MrSerge01) and [@dimkauzh](h
 - Now any generated YAML files by the CLI follow common formatting.
 - Now many commands (not all though) are strictly normalized, meaning even stupid things like `fuckingnode mÀnaGëR lÌSt` will work perfectly.
 - Now the CLI more reliably tells whether a runtime is installed or not (at the expense of some extra milliseconds).
-- Now `audit` experiment's parsing rules are more reliable. _They still have known issues (direct/indirect deps + patched version), but they're internal-only and don't affect usage as of now_.
+- Now `audit` experiment's parsing rules are more reliable. *They still have known issues (direct/indirect deps + patched version), but they're internal-only and don't affect usage as of now*.
 - Now updating dependencies will always run with `--save-text-lockfile` in Bun.
 - Now `migrate` will always update dependencies before running.
 - Now `migrate` will back up your project's package file and lockfile.
@@ -233,13 +237,13 @@ Acknowledgements to [@MrSerge01](https://github.com/MrSerge01) and [@dimkauzh](h
 
 ### Fixed
 
-- Fixed `manager add` allowing to add _one_ duplicate of each entry.
+- Fixed `manager add` allowing to add *one* duplicate of each entry.
 - Fixed `manager add` project-env errors being ambiguous. Now they're more specific (missing lockfile, missing path, etc...).
 - Fixed `manager list` showing a "no projects exist" message when they do exist but are all ignored.
 - Fixed project paths not being correctly handled in some cases.
 - Fixed the CLI running init task (check for updates & config files) twice.
 - Fixed cleaner intensity being hypothetically case sensitive.
-- Fixed cleaner showing elapsed time since the _entire process_ had begun instead of since _that specific project's cleanup_ begun.
+- Fixed cleaner showing elapsed time since the *entire process* had begun instead of since *that specific project's cleanup* begun.
 - Fixed the CLI adding an odd-looking linebreak before "Cleaning..." when using per-project cleanup.
 - Fixed the confirmation for using maxim cleanup.
 - Fixed projects not being alphabetically sorted when listing them.
@@ -248,7 +252,7 @@ Acknowledgements to [@MrSerge01](https://github.com/MrSerge01) and [@dimkauzh](h
 - Fixed schedules running each time you run the CLI after they reach their scheduled run time once (they didn't reset the timer).
 - Fixed Report not being shown when using verbose flag & per-project cleanup.
 - Fixed `kickstart` not always running the correct install command.
-- Fixed `kickstart` throwing `Internal__CantDetermineEnv` with reason "Path _x_ doesn't exist" even though it does exist.
+- Fixed `kickstart` throwing `Internal__CantDetermineEnv` with reason "Path *x* doesn't exist" even though it does exist.
 - Fixed `kickstart` throwing `Internal__CantDetermineEnv` with reason "No lockfile present" for lockfile-less projects even if a package manager is specified when running.
 - Fixed a bunch of issues with how `kickstart` determined a project's environment and the runtime to work with.
 - Fixed how workspaces are shown to the user when found while adding a project.
@@ -263,10 +267,10 @@ Acknowledgements to [@MrSerge01](https://github.com/MrSerge01) and [@dimkauzh](h
 - Fixed Git-related commands sometimes not working because of output handling.
   - As as side effect, you now don't get to see Git's output live.
 - Fixed the CLI not being able to handle projects that were missing the `name` or `version` field in a `package.json`/`deno.json` file.
-- Fixed an edge case where the CLI wouldn't work because it fetched configuration _right before_ having it setup.
+- Fixed an edge case where the CLI wouldn't work because it fetched configuration *right before* having it setup.
 - Fixed hard cleanup not respecting verbose logging setting.
 - Fixed useless path-related and settings-related function calls, minimally increasing performance.
-- Fixed the CLI adding "NOTE: Invalid fknode.yaml" to files that _already_ have the note.
+- Fixed the CLI adding "NOTE: Invalid fknode.yaml" to files that *already* have the note.
 - Fixed the `fknode.yaml` validator having a wrong value set (for whatever unknown reason) for intensities, marking valid config files as invalid and ignoring them.
 - Fixed Git not properly adding files for commit, thus failing.
 - Fixed `commit` allowing to be used without anything to commit, thus failing.
@@ -325,7 +329,7 @@ Acknowledgements to [@MrSerge01](https://github.com/MrSerge01) and [@dimkauzh](h
 
 ### Added
 
-- Added a **new** experimental **command**: _**audit**_. Currently it's only available for `npm` users and behind the `--experimental-audit` flag. TL;DR it helps you better understand security audits by asking questions, [read more in here](https://fuckingnode.github.io/learn/audit/).
+- Added a **new** experimental **command**: ***audit***. Currently it's only available for `npm` users and behind the `--experimental-audit` flag. TL;DR it helps you better understand security audits by asking questions, [read more in here](https://fuckingnode.github.io/learn/audit/).
 - Added support for more IDEs / code editors as favorite editors (VSCodium, Emacs, Notepad++, Atom).
 - Added a `repo` command that shows the URL to GitHub.
 
@@ -361,7 +365,7 @@ Happy new year btw
 
 ### Fixed
 
-- Fixed a long standing issue with hard cleanup: it didn't properly detect if you had certain managers like `npm`, skipping them when it shouldn't. _(That has been in there since october :skull:)_.
+- Fixed a long standing issue with hard cleanup: it didn't properly detect if you had certain managers like `npm`, skipping them when it shouldn't. *(That has been in there since october :skull:)*.
 - Fixed the updater thinking you're on an outdated version when you aren't.
 - Fixed settings displaying `autoFlush` related settings (that's not a feature).
 - Fixed `kickstart` not knowing where was the project cloned (hence failing).
@@ -434,7 +438,7 @@ Happy new year btw
 - Fixed many potential unhandled errors at many places.
 - Fixed the base directory for app config being recursively created on each run.
 - Fixed `manager list` not listing ignored projects (showing an empty list when there are ignored projects).
-- Fixed `upgrade` (_`self-update`_) not correctly handling GitHub's rate limit.
+- Fixed `upgrade` (*`self-update`*) not correctly handling GitHub's rate limit.
 - Fixed an issue where naming projects (reading their `name` from `package.json`) would crash the CLI.
 - Fixed unreliability when finding out if a project uses Node, Deno, or Bun.
 - Fixed projects not being correctly added due to missing `await` keyword.
@@ -515,7 +519,7 @@ Happy new year btw
 
 - `stats` (`--experimental-stats`):
   - While recursive fetching improved accuracy, it still provides sizes lower than the real one (like hundreds of MBs lower).
-  - It takes a _lot_ of CPU.
+  - It takes a *lot* of CPU.
   - It does throw an error for many files stating that they "cannot be accessed".
 
 ## [1.2.0] 21-10-2024
@@ -536,7 +540,7 @@ Happy new year btw
 - Fixed `manager add` adding a path even if it doesn't exist.
 - Fixed an issue where if the `node_modules` DIR wasn't present but the user chose to add the project anyway, it got added twice.
 - Fixed an issue where removing a duplicate project would remove it entirely, instead of keeping one entry.
-  - Note: it was fixed by making it remove only _once_, so if you have the same entry four times and remove it, you will still have 3 duplicates.
+  - Note: it was fixed by making it remove only *once*, so if you have the same entry four times and remove it, you will still have 3 duplicates.
 
 ## [1.1.1] - 19-10-2024
 
@@ -574,7 +578,7 @@ Happy new year btw
 
 ### Added
 
-- Added `--maxim` flag to the `clean` command. It will _take cleaning to the max_ (AKA removing `node_modules/` entirely).
+- Added `--maxim` flag to the `clean` command. It will *take cleaning to the max* (AKA removing `node_modules/` entirely).
 - Added additional commands to the cleaner, like `dedupe`, for more in-depth cleaning.
 - Added the capability to the CLI of checking for updates by itself. Does it only once every 7 days to save up on the user's resources.
 

@@ -687,8 +687,66 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
 
     const { PackageFileParsers } = FkNodeInterop;
 
-    // cargo and golang aren't extracted as constants because their parsers
-    // don't support JSON, so they always throw an error when parsing a JSON string
+    if (isGolang || settings.projectEnvOverride === "go") {
+        return {
+            root,
+            settings,
+            runtimeColor,
+            main: {
+                path: mainPath,
+                name: "go.mod",
+                stdContent: PackageFileParsers.Golang.STD(mainString),
+                cpfContent: PackageFileParsers.Golang.CPF(mainString, GetLatestTag(root), workspaces),
+            },
+            lockfile: {
+                name: "go.sum",
+                path: paths.golang.lock,
+            },
+            runtime: "golang",
+            manager: "go",
+            commands: {
+                base: "go",
+                exec: ["go", "run"],
+                update: ["get", "-u", "all"],
+                clean: [["clean"], ["mod", "tidy"]],
+                run: "__UNSUPPORTED",
+                audit: "__UNSUPPORTED", // i thought it was vet
+                publish: "__UNSUPPORTED", // ["test", "./..."]
+                start: "run",
+            },
+            workspaces,
+        };
+    }
+    if (isRust || settings.projectEnvOverride === "cargo") {
+        return {
+            root,
+            settings,
+            runtimeColor,
+            main: {
+                path: mainPath,
+                name: "Cargo.toml",
+                stdContent: PackageFileParsers.Cargo.STD(mainString),
+                cpfContent: PackageFileParsers.Cargo.CPF(mainString, workspaces),
+            },
+            lockfile: {
+                name: "Cargo.lock",
+                path: paths.rust.lock,
+            },
+            runtime: "rust",
+            manager: "cargo",
+            commands: {
+                base: "cargo",
+                exec: ["cargo", "run"],
+                update: ["update"],
+                clean: [["clean"]],
+                run: "__UNSUPPORTED",
+                audit: "__UNSUPPORTED", // ["audit"]
+                publish: ["publish"],
+                start: "run",
+            },
+            workspaces,
+        };
+    }
     if (isBun || settings.projectEnvOverride === "bun") {
         return {
             root,
@@ -752,6 +810,8 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
             workspaces,
         };
     }
+    // TODO -do like the rest, if (x) return;, including inferences
+    // also, reorder so its GO-RUST-DENO-BUN-YARN-PNPM-NPM
     const yarnEnv: ProjectEnvironment = {
         root,
         settings,
@@ -839,67 +899,6 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
         },
         workspaces,
     };
-
-    if (isGolang || settings.projectEnvOverride === "go") {
-        return {
-            root,
-            settings,
-            runtimeColor,
-            main: {
-                path: mainPath,
-                name: "go.mod",
-                stdContent: PackageFileParsers.Golang.STD(mainString),
-                cpfContent: PackageFileParsers.Golang.CPF(mainString, GetLatestTag(root), workspaces),
-            },
-            lockfile: {
-                name: "go.sum",
-                path: paths.golang.lock,
-            },
-            runtime: "golang",
-            manager: "go",
-            commands: {
-                base: "go",
-                exec: ["go", "run"],
-                update: ["get", "-u", "all"],
-                clean: [["clean"], ["mod", "tidy"]],
-                run: "__UNSUPPORTED",
-                audit: "__UNSUPPORTED", // i thought it was vet
-                publish: "__UNSUPPORTED", // ["test", "./..."]
-                start: "run",
-            },
-            workspaces,
-        };
-    }
-    if (isRust || settings.projectEnvOverride === "cargo") {
-        return {
-            root,
-            settings,
-            runtimeColor,
-            main: {
-                path: mainPath,
-                name: "Cargo.toml",
-                stdContent: PackageFileParsers.Cargo.STD(mainString),
-                cpfContent: PackageFileParsers.Cargo.CPF(mainString, workspaces),
-            },
-            lockfile: {
-                name: "Cargo.lock",
-                path: paths.rust.lock,
-            },
-            runtime: "rust",
-            manager: "cargo",
-            commands: {
-                base: "cargo",
-                exec: ["cargo", "run"],
-                update: ["update"],
-                clean: [["clean"]],
-                run: "__UNSUPPORTED",
-                audit: "__UNSUPPORTED", // ["audit"]
-                publish: "__UNSUPPORTED", // ["publish"],
-                start: "run",
-            },
-            workspaces,
-        };
-    }
 
     switch (settings.projectEnvOverride) {
         case "npm":

@@ -1,4 +1,4 @@
-import { CheckForPath, JoinPaths } from "../functions/filesystem.ts";
+import { CheckForPath, GetTextIndentSize, JoinPaths } from "../functions/filesystem.ts";
 import { ColorString, Interrogate, LogStuff, StringifyYaml } from "../functions/io.ts";
 import { deepMerge, GetProjectEnvironment, NameProject, SpotProject } from "../functions/projects.ts";
 import type { TheSetuperConstructedParams } from "./constructors/command.ts";
@@ -54,9 +54,7 @@ export default function TheSetuper(params: TheSetuperConstructedParams) {
         const fileContent = Deno.readTextFileSync(path);
         if (setupToUse.seek === "tsconfig.json" || setupToUse.seek === ".prettierrc") {
             const parsedContent = parseJsonc(fileContent);
-            const line = fileContent.trim().split("\n")[1] || "";
-            const indentSize: number = line.length - line.trim().length || 4;
-            finalContent = JSON.stringify(deepMerge(contentToUse, parsedContent), undefined, indentSize);
+            finalContent = JSON.stringify(deepMerge(contentToUse, parsedContent), undefined, GetTextIndentSize(fileContent));
         } else if (setupToUse.seek === "fknode.yaml") {
             const parsedContent = parseYaml(fileContent);
             finalContent = StringifyYaml(deepMerge(contentToUse, parsedContent));

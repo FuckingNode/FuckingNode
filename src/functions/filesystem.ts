@@ -124,3 +124,10 @@ export function BulkRemoveFiles(files: string[]): void {
         });
     });
 }
+
+/** Gets the indent size used by an already read file, with fair enough accuracy. */
+export function GetTextIndentSize(file: string) {
+    const line = file.trim().split("\n")[1] || "";
+    const indentSize: number = line.length - line.trim().length || 4;
+    return indentSize;
+}
