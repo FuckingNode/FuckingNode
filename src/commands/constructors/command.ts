@@ -171,6 +171,22 @@ export interface TheReleaserConstructedParams {
 }
 
 /**
+ * The Builder.
+ * @author ZakaHaceCosas
+ *
+ * @export
+ * @interface TheBuilderConstructedParams
+ */
+export interface TheBuilderConstructedParams {
+    /**
+     * Project to be released.
+     *
+     * @type {UnknownString}
+     */
+    project: UnknownString;
+}
+
+/**
  * The Exporter
  * @author ZakaHaceCosas
  *

@@ -71,9 +71,9 @@
     "imports": {
         "@std/datetime": "jsr:@std/datetime@^0.225.5",
         "@std/fmt": "jsr:@std/fmt@^1.0.8",
-        "@std/fs": "jsr:@std/fs@^1.0.18",
+        "@std/fs": "jsr:@std/fs@^1.0.19",
         "@std/jsonc": "jsr:@std/jsonc@^1.0.2",
-        "@std/path": "jsr:@std/path@^1.1.0",
+        "@std/path": "jsr:@std/path@^1.1.1",
         "@std/yaml": "jsr:@std/yaml@1.0.8",
         "@std/toml": "jsr:@std/toml@^1.0.8",
         "@std/semver": "jsr:@std/semver@1.0.5",

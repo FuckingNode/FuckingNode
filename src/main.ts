@@ -16,6 +16,7 @@ import TheCommitter from "./commands/commit.ts";
 import TheSurrenderer from "./commands/surrender.ts";
 import TheSetuper from "./commands/setup.ts";
 import TheLauncher from "./commands/launch.ts";
+import TheBuilder from "./commands/build.ts";
 // other things
 import { APP_NAME, APP_URLs, FULL_NAME, FWORDS } from "./constants.ts";
 import { ColorString, LogStuff } from "./functions/io.ts";
@@ -235,6 +236,11 @@ async function main(command: UnknownString) {
             break;
         case "about":
             TheAbouter();
+            break;
+        case "build":
+            TheBuilder({
+                project: flags[1],
+            });
             break;
         case "release":
         case "publish":

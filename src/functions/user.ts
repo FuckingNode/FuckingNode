@@ -6,8 +6,8 @@ import { isDis } from "../constants.ts";
 import type { CF_FKNODE_SETTINGS } from "../types/config_files.ts";
 import { GetUserSettings } from "./config.ts";
 
-export function ValidateUserCmd(env: ProjectEnvironment, key: "commitCmd" | "releaseCmd"): string {
-    const command = key === "commitCmd" ? env.settings.commitCmd : env.settings.releaseCmd;
+export function ValidateUserCmd(env: ProjectEnvironment, key: "commitCmd" | "releaseCmd" | "buildCmd"): string {
+    const command = env.settings[key];
 
     const cmd = (validate(command) && !isDis(command)) ? normalize(command) : "disable";
 

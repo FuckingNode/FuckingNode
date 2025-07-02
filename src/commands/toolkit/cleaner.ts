@@ -529,7 +529,7 @@ export function ValidateIntensity(intensity: string): CleanerIntensity {
             ' Are you sure you want to use maxim cleanup? It\'ll entirely remove "./node_modules" from all of your added projects.',
             "warn",
         );
-        return confirmMaxim === true ? workingIntensity : defaultIntensity;
+        return confirmMaxim ? workingIntensity : defaultIntensity;
     } else {
         return defaultIntensity;
     }

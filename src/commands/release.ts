@@ -11,6 +11,7 @@ import { APP_NAME, isDis } from "../constants.ts";
 import { FknError } from "../functions/error.ts";
 import { stringify as stringifyToml } from "@std/toml/stringify";
 import { GetTextIndentSize } from "../functions/filesystem.ts";
+import { RunBuildCmds } from "../functions/build.ts";
 
 export default function TheReleaser(params: TheReleaserConstructedParams) {
     if (!validate(params.version)) {
@@ -39,11 +40,17 @@ export default function TheReleaser(params: TheReleaserConstructedParams) {
 
     const releaseCmd = ValidateUserCmd(env, "releaseCmd");
 
+    const shouldBuild = env.settings.buildForRelease && !isDis(env.settings.buildCmd);
+
     const actions: string[] = [
         `${ColorString(`Update your ${ColorString(env.main.name, "bold")}'s`, "white")} "version" field`,
         `Create a ${ColorString(`${env.main.name}.bak`, "bold")} file, and add it to .gitignore`,
     ];
-
+    if (shouldBuild) {
+        actions.push(
+            "Run your 'buildCmd'.",
+        );
+    }
     if (!isDis(releaseCmd)) {
         if (env.runtime === "rust") {
             throw new FknError(
@@ -118,6 +125,15 @@ export default function TheReleaser(params: TheReleaserConstructedParams) {
         }
     } catch (e) {
         throw new Error(`Failed to write to '${env.main.path}' (intention was to update your version code): ${e}`);
+    }
+
+    // build
+    if (shouldBuild) {
+        const buildCmd = ValidateUserCmd(env, "buildCmd");
+
+        if (!validate(buildCmd) || isDis(buildCmd)) {
+            LogStuff("No build command(s) specified!", "warn", "bright-yellow");
+        } else RunBuildCmds(buildCmd.split("^"));
     }
 
     // run their releaseCmd
