@@ -179,7 +179,7 @@ export interface TheReleaserConstructedParams {
  */
 export interface TheBuilderConstructedParams {
     /**
-     * Project to be released.
+     * Project to be built.
      *
      * @type {UnknownString}
      */

@@ -16,6 +16,7 @@ export type GLOBAL_ERROR_CODES =
     | "Unknown__CleanerTask__Update"
     | "Unknown__CleanerTask__Launch"
     | "Commit__Fail__CommitCmd"
+    | "Sys__CannotNotify"
     | "Git__IsRepoError"
     | "Internal__UnparsablePath"
     | "Generic__MissingRuntime"

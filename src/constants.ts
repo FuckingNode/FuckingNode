@@ -24,12 +24,11 @@ export const VERSION: string = format(_SV_VER);
 /**
  * Best CLI app ever (it's name, so you don't, for example, miss-capitalize it).
  *
- * @type {{CASED: string, CLI: string, STYLED: string, SCOPE: string}}
+ * @type {{CASED: string, CLI: string, SCOPE: string}}
  */
-export const APP_NAME: { CASED: string; CLI: string; STYLED: string; SCOPE: string } = {
+export const APP_NAME: { CASED: string; CLI: string; SCOPE: string } = {
     CASED: "FuckingNode",
     CLI: "fuckingnode",
-    STYLED: "F\*ckingNode",
     SCOPE: "@zakahacecosas/fuckingnode",
 };
 

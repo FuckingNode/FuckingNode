@@ -511,7 +511,7 @@ export function AuditProject(bareReport: ParsedNodeReport): FkNodeSecurityAudit 
     LogStuff(
         `\n===        FOUND VULNERABILITIES (${totalAdvisories.toString().padStart(3, "0")})        ===\n${
             ColorString(advisories.join(" & "), "bold")
-        }\n===    STARTING ${APP_NAME.STYLED} SECURITY AUDIT    ===\n`,
+        }\n===    STARTING ${APP_NAME.CASED} SECURITY AUDIT    ===\n`,
     );
 
     LogStuff("Please answer these questions. We'll use your responses to evaluate this vulnerability:\n", "bulb");
