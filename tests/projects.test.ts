@@ -42,8 +42,6 @@ Deno.test({
     },
 });
 
-// ! this test is failing as of now
-// this is new info, maybe the ctx mismatch comes from here instead?
 Deno.test({
     name: "gets the right fknode.yaml",
     fn: () => {
