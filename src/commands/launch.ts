@@ -4,7 +4,7 @@ import type { TheLauncherConstructedParams } from "./constructors/command.ts";
 import { FkNodeInterop } from "./interop/interop.ts";
 
 export default function TheLauncher(params: TheLauncherConstructedParams) {
-    const path = SpotProject(params.project);
+    const path = SpotProject(params.project ?? Deno.cwd());
     const env = GetProjectEnvironment(path);
 
     Deno.chdir(path);

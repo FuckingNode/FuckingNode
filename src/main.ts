@@ -225,7 +225,7 @@ async function main(command: UnknownString) {
             TheSettings({ args: flags.slice(1) });
             break;
         case "migrate":
-            TheMigrator({ projectPath: flags[1], wantedManager: flags[2] });
+            TheMigrator({ projectPath: (flags[2] ?? Deno.cwd()), wantedManager: flags[1] });
             break;
         case "self-update":
         case "upgrade":
@@ -239,7 +239,7 @@ async function main(command: UnknownString) {
             break;
         case "build":
             TheBuilder({
-                project: flags[1],
+                project: (flags[1] ?? Deno.cwd()),
             });
             break;
         case "release":
@@ -254,7 +254,8 @@ async function main(command: UnknownString) {
         case "commit": {
             const indexBranch = flags.indexOf("--branch");
             const indexB = flags.indexOf("-b");
-            const filesEnd = indexBranch !== -1 ? indexBranch : (indexB !== -1 ? indexB : undefined);
+            const indexElse = flags.indexOf("--");
+            const filesEnd = indexBranch !== -1 ? indexBranch : (indexB !== -1 ? indexB : indexElse !== -1 ? indexElse : undefined);
             TheCommitter({
                 message: flags[1],
                 files: flags.slice(2, filesEnd),
@@ -297,7 +298,7 @@ async function main(command: UnknownString) {
         case "gen-cpf":
         case "generate-cpf":
             TheExporter({
-                project: flags[1],
+                project: (flags[1] ?? Deno.cwd()),
                 json: hasFlag("json", false),
                 cli: hasFlag("cli", false),
             });

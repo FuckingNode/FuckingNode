@@ -1,5 +1,5 @@
 import { normalize, spaceString } from "@zakahacecosas/string-utils";
-import { APP_NAME, APP_URLs } from "../constants.ts";
+import { APP_NAME } from "../constants.ts";
 import { ColorString, LogStuff } from "../functions/io.ts";
 import type { TheHelperConstructedParams } from "./constructors/command.ts";
 
@@ -10,21 +10,33 @@ function formatCmd(obj: helpThing): string {
     const strings: string[] = [];
 
     for (const thingy of obj) {
-        const cmd: string = ColorString(thingy[0], "bright-blue");
-        const params: string = thingy[1] ? ColorString(thingy[1], "bold") : ColorString("No parameters.", "italic", "half-opaque");
-        const desc: string = thingy[2];
+        const cmd: string = ColorString(
+            thingy[0],
+            thingy[0] === ">>>" ? "bright-green" : ["export", "compat"].includes(thingy[0]) ? "cyan" : "bright-blue",
+        );
+        const params: string = thingy[1]
+            ? ColorString(thingy[1], "bold", "italic", "half-opaque")
+            : ColorString("(No parameters)", "italic", "half-opaque");
+        const desc: string = thingy[2].replaceAll("\n", "\n" + spaceString(" ", 0, 19))
+            .replace(new RegExp("--[^\\s]+", "gim"), (match) => ColorString(match, "orange", "bold"))
+            .replace(new RegExp("\<[^\\s]+\>", "gim"), (match) => ColorString(match, "pink", "bold"))
+            .replace(new RegExp("'[^\\s]+'", "gim"), (match) => ColorString(match, "orange", "bold"));
 
         strings.push(
-            `${spaceString(cmd, 0, 30 - (thingy[0].length))}${desc}${((thingy[3] ?? false) === true) ? `\nparams: ${params}` : ""}`,
+            `${spaceString(cmd, 0, 20 - (thingy[0].length))}${desc}${((thingy[3] ?? false) === true) ? `\n${params}` : ""}`,
         );
     }
 
-    return strings.join("\n");
+    return strings.join("\n\n");
 }
 
-function pathReminder() {
+function formatCmdWithTitle(title: string, desc: string, obj: helpThing): string {
+    return `> ${ColorString(title, "bright-green", "bold")}\n\n>>> Details:\n\n${desc}\n\n>>> Parameters\n\n${formatCmd(obj)}\n`;
+}
+
+function projectReminder() {
     LogStuff(
-        `----\nNote: <project> is either a file path OR a project's name.\nIn places where we assume the project is already added (like clean or stats),\nyou can pass the project's name (as it appears in the package file) and it should work as well.`,
+        "Note: <project> is either a file path OR a project's name.\nIn places where we can assume the project is already added (like 'clean' or 'stats'),\nyou can pass the project's name (as it appears in the package file) and it should be recognized.",
         undefined,
         ["italic", "half-opaque"],
     );
@@ -34,6 +46,11 @@ export default function TheHelper(params: TheHelperConstructedParams) {
     const { query } = params;
 
     const USAGE = formatCmd([
+        [
+            ">>>",
+            `The ${APP_NAME.CASED} experience...`,
+            "Base commands:",
+        ],
         [
             "clean",
             "<intensity | --> [--update] [--verbose] [--lint] [--pretty] [--commit] [--destroy]",
@@ -47,12 +64,12 @@ export default function TheHelper(params: TheHelperConstructedParams) {
         [
             "kickstart",
             "<git-url> [path] [npm | pnpm | yarn | deno | bun]",
-            `Quickly clones a repo inside of [path], installs deps, setups ${APP_NAME.CASED}, and launches your favorite editor.`,
+            `Quickly clones a repo inside [path], installs deps, setups ${APP_NAME.CASED}, and launches your code editor.`,
         ],
         [
             "commit",
             "<message> [branch] [--push]",
-            `Makes a <commit> with the given message, optionally to the given [branch], only if a specified task succeeds.`,
+            `Makes a commit with the given <message> only if a specific task succeeds, (to [branch], if specified).`,
         ],
         [
             "release",
@@ -65,258 +82,474 @@ export default function TheHelper(params: TheHelperConstructedParams) {
             `Deprecates a <project>, optional leaving a [message], an [alternative], and a [learn-more-url].`,
         ],
         [
-            "settings",
-            "[setting] [extra parameters]",
-            "Allows to change the CLIs setting. Run it without args to see current settings.",
-        ],
-        [
             "audit",
             "[project | --]",
-            "Runs a security audit and determines if any found vulnerability actually affects your project. NodeJS-only.",
+            "Runs a security audit and determines if any found vulnerability actually affects your project.",
         ],
         [
             "migrate",
-            "<target>",
+            "<target> [project]",
             "Migrates a project from one package manager to another and reinstalls deps.",
+        ],
+        [
+            "build",
+            "[project]",
+            "Runs a set of user-defined commands, meant for building your project. If a command fails, it halts.",
+        ],
+        [
+            "setup",
+            "[setup-to-use] [project]",
+            "Adds a typical config file (tsconfig, gitignore,...) for you. Run with no args to see available setups.",
+        ],
+        [
+            "launch",
+            "<project>",
+            'Launches your code editor with a specific project and runs a specified command (e.g., "npm run start").',
+        ],
+        [
+            "stats",
+            "[project]",
+            "Shows basic statistics for a project and (if viable) compares it against a basic set of recommended standards.",
+        ],
+        [
+            "export",
+            "[project] [--json] [--cli]",
+            "Exports your project's CPF. Meant for debugging only.",
+        ],
+        [
+            ">>>",
+            "Configuration and more...",
+            "Other commands:",
+        ],
+        [
+            "settings",
+            "[setting] [extra parameters]",
+            "Allows you to change settings. Run it without args to see current settings.",
+        ],
+        [
+            "compat",
+            "[feature]",
+            "Shows an overall summary of support for all features, or details on a specific feature if provided.",
         ],
         [
             "upgrade",
             null,
-            "Checks for updates, and installs them if present.",
+            "Checks for updates. As of now they need to be installed manually. Data won't be lost.",
         ],
         [
             "about",
             null,
-            "Shows info about the app.",
+            `Shows info about ${APP_NAME.CASED}.`,
+        ],
+        [
+            "tip",
+            null,
+            "Shows a random pro-tip.",
         ],
         [
             "--version, -v",
             null,
-            "Shows current version.",
+            "Shows details about locally installed version.",
         ],
         [
-            "--help, -h",
+            "help, --help, -h",
             "[command]",
             "Shows this menu, or the help menu for a specific command, if provided.",
         ],
     ]
         .map((item) => [...item, true]) as helpItem[]);
 
-    const MANAGER_OPTIONS = formatCmd([
-        [
-            "manager",
-            "add <project>",
-            "Adds a project to your list.",
-        ],
-        [
-            "manager",
-            "remove <project-path>",
-            "Removes a project from your list.",
-        ],
-        [
-            "manager",
-            "list [--ignored / --alive]",
-            "Lists all of your added projects. You can use --ignored or --alive to filter ignored projects (with --alive, only NOT ignored projects are shown, with --ignore, vice versa).",
-        ],
-    ]);
-    const CLEAN_OPTIONS = formatCmd([
-        [
-            "clean",
-            "<project | --> <intensity | -->",
-            "Where the project equals a <project> and intensity is either 'normal' | 'hard' | 'hard-only' | 'maxim' | 'maxim-only'.\n  The higher the intensity, the deeper (but more time-consuming) the cleaning will be.\n  Use '--' as a project to clean all your projects at once, and as the intensity to use your default one.\n  You can also just run 'clean' without flags to clean everything.",
-        ],
-        [
-            "--update",
-            null,
-            "Update all your projects before cleaning them.",
-        ],
-        [
-            "--verbose",
-            null,
-            "Show more detailed ('verbose') logs. This includes timestamps and a report.",
-        ],
-        [
-            "--lint",
-            null,
-            "Lint the project's code if possible. You'll need either ESLint in your devDependencies or a custom lint script specified in the fknode.yaml.",
-        ],
-        [
-            "--pretty",
-            null,
-            "Prettify the project's code if possible. You'll need either Prettier in your devDependencies or a custom prettify script specified in the fknode.yaml.",
-        ],
-        [
-            "--destroy",
-            null,
-            "Remove additional files and DIRs (e.g. 'dist/', 'out/', etc...) when cleaning. Requires you to specify files and DIRs to remove in the fknode.yaml.",
-        ],
-        [
-            "--commit",
-            null,
-            `Commit any action that changes the code (e.g. --pretty or --update) when all of these are true:\n${
-                spaceString(`- "commitActions" is set to true in your fknode.yaml.`, 4, 0)
-            }\n${spaceString(`- Local working tree was clean before ${APP_NAME.CASED} touched it.`, 4, 0)}\n${
-                spaceString(`- Local repo is not behind upstream.`, 4, 0)
-            }\n  Uses a default commit message; override it by setting "commitMessage" in your fknode.yaml.`,
-        ],
-    ]);
-    const SETTINGS_OPTIONS = formatCmd([
-        [
-            "flush",
-            "<'logs' | 'updates' | 'projects' | 'all'> [--force]",
-            "Flushes (removes) chosen config files.",
-        ],
-        [
-            "repair",
-            null,
-            `Resets all settings to their default value.`,
-        ],
-        [
-            "change",
-            "<setting> <value>",
-            "Allows to change chosen <setting> to given <value>. See documentation for more info.",
-        ],
-    ]);
-    const KICKSTART_OPTIONS = formatCmd([
-        [
-            "kickstart",
-            "<git-url> [path] [manager]",
-            "Clones <git-url> to [path] (or ./<repo-name> by default), installs deps with [manager] (or default (pnpm, bun, or deno) if not given), opens your editor (VSCode by default, change from settings), and adds the project to your list.",
-        ],
-    ]);
-    const SURRENDER_OPTIONS = formatCmd([
-        [
-            "surrender",
-            "<project> [message] [alternative] [learn-more-url] [--github]",
-            "Takes a <project>, runs a last maintenance task, then edits its README file to add a deprecation notice, and optionally, a [message], an [alternative] to your project, and a URL to learn more ([learn-more-url]). If [--github] is passed, GitHub flavored MarkDown is used.\n\nAll these changes will be committed and pushed to the repo, and after that the code will be removed from your local machine.",
-        ],
-    ]);
-    const AUDIT_OPTIONS = formatCmd([
-        [
-            "audit",
-            "[project | --]",
-            `Runs your manager's audit command, then asks questions to tell if any vulnerability affects the project.\n  Run without a project or with '--' to audit all projects.\n  Learn more about it at ${APP_URLs.WEBSITE}learn/audit/`,
-        ],
-    ]);
-    const MIGRATE_OPTIONS = formatCmd([
-        [
-            "migrate",
-            "<project> <target>",
-            "Automatically migrates a given <project> to a given <target> package manager (npm, pnpm, yarn, deno, or bun).\n  Relies as of now on each manager's ability to understand the other one's package manager formats.",
-        ],
-    ]);
-    const COMMIT_OPTIONS = formatCmd([
-        [
-            "commit",
-            "<message> [branch] [--push]",
-            "Runs our maintenance task and a script specified by you (if any) and commit only if they succeed.\n  Just like git commit, uses the CWD as the path to the project.\n  Run with --push to push the commit.\n  Pass a branch name as the 2nd argument to commit there.",
-        ],
-    ]);
-    const RELEASE_OPTIONS = formatCmd([
-        [
-            "release",
-            "<project> <version> [--push] [--dry]",
-            "Runs our maintenance task and a script specified by you (if any).\n  Then bumps version in your package file to given <version> and commits that.\n  If these tasks succeed, releases the project as an npm / jsr package (autodetected).\n  Run with --push to push commit as well.\n  Use '--dry' to make everything (commit, push, run script) but without publishing to npm / jsr.",
-        ],
-    ]);
-    const EXPORT_OPTIONS = formatCmd([
-        [
-            "export",
-            "<project> [--json] [--cli]",
-            "Exports a project's FnCPF (an internal file used by us to work with them) so you can see it.\n  Defaults to .yaml format, use '--json' to use JSONC format instead.\n  Add '--cli' to also show the output file in your terminal.",
-        ],
-    ]);
-    const SETUP_OPTIONS = formatCmd([
-        [
-            "setup",
-            "<project> <setup>",
-            "Allows you to 'add a setup' to your project (setup = preset text-config file).\n  For now, .gitignore, tsconfig.json, and of course fknode.yaml setups exist.\n  Run 'setup' with no args to see the list of available options.",
-        ],
-    ]);
-    const COMPAT_OPTIONS = formatCmd([
-        [
-            "compat",
-            "[feature]",
-            "Shows info about this CLI's cross-runtime & cross-platform support for the given feature,\n  or an overall summary if none given.",
-        ],
-    ]);
-    const UPGRADE_OPTIONS = formatCmd([
-        [
-            "upgrade",
-            null,
-            "Checks for updates, and installs them if present.",
-        ],
-    ]);
-    const ABOUT_OPTIONS = formatCmd([
-        [
-            "about",
-            null,
-            "Shows a simple (but cool looking!) about screen. Includes random quotes.",
-        ],
-    ]);
-
     switch (normalize(query ?? "", { strict: true })) {
         case "clean":
             LogStuff(
-                `'clean' will clean your added projects. Options and flags:\n${CLEAN_OPTIONS}`,
+                formatCmdWithTitle(
+                    "'clean' will clean, lint, prettify,... all your projects.",
+                    `Recursively runs a set of tasks across all of your projects, depending on given flags and project configuration (via fknode.yaml).\nIt's our main feature, base for ${APP_NAME.CASED} saving you time.`,
+                    [
+                        [
+                            "<project | -->",
+                            null,
+                            'Project to be cleaned. Set to "--" to bulk-clean all added projects.\nRun with no args to bulk-clean all projects, too.',
+                        ],
+                        [
+                            "[intensity | --]",
+                            null,
+                            "Either 'normal' | 'hard' | 'hard-only' | 'maxim' | 'maxim-only'.\nThe higher the intensity, the deeper (but more time-consuming) the cleaning will be.\nUse '--' as a project to clean all your projects at once, and as the intensity to use your default one.\nYou can also just run 'clean' without flags to clean everything.",
+                        ],
+                        [
+                            "--update, -u",
+                            null,
+                            "Update all your projects before cleaning them.",
+                        ],
+                        [
+                            "--verbose, -v",
+                            null,
+                            "Show more detailed ('verbose') logs.\nThis includes live command output, timestamps and a mini report.",
+                        ],
+                        [
+                            "--lint, -l",
+                            null,
+                            "Lint the project's code (if possible).\nYou need to specify a linting script in your fknode.yaml file.\nIf script is absent, we'll try to use ESLint (if installed).",
+                        ],
+                        [
+                            "--pretty, -p",
+                            null,
+                            "Prettify the project's code (if possible).\nYou need to specify a prettifying script in your fknode.yaml file.\nIf script is absent, we'll try to use Prettier (if installed).",
+                        ],
+                        [
+                            "--destroy, -d",
+                            null,
+                            "Removes files and DIRs (e.g. 'dist/', 'out/', etc...) specified by you in the fknode.yaml.",
+                        ],
+                        [
+                            "--commit, -c",
+                            null,
+                            `Commit any changes made (via, e.g., --pretty or --update) only if all of these are true:\n- "commitActions" is set to true in your fknode.yaml.\n- Local working tree was clean before ${APP_NAME.CASED} touched it.\n- Local repo is not behind upstream.\nIt uses a default commit message; override it by setting "commitMessage" in your fknode.yaml.`,
+                        ],
+                    ],
+                ),
             );
-            pathReminder();
+            projectReminder();
             break;
         case "manager":
             LogStuff(
-                `'manager' will let you manage projects. Options:\n${MANAGER_OPTIONS}`,
+                formatCmdWithTitle(
+                    "'manager' lets you manage all your added projects.",
+                    "The manager commands holds the subcommands to add and remove projects from your list.\nYour project list is used to:\n- Bulk-run several maintenance tasks (like cleaning, linting, etc.) at once, via 'clean'.\n- Let you use a project's name instead of full path from most other commands.",
+                    [
+                        [
+                            "add <project>",
+                            null,
+                            "Adds a project to your project list.",
+                        ],
+                        [
+                            "remove <project>",
+                            null,
+                            "Removes a project from your list.",
+                        ],
+                        [
+                            "list [filter]",
+                            null,
+                            "Lists all of your added projects.\nYou can use a [filter], either --ignored or --alive to filter ignored projects.\n(With --alive, only NOT ignored projects are shown, with --ignore, vice versa).",
+                        ],
+                    ],
+                ),
             );
-            pathReminder();
+            projectReminder();
+            break;
+        case "build":
+            LogStuff(
+                formatCmdWithTitle(
+                    "'build' simplifies building your project",
+                    "You can define one or more 'build' commands from your fknode.yaml.\nThis command runs them one by one, showing progress.\nIf any of those fails, the entire process is aborted.",
+                    [
+                        [
+                            "[project]",
+                            null,
+                            "Project to build. Defaults to the current working directory.",
+                        ],
+                    ],
+                ),
+            );
+            projectReminder();
+            break;
+        case "launch":
+            LogStuff(
+                formatCmdWithTitle(
+                    "'launch' quickly launches your project with all you need",
+                    "This launches your code editor with the given project opened.\nIt also runs a specific command (e.g., 'npm run start') if specified in your fknode.yaml.",
+                    [
+                        [
+                            "[project]",
+                            null,
+                            "Project to launch. Defaults to the current working directory.",
+                        ],
+                    ],
+                ),
+            );
+            projectReminder();
+            break;
+        case "stats":
+            LogStuff(
+                formatCmdWithTitle(
+                    "'stats' displays some stats about your project",
+                    "This shows basic stats (like number of dependencies) for your project.\nIn supported platforms, also compares your project's main file (e.g., the package.json) to a set of recommendations.",
+                    [
+                        [
+                            "[project]",
+                            null,
+                            "Project to show stats for. Defaults to the current working directory.",
+                        ],
+                    ],
+                ),
+            );
+            projectReminder();
             break;
         case "settings":
             LogStuff(
-                `'settings' lets you manage app configurations and more. Options:\n${SETTINGS_OPTIONS}`,
+                formatCmdWithTitle(
+                    "'settings' lets you manage app configurations and more.",
+                    "This commands holds subcommands to manage your settings.\nYou can change any setting, or reset them all to their default value.\nYou can also cleanup old internal files from here, to save up space.",
+                    [
+                        [
+                            "flush <f> [--force]",
+                            null,
+                            "Flushes (removes) chosen config files.\nSpecify what to remove by setting <f> to either:\n'logs' (logging files), 'updates' (update data), 'projects' (all added projects), or 'all' (everything).\nYou can pass --force to skip confirmation.",
+                        ],
+                        [
+                            "repair",
+                            null,
+                            `Resets all settings to their default value.`,
+                        ],
+                        [
+                            "change <s> <v>",
+                            null,
+                            "Allows to change chosen setting, <s>, to given value, <v>.\nWhen you run 'settings' with no args, you'll see all settings and their key.\n(The key is the gray, cursive, code-like word at the end).\nThat's the name you'll use for <s>.",
+                        ],
+                    ],
+                ),
             );
             break;
         case "kickstart":
             LogStuff(
-                `'kickstart' allows you to kickstart a repo easily. Options:\n${KICKSTART_OPTIONS}`,
+                formatCmdWithTitle(
+                    "'kickstart' allows you to easily kickstart a remote project.",
+                    "This command clones a remote repository, installs dependencies, sets up the project, and launches your code editor with it.\nNeedless to say, it also adds it to your project list.",
+                    [
+                        [
+                            "<git-url>",
+                            null,
+                            "Git repository to clone. It can be a URL or a scope.\nScopes like 'gh' for GitHub, 'gl' for GitLab, etc. are supported.\nRun 'compat kickstart' to see a list of supported scopes.",
+                        ],
+                        [
+                            "[path]",
+                            null,
+                            'Where to clone the repository. Otherwise, defaults to "./<repo-name>".',
+                        ],
+                        [
+                            "[manager]",
+                            "<git-url> [path] [manager]",
+                            "Manager to use when installing dependencies. If not set, will default to whatever lockfile the cloned repo has.",
+                        ],
+                    ],
+                ),
             );
-            pathReminder();
             break;
         case "migrate":
-            LogStuff(MIGRATE_OPTIONS);
-            pathReminder();
+            LogStuff(
+                formatCmdWithTitle(
+                    "'migrate' helps you migrate projects from a pkg manager to another",
+                    "This is a simple automation, since all package managers understand each other nowadays.\nIt just speeds up the process by needing to run a single command instead of several.",
+                    [
+                        [
+                            "<project>",
+                            null,
+                            "Project to be migrated.",
+                        ],
+                        [
+                            "<target>",
+                            null,
+                            "Target package manager (npm, pnpm, yarn, deno, or bun).\nWe rely on each manager's ability to understand the other one.",
+                        ],
+                    ],
+                ),
+            );
+            projectReminder();
             break;
         case "audit":
-            LogStuff(AUDIT_OPTIONS);
-            pathReminder();
+            LogStuff(
+                formatCmdWithTitle(
+                    "'audit' audits projects for you and helps you understand vulnerabilities",
+                    "This will run the 'audit' command for the given project, or all projects if no project is specified.\nIt will then ask questions to determine if found vulnerabilities are actually concerning.\n\nA simple example is:\nIf a vulnerability related to HTTP appears, but you state not to use HTTP requests at all, it won't be considered a concern.",
+                    [
+                        [
+                            "[project | --]",
+                            null,
+                            "Project to audit. Leave empty or set to '--' to audit all projects.",
+                        ],
+                    ],
+                ),
+            );
+            projectReminder();
             break;
         case "surrender":
             LogStuff(
-                `'surrender' allows you to deprecate a project easily. Options:\n${SURRENDER_OPTIONS}`,
+                formatCmdWithTitle(
+                    "'surrender' allows you to deprecate a project easily.",
+                    "This is a fun one. It automates the process of deprecating that project you know you won't ever release...\nIt randomly chooses a deprecation notice, lets you add:\n- a message\n- an alternative to this tool\n- a URL to somewhere to learn more about this\nThen it creates a deprecation notice in the project's README, and commits it.",
+                    [
+                        [
+                            "<project>",
+                            null,
+                            "Path to the project to surrender. Use '.' for the current working directory.",
+                        ],
+                        [
+                            "[message]",
+                            null,
+                            "Optional message to add to the deprecation notice.",
+                        ],
+                        [
+                            "[alternative]",
+                            null,
+                            "Optional message to any alternative to this tool.\nIf any, we recommend adding a link to it.",
+                        ],
+                        [
+                            "[learn-more-url]",
+                            null,
+                            "An optional URL to wherever you can learn more about this deprecation.",
+                        ],
+                        [
+                            "--github, --gh",
+                            null,
+                            "If passed, the deprecation notice will use GitHub Flavored Markdown.",
+                        ],
+                    ],
+                ),
             );
-            pathReminder();
+            projectReminder();
             break;
         case "compat":
-            LogStuff(COMPAT_OPTIONS);
+            LogStuff(
+                formatCmdWithTitle(
+                    "'compat' shows compatibility info",
+                    "If used with no args, shows a table indicating what features work where (NodeJS, Bun, Deno, Rust, and Golang).\nIf you specify a feature, it shows more specific details related to that feature's compatibility.",
+                    [
+                        [
+                            "[feature]",
+                            null,
+                            "Specific feature to show all info about.\nIf not given, a basic summary of all features is shown.",
+                        ],
+                    ],
+                ),
+            );
             break;
         case "commit":
-            LogStuff(COMMIT_OPTIONS);
+            LogStuff(
+                formatCmdWithTitle(
+                    "'commit' auto runs specific tasks (like a test suite) and commits only if they succeed.",
+                    "This is language agnostic, by the way. It runs a user-defined command (likely your test suite) and commits ONLY if it succeeds.\nIt also prevents committing files you forgot you had staged, by default (avoid this with '--keep-staged').",
+                    [
+                        [
+                            "<message>",
+                            null,
+                            'Commit message. Must be quoted ("commit message").',
+                        ],
+                        [
+                            "<files...>",
+                            null,
+                            "A list of files or directories to be staged.\nYou can use -A to stage all changed files.\nIMPORTANT: Either an empty flag ('--') or the --branch flag indicate the end of the files list.",
+                        ],
+                        [
+                            "--keep-staged",
+                            null,
+                            "If any file was staged before running the command, it'll keep it staged.\nBy default we unstage everything so only what you specify here is committed.",
+                        ],
+                        [
+                            "--branch [branch]",
+                            null,
+                            "Branch to commit too. If not given, default branch is used.\nThis is a delimiter. All strings between the commit message and the --branch flag are considered files to be staged.",
+                        ],
+                        [
+                            "--push",
+                            null,
+                            "If passed, pushes the commit to the remote repository after making it.",
+                        ],
+                        [
+                            "--yes",
+                            null,
+                            "By default we show a confirmation to ensure you want to proceed.\nRun with --yes to skip this confirmation.",
+                        ],
+                    ],
+                ),
+            );
             break;
         case "release":
         case "publish":
-            LogStuff(RELEASE_OPTIONS);
-            pathReminder();
+            LogStuff(
+                formatCmdWithTitle(
+                    "'release' releases an npm or jsr package for you",
+                    "This updates the version in the package file for you and runs a user-defined release script.\nThen, (unless using a dry run), it publishes to npm or jsr.",
+                    [
+                        [
+                            "<version>",
+                            null,
+                            "Version to be released. Must be SemVer compliant.",
+                        ],
+                        [
+                            "<project>",
+                            null,
+                            "Optional. Uses this path instead of the current working directory.",
+                        ],
+                        [
+                            "--push",
+                            null,
+                            "Since code changes (and thus a commit) are made, you can pass this flag to push those changes to remote.",
+                        ],
+                        [
+                            "--dry",
+                            "<project> <version> [--push] [--dry]",
+                            "Make everything (commit, run release script, even push), but without publishing to npm / jsr.",
+                        ],
+                    ],
+                ),
+            );
+            projectReminder();
             break;
         case "export":
-            LogStuff(EXPORT_OPTIONS);
-            pathReminder();
+            LogStuff(
+                formatCmdWithTitle(
+                    "'export' lets you see your project's CPF, meant for debug",
+                    `The ${APP_NAME.CASED} Common Package File (FnCPF) is a fancy name for a common structure we convert all package files into.\nIt's useful to debug - as if this file shows content differences with your package file, there's likely a bug in our source code.`,
+                    [
+                        [
+                            "<project>",
+                            null,
+                            "Project to show the CPF for. Defaults to the current working directory.",
+                        ],
+                        [
+                            "--json",
+                            null,
+                            "Default format is YAML, use --json to use JSONC format instead.",
+                        ],
+                        [
+                            "--cli",
+                            null,
+                            "If passed, the output (which is written to a file btw), wil also be shown in the terminal.",
+                        ],
+                    ],
+                ),
+            );
+            projectReminder();
             break;
         case "setup":
-            LogStuff(SETUP_OPTIONS);
-            pathReminder();
+            LogStuff(
+                formatCmdWithTitle(
+                    "'setup' lets you quickly add a pre-made setup file.",
+                    "Provides a set of pre-made setup files for you to use.\nYou can run it with no args to see available setups, or specify one to add it to a project.\nIncludes setups for tsconfig, gitignore, fknode, and other files.",
+                    [
+                        [
+                            "<setup>",
+                            null,
+                            "Setup to use. Run 'setup' with no args to see available setups, with their name.",
+                        ],
+                        [
+                            "<project>",
+                            null,
+                            "Project to add the setup to. Defaults to the current working directory.",
+                        ],
+                    ],
+                ),
+            );
+            projectReminder();
             break;
         case "upgrade":
-            LogStuff(UPGRADE_OPTIONS);
+            LogStuff("Checks for updates. Takes no arguments.\nAs of now, updates need to be installed manually. Data won't be lost.");
             break;
         case "about":
-            LogStuff(ABOUT_OPTIONS);
+            LogStuff("Shows a simple (but cool looking!) about screen. Takes no arguments.\nIncludes a bunch of info, and a randomized quote.");
+            break;
+        case "tip":
+            LogStuff("Shows a randomized pro-tip related to the app.");
             break;
         case "help":
             LogStuff(
