@@ -34,7 +34,7 @@ It's not magic, it's FuckingNode—and that name is shipping to production.
 ### Usage
 
 ```bash
-fkn manager add < path >  # add a project to your project list
+fkn add < path >          # add a project to your project list
 fkn clean                 # autoclean all of your projects
 fkn clean < project >     # autoclean a specific project
 fkn release < project >   # release a project, automatically

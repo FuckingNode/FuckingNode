@@ -36,7 +36,7 @@ function formatCmdWithTitle(title: string, desc: string, obj: helpThing): string
 
 function projectReminder() {
     LogStuff(
-        "Note: <project> is either a file path OR a project's name.\nIn places where we can assume the project is already added (like 'clean' or 'stats'),\nyou can pass the project's name (as it appears in the package file) and it should be recognized.",
+        "Note: <project> is either a file path OR a project's name.\nIn places where we can assume the project is already added (like 'clean', 'remove', or 'stats'),\nyou can pass the project's name (as it appears in the package file) and it should be recognized.",
         undefined,
         ["italic", "half-opaque"],
     );
@@ -57,9 +57,19 @@ export default function TheHelper(params: TheHelperConstructedParams) {
             "Cleans all of your projects.",
         ],
         [
-            "manager",
-            "add <project> | remove <project> | list",
-            "Manages your added projects.",
+            "add",
+            "<project>",
+            "Adds a project to your list.",
+        ],
+        [
+            "remove",
+            "<project>",
+            "Removes a project to your list.",
+        ],
+        [
+            "list",
+            "[--ignored OR --alive]",
+            "Shows your added project list.",
         ],
         [
             "kickstart",
@@ -211,26 +221,48 @@ export default function TheHelper(params: TheHelperConstructedParams) {
             );
             projectReminder();
             break;
-        case "manager":
+        case "add":
             LogStuff(
                 formatCmdWithTitle(
-                    "'manager' lets you manage all your added projects.",
-                    "The manager commands holds the subcommands to add and remove projects from your list.\nYour project list is used to:\n- Bulk-run several maintenance tasks (like cleaning, linting, etc.) at once, via 'clean'.\n- Let you use a project's name instead of full path from most other commands.",
+                    "'add' lets you add projects to your list.",
+                    "Your project list is used to:\n- Bulk-run several maintenance tasks (like cleaning, linting, etc.) at once, via 'clean'.\n- Let you use a project's name instead of full path from most other commands.\nThis command lets you add projects to it.",
                     [
                         [
-                            "add <project>",
+                            "<project>",
                             null,
-                            "Adds a project to your project list.",
+                            "Path to the project to be added.",
                         ],
+                    ],
+                ),
+            );
+            projectReminder();
+            break;
+        case "remove":
+            LogStuff(
+                formatCmdWithTitle(
+                    "'remove' lets you remove projects to your list.",
+                    "Your project list is used to:\n- Bulk-run several maintenance tasks (like cleaning, linting, etc.) at once, via 'clean'.\n- Let you use a project's name instead of full path from most other commands.\nThis command lets you remove projects from it.",
+                    [
                         [
-                            "remove <project>",
+                            "<project>",
                             null,
-                            "Removes a project from your list.",
+                            "Path to the project to be removed.",
                         ],
+                    ],
+                ),
+            );
+            projectReminder();
+            break;
+        case "list":
+            LogStuff(
+                formatCmdWithTitle(
+                    "'list' shows your project list.",
+                    "Your project list is used to:\n- Bulk-run several maintenance tasks (like cleaning, linting, etc.) at once, via 'clean'.\n- Let you use a project's name instead of full path from most other commands.\nThis command shows you the list.",
+                    [
                         [
-                            "list [filter]",
+                            "[filter]",
                             null,
-                            "Lists all of your added projects.\nYou can use a [filter], either --ignored or --alive to filter ignored projects.\n(With --alive, only NOT ignored projects are shown, with --ignore, vice versa).",
+                            "You can use a [filter], either --ignored or --alive to filter ignored projects.\n(With --alive, only NOT ignored projects are shown, with --ignore, vice versa).",
                         ],
                     ],
                 ),

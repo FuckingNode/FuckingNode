@@ -1,6 +1,6 @@
 // the things.
 import TheCleaner from "./commands/clean.ts";
-import TheManager from "./commands/manage.ts";
+import TheLister from "./commands/list.ts";
 import TheStatistics from "./commands/stats.ts";
 import TheMigrator from "./commands/migrate.ts";
 import TheHelper from "./commands/help.ts";
@@ -25,7 +25,7 @@ import { DEBUG_LOG, ErrorHandler } from "./functions/error.ts";
 import type { TheCleanerConstructedParams } from "./commands/constructors/command.ts";
 import { RunScheduledTasks } from "./functions/schedules.ts";
 import { normalize, testFlag, testFlags, type UnknownString, validate } from "@zakahacecosas/string-utils";
-import { CleanupProjects } from "./functions/projects.ts";
+import { AddProject, CleanupProjects, RemoveProject } from "./functions/projects.ts";
 import { LaunchWebsite } from "./functions/http.ts";
 import { HINTS } from "./functions/phrases.ts";
 import { GetDateNow } from "./functions/date.ts";
@@ -89,7 +89,7 @@ function hasFlag(flag: string, allowQuickFlag: boolean, firstOnly: boolean = fal
 if (hasFlag("help", true)) {
     try {
         await init();
-        TheHelper({ query: flags[1] ?? "help" });
+        TheHelper({ query: flags[1] });
         Deno.exit(0);
     } catch (e) {
         console.error("Critical error", e);
@@ -211,8 +211,14 @@ async function main(command: UnknownString) {
                 },
             });
             break;
-        case "manager":
-            TheManager(flags);
+        case "list":
+            TheLister(flags[1]);
+            break;
+        case "add":
+            AddProject(flags[1]);
+            break;
+        case "remove":
+            RemoveProject(flags[1]);
             break;
         case "kickstart":
             TheKickstarter({
@@ -349,7 +355,8 @@ async function main(command: UnknownString) {
             );
             break;
         default:
-            TheHelper({ query: flags[1] });
+            TheHelper({});
+            LogStuff(`You're seeing this because command '${command}' doesn't exist.`, undefined, ["orange", "italic"]);
     }
 
     Deno.exit(0);

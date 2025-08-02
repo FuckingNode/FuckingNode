@@ -45,6 +45,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Removed
 
+- (Breaking) Removed the `manager` command. Manager subcommands are now standalone commands (`manager add .` is now just `add .`, for example).
 - Removed the ability to auto-update from the CLI, because it never really worked. If we get it to work it'll be added back, but for now it's better not to have it than to have a broken implementation.
 - Removed `--self`. It's a bit stupid since I somehow never realized passing a dot (`"."`) as a path is equivalent and native, so keeping that extra code in there was useless.
 
