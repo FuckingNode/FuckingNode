@@ -8,7 +8,7 @@ export function RunBuildCmds(commands: string[]) {
             LogStuff(`Command "${command}" is empty? Skipping...`, "warn", "bright-yellow");
             continue;
         }
-        LogStuff(`Running command ${commands.indexOf(command)}/${commands.length}`, undefined, "bold");
+        LogStuff(`Running command ${commands.indexOf(command) + 1}/${commands.length}`, undefined, "bold");
         try {
             Commander(
                 cmd[0],

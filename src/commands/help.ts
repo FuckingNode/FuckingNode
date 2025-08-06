@@ -64,7 +64,7 @@ export default function TheHelper(params: TheHelperConstructedParams) {
         [
             "remove",
             "<project>",
-            "Removes a project to your list.",
+            "Removes a project from your list.",
         ],
         [
             "list",
