@@ -502,7 +502,7 @@ export function ValidateIntensity(intensity: string): CleanerIntensity {
     const cleanedIntensity = intensity.trim().toLowerCase();
 
     if (!["hard", "hard-only", "normal", "maxim", "maxim-only", "--"].includes(cleanedIntensity)) {
-        throw new FknError("Cleaner__InvalidCleanerIntensity", `Provided intensity '${intensity}' is not valid.`);
+        throw new FknError("Param__CIntensityInvalid", `Provided intensity '${intensity}' is not valid.`);
     }
 
     const workingIntensity = cleanedIntensity as CleanerIntensity | "--";

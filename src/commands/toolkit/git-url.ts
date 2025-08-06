@@ -1,5 +1,6 @@
 import { type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { LogStuff } from "../../functions/io.ts";
+import { FknError } from "../../functions/error.ts";
 
 const gitAliases: Record<string, (arg: string) => string> = {
     gh: (repo: string) => `https://github.com/${repo}.git`,
@@ -18,7 +19,7 @@ export function GenerateGitUrl(str: UnknownString): {
     full: string;
     name: string;
 } {
-    if (!validate(str)) throw new Error("Git URL is required!");
+    if (!validate(str)) throw new FknError("Param__WhateverUnprovided", "Git URL is required!");
 
     const gitUrlRegex = /^(https?:\/\/.*?\/)([^\/]+)(?:\.git)?$/;
     const regexMatch = str.match(gitUrlRegex);
@@ -47,34 +48,34 @@ export function GenerateGitUrl(str: UnknownString): {
 
         const strictGitUrlRegex = /^(https?:\/\/.*?\/)([^\/]+)\.git$/;
 
-        if (strictGitUrlRegex.test(workingGitUrl)) {
-            if (userForgotDotGit) {
-                LogStuff(
-                    "Psst... You forgot '.git' at the end. No worries, we can still read it.",
-                    "bruh",
-                    "italic",
-                );
-            }
-            const splittedUrl = workingGitUrl
-                .split("/");
-            const twiceSplittedUrl = splittedUrl[splittedUrl.length - 1]!
-                .split(".")!;
-            const name = twiceSplittedUrl.splice(0, twiceSplittedUrl.length - 1).filter((s) => s.trim() !== "").join(".");
-            return { full: workingGitUrl, name };
-        } else {
-            throw new Error(`${str} is not a valid Git URL!`);
+        if (!strictGitUrlRegex.test(workingGitUrl)) {
+            throw new FknError("Param__GitTargetInvalid", `${str} is not a valid Git URL!`);
         }
+        if (userForgotDotGit) {
+            LogStuff(
+                "Psst... You forgot '.git' at the end. No worries, we can still read it.",
+                "bruh",
+                "italic",
+            );
+        }
+        const splittedUrl = workingGitUrl
+            .split("/");
+        const twiceSplittedUrl = splittedUrl[splittedUrl.length - 1]!
+            .split(".")!;
+        const name = twiceSplittedUrl.splice(0, twiceSplittedUrl.length - 1).filter((s) => s.trim() !== "").join(".");
+        return { full: workingGitUrl, name };
     }
 
-    if (!str.includes(":")) throw new Error("Git URL must be a valid URL or scope!");
+    if (!str.includes(":")) throw new FknError("Param__GitTargetInvalid", "Git URL must be a valid URL or scope!");
 
     const [alias, repo] = str.split(":");
 
-    if (!validate(alias)) throw new Error("Missing alias.");
-    if (!validate(repo)) throw new Error("Missing repository.");
+    if (!validate(alias)) throw new FknError("Param__GitTargetAliasInvalid", "Missing alias.");
+    if (!validate(repo)) throw new FknError("Param__GitTargetAliasInvalid", "Missing repository.");
 
     if (!gitAliases[alias]) {
-        throw new Error(
+        throw new FknError(
+            "Param__GitTargetAliasInvalid",
             `Alias '${alias}' is not recognized.\nValid aliases are ${
                 Object.keys(gitAliases).join(", ")
             }.\nRun 'compat kickstart' to see where does each alias point to.`,
@@ -82,7 +83,7 @@ export function GenerateGitUrl(str: UnknownString): {
     }
 
     const parts = repo.split("/");
-    if (parts.length !== 2) throw new Error("Git shorthand must be in a 'owner/repo' format.");
+    if (parts.length !== 2) throw new FknError("Param__GitTargetAliasInvalid", "Git shorthand must be in a 'owner/repo' format.");
 
     return GenerateGitUrl(gitAliases[alias](repo));
 }

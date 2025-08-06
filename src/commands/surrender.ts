@@ -7,6 +7,7 @@ import { APP_URLs, FULL_NAME } from "../constants.ts";
 import { Commit, GetBranches, Push } from "../functions/git.ts";
 import { CheckForPath, JoinPaths } from "../functions/filesystem.ts";
 import { FkNodeInterop } from "./interop/interop.ts";
+import { FknError } from "../functions/error.ts";
 
 const deprecationNotices = [
     "# This project is no longer maintained\n\nThis repository is archived and will not receive updates or bug fixes.",
@@ -72,7 +73,7 @@ export default function TheSurrenderer(params: TheSurrendererConstructedParams) 
         [],
     );
 
-    if (commitOne === 1) throw new Error("Error committing all not added changes.");
+    if (commitOne === 1) throw new FknError("Git__UE__Commit", "Error committing all not added changes.");
 
     const env = GetProjectEnvironment(project);
 
@@ -87,7 +88,7 @@ export default function TheSurrenderer(params: TheSurrendererConstructedParams) 
         [],
     );
 
-    if (commitTwo === 1) throw new Error("Error committing README changes.");
+    if (commitTwo === 1) throw new FknError("Git__UE__Commit", "Error committing README changes.");
 
     FkNodeInterop.Features.Update({ env, verbose: true });
 
@@ -98,12 +99,12 @@ export default function TheSurrenderer(params: TheSurrendererConstructedParams) 
         [],
     );
 
-    if (commitThree === 1) throw new Error("Error committing last dependency update.");
+    if (commitThree === 1) throw new FknError("Git__UE__Commit", "Error committing last dependency update.");
 
     const finalPush = Push(project, GetBranches(project).current);
 
     if (finalPush === 1) {
-        throw new Error("Error pushing changes (ERROR SHOULD APPEAR ABOVE THIS, OPEN A GITHUB ISSUE OTHERWISE).");
+        throw new FknError("Git__UE_Push", "Error pushing changes.");
     }
 
     LogStuff("Project deprecated successfully, sir.", "comrade", "red");
@@ -119,7 +120,12 @@ export default function TheSurrenderer(params: TheSurrendererConstructedParams) 
                 "warn",
             )
         ) return;
-        if (!CheckForPath(env.root)) throw new Error(`Turns out the CLI cannot find the path to ${env.root}?`);
+        if (!CheckForPath(env.root)) {
+            throw new FknError(
+                "Fs__Unreal",
+                `Turns out the CLI cannot find the path to ${env.root}?`,
+            );
+        }
         Deno.removeSync(env.root, { recursive: true });
     }
 

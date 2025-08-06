@@ -1,6 +1,6 @@
 import { FWORDS } from "../constants.ts";
 import { CheckForPath } from "../functions/filesystem.ts";
-import { LogStuff } from "../functions/io.ts";
+import { LogStuff, Notification } from "../functions/io.ts";
 import { GetAllProjects, NameProject, SpotProject } from "../functions/projects.ts";
 import type { TheCleanerConstructedParams } from "./constructors/command.ts";
 import { PerformCleanup, PerformHardCleanup, PerformMaximCleanup, ShowReport, ValidateIntensity } from "./toolkit/cleaner.ts";
@@ -17,6 +17,7 @@ export default function TheCleaner(params: TheCleanerConstructedParams) {
     // original path
     const originalLocation = Deno.cwd();
     const realIntensity: CleanerIntensity = ValidateIntensity(intensity);
+    const startup = new Date();
 
     if (realIntensity === "hard-only") {
         PerformHardCleanup(verbose);
@@ -119,6 +120,10 @@ export default function TheCleaner(params: TheCleanerConstructedParams) {
         "tick",
         "bright-green",
     );
+    const elapsed = Date.now() - startup.getTime();
+    if ((elapsed > 180000)) {
+        Notification(`All your ${FWORDS.MFN} projects have been cleaned!`, `It took us ${GetElapsedTime(startup)}, but we did it!`);
+    }
     if (verbose) ShowReport(results);
     return;
 }

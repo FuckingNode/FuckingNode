@@ -6,6 +6,7 @@ import { parse as parseYaml } from "@std/yaml";
 import { parse as parseJsonc } from "@std/jsonc";
 import { SETUPS, VISIBLE_SETUPS } from "./toolkit/setups.ts";
 import { normalize, table, validate } from "@zakahacecosas/string-utils";
+import { FknError } from "../functions/error.ts";
 
 export default function TheSetuper(params: TheSetuperConstructedParams) {
     if (!validate(params.setup) || (validate(params.project) && !CheckForPath(params.project ?? ""))) {
@@ -23,7 +24,12 @@ export default function TheSetuper(params: TheSetuperConstructedParams) {
 
     if (
         !setupToUse
-    ) throw new Error(`Given setup ${params.setup} is not valid! Choose from the list ${SETUPS.map((s) => s.name)}.`);
+    ) {
+        throw new FknError(
+            "Param__SetupInvalid",
+            `Given setup ${params.setup} is not valid! Choose from the list ${SETUPS.map((s) => s.name)}.`,
+        );
+    }
 
     const contentToUse = (setupToUse.seek === "tsconfig.json" || setupToUse.seek === ".prettierrc")
         ? parseJsonc(setupToUse.content)

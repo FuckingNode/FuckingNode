@@ -1,6 +1,6 @@
 import { ManagerExists } from "../functions/cli.ts";
 import { CheckForDir, JoinPaths, ParsePath } from "../functions/filesystem.ts";
-import { ColorString, LogStuff } from "../functions/io.ts";
+import { ColorString, LogStuff, Notification } from "../functions/io.ts";
 import { AddProject, GetProjectEnvironment, NameProject } from "../functions/projects.ts";
 import type { TheKickstarterConstructedParams } from "./constructors/command.ts";
 import { FkNodeInterop } from "./interop/interop.ts";
@@ -12,19 +12,31 @@ import { GetUserSettings } from "../functions/config.ts";
 import { GenerateGitUrl } from "./toolkit/git-url.ts";
 import { Clone } from "../functions/git.ts";
 import { validate, validateAgainst } from "@zakahacecosas/string-utils";
+import { GetElapsedTime } from "../functions/date.ts";
+import { FWORDS } from "../constants.ts";
 
 export default function TheKickstarter(params: TheKickstarterConstructedParams) {
     const { gitUrl, path, manager } = params;
-
+    const startup = new Date();
     const { full: repoUrl, name: projectName } = GenerateGitUrl(gitUrl);
 
     const cwd = Deno.cwd();
     const clonePath: string = ParsePath(validate(path) ? path : JoinPaths(cwd, projectName));
 
     const clonePathValidator = CheckForDir(clonePath);
-    if (clonePathValidator === "ValidButNotEmpty") throw new Error(`${clonePath} is not empty! Choose somewhere else to clone this.`);
+    if (clonePathValidator === "ValidButNotEmpty") {
+        throw new FknError(
+            "Fs__DemandsEmptying",
+            `${clonePath} is not empty! Choose somewhere else to clone this.`,
+        );
+    }
 
-    if (clonePathValidator === "NotDir") throw new Error(`${path} is not a directory...`);
+    if (clonePathValidator === "NotDir") {
+        throw new FknError(
+            "Fs__DemandsDIR",
+            `${path} is not a directory...`,
+        );
+    }
 
     LogStuff("Let's begin! Wait a moment please...", "tick-clear", ["bright-green", "bold"]);
     LogStuff(`Cloning from ${repoUrl}`);
@@ -76,7 +88,7 @@ export default function TheKickstarter(params: TheKickstarterConstructedParams) 
 
     if (!managerToUse) {
         throw new FknError(
-            "Generic__MissingRuntime",
+            "Env__MissingMotor",
             validate(manager)
                 ? `Neither your specified package manager (${manager}) nor the repo's manager (${env.manager}) is installed on this system. What the heck?`
                 : `This repo uses ${env.manager} as a package manager, but it isn't installed locally.`,
@@ -99,6 +111,14 @@ export default function TheKickstarter(params: TheKickstarterConstructedParams) 
     LogStuff(`Great! ${NameProject(Deno.cwd(), "name-ver")} is now setup. Enjoy!`, "tick-clear");
 
     LaunchUserIDE();
+
+    const elapsed = Date.now() - startup.getTime();
+    if ((elapsed > 120000)) {
+        Notification(
+            `Kickstart successful!`,
+            `It took ${GetElapsedTime(startup)}, but your project is ready. Go write some ${FWORDS.FKN} good code!`,
+        );
+    }
 
     Deno.chdir(cwd);
 }

@@ -18,7 +18,6 @@ import { normalize, normalizeArray, toUpperCaseFirst, type UnknownString, valida
 import { ResolveLockfiles } from "../commands/toolkit/cleaner.ts";
 import { isGlob } from "@std/path/is-glob";
 import { joinGlobs, normalizeGlob } from "@std/path";
-import { statSync } from "node:fs";
 import { globSync } from "node:fs";
 
 /**
@@ -65,13 +64,11 @@ export function GetAllProjects(ignored?: false | "limit" | "exclude"): string[] 
 export function AddProject(
     entry: UnknownString,
 ): void {
-    if (validate(entry) && isGlob(entry)) {
-        globSync(entry).filter((f) => statSync(f).isDirectory()).forEach(AddProject);
-    }
+    if (validate(entry) && isGlob(entry)) globSync(entry).filter((f) => Deno.statSync(f).isDirectory).forEach(AddProject);
 
     const workingEntry = ParsePath(validate(entry) ? entry : Deno.cwd());
 
-    if (!CheckForPath(workingEntry)) throw new FknError("Generic__NonExistingPath", `Path "${workingEntry}" doesn't exist.`);
+    if (!CheckForPath(workingEntry)) throw new FknError("Fs__Unreal", `Path "${workingEntry}" doesn't exist.`);
 
     function addTheEntry(name: string) {
         Deno.writeTextFileSync(GetAppPath("MOTHERFKRS"), `${workingEntry}\n`, {
@@ -159,7 +156,7 @@ export function AddProject(
         );
         return;
     } catch (e) {
-        if (!(e instanceof FknError) || e.code !== "Env__UnparsableMainFile") throw e;
+        if (!(e instanceof FknError) || e.code !== "Env__PkgFileUnparsable") throw e;
 
         const ws = GetWorkspaces(workingEntry);
         if (ws.length === 0) throw e;
@@ -252,7 +249,7 @@ export function RemoveProject(
             return;
         }
     } catch (e) {
-        if (e instanceof FknError && e.code === "Project__NonFoundProject") {
+        if (e instanceof FknError && e.code === "External__Proj__NotFound") {
             LogStuff(
                 `Bruh, that mf doesn't exist yet.\nAnother typo? We took: ${entry} (=> ${entry ? ParsePath(entry) : "undefined?"})`,
                 "error",
@@ -577,7 +574,7 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
     DEBUG_LOG("CALLED GetProjectEnvironment WITH path", path);
     const root = SpotProject(path);
 
-    if (!CheckForPath(root)) throw new FknError("Internal__Projects__CantDetermineEnv", `Path ${root} doesn't exist.`);
+    if (!CheckForPath(root)) throw new FknError("Fs__Unreal", `Path ${root} doesn't exist.`);
 
     const hall_of_trash = JoinPaths(root, "node_modules");
     const workspaces = GetWorkspaces(root);
@@ -663,7 +660,7 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
         !pathChecks.node["json"] && !pathChecks.deno["json"] && !pathChecks.bun["toml"] && !pathChecks.golang["pkg"] && !pathChecks.rust["pkg"]
     ) {
         throw new FknError(
-            "Internal__Projects__CantDetermineEnv",
+            "Env__NoPkgFile",
             `No main file present (package.json, deno.json, Cargo.toml...) at ${ColorString(root, "bold")}.`,
         );
     }
@@ -672,7 +669,7 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
 
     if (seemsToBeNothing) {
         throw new FknError(
-            "Internal__Projects__CantDetermineEnv",
+            "Env__CannotDetermine",
             "This is not a valid JS/Golang/Rust project! Or at least it doesn't seem to be.",
         );
     }
@@ -921,7 +918,7 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
 
     if (lockfiles.length > 1) {
         const err = new FknError(
-            "Internal__Projects__CantDetermineEnv",
+            "Env__SchrodingerLockfile",
             `Multiple lockfiles found in ${
                 ColorString(root, "bold")
             }. This is a bad practice and does not let us properly infer the package manager to use.`,
@@ -949,8 +946,8 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
     if (!isPnpm && !isYarn && !isNpm && isNode) return npmEnv;
 
     const err = new FknError(
-        "Internal__Projects__CantDetermineEnv",
-        `Failed to determine the environment of '${"root"}'. We attempt to infer by all means possible the pkg manager of a project but sometimes fail. We kindly ask you to report this as an issue at ${APP_URLs.REPO} so we can fix it.`,
+        "Env__CannotDetermine",
+        `Failed to determine the environment of '${root}'. We attempt to infer by all means possible the pkg manager of a project but sometimes fail. We kindly ask you to report this as an issue at ${APP_URLs.REPO} so we can fix it.`,
     );
     err.hint =
         "To (manually) fix this, manually specify the package manager you use via the 'fknode.yaml' file, by adding the 'projectEnvOverride' field with the value of 'npm', 'pnpm', 'bun', 'deno', 'golang', or 'rust'.";
@@ -971,7 +968,12 @@ export function SpotProject(name: UnknownString): string {
         return workingProject;
     }
 
-    if (!validate(name)) throw new Error("Invalid project path or name provided, or none provided at all.");
+    if (!validate(name)) {
+        throw new FknError(
+            "Param__WhateverUnprovided",
+            "Invalid project path or name provided, or none provided at all.",
+        );
+    }
     const toSpot = normalize(name, { strict: false, preserveCase: true, removeCliColors: true });
 
     for (const project of allProjects) {
@@ -985,7 +987,7 @@ export function SpotProject(name: UnknownString): string {
     }
 
     if (CheckForPath(workingProject)) return workingProject;
-    throw new FknError("Project__NonFoundProject", `'${name.trim()}' (=> '${toSpot}') does not exist.`);
+    throw new FknError("External__Proj__NotFound", `'${name.trim()}' (=> '${toSpot}') does not exist.`);
 }
 
 /**

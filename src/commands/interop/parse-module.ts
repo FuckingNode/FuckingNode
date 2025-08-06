@@ -107,7 +107,7 @@ const internalParsers = {
         }
 
         if (!validate(module) || !validate(go)) {
-            throw new FknError("Env__UnparsableMainFile", `Given go.mod contents are unparsable.\n${content}`);
+            throw new FknError("Env__PkgFileUnparsable", `Given go.mod contents are unparsable.\n${content}`);
         }
 
         const toReturn: GolangPkgFile = {
@@ -117,7 +117,7 @@ const internalParsers = {
         };
 
         if (!FkNodeInterop.BareValidators.Golang(toReturn)) {
-            throw new FknError("Env__UnparsableMainFile", `Given go.mod contents are unparsable.`);
+            throw new FknError("Env__PkgFileUnparsable", `Given go.mod contents are unparsable.`);
         }
 
         return toReturn;
@@ -126,7 +126,7 @@ const internalParsers = {
         const toReturn = parseToml(content);
 
         if (!FkNodeInterop.BareValidators.Cargo(toReturn)) {
-            throw new FknError("Env__UnparsableMainFile", `Given Cargo.toml contents are unparsable.`);
+            throw new FknError("Env__PkgFileUnparsable", `Given Cargo.toml contents are unparsable.`);
         }
 
         return toReturn;
@@ -135,7 +135,7 @@ const internalParsers = {
         const toReturn = parseJsonc(content);
 
         if (!FkNodeInterop.BareValidators.NodeBun(toReturn)) {
-            throw new FknError("Env__UnparsableMainFile", `Given package.json contents are unparsable.`);
+            throw new FknError("Env__PkgFileUnparsable", `Given package.json contents are unparsable.`);
         }
 
         return toReturn;
@@ -144,7 +144,7 @@ const internalParsers = {
         const toReturn = parseJsonc(content);
 
         if (!FkNodeInterop.BareValidators.Deno(toReturn)) {
-            throw new FknError("Env__UnparsableMainFile", `Given deno.json/deno.jsonc contents are unparsable.`);
+            throw new FknError("Env__PkgFileUnparsable", `Given deno.json/deno.jsonc contents are unparsable.`);
         }
 
         return toReturn;
@@ -267,7 +267,10 @@ export const Parsers = {
             const parsedContent = internalParsers.NodeBunPkgFile(content);
 
             if (!parsedContent.name) {
-                throw new Error("Invalid package.json file");
+                throw new FknError(
+                    "Env__PkgFileUnparsable",
+                    "Invalid package.json file",
+                );
             }
 
             const deps: FnCPF["deps"] = [];

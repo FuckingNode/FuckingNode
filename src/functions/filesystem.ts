@@ -52,7 +52,12 @@ export function CheckForDir(path: string): "NotDir" | "Valid" | "ValidButNotEmpt
  */
 export function ParsePath(target: UnknownString): string {
     try {
-        if (!validate(target)) throw new Error("Target must be (obviously) a string.");
+        if (!validate(target)) {
+            throw new FknError(
+                "Param__WhateverUnprovided",
+                "Target for path parsing must be (obviously) a string.",
+            );
+        }
 
         let workingTarget: string;
 
@@ -69,7 +74,7 @@ export function ParsePath(target: UnknownString): string {
 
         return cleanEntry.trim();
     } catch (e) {
-        throw new FknError("Internal__UnparsablePath", `Error parsing ${target}: ${e}`);
+        throw new FknError("Fs__UnparsablePath", `Error parsing ${target}: ${e}`);
     }
 }
 

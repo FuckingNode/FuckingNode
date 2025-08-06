@@ -68,7 +68,7 @@ Another case where you can't choose is function objects, like the `FkNodeInterop
 
 ### Error handling
 
-F\*ckingNode is wrapped in an error boundary (`ErrorHandler()`) that automatically stops execution and handles the error, so no need to try/catch every function. When throwing an error, `throw new Error()` is perfectly fine, however you'll see we sometimes use `FknError()` instead. It's a superset of `Error` with error codes and hints for our users. If you can, attempt to add an error code and throwing a FknError instead.
+F\*ckingNode is wrapped in an error boundary (`ErrorHandler()`) that automatically stops execution and handles the error, so no need to try/catch every function. When throwing an error, you'll see we sometimes use `FknError` instead of `Error`. It's a superset of `Error` with searchable error codes and hints for our users. Attempt to add an error code and throwing a `FknError` instead of just throwing JS errors.
 
 ### Comment in a readable manner
 
@@ -82,7 +82,8 @@ Both single and multiline comments are valid. Our only rule is:
 // this works
 const hi = "hi, CONTRIBUTING.md reader!";
 
-const bye = "bye, CONTRIBUTING.md reader!"; // THIS DOES NOT! NOT EVERYONE HAS A 4K MONITOR TO READ THIS COMMENT WITHOUT SCROLLING OR ENABLING LINE WRAP!
+const bye = "bye, CONTRIBUTING.md reader!"; // THIS DOES NOT!
+// NOT EVERYONE HAS A 4K MONITOR TO READ THIS COMMENT WITHOUT SCROLLING OR ENABLING LINE WRAP!
 ```
 
 ### Avoid nesting
@@ -107,21 +108,18 @@ async function StartUp() {
 }
 ```
 
-We could avoid nesting using `if` the smart 🗿 way:
+We could avoid nesting using `if` the smart 🗿 way, and avoiding brackets:
 
 ```ts
 async function StartUp() {
     if (!User.isAuthenticated) throw new Error("User ain't authenticated!");
     await startup();
-    if (User.isAdmin) {
-        await login("admin");
-    } else {
-        await login("user");
-    }
+    if (User.isAdmin) await login("admin");
+    else await login("user");
 }
 ```
 
-We can avoid even another level by using ternary operators:
+We can make it even shorter by using ternary operators:
 
 ```ts
 async function StartUp() {

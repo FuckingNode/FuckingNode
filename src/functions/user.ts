@@ -13,7 +13,7 @@ export function ValidateUserCmd(env: ProjectEnvironment, key: "commitCmd" | "rel
 
     if (cmd !== "disable" && env.commands.run === "__UNSUPPORTED") {
         throw new FknError(
-            "Interop__CannotRunJsLike",
+            "Interop__JSRunUnable",
             `Your fknode.yaml file has a ${key} key, but ${env.manager} doesn't support JS-like "run" tasks, so we can't execute that task. To avoid undesired behavior, we stopped execution. Please remove the commitCmd key from this fknode.yaml. Sorry!`,
         );
     }
@@ -34,7 +34,7 @@ export function RunUserCmd(params: { key: "commitCmd" | "releaseCmd"; env: Proje
 
     if (!cmdOutput.success) {
         DebugFknErr(
-            key === "commitCmd" ? "Commit__Fail__CommitCmd" : "Release__Fail__ReleaseCmd",
+            key === "commitCmd" ? "Task__Commit" : "Task__Release",
             `Your fknode.yaml's ${key} failed at ${env.root}. The command's output was logged to the error log file.`,
             cmdOutput.stdout,
         );
@@ -45,7 +45,7 @@ export function LaunchUserIDE() {
     const IDE: CF_FKNODE_SETTINGS["favEditor"] = GetUserSettings().favEditor;
 
     if (!validateAgainst(IDE, ["vscode", "sublime", "emacs", "notepad++", "atom", "vscodium"])) {
-        throw new Error(`${IDE} is not a supported editor! Cannot launch it.`);
+        throw new FknError("External__Setting__FavIde", `${IDE} is not a supported editor! Cannot launch it.`);
     }
 
     let executionCommand: "subl" | "code" | "emacs" | "notepad++" | "codium" | "atom";

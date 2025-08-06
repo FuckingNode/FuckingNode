@@ -24,7 +24,9 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
         const response = await FetchGitHub(RELEASE_URL);
 
         if (!response.ok) {
-            if (response.status === 403) return "rl"; // (github has a rate limit, so this is not an error we should be really aware of)
+            // (github has a rate limit, so this is not an error we should be really aware of)
+            if (response.status === 403) return "rl";
+            // there's just one HTTP error app-wide, no need for a FknError
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 

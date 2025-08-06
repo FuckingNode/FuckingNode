@@ -14,16 +14,16 @@ import { GetTextIndentSize } from "../functions/filesystem.ts";
 import { RunBuildCmds } from "../functions/build.ts";
 
 export default function TheReleaser(params: TheReleaserConstructedParams) {
-    if (!validate(params.version)) {
-        throw new Error("No version specified!");
-    }
+    if (!validate(params.version)) throw new FknError("Param__VerInvalid", "No version specified!");
 
     // validate version
     try {
         parse(params.version);
     } catch {
-        LogStuff(`Invalid version: ${params.version}. Please use a valid SemVer version.`, "error", "red");
-        return;
+        throw new FknError(
+            "Param__VerInvalid",
+            `Invalid version: ${params.version}. Please use a valid SemVer version.`,
+        );
     }
 
     const parsedVersion = parse(params.version);
@@ -35,7 +35,7 @@ export default function TheReleaser(params: TheReleaserConstructedParams) {
     Deno.chdir(env.root);
 
     if (env.commands.publish === "__UNSUPPORTED") {
-        throw new Error(`Platform ${env.runtime} doesn't support publishing. Aborting.`);
+        throw new FknError("Interop__PublishUnable", `Platform ${env.runtime} doesn't support publishing. Aborting.`);
     }
 
     const releaseCmd = ValidateUserCmd(env, "releaseCmd");
@@ -54,7 +54,7 @@ export default function TheReleaser(params: TheReleaserConstructedParams) {
     if (!isDis(releaseCmd)) {
         if (env.runtime === "rust") {
             throw new FknError(
-                "Release__Fail__ReleaseCmd",
+                "Task__Release",
                 `Cargo does not support JS-like run, however your fknode.yaml file has the releaseCmd set to "${env.settings.releaseCmd}". To avoid unexpected behavior, we stopped execution. Please, remove the "releaseCmd" key from your config file.`,
             );
         }
@@ -104,27 +104,23 @@ export default function TheReleaser(params: TheReleaserConstructedParams) {
     if (!confirmation) return;
 
     // write the updated pkg file
-    try {
-        Deno.copyFileSync(env.main.path, `${env.main.path}.bak`); // Backup original
-        if (env.runtime === "rust") {
-            const newPackageFile = {
-                ...(env.main.stdContent),
-                package: {
-                    ...(env.main.stdContent as CargoPkgFile).package,
-                    version: format(parsedVersion),
-                },
-            };
-            Deno.writeTextFileSync(env.main.path, stringifyToml(newPackageFile));
-        } else {
-            const newPackageFile = {
-                ...env.main.stdContent,
+    Deno.copyFileSync(env.main.path, `${env.main.path}.bak`); // Backup original
+    if (env.runtime === "rust") {
+        const newPackageFile = {
+            ...(env.main.stdContent),
+            package: {
+                ...(env.main.stdContent as CargoPkgFile).package,
                 version: format(parsedVersion),
-            };
-            const indent = GetTextIndentSize(Deno.readTextFileSync(env.main.path));
-            Deno.writeTextFileSync(env.main.path, JSON.stringify(newPackageFile, undefined, indent));
-        }
-    } catch (e) {
-        throw new Error(`Failed to write to '${env.main.path}' (intention was to update your version code): ${e}`);
+            },
+        };
+        Deno.writeTextFileSync(env.main.path, stringifyToml(newPackageFile));
+    } else {
+        const newPackageFile = {
+            ...env.main.stdContent,
+            version: format(parsedVersion),
+        };
+        const indent = GetTextIndentSize(Deno.readTextFileSync(env.main.path));
+        Deno.writeTextFileSync(env.main.path, JSON.stringify(newPackageFile, undefined, indent));
     }
 
     // build
@@ -204,7 +200,7 @@ export default function TheReleaser(params: TheReleaserConstructedParams) {
             // push stuff to git
             const pushOutput = Push(project, false);
             if (pushOutput === 1) {
-                throw new Error(`Git push failed unexpectedly.`);
+                throw new FknError("Git__UE", `Git push failed unexpectedly.`);
             }
         }
     }
@@ -212,7 +208,7 @@ export default function TheReleaser(params: TheReleaserConstructedParams) {
     // publish the package
     const publishOutput = Commander(env.commands.base, env.commands.publish);
     if (!publishOutput.success) {
-        throw new Error(`Publish command failed: ${publishOutput.stdout}`);
+        throw new FknError("External__Publish", `Publish command failed: ${publishOutput.stdout}`);
     }
 
     Deno.chdir(CWD);

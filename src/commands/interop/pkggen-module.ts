@@ -1,3 +1,4 @@
+import { FknError } from "../../functions/error.ts";
 import { deepMerge } from "../../functions/projects.ts";
 import type { CargoDependency, CargoPkgFile, DenoPkgFile, FnCPF, NodePkgFile } from "../../types/platform.ts";
 
@@ -72,7 +73,10 @@ export const Generators: {
         return deepMerge(generatedPkgFile, additionalParams);
     },
     Golang: () => {
-        throw new Error("Not done yet! (interop/pkg-gen/golang)");
+        throw new FknError(
+            "Internal__Lazy",
+            "Not done yet! (interop/pkg-gen/golang)",
+        );
     },
     /** Generates a `Cargo.toml` from a FnCPF. */
     Cargo: (cpf: FnCPF, additionalParams?: object): ExtraProps<CargoPkgFile> => {

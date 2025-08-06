@@ -7,6 +7,10 @@ import { normalize, normalizeArray, StringArray, validate } from "@zakahacecosas
 import { FknError } from "./error.ts";
 import { GIT_FILES } from "../types/misc.ts";
 
+// * NOTE
+// * in this file, use Error instead of FknError, then capture all errors and return 1
+// * it's designed that way
+
 /** Runs a Git command with any args. ASSUMES AN ALREADY SPOTTED PATH. */
 function g(path: string, args: string[]): CommanderOutput {
     return Commander("git", ["-C", path, ...args], false);
@@ -39,7 +43,7 @@ export function IsRepo(path: string): boolean {
         return true;
     } catch (e) {
         new FknError(
-            "Git__IsRepoError",
+            "Git__UE__IsRepo",
             `An error happened validating if ${ParsePath(path)} is a Git repo: ${e}`,
         );
         return false;

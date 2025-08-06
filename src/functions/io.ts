@@ -2,6 +2,8 @@ import type { VALID_COLORS, VALID_EMOJIS } from "../types/misc.ts";
 import { GetAppPath } from "./config.ts";
 import { stringify as stringifyYaml } from "@std/yaml";
 import { GetDateNow } from "./date.ts";
+import { Commander } from "./cli.ts";
+import { APP_NAME, LOCAL_PLATFORM } from "../constants.ts";
 
 /**
  * Appends an emoji at the beginning of a message.
@@ -232,4 +234,60 @@ export function StringifyYaml(content: unknown): string {
         compatMode: true,
         condenseFlow: false,
     });
+}
+
+/**
+ * Shows a system UI notification.
+ *
+ * @export
+ * @param {string} title Title of notification.
+ * @param {string} msg Main text.
+ */
+export function Notification(title: string, msg: string) {
+    // NOTE: we should show our logo
+    // requires to bundle it / add it to the installer script
+    // on Windows, to write XML inside of the damn script :sob:
+    // on macOS and Linux, idk what does it require, we'll find out
+    if (LOCAL_PLATFORM.SYSTEM === "windows") {
+        Commander(
+            "powershell",
+            [
+                "-Command",
+                `[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null; ` +
+                `$template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02); ` +
+                `$template.GetElementsByTagName("text").Item(0).AppendChild($template.CreateTextNode("${title}")) > $null; ` +
+                `$template.GetElementsByTagName("text").Item(1).AppendChild($template.CreateTextNode("${msg}")) > $null; ` +
+                `$notification = [Windows.UI.Notifications.ToastNotification]::new($template); ` +
+                `$notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("${APP_NAME.CASED}"); ` +
+                `$notifier.Show($notification);`,
+            ],
+        );
+    } else if (LOCAL_PLATFORM.SYSTEM === "chad") {
+        if (Deno.build.os === "darwin") {
+            Commander(
+                "osascript",
+                [
+                    "-e",
+                    `display notification "${msg}" with title "${title}"`,
+                ],
+            );
+        } else {
+            const out = Commander(
+                "command",
+                [
+                    "-v",
+                    "notify-send",
+                ],
+            );
+            // cannot notify
+            if (!out.success) return;
+            Commander(
+                "notify-send",
+                [
+                    title,
+                    msg,
+                ],
+            );
+        }
+    }
 }

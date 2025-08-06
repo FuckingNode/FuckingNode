@@ -19,11 +19,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Added Cargo support for `release`.
 - Added `build` command, which allows the user to define several CLI commands (via the `buildCmd` `fknode.yaml` key, and separated by `^`) to be run one after each other.
   - Added `buildForRelease` key to `fknode.yaml`. If true, calling `release` will first invoke `build`.
+- Added a bunch of error codes. Now, all(most) known possible exceptions are a `FknError`, with an identifiable error code. These also have a new documentation page.
+- Added system notifications. Tasks that _can_ take 2 minutes or more (as of now: `clean`, `kickstart`, and `migrate`), will send a system notification once done. It'll only appear if the task takes more than a threshold (3 minutes for `clean`, 2 for `kickstart` and `migrate`).
 
 ### Changed
 
 - (Breaking) Now `setup` takes FIRST the setup to use, THEN the path of the project. This is for the command to work in the CWD without specifying a path, as explained above.
 - (Breaking) Now `release` takes FIRST the version, THEN the path of the project, which is now optional (if not provided, the CWD is used, as explained above).
+- Renamed all existing FknError codes.
 - Now **(1)** `commit` will unstage previously staged files. This is to avoid committing files you forgot were staged, or were staged, modified, then not staged again. Use `-k` to keep prev. staged files.
 - Now `commit` tells more clearly when the commit was aborted due to an error in your `commitCmd`.
 - Now the `help` command should look a bit better.
@@ -42,6 +45,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Fixed the CLI running 3 CLI commands instead of 1 to check if a package manager is installed, consuming more resources and time.
 - Fixed several issues with project environment inference.
 - Fixed commands with dashes (e.g. `storage-emergency` or `im-done-with`) not working.
+- Fixed message for `FknError/Env__CannotDetermine` (prev. `Internal__Projects__CantDetermineEnv`) showing `"root"` instead of the real root of the project.
 
 ### Removed
 

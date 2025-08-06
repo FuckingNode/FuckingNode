@@ -6,6 +6,7 @@ import { normalize, pluralOrNot, testFlag, validate } from "@zakahacecosas/strin
 import { RunUserCmd, ValidateUserCmd } from "../functions/user.ts";
 import { GIT_FILES } from "../types/misc.ts";
 import { CheckForPath } from "../functions/filesystem.ts";
+import { FknError } from "../functions/error.ts";
 
 function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
     const canCommit = CanCommit(path);
@@ -59,7 +60,12 @@ function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
 }
 
 export default function TheCommitter(params: TheCommitterConstructedParams) {
-    if (!validate(params.message)) throw new Error("No commit message specified!");
+    if (!validate(params.message)) {
+        throw new FknError(
+            "Param__WhateverUnprovided",
+            "No commit message specified!",
+        );
+    }
 
     const project = Deno.cwd();
 
@@ -94,7 +100,8 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
     };
 
     if (!validate(gitProps.branch) || gitProps.branch === "__ERROR") {
-        throw new Error(
+        throw new FknError(
+            params.branch ? "Git__NoBranch" : "Git__NoBranchAA",
             params.branch
                 ? `Given branch ${params.branch} wasn't found! These are your repo's branches:\n${
                     branches.all.toString().replaceAll(",", ", ")
@@ -192,7 +199,7 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
         // push stuff to git
         const pushOutput = Push(project, gitProps.branch);
         if (pushOutput === 1) {
-            throw new Error(`Git push failed unexpectedly.`);
+            throw new FknError("Git__UE", `Git push failed unexpectedly.`);
         }
     }
 
