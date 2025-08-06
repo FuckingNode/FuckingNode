@@ -18,6 +18,8 @@ import { normalize, normalizeArray, toUpperCaseFirst, type UnknownString, valida
 import { ResolveLockfiles } from "../commands/toolkit/cleaner.ts";
 import { isGlob } from "@std/path/is-glob";
 import { joinGlobs, normalizeGlob } from "@std/path";
+import { statSync } from "node:fs";
+import { globSync } from "node:fs";
 
 /**
  * Gets all the users projects and returns their absolute root paths as a `string[]`.
@@ -63,6 +65,10 @@ export function GetAllProjects(ignored?: false | "limit" | "exclude"): string[] 
 export function AddProject(
     entry: UnknownString,
 ): void {
+    if (validate(entry) && isGlob(entry)) {
+        globSync(entry).filter((f) => statSync(f).isDirectory()).forEach(AddProject);
+    }
+
     const workingEntry = ParsePath(validate(entry) ? entry : Deno.cwd());
 
     if (!CheckForPath(workingEntry)) throw new FknError("Generic__NonExistingPath", `Path "${workingEntry}" doesn't exist.`);

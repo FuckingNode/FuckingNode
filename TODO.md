@@ -5,7 +5,7 @@
 
 ## Workspaces and compatibility
 
-- [ ] Support in `fkadd` for globs, or however you call strings like `path/*` or `my-project-*`.
+- [x] Support in `fkadd` for basic globs, like `path/*` or `my-project-*`.
 - [x] Work with lockfile-less projects.
 
 ## Cross-runtime support
