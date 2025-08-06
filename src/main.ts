@@ -354,6 +354,9 @@ async function main(command: UnknownString) {
                 "bright-blue",
             );
             break;
+        case "help":
+            TheHelper({ query: flags[1] });
+            break;
         default:
             TheHelper({});
             LogStuff(`You're seeing this because command '${command}' doesn't exist.`, undefined, ["orange", "italic"]);
