@@ -7,16 +7,6 @@ import { RunUserCmd, ValidateUserCmd } from "../functions/user.ts";
 import { GIT_FILES } from "../types/misc.ts";
 import { CheckForPath } from "../functions/filesystem.ts";
 
-/*
- TODO for stage area
- * if you add a folder, the file count will say 1 even if you added 10 files
- * what if you add a file that's already staged?
- * "If everything above went alright, commit 1 file(s) to branch main with message "bla"" shows the wrong amount.
- * overall the Git toolkit needs reviewing
- * most important todo: TESTS. i need to manually test everything + write tests to ensure everything works.
- * when showing the "Staged files" message, we shouldn't actually stage the files until whatever commit task from the user is run.
-*/
-
 function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
     const canCommit = CanCommit(path);
     if (canCommit === false) {
@@ -47,11 +37,14 @@ function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
                 .filter(validate)
                 .filter(CheckForPath)
             : ["(this should never appear in the cli)"];
+        // stage them early
+        StageFiles(path, (files === "A" || files[0] === "-A") ? "A" : filtered);
+        const staged = GetStagedFiles(path);
         LogStuff(
             (files === "A" || files[0] === "-A")
-                ? `Staged all files for commit (${GetStagedFiles(path).length}).`
-                : `Staged ${filtered.length} ${pluralOrNot("file", filtered.length)} for commit:\n${
-                    filtered
+                ? `Staged all files for commit (${staged.length}).`
+                : `Staged ${staged.length} ${pluralOrNot("file", filtered.length)} for commit:\n${
+                    staged
                         .map((file) => ColorString("- " + file, "bold", "white"))
                         .join("\n")
                 }`,
