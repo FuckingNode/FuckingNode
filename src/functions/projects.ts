@@ -63,8 +63,12 @@ export function GetAllProjects(ignored?: false | "limit" | "exclude"): string[] 
  */
 export function AddProject(
     entry: UnknownString,
+    glob: boolean = false,
 ): void {
-    if (validate(entry) && isGlob(entry)) globSync(entry).filter((f) => Deno.statSync(f).isDirectory).forEach(AddProject);
+    if (validate(entry) && isGlob(entry)) {
+        globSync(entry).filter((f) => Deno.statSync(f).isDirectory).forEach((p) => AddProject(p, true));
+        return;
+    }
 
     const workingEntry = ParsePath(validate(entry) ? entry : Deno.cwd());
 
@@ -156,6 +160,10 @@ export function AddProject(
         );
         return;
     } catch (e) {
+        if (e instanceof FknError && glob) {
+            LogStuff(`Couldn't add ${workingEntry}. Maybe it's not a project. Skipping it...`, undefined, ["italic", "half-opaque"]);
+            return;
+        }
         if (!(e instanceof FknError) || e.code !== "Env__PkgFileUnparsable") throw e;
 
         const ws = GetWorkspaces(workingEntry);

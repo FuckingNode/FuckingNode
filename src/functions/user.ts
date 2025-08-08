@@ -6,18 +6,19 @@ import { isDis } from "../constants.ts";
 import type { CF_FKNODE_SETTINGS } from "../types/config_files.ts";
 import { GetUserSettings } from "./config.ts";
 
-export function ValidateUserCmd(env: ProjectEnvironment, key: "commitCmd" | "releaseCmd" | "buildCmd"): string {
+export function ValidateUserCmd(env: ProjectEnvironment, key: "commitCmd" | "releaseCmd" | "buildCmd"): string | null {
     const command = env.settings[key];
 
-    const cmd = (validate(command) && !isDis(command)) ? normalize(command) : "disable";
+    const cmd = (validate(command) && !isDis(command)) ? normalize(command) : "#disable";
 
-    if (cmd !== "disable" && env.commands.run === "__UNSUPPORTED") {
+    if (cmd !== "#disable" && env.commands.run === "__UNSUPPORTED") {
         throw new FknError(
             "Interop__JSRunUnable",
             `Your fknode.yaml file has a ${key} key, but ${env.manager} doesn't support JS-like "run" tasks, so we can't execute that task. To avoid undesired behavior, we stopped execution. Please remove the commitCmd key from this fknode.yaml. Sorry!`,
         );
     }
 
+    if (cmd === "#disable") return null;
     return cmd;
 }
 
@@ -25,6 +26,8 @@ export function RunUserCmd(params: { key: "commitCmd" | "releaseCmd"; env: Proje
     const { env, key } = params;
 
     const cmd = ValidateUserCmd(env, key);
+
+    if (!cmd) return;
 
     const cmdOutput = Commander(
         env.commands.run[0],

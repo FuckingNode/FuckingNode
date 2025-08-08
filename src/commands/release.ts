@@ -7,7 +7,7 @@ import { Commander } from "../functions/cli.ts";
 import { AddToGitIgnore, Commit, IsRepo, Push, Tag } from "../functions/git.ts";
 import { RunUserCmd, ValidateUserCmd } from "../functions/user.ts";
 import { validate } from "@zakahacecosas/string-utils";
-import { APP_NAME, isDis } from "../constants.ts";
+import { APP_NAME } from "../constants.ts";
 import { FknError } from "../functions/error.ts";
 import { stringify as stringifyToml } from "@std/toml/stringify";
 import { GetTextIndentSize } from "../functions/filesystem.ts";
@@ -39,19 +39,19 @@ export default function TheReleaser(params: TheReleaserConstructedParams) {
     }
 
     const releaseCmd = ValidateUserCmd(env, "releaseCmd");
-
-    const shouldBuild = env.settings.buildForRelease && !isDis(env.settings.buildCmd);
+    const buildCmd = ValidateUserCmd(env, "buildCmd");
+    const shouldBuild = env.settings.buildForRelease;
 
     const actions: string[] = [
         `${ColorString(`Update your ${ColorString(env.main.name, "bold")}'s`, "white")} "version" field`,
         `Create a ${ColorString(`${env.main.name}.bak`, "bold")} file, and add it to .gitignore`,
     ];
-    if (shouldBuild) {
+    if (buildCmd && shouldBuild) {
         actions.push(
-            "Run your 'buildCmd'.",
+            `Run your 'buildCmd' (${buildCmd}).`,
         );
     }
-    if (!isDis(releaseCmd)) {
+    if (releaseCmd) {
         if (env.runtime === "rust") {
             throw new FknError(
                 "Task__Release",
@@ -125,15 +125,12 @@ export default function TheReleaser(params: TheReleaserConstructedParams) {
 
     // build
     if (shouldBuild) {
-        const buildCmd = ValidateUserCmd(env, "buildCmd");
-
-        if (!validate(buildCmd) || isDis(buildCmd)) {
-            LogStuff("No build command(s) specified!", "warn", "bright-yellow");
-        } else RunBuildCmds(buildCmd.split("^"));
+        if (!buildCmd) LogStuff("No build command(s) specified!", "warn", "bright-yellow");
+        else RunBuildCmds(buildCmd.split("^"));
     }
 
     // run their releaseCmd
-    if (!isDis(releaseCmd)) {
+    if (releaseCmd) {
         RunUserCmd({
             key: "releaseCmd",
             env,

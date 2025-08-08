@@ -1,9 +1,7 @@
 import { GetProjectEnvironment, NameProject, SpotProject } from "../functions/projects.ts";
 import type { TheBuilderConstructedParams } from "./constructors/command.ts";
 import { ValidateUserCmd } from "../functions/user.ts";
-import { isDis } from "../constants.ts";
 import { LogStuff } from "../functions/io.ts";
-import { validate } from "@zakahacecosas/string-utils";
 import { RunBuildCmds } from "../functions/build.ts";
 
 export default function TheBuilder(params: TheBuilderConstructedParams) {
@@ -14,7 +12,7 @@ export default function TheBuilder(params: TheBuilderConstructedParams) {
 
     const buildCmd = ValidateUserCmd(env, "buildCmd");
 
-    if (!validate(buildCmd) || isDis(buildCmd)) {
+    if (!buildCmd) {
         LogStuff("No build command(s) specified!", "warn", "bright-yellow");
         return;
     }
