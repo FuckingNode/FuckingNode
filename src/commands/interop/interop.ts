@@ -15,12 +15,12 @@ export const FkNodeInterop = {
         Deno: Parsers.Deno,
         NodeBun: Parsers.NodeBun,
     },
-    BareValidators: BareValidators,
+    BareValidators,
     PackageFileUtils: {
         SpotDependency: findDependency,
         DedupeDependencies: dedupeDependencies,
     },
-    Installers: Installers,
+    Installers,
     Features: InteropedFeatures,
-    Generators: Generators,
+    Generators,
 };

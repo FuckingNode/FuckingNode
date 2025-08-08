@@ -1,4 +1,4 @@
-import { CheckForPath, JoinPaths } from "../functions/filesystem.ts";
+import { CheckForPath, GetTextIndentSize, JoinPaths } from "../functions/filesystem.ts";
 import { ColorString, Interrogate, LogStuff, StringifyYaml } from "../functions/io.ts";
 import { deepMerge, GetProjectEnvironment, NameProject, SpotProject } from "../functions/projects.ts";
 import type { TheSetuperConstructedParams } from "./constructors/command.ts";
@@ -6,24 +6,30 @@ import { parse as parseYaml } from "@std/yaml";
 import { parse as parseJsonc } from "@std/jsonc";
 import { SETUPS, VISIBLE_SETUPS } from "./toolkit/setups.ts";
 import { normalize, table, validate } from "@zakahacecosas/string-utils";
+import { FknError } from "../functions/error.ts";
 
 export default function TheSetuper(params: TheSetuperConstructedParams) {
-    if (!validate(params.setup) || !validate(params.project)) {
+    if (!validate(params.setup) || (validate(params.project) && !CheckForPath(params.project ?? ""))) {
         LogStuff(table(VISIBLE_SETUPS));
         LogStuff(
-            `You didn't provide a ${params.setup ? "project" : "target setup"} or provided an invalid one, so up here are all possible setups.`,
+            `You didn't provide any argument, or provided invalid ones, so up here are all possible setups.`,
         );
         return;
     }
 
-    const project = SpotProject(params.project);
+    const project = SpotProject(validate(params.project) ? params.project : ".");
     const env = GetProjectEnvironment(project);
     const desiredSetup = normalize(params.setup, { strict: true });
     const setupToUse = SETUPS.find((s) => (normalize(s.name, { strict: true })) === desiredSetup);
 
     if (
         !setupToUse
-    ) throw new Error(`Given setup ${params.setup} is not valid! Choose from the list ${SETUPS.map((s) => s.name)}.`);
+    ) {
+        throw new FknError(
+            "Param__SetupInvalid",
+            `Given setup ${params.setup} is not valid! Choose from the list ${SETUPS.map((s) => s.name)}.`,
+        );
+    }
 
     const contentToUse = (setupToUse.seek === "tsconfig.json" || setupToUse.seek === ".prettierrc")
         ? parseJsonc(setupToUse.content)
@@ -54,9 +60,7 @@ export default function TheSetuper(params: TheSetuperConstructedParams) {
         const fileContent = Deno.readTextFileSync(path);
         if (setupToUse.seek === "tsconfig.json" || setupToUse.seek === ".prettierrc") {
             const parsedContent = parseJsonc(fileContent);
-            const line = fileContent.trim().split("\n")[1] || "";
-            const indentSize: number = line.length - line.trim().length || 4;
-            finalContent = JSON.stringify(deepMerge(contentToUse, parsedContent), undefined, indentSize);
+            finalContent = JSON.stringify(deepMerge(contentToUse, parsedContent), undefined, GetTextIndentSize(fileContent));
         } else if (setupToUse.seek === "fknode.yaml") {
             const parsedContent = parseYaml(fileContent);
             finalContent = StringifyYaml(deepMerge(contentToUse, parsedContent));

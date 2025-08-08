@@ -192,6 +192,24 @@ export interface FullFkNodeYaml {
      * @type {boolean}
      */
     launchWithUpdate: boolean;
+    /**
+     * If specified, this will override FkNode's project environment inference.
+     *
+     * @type {MANAGER_GLOBAL | "__USE_DEFAULT"}
+     */
+    projectEnvOverride: MANAGER_GLOBAL | "__USE_DEFAULT";
+    /**
+     * Command(s) to be executed when running the `build` command.
+     *
+     * @type {string | "__DISABLE"}
+     */
+    buildCmd: string | "__DISABLE";
+    /**
+     * If true, `buildCmd` is invoked before releasing.
+     *
+     * @type {boolean}
+     */
+    buildForRelease: boolean;
 }
 
 /**

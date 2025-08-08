@@ -6,6 +6,53 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
+## Upcoming major (v4)
+
+### Added
+
+- Added the ability to stage files directly from `commit`, removing the need to do `git add` first.
+- Added the ability to include previously staged files when `commit`ing with `--keep-staged` / `-k`. **(1)**
+- Added the ability to skip the confirmation at `commit` with `--yes` / `-y`.
+- Added the ability to bulk-stage all files with `-A` to `commit`, just as in regular `git commit`.
+- Added `audit` support for Bun.
+- Added a `projectEnvOverride` field to `fknode.yaml` files, to override our project environment inference system.
+- Added Cargo support for `release`.
+- Added `build` command, which allows the user to define several CLI commands (via the `buildCmd` `fknode.yaml` key, and separated by `^`) to be run one after each other.
+  - Added `buildForRelease` key to `fknode.yaml`. If true, calling `release` will first invoke `build`.
+- Added a bunch of error codes. Now, all(most) known possible exceptions are a `FknError`, with an identifiable error code. These also have a new documentation page.
+- Added system notifications. Tasks that _can_ take 2 minutes or more (as of now: `clean`, `kickstart`, and `migrate`), will send a system notification once done. It'll only appear if the task takes more than a threshold (3 minutes for `clean`, 2 for `kickstart` and `migrate`).
+
+### Changed
+
+- (Breaking) Now `setup` takes FIRST the setup to use, THEN the path of the project. This is for the command to work in the CWD without specifying a path, as explained above.
+- (Breaking) Now `release` takes FIRST the version, THEN the path of the project, which is now optional (if not provided, the CWD is used, as explained above).
+- Renamed all existing FknError codes.
+- Now **(1)** `commit` will unstage previously staged files. This is to avoid committing files you forgot were staged, or were staged, modified, then not staged again. Use `-k` to keep prev. staged files.
+- Now `commit` tells more clearly when the commit was aborted due to an error in your `commitCmd`.
+- Now the `help` command should look a bit better.
+- Now when no path is provided and it makes sense to, the CWD will be used, without needing to specify it.
+- Now `package.json` files do not crash the program if no `version` was specified.
+- Now glob patterns are supported when seeking for monorepos when adding a project.
+- Now we no longer show a "partial support" warning when adding DenoJS or BunJS projects, and when cleaning, "Cleanup is unsupported" was replaced with "This runtime lacks cleanup/deduping commands".
+- Now `commit` does not require the CWD to be an added project, making it tech-stack agnostic.
+- Now, when using dry-run with `release` (which should mean "no _real action_"), this will actually be respected (before, commits would be made and even pushed despite having this flag). Now with this flag only your `releaseCmd` gets to run.
+- Now `release` will always use `--dry-run` with your package manager's release command before publishing, and tell you to check if everything's alright. If you find something wrong, you'll be able to abort.
+
+### Fixed
+
+- Fixed the biggest error of the CLI so far, codenamed ["context mismatch"](https://github.com/FuckingNode/FuckingNode/issues/15) - though it actually was a mutation issue, the CLI was overwriting its own defaults. More info in [#15](https://github.com/FuckingNode/FuckingNode/issues/15).
+- Fixed your `commitCmd` not actually working (it did run but with the files staged, AKA unmodifiable, making it stupidly useless). Now, if your commitCmd altered any committed file, these changes will properly reflect in the made commit.
+- Fixed the CLI running 3 CLI commands instead of 1 to check if a package manager is installed, consuming more resources and time.
+- Fixed several issues with project environment inference.
+- Fixed commands with dashes (e.g. `storage-emergency` or `im-done-with`) not working.
+- Fixed message for `FknError/Env__CannotDetermine` (prev. `Internal__Projects__CantDetermineEnv`) showing `"root"` instead of the real root of the project.
+
+### Removed
+
+- (Breaking) Removed the `manager` command. Manager subcommands are now standalone commands (`manager add .` is now just `add .`, for example).
+- Removed the ability to auto-update from the CLI, because it never really worked. If we get it to work it'll be added back, but for now it's better not to have it than to have a broken implementation.
+- Removed `--self`. It's a bit stupid since I somehow never realized passing a dot (`"."`) as a path is equivalent and native, so keeping that extra code in there was useless.
+
 ## [3.4.1] (04-05-2025)
 
 ### Changed
@@ -62,11 +109,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Removed `--strict` flag from audit, now all audits are "strict" per se.
 
 ## [3.2.1] (11-04-2025)
-
-### Changed
-
-- Changed compile script to fix some issues and add Konbini support.
-  - (That's a separate project I'm personally working on, don't expect to find any info related to it as of now).
 
 ### Fixed
 
@@ -294,7 +336,7 @@ Acknowledgements to [@MrSerge01](https://github.com/MrSerge01) and [@dimkauzh](h
 
 ### Added
 
-- Added a **new** experimental **command**: _**audit**_. Currently it's only available for `npm` users and behind the `--experimental-audit` flag. TL;DR it helps you better understand security audits by asking questions, read more in [here](https://fuckingnode.github.io/learn/audit/).
+- Added a **new** experimental **command**: _**audit**_. Currently it's only available for `npm` users and behind the `--experimental-audit` flag. TL;DR it helps you better understand security audits by asking questions, [read more in here](https://fuckingnode.github.io/learn/audit/).
 - Added support for more IDEs / code editors as favorite editors (VSCodium, Emacs, Notepad++, Atom).
 - Added a `repo` command that shows the URL to GitHub.
 

@@ -14,18 +14,25 @@ try {
 
 Deno.mkdir("./dist/");
 
+type OS = "win64" | "macArm" | "linuxArm" | "mac64" | "linux64";
+
 const TARGETS: Record<
-    "win64" | "darwinArm" | "linuxArm" | "darwin64" | "linux64",
-    [string, string]
+    OS,
+    [string, OS]
 > = {
     win64: ["x86_64-pc-windows-msvc", "win64"],
-    darwinArm: ["aarch64-apple-darwin", "macos_arm"],
-    linuxArm: ["aarch64-unknown-linux-gnu", "linux_arm"],
-    darwin64: ["x86_64-apple-darwin", "macos64"],
+    macArm: ["aarch64-apple-darwin", "macArm"],
+    linuxArm: ["aarch64-unknown-linux-gnu", "linuxArm"],
+    mac64: ["x86_64-apple-darwin", "mac64"],
     linux64: ["x86_64-unknown-linux-gnu", "linux64"],
 };
 
-const ALL_COMMANDS = Object.entries(TARGETS).map(([key, [target, output]]) => {
+const ALL_COMMANDS = Object.entries(TARGETS).map(([key, [target, output]]: [string, [string, string]]): {
+    target: OS;
+    compileCmd: Deno.Command;
+    hashCmd: Deno.Command;
+    signCmd: Deno.Command;
+} => {
     const compiledName = `${APP_NAME.CLI}-${output}${key === "win64" ? ".exe" : ""}`;
 
     const compilerArguments = [
@@ -47,76 +54,53 @@ const ALL_COMMANDS = Object.entries(TARGETS).map(([key, [target, output]]) => {
 
     // hash and signature stuff
     const hasherArguments = [
-        "kbd-hash",
-        `dist\\${compiledName}`,
+        "hash",
+        `dist/${compiledName}`,
         "--porcelain",
     ];
 
     const signerArguments = [
-        "--armor",
-        "--output",
-        `dist/${compiledName}.asc`,
-        "--detach-sig",
-        "--digest-algo",
-        "SHA512",
-        "--armor",
+        "sign",
+        "apply",
         `dist/${compiledName}`,
+        "org.fuckingnode",
     ];
 
-    let newTarget: "linux_64_sha" | "linux_arm_sha" | "mac_64_sha" | "mac_arm_sha" | "win64_sha" | null = null;
-
-    if (key === "win64") {
-        newTarget = "win64_sha";
-    } else if (key === "linux64") {
-        newTarget = "linux_64_sha";
-    } else if (key === "linuxArm") {
-        newTarget = "linux_arm_sha";
-    } else if (key === "darwin64") {
-        newTarget = "mac_64_sha";
-    } else if (key === "darwinArm") {
-        newTarget = "mac_arm_sha";
-    }
-
-    if (!newTarget) throw new Error("No newTarget for " + key);
-
     return {
-        target: newTarget,
+        target: key as OS,
         compileCmd: new Deno.Command("deno", { args: compilerArguments }),
-        hashCmd: new Deno.Command("kbi", { args: hasherArguments }),
-        signCmd: new Deno.Command("gpg", { args: signerArguments }),
+        // env: {} is a workaround for Deno not properly reading my PATH for whatever reason...
+        // it's just me who can make releases so ig it's okay to hardcode my user path lmao
+        hashCmd: new Deno.Command("kbi", { args: hasherArguments, env: { PATH: "C:\\Users\\Zaka\\kbi\\exe;" + Deno.env.get("PATH") } }),
+        signCmd: new Deno.Command("kbi", { args: signerArguments, env: { PATH: "C:\\Users\\Zaka\\kbi\\exe;" + Deno.env.get("PATH") } }),
     };
 });
 
-// first
 for (const CMD of ALL_COMMANDS) {
     CMD.compileCmd.outputSync();
 }
 
 if (release) {
-    // then
     const hashes: Record<
-        "linux_64_sha" | "linux_arm_sha" | "mac_64_sha" | "mac_arm_sha" | "win64_sha",
+        OS,
         string
     > = {
-        linux_64_sha: "",
-        linux_arm_sha: "",
-        mac_64_sha: "",
-        mac_arm_sha: "",
-        win64_sha: "",
+        linux64: "",
+        linuxArm: "",
+        mac64: "",
+        macArm: "",
+        win64: "",
     };
+
     for (const CMD of ALL_COMMANDS) {
         const hashing = CMD.hashCmd.outputSync();
         const hash = new TextDecoder().decode(hashing.stdout).trim();
         hashes[CMD.target] = hash;
+        console.debug(new TextDecoder().decode(hashing.stdout), new TextDecoder().decode(hashing.stderr));
         console.log(CMD.target, "HASH", hash);
         Deno.writeTextFileSync("dist/konbini.hash.yaml", stringifyYaml(hashes));
-    }
-
-    confirm("Ready? You've gotta open the password manager to sign all executables.");
-
-    // last
-    for (const CMD of ALL_COMMANDS) {
-        CMD.signCmd.outputSync();
+        const signing = CMD.signCmd.outputSync();
+        console.debug(new TextDecoder().decode(signing.stdout), new TextDecoder().decode(signing.stderr));
         console.log("Signed", CMD.target);
     }
 

@@ -1,6 +1,6 @@
 // the things.
 import TheCleaner from "./commands/clean.ts";
-import TheManager from "./commands/manage.ts";
+import TheLister from "./commands/list.ts";
 import TheStatistics from "./commands/stats.ts";
 import TheMigrator from "./commands/migrate.ts";
 import TheHelper from "./commands/help.ts";
@@ -16,15 +16,16 @@ import TheCommitter from "./commands/commit.ts";
 import TheSurrenderer from "./commands/surrender.ts";
 import TheSetuper from "./commands/setup.ts";
 import TheLauncher from "./commands/launch.ts";
+import TheBuilder from "./commands/build.ts";
 // other things
 import { APP_NAME, APP_URLs, FULL_NAME, FWORDS } from "./constants.ts";
 import { ColorString, LogStuff } from "./functions/io.ts";
 import { FreshSetup, GetAppPath, GetUserSettings } from "./functions/config.ts";
-import { DEBUG_LOG, GenericErrorHandler } from "./functions/error.ts";
+import { DEBUG_LOG, ErrorHandler } from "./functions/error.ts";
 import type { TheCleanerConstructedParams } from "./commands/constructors/command.ts";
 import { RunScheduledTasks } from "./functions/schedules.ts";
 import { normalize, testFlag, testFlags, type UnknownString, validate } from "@zakahacecosas/string-utils";
-import { CleanupProjects } from "./functions/projects.ts";
+import { AddProject, CleanupProjects, RemoveProject } from "./functions/projects.ts";
 import { LaunchWebsite } from "./functions/http.ts";
 import { HINTS } from "./functions/phrases.ts";
 import { GetDateNow } from "./functions/date.ts";
@@ -76,7 +77,7 @@ const flags = Deno.args.map((arg) =>
     })
 );
 
-export const FKNODE_SHALL_WE_DEBUG = Deno.env.get("FKNODE_SHALL_WE_DEBUG") === "yeah";
+export const FKNODE_SHALL_WE_DEBUG = import.meta.main === false ? false : Deno.env.get("FKNODE_SHALL_WE_DEBUG") === "yeah";
 DEBUG_LOG("Initialized FKNODE_SHALL_WE_DEBUG constant (ENTRY POINT)");
 DEBUG_LOG("ARGS", flags);
 
@@ -88,7 +89,7 @@ function hasFlag(flag: string, allowQuickFlag: boolean, firstOnly: boolean = fal
 if (hasFlag("help", true)) {
     try {
         await init();
-        TheHelper({ query: flags[1] ?? "help" });
+        TheHelper({ query: flags[1] });
         Deno.exit(0);
     } catch (e) {
         console.error("Critical error", e);
@@ -162,9 +163,11 @@ async function main(command: UnknownString) {
     }
 
     DEBUG_LOG("FLAGS[1]", flags[1], isNotFlag(flags[1]));
-    const projectArg = (isNotFlag(flags[1]) || flags[1] === "--self") ? flags[1] : 0 as const;
+    const projectArg = (isNotFlag(flags[1])) ? flags[1] : 0 as const;
+    DEBUG_LOG("PROJECT ARG IS", projectArg);
     DEBUG_LOG("FLAGS[2]", flags[2], isNotFlag(flags[2]));
     const intensityArg = isNotFlag(flags[2]) ? flags[2] : GetUserSettings().defaultIntensity;
+    DEBUG_LOG("INTENSITY ARG IS", intensityArg);
 
     const cleanerArgs: TheCleanerConstructedParams = {
         flags: {
@@ -182,11 +185,7 @@ async function main(command: UnknownString) {
     };
 
     switch (
-        normalize(command, {
-            strict: true,
-            preserveCase: true,
-            removeCliColors: true,
-        })
+        command.toLowerCase()
     ) {
         case "clean":
             TheCleaner(cleanerArgs);
@@ -212,8 +211,14 @@ async function main(command: UnknownString) {
                 },
             });
             break;
-        case "manager":
-            TheManager(flags);
+        case "list":
+            TheLister(flags[1]);
+            break;
+        case "add":
+            AddProject(flags[1]);
+            break;
+        case "remove":
+            RemoveProject(flags[1]);
             break;
         case "kickstart":
             TheKickstarter({
@@ -226,33 +231,47 @@ async function main(command: UnknownString) {
             TheSettings({ args: flags.slice(1) });
             break;
         case "migrate":
-            TheMigrator({ projectPath: flags[1], wantedManager: flags[2] });
+            TheMigrator({ projectPath: (flags[2] ?? Deno.cwd()), wantedManager: flags[1] });
             break;
         case "self-update":
         case "upgrade":
+        case "update":
             LogStuff(`Currently using ${ColorString(FULL_NAME, "green")}`);
             LogStuff("Checking for updates...");
-            await TheUpdater({ silent: false, install: true });
+            await TheUpdater({ silent: false });
             break;
         case "about":
             TheAbouter();
             break;
+        case "build":
+            TheBuilder({
+                project: (flags[1] ?? Deno.cwd()),
+            });
+            break;
         case "release":
         case "publish":
             TheReleaser({
-                project: flags[1],
-                version: flags[2],
+                version: flags[1],
+                project: (flags[2] ?? Deno.cwd()),
                 push: hasFlag("push", true),
                 dry: hasFlag("dry-run", true),
             });
             break;
-        case "commit":
+        case "commit": {
+            const indexBranch = flags.indexOf("--branch");
+            const indexB = flags.indexOf("-b");
+            const indexElse = flags.indexOf("--");
+            const filesEnd = indexBranch !== -1 ? indexBranch : (indexB !== -1 ? indexB : indexElse !== -1 ? indexElse : undefined);
             TheCommitter({
                 message: flags[1],
-                branch: flags[2],
+                files: flags.slice(2, filesEnd),
+                branch: indexBranch !== -1 ? flags[indexBranch + 1] : (indexB !== -1 ? flags[indexB + 1] : undefined),
                 push: hasFlag("push", true),
+                keepStagedFiles: hasFlag("keep-staged", true),
+                y: hasFlag("yes", true),
             });
             break;
+        }
         case "surrender":
         case "give-up":
         case "i-give-up":
@@ -272,8 +291,8 @@ async function main(command: UnknownString) {
         case "configure":
         case "preset":
             TheSetuper({
-                project: flags[1],
-                setup: flags[2],
+                setup: flags[1],
+                project: flags[2],
             });
             break;
         case "launch":
@@ -285,7 +304,7 @@ async function main(command: UnknownString) {
         case "gen-cpf":
         case "generate-cpf":
             TheExporter({
-                project: flags[1],
+                project: (flags[1] ?? Deno.cwd()),
                 json: hasFlag("json", false),
                 cli: hasFlag("cli", false),
             });
@@ -335,8 +354,12 @@ async function main(command: UnknownString) {
                 "bright-blue",
             );
             break;
-        default:
+        case "help":
             TheHelper({ query: flags[1] });
+            break;
+        default:
+            TheHelper({});
+            LogStuff(`You're seeing this because command '${command}' doesn't exist.`, undefined, ["orange", "italic"]);
     }
 
     Deno.exit(0);
@@ -350,6 +373,6 @@ if (import.meta.main) {
 
         await main(flags[0]);
     } catch (e) {
-        GenericErrorHandler(e);
+        ErrorHandler(e);
     }
 }

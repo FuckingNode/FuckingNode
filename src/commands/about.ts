@@ -30,7 +30,7 @@ function colorizeText(text: string): string {
 }
 
 const coolStrings = {
-    ver: ColorString(`${APP_NAME.STYLED} ${VERSION}`, "bold", "red"),
+    ver: ColorString(`${APP_NAME.CASED} ${VERSION}`, "bold", "red"),
     ts: ColorString(`TypeScript ${Deno.version.typescript}`, "bright-blue"),
     deno: ColorString(`Deno ${Deno.version.deno}`, "bright-yellow"),
     spain: ColorString("Spain", "red"),

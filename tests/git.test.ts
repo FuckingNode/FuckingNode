@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { Git } from "../src/functions/git.ts";
+import { GetBranches, GetLatestTag } from "../src/functions/git.ts";
 import { APP_NAME } from "../src/constants.ts";
 import { SpotProject } from "../src/functions/projects.ts";
 import { GenerateGitUrl } from "../src/commands/toolkit/git-url.ts";
@@ -10,13 +10,14 @@ Deno.test({
     name: "gets git branches",
     fn: () => {
         assertEquals(
-            Git.GetBranches(here),
+            GetBranches(here),
             {
-                current: "master",
+                current: "v4",
                 // update if we add more branches
                 // apparently git clone only clones the branch you're going to use
                 all: [
                     "master",
+                    "v4",
                 ],
             },
         );
@@ -27,7 +28,7 @@ Deno.test({
     name: "gets git latest tag",
     fn: () => {
         assertEquals(
-            Git.GetLatestTag(here),
+            GetLatestTag(here),
             JSON.parse(Deno.readTextFileSync("./deno.json")).version,
         );
     },

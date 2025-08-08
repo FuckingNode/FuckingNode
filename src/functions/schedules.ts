@@ -40,7 +40,6 @@ export async function RunScheduledTasks() {
             },
         };
         await TheUpdater({
-            install: false,
             silent: true,
         });
         Deno.writeTextFileSync(scheduleFilePath, StringifyYaml(updatedScheduleFile));

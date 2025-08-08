@@ -21,7 +21,7 @@ export function GetAppPath(
 
     if (!validate(appDataPath) || !CheckForPath(appDataPath)) {
         throw new FknError(
-            "Internal__NoEnvForConfigPath",
+            "Os__NoAppdataNoHome",
             `We searched for ${
                 LOCAL_PLATFORM.SYSTEM === "windows" ? "APPDATA" : "XDG_CONFIG_HOME and HOME"
             } in your environment variables, but nothing was found.\nThis breaks the entire CLI, please report this on GitHub.`,
@@ -49,7 +49,7 @@ export function GetAppPath(
     if (path === "SETTINGS") return SETTINGS;
     if (path === "ERRORS") return ERRORS;
     if (path === "REM") return REM;
-    throw new Error(`Invalid config path ${path} requested.`);
+    throw new FknError("Internal__NonexistentAppPath", `Invalid config path ${path} requested.`);
 }
 
 /**

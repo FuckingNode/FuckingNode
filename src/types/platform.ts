@@ -147,13 +147,13 @@ interface GenericProjectEnvironment {
      */
     lockfile: {
         /**
-         * Parsed path to lockfile.
+         * Parsed path to lockfile. `null` if it doesn't exist (that may happen).
          *
-         * @type {string}
+         * @type {string | null}
          */
-        path: string;
+        path: string | null;
         /**
-         * Bare name of the lockfile (`package-lock.json`, `deno.lock`, `go.sum`...)
+         * Bare name of the lockfile (`package-lock.json`, `deno.lock`, `go.sum`...).
          *
          * @type {LOCKFILE_GLOBAL}
          */
@@ -267,7 +267,7 @@ interface BunEnvironment extends GenericProjectEnvironment {
         run: ["bun", "run"];
         update: ["update", "--save-text-lockfile"];
         clean: "__UNSUPPORTED";
-        audit: "__UNSUPPORTED";
+        audit: ["audit", "--json"];
         publish: ["publish"];
         start: "start";
     };
@@ -312,7 +312,7 @@ interface CargoEnvironment extends GenericProjectEnvironment {
         update: ["update"];
         clean: [["clean"]];
         audit: "__UNSUPPORTED";
-        publish: "__UNSUPPORTED";
+        publish: ["publish"];
         start: "run";
     };
 }

@@ -9,10 +9,10 @@ import { NameProject } from "../../functions/projects.ts";
 
 function HandleError(
     err:
-        | "Unknown__CleanerTask__Update"
-        | "Unknown__CleanerTask__Lint"
-        | "Unknown__CleanerTask__Pretty"
-        | "Unknown__CleanerTask__Launch",
+        | "Task__Update"
+        | "Task__Lint"
+        | "Task__Pretty"
+        | "Task__Launch",
     stdout: UnknownString,
 ): never {
     DebugFknErr(
@@ -65,7 +65,7 @@ export const InteropedFeatures = {
                     verbose,
                 );
 
-                if (!output.success) HandleError("Unknown__CleanerTask__Lint", output.stdout);
+                if (!output.success) HandleError("Task__Lint", output.stdout);
 
                 return true;
             } else {
@@ -75,7 +75,7 @@ export const InteropedFeatures = {
                     verbose,
                 );
 
-                if (!output.success) HandleError("Unknown__CleanerTask__Lint", output.stdout);
+                if (!output.success) HandleError("Task__Lint", output.stdout);
 
                 return true;
             }
@@ -86,7 +86,7 @@ export const InteropedFeatures = {
                 verbose,
             );
 
-            if (!output.success) HandleError("Unknown__CleanerTask__Lint", output.stdout);
+            if (!output.success) HandleError("Task__Lint", output.stdout);
 
             return false;
         } else if (env.runtime === "deno") {
@@ -96,7 +96,7 @@ export const InteropedFeatures = {
                 verbose,
             );
 
-            if (!output.success) HandleError("Unknown__CleanerTask__Lint", output.stdout);
+            if (!output.success) HandleError("Task__Lint", output.stdout);
 
             return true;
         } else {
@@ -106,7 +106,7 @@ export const InteropedFeatures = {
                 verbose,
             );
 
-            if (!output.success) HandleError("Unknown__CleanerTask__Lint", output.stdout);
+            if (!output.success) HandleError("Task__Lint", output.stdout);
 
             return true;
         }
@@ -142,7 +142,7 @@ export const InteropedFeatures = {
                     verbose,
                 );
 
-                if (!output.success) HandleError("Unknown__CleanerTask__Pretty", output.stdout);
+                if (!output.success) HandleError("Task__Pretty", output.stdout);
 
                 return true;
             } else {
@@ -152,7 +152,7 @@ export const InteropedFeatures = {
                     verbose,
                 );
 
-                if (!output.success) HandleError("Unknown__CleanerTask__Pretty", output.stdout);
+                if (!output.success) HandleError("Task__Pretty", output.stdout);
 
                 return true;
             }
@@ -165,7 +165,7 @@ export const InteropedFeatures = {
                 verbose,
             );
 
-            if (!output.success) HandleError("Unknown__CleanerTask__Pretty", output.stdout);
+            if (!output.success) HandleError("Task__Pretty", output.stdout);
 
             return true;
         }
@@ -181,14 +181,14 @@ export const InteropedFeatures = {
                 verbose,
             );
 
-            if (!output.success) HandleError("Unknown__CleanerTask__Update", output.stdout);
+            if (!output.success) HandleError("Task__Update", output.stdout);
 
             return true;
         }
 
         if (validateAgainst(env.runtime, ["rust", "golang"])) {
             throw new FknError(
-                "Interop__CannotRunJsLike",
+                "Interop__JSRunUnable",
                 `${env.manager} does not support JavaScript-like "run" commands, however you've set updateCmdOverride in your fknode.yaml to ${script}. Since we don't know what you're doing, update task wont proceed for this project.`,
             );
         } else {
@@ -198,7 +198,7 @@ export const InteropedFeatures = {
                 verbose,
             );
 
-            if (!output.success) HandleError("Unknown__CleanerTask__Update", output.stdout);
+            if (!output.success) HandleError("Task__Update", output.stdout);
 
             return true;
         }
@@ -212,7 +212,7 @@ export const InteropedFeatures = {
         if (isDef(script)) {
             if (validateAgainst(env.manager, ["go", "deno", "cargo"]) && !env.settings.launchFile) {
                 throw new FknError(
-                    "Unknown__CleanerTask__Launch",
+                    "Task__Launch",
                     `You tried to launch project ${
                         NameProject(
                             env.root,
@@ -228,7 +228,7 @@ export const InteropedFeatures = {
                 verbose,
             );
 
-            if (!output.success) HandleError("Unknown__CleanerTask__Launch", output.stdout);
+            if (!output.success) HandleError("Task__Launch", output.stdout);
 
             return true;
         }
@@ -239,7 +239,7 @@ export const InteropedFeatures = {
             verbose,
         );
 
-        if (!output.success) HandleError("Unknown__CleanerTask__Launch", output.stdout);
+        if (!output.success) HandleError("Task__Launch", output.stdout);
 
         return true;
     },

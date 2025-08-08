@@ -1,5 +1,5 @@
 import { join, normalize } from "@std/path";
-import { kominator, sortAlphabetically, type UnknownString, validate } from "@zakahacecosas/string-utils";
+import { StringArray, type UnknownString, validate } from "@zakahacecosas/string-utils";
 import { FknError } from "./error.ts";
 
 /**
@@ -44,7 +44,7 @@ export function CheckForDir(path: string): "NotDir" | "Valid" | "ValidButNotEmpt
 }
 
 /**
- * Parses a string path, to ensure string cleanness and handle things like relative paths or `--self`.
+ * Parses a string path, to ensure string cleanness and handle things like relative paths.
  *
  * @export
  * @param {UnknownString} target The string to parse.
@@ -52,9 +52,12 @@ export function CheckForDir(path: string): "NotDir" | "Valid" | "ValidButNotEmpt
  */
 export function ParsePath(target: UnknownString): string {
     try {
-        if (!validate(target)) throw new Error("Target must be (obviously) a string.");
-
-        if (normalize(target) === "--self") return Deno.cwd();
+        if (!validate(target)) {
+            throw new FknError(
+                "Param__WhateverUnprovided",
+                "Target for path parsing must be (obviously) a string.",
+            );
+        }
 
         let workingTarget: string;
 
@@ -71,7 +74,7 @@ export function ParsePath(target: UnknownString): string {
 
         return cleanEntry.trim();
     } catch (e) {
-        throw new FknError("Internal__UnparsablePath", `Error parsing ${target}: ${e}`);
+        throw new FknError("Fs__UnparsablePath", `Error parsing ${target}: ${e}`);
     }
 }
 
@@ -85,13 +88,12 @@ export function ParsePath(target: UnknownString): string {
 export function ParsePathList(target: UnknownString): string[] {
     if (!validate(target)) return [];
 
-    // TODO for dev-utils: add these methods to StringArray so they're chainable
-    return sortAlphabetically(
-        kominator(target, "\n")
-            .map((line) => line.trim().replace(/,$/, ""))
-            .filter((line) => line.length > 0)
-            .map(ParsePath),
-    );
+    return StringArray.fromKominator(target, "\n")
+        .sortAlphabetically()
+        .arr()
+        .map((line) => line.trim().replace(/,$/, ""))
+        .filter((line) => line.length > 0)
+        .map(ParsePath);
 }
 
 /**
@@ -126,4 +128,11 @@ export function BulkRemoveFiles(files: string[]): void {
             recursive: true,
         });
     });
+}
+
+/** Gets the indent size used by an already read file, with fair enough accuracy. */
+export function GetTextIndentSize(file: string) {
+    const line = file.trim().split("\n")[1] || "";
+    const indentSize: number = line.length - line.trim().length || 4;
+    return indentSize;
 }

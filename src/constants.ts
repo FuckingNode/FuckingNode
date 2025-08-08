@@ -5,7 +5,7 @@ import type { CF_FKNODE_SCHEDULE, CF_FKNODE_SETTINGS, FullFkNodeYaml } from "./t
 import * as DenoJson from "../deno.json" with { type: "json" };
 import { GetDateNow } from "./functions/date.ts";
 import { normalize, type UnknownString } from "@zakahacecosas/string-utils";
-import { CommandExists } from "./functions/cli.ts";
+import { ManagerExists } from "./functions/cli.ts";
 
 /**
  * Current app version as a SemVer object. **Change it from `deno.json`.**
@@ -24,12 +24,11 @@ export const VERSION: string = format(_SV_VER);
 /**
  * Best CLI app ever (it's name, so you don't, for example, miss-capitalize it).
  *
- * @type {{CASED: string, CLI: string, STYLED: string, SCOPE: string}}
+ * @type {{CASED: string, CLI: string, SCOPE: string}}
  */
-export const APP_NAME: { CASED: string; CLI: string; STYLED: string; SCOPE: string } = {
+export const APP_NAME: { CASED: string; CLI: string; SCOPE: string } = {
     CASED: "FuckingNode",
     CLI: "fuckingnode",
-    STYLED: "F\*ckingNode",
     SCOPE: "@zakahacecosas/fuckingnode",
 };
 
@@ -117,7 +116,7 @@ export const DEFAULT_SETTINGS: CF_FKNODE_SETTINGS = {
     flushFreq: 14,
     defaultIntensity: "normal",
     favEditor: "vscode",
-    defaultManager: CommandExists("pnpm") ? "pnpm" : "npm",
+    defaultManager: ManagerExists("pnpm") ? "pnpm" : "npm",
 };
 
 /**
@@ -166,7 +165,10 @@ export const DEFAULT_FKNODE_YAML: FullFkNodeYaml = {
     releaseCmd: "__DISABLE",
     launchCmd: "__DISABLE",
     launchFile: "__DISABLE",
-    launchWithUpdate: true,
+    launchWithUpdate: false,
+    projectEnvOverride: "__USE_DEFAULT",
+    buildCmd: "__DISABLE",
+    buildForRelease: false,
 };
 
 /** Checks if a given command is __USE_DEFAULT */

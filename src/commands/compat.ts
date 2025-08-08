@@ -15,11 +15,11 @@ const featureCompatibility = [
     { Feature: "Cleanup", NodeJS: labels.y, Deno: labels.p, Bun: labels.p, Go: labels.p, Cargo: labels.p },
     { Feature: "Kickstart", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
     { Feature: "Commit", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.p, Cargo: labels.p },
-    { Feature: "Release", NodeJS: labels.npm, Deno: labels.jsr, Bun: labels.npm, Go: labels.n, Cargo: labels.n },
+    { Feature: "Release", NodeJS: labels.npm, Deno: labels.jsr, Bun: labels.npm, Go: labels.n, Cargo: labels.y },
     { Feature: "Stats", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.p, Cargo: labels.y },
     { Feature: "Surrender", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
     { Feature: "Setup", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
-    { Feature: "Audit", NodeJS: labels.y, Deno: labels.n, Bun: labels.n, Go: labels.n, Cargo: labels.n },
+    { Feature: "Audit", NodeJS: labels.y, Deno: labels.n, Bun: labels.y, Go: labels.n, Cargo: labels.n },
     { Feature: "Launch", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
 ];
 
@@ -47,7 +47,7 @@ const releaseCompatibility = [
 ];
 
 const auditCompatibility = [
-    { NodeJS: labels.y, Deno: labels.n, Bun: labels.n, Go: labels.n, Cargo: labels.n },
+    { NodeJS: labels.y, Deno: labels.n, Bun: labels.y, Go: labels.n, Cargo: labels.n },
 ];
 
 const migrateCompatibility = [

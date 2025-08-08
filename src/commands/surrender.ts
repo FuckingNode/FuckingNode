@@ -4,9 +4,10 @@ import type { TheSurrendererConstructedParams } from "./constructors/command.ts"
 import { ColorString, Interrogate, LogStuff } from "../functions/io.ts";
 import { NameProject } from "../functions/projects.ts";
 import { APP_URLs, FULL_NAME } from "../constants.ts";
-import { Git } from "../functions/git.ts";
+import { Commit, GetBranches, Push } from "../functions/git.ts";
 import { CheckForPath, JoinPaths } from "../functions/filesystem.ts";
 import { FkNodeInterop } from "./interop/interop.ts";
+import { FknError } from "../functions/error.ts";
 
 const deprecationNotices = [
     "# This project is no longer maintained\n\nThis repository is archived and will not receive updates or bug fixes.",
@@ -65,14 +66,14 @@ export default function TheSurrenderer(params: TheSurrendererConstructedParams) 
         confirmation === false
     ) return;
 
-    const commitOne = Git.Commit(
+    const commitOne = Commit(
         project,
         `Add all uncommitted changes (automated by ${FULL_NAME})`,
         "all",
         [],
     );
 
-    if (commitOne === 1) throw new Error("Error committing all not added changes.");
+    if (commitOne === 1) throw new FknError("Git__UE__Commit", "Error committing all not added changes.");
 
     const env = GetProjectEnvironment(project);
 
@@ -80,30 +81,30 @@ export default function TheSurrenderer(params: TheSurrendererConstructedParams) 
 
     if (CheckForPath(README)) Deno.writeTextFileSync(README, `${message}\n${Deno.readTextFileSync(README)}`);
 
-    const commitTwo = Git.Commit(
+    const commitTwo = Commit(
         project,
         `Add deprecation notice (automated by ${FULL_NAME})`,
         "all",
         [],
     );
 
-    if (commitTwo === 1) throw new Error("Error committing README changes.");
+    if (commitTwo === 1) throw new FknError("Git__UE__Commit", "Error committing README changes.");
 
     FkNodeInterop.Features.Update({ env, verbose: true });
 
-    const commitThree = Git.Commit(
+    const commitThree = Commit(
         project,
         "Update dependencies one last time",
         "all",
         [],
     );
 
-    if (commitThree === 1) throw new Error("Error committing last dependency update.");
+    if (commitThree === 1) throw new FknError("Git__UE__Commit", "Error committing last dependency update.");
 
-    const finalPush = Git.Push(project, (Git.GetBranches(project)).current);
+    const finalPush = Push(project, GetBranches(project).current);
 
     if (finalPush === 1) {
-        throw new Error("Error pushing changes (ERROR SHOULD APPEAR ABOVE THIS, OPEN A GITHUB ISSUE OTHERWISE).");
+        throw new FknError("Git__UE_Push", "Error pushing changes.");
     }
 
     LogStuff("Project deprecated successfully, sir.", "comrade", "red");
@@ -119,7 +120,12 @@ export default function TheSurrenderer(params: TheSurrendererConstructedParams) 
                 "warn",
             )
         ) return;
-        if (!CheckForPath(env.root)) throw new Error(`Turns out the CLI cannot find the path to ${env.root}?`);
+        if (!CheckForPath(env.root)) {
+            throw new FknError(
+                "Fs__Unreal",
+                `Turns out the CLI cannot find the path to ${env.root}?`,
+            );
+        }
         Deno.removeSync(env.root, { recursive: true });
     }
 

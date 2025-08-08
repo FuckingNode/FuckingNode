@@ -1,3 +1,5 @@
+import { UnknownString } from "@zakahacecosas/string-utils";
+
 /**
  * Valid emojis
  *
@@ -86,3 +88,10 @@ export type VALID_COLORS =
     | "bright-blue"
     | "bright-yellow"
     | "orange";
+
+/**
+ * Git file codes.
+ *
+ * @export
+ */
+export type GIT_FILES = UnknownString[] | "A" | "!A" | "S";

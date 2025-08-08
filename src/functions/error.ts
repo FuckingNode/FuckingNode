@@ -21,31 +21,27 @@ export class FknError extends Error {
      * Creates an instance of FknError.
      *
      * @constructor
-     * @param {GLOBAL_ERROR_CODES} code Error code. (TODO: add a documentation page for them).
-     * @param {?string} [message] An optional error message.
+     * @param {GLOBAL_ERROR_CODES} code Error code.
+     * @param {?string} message An optional error message.
      */
     constructor(code: GLOBAL_ERROR_CODES, message?: string) {
         super(message);
         this.name = "FknError";
         this.code = code;
         switch (this.code) {
-            case "Generic__InteractionInvalidCauseNoPathProvided":
-                this.hint =
-                    `Provide the project's path or name to the project.\n    It can be a file path ("../node-project" OR "C:\\Users\\coolDev\\node-project"),\n    It can be "--self" to use the current working DIR (${Deno.cwd()}).\n    Or it can be a project's name (type the exact name as it is on package.json's "name" field).`;
-                break;
-            case "Cleaner__InvalidCleanerIntensity":
+            case "Param__CIntensityInvalid":
                 this.hint =
                     "Valid intensity levels are 'normal', 'hard', 'hard-only', 'maxim', and 'maxim-only'.\nIf you want to use flags without providing an intensity (e.g. 'clean --verbose'), prepend '-- --' to the command ('clean -- -- -verbose'). Run 'help clean' for more info onto what does each level do.";
                 break;
-            case "Internal__Projects__CantDetermineEnv":
+            case "Env__CannotDetermine":
                 this.hint =
                     "Check 'Thrown message' as that might help you. If not present, or it didn't help you, you should open up an issue on GitHub.";
                 break;
-            case "Generic__NonExistingPath":
+            case "Fs__Unreal":
                 this.hint =
                     "Check for typos - the path you provided wasn't found in the filesystem. If you're sure the path is right, maybe it's a permission issue. If not, open an issue on GitHub so we can fix our tool that fixes NodeJS ;).";
                 break;
-            case "Internal__NoEnvForConfigPath":
+            case "Os__NoAppdataNoHome":
                 this.hint = `We tried to find ${
                     ColorString(
                         LOCAL_PLATFORM.SYSTEM === "windows" ? "APPDATA env variable" : "XDG_CONFIG_HOME and HOME env variables",
@@ -53,22 +49,22 @@ export class FknError extends Error {
                     )
                 } but failed, meaning config files cannot be created and the CLI can't work. Something seriously went ${FWORDS.MFLY} wrong. If these aren't the right environment variables for your system's config path (currently using APPDATA on Windows, /home/user/.config on macOS and Linux), please raise an issue on GitHub.`;
                 break;
-            case "Project__NonFoundProject":
+            case "External__Proj__NotFound":
                 this.hint = `Check for typos or a wrong name. Given input (either a project's name or a file path) wasn't found.`;
                 break;
-            case "Env__UnparsableMainFile":
+            case "Env__PkgFileUnparsable":
                 this.hint =
                     `Your project's main file (package.json, deno.json, go.mod, etc.) is unparsable, or is missing basic fields ("name" and "version" on JS/Cargo, "go" and "module" on Golang).\nCheck for typos or syntax errors. If you're sure the file is correct, please open an issue on GitHub (if everything's right, it might be a bug with our interop layer).`;
                 break;
-            case "Interop__CannotRunJsLike":
+            case "Interop__JSRunUnable":
                 this.hint =
                     `Non-JS environments do not have an equivalent to "npm run" or "yarn run" tasks, so we can't execute that task. To avoid undesired behavior, we stopped execution. Please remove the setting key from this fknode.yaml that's causing the error.`;
                 break;
-            case "Generic__MissingRuntime":
+            case "Env__MissingMotor":
                 this.hint =
                     "The specified runtime / package manager is not installed on your machine! Please install it for this task to work. If it is installed and you still got this error, please raise an issue on GitHub.";
                 break;
-            case "Internal__UnparsablePath":
+            case "Fs__UnparsablePath":
                 this.hint = `The given path was not found. Check for typos${
                     LOCAL_PLATFORM.SYSTEM === "windows" ? "." : " or casing mistakes (you're on Linux mate, paths are case-sensitive)."
                 }`;
@@ -140,7 +136,7 @@ ${stripCliColors(debuggableContent ?? "UNKNOWN OUTPUT - No debuggableContent was
     }
 
     /**
-     * Handles the error and exits the CLI. Don't use this directly, use {@linkcode GenericErrorHandler} instead.
+     * Handles the error and exits the CLI. Don't use this directly, use {@linkcode ErrorHandler} instead.
      */
     public exit(): never {
         this.handleMessage();
@@ -151,21 +147,21 @@ ${stripCliColors(debuggableContent ?? "UNKNOWN OUTPUT - No debuggableContent was
 /**
  * Handles an error and quits. Save up a few lines of code by using this in the `catch` block.
  *
- * @export
  * @param {unknown} e The error.
  * @returns {never} _Below any call to this function nothing can happen. It exits the CLI with code 1._
  */
-export function GenericErrorHandler(e: unknown): never {
+export function ErrorHandler(e: unknown): never {
     if (e instanceof FknError) {
         e.exit();
         Deno.exit(1); // (never reached, but without this line typescript doesn't shut up)
-    } else if (e instanceof Error) {
-        console.error(`${ColorString(FWORDS.FK, "red", "bold")}! Something happened: ${e.message}`);
-        Deno.exit(1);
-    } else {
-        console.error(`${ColorString(FWORDS.FK, "red", "bold")}! Something strange happened: ${e}`);
+    }
+    const fk = ColorString(FWORDS.FK, "red", "bold");
+    if (Error.isError(e)) {
+        console.error(`${fk}! Something happened: ${e.message} (${e.cause})\n${e.stack}`);
         Deno.exit(1);
     }
+    console.error(`${fk}! Something strange happened: ${e}`);
+    Deno.exit(1);
 }
 
 /** function to write debug logs, only visible if env variable FKNODE_SHALL_WE_DEBUG is set to `yeah`
@@ -173,7 +169,7 @@ export function GenericErrorHandler(e: unknown): never {
  * (constant case instead of pascal case so i can better recognize this)
  */
 export function DEBUG_LOG(...a: unknown[]): void {
-    if (FKNODE_SHALL_WE_DEBUG) console.debug(a);
+    if (FKNODE_SHALL_WE_DEBUG) console.debug(" >>> FKNDBG >>>", ...a);
 }
 
 /** Throws a `FknError` and writes any debuggable content. */

@@ -1,17 +1,75 @@
 import { ColorString, Interrogate, LogStuff } from "../functions/io.ts";
-import { GetProjectEnvironment, NameProject, SpotProject } from "../functions/projects.ts";
+import { GetProjectEnvironment, NameProject } from "../functions/projects.ts";
 import type { TheCommitterConstructedParams } from "./constructors/command.ts";
-import { Git } from "../functions/git.ts";
-import { normalize, testFlag, validate } from "@zakahacecosas/string-utils";
+import { CanCommit, Commit, GetBranches, GetCommittableFiles, GetStagedFiles, IsRepo, Push, StageFiles } from "../functions/git.ts";
+import { normalize, pluralOrNot, testFlag, validate } from "@zakahacecosas/string-utils";
 import { RunUserCmd, ValidateUserCmd } from "../functions/user.ts";
+import { GIT_FILES } from "../types/misc.ts";
+import { CheckForPath } from "../functions/filesystem.ts";
+import { FknError } from "../functions/error.ts";
+
+function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
+    const canCommit = CanCommit(path);
+    if (canCommit === false) {
+        LogStuff("Nothing to commit, sir!", "tick");
+        return "abort";
+    }
+    if (files === "S") {
+        if (canCommit === "nonAdded") {
+            LogStuff('There are changes, but none of them is added. Use "git add <file>" for that.', "what");
+            return "abort";
+        }
+        return "ok"; // nothing to do, files alr staged
+    }
+    if (Array.isArray(files) && files[0] !== "-A" && files.filter(validate).filter(CheckForPath).length === 0) {
+        LogStuff(
+            `No files specified for committing. Specify any of the ${
+                ColorString(GetCommittableFiles(path).length, "bold")
+            } modified files (run '${ColorString('fkcommit "message" file1 folder/file2', "bold")}').`,
+            "bruh",
+        );
+        return "abort";
+    }
+    try {
+        const out = GetCommittableFiles(path);
+        if (out.length === 0) return "abort";
+        const filtered = Array.isArray(files)
+            ? files
+                .filter(validate)
+                .filter(CheckForPath)
+            : ["(this should never appear in the cli)"];
+        // stage them early
+        StageFiles(path, (files === "A" || files[0] === "-A") ? "A" : filtered);
+        const staged = GetStagedFiles(path);
+        LogStuff(
+            (files === "A" || files[0] === "-A")
+                ? `Staged all files for commit (${staged.length}).`
+                : `Staged ${staged.length} ${pluralOrNot("file", filtered.length)} for commit:\n${
+                    staged
+                        .map((file) => ColorString("- " + file, "bold", "white"))
+                        .join("\n")
+                }`,
+            "tick",
+            ["bold", "bright-green"],
+        );
+        return "ok";
+    } catch {
+        LogStuff("Something went wrong while staging files. Aborting.", "error");
+        return "abort";
+    }
+}
 
 export default function TheCommitter(params: TheCommitterConstructedParams) {
-    if (!validate(params.message)) throw new Error("No commit message specified!");
+    if (!validate(params.message)) {
+        throw new FknError(
+            "Param__WhateverUnprovided",
+            "No commit message specified!",
+        );
+    }
 
-    const CWD = Deno.cwd();
-    const project = SpotProject(CWD);
+    const project = Deno.cwd();
 
-    if (!Git.IsRepo(project)) {
+    if (!IsRepo(project)) {
         LogStuff(
             "Are you serious right now? Making a commit without being on a Git repo...\nThis project isn't a Git repository. We can't commit to it.",
             "error",
@@ -20,30 +78,30 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
     }
 
     const env = GetProjectEnvironment(project);
+    const prevStaged = GetStagedFiles(project).length;
 
-    const canCommit = Git.CanCommit(project);
-
-    if (canCommit !== true) {
-        if (canCommit === "nonAdded") {
-            LogStuff('There are changes, but none of them is added. Use "git add <file>" for that.', "what");
-        }
-        LogStuff("Nothing to commit, sir!", "tick");
-        return;
+    if (!params.keepStagedFiles) StageFiles(project, "!A");
+    if (params.files[0] === "-A") StageFiles(project, "A");
+    const staging = StagingHandler(project, params.files);
+    if (staging === "abort") Deno.exit(1);
+    if (params.keepStagedFiles) {
+        LogStuff(`Also, keeping ${prevStaged} previously staged ${pluralOrNot("file", prevStaged)} for committing.`, "warn");
     }
 
     const commitCmd = ValidateUserCmd(env, "commitCmd");
 
-    const branches = Git.GetBranches(project);
+    const branches = GetBranches(project);
 
     const gitProps = {
-        fileCount: Git.GetFilesReadyForCommit(project).length,
+        fileCount: GetStagedFiles(project).length,
         branch: (params.branch && !testFlag(params.branch, "push", { allowQuickFlag: true, allowSingleDash: true }))
             ? branches.all.includes(normalize(params.branch)) ? params.branch : "__ERROR"
             : branches.current,
     };
 
     if (!validate(gitProps.branch) || gitProps.branch === "__ERROR") {
-        throw new Error(
+        throw new FknError(
+            params.branch ? "Git__NoBranch" : "Git__NoBranchAA",
             params.branch
                 ? `Given branch ${params.branch} wasn't found! These are your repo's branches:\n${
                     branches.all.toString().replaceAll(",", ", ")
@@ -68,10 +126,15 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
         );
     }
 
+    const fBold = ColorString(gitProps.fileCount, "bold");
+    const bBold = ColorString(gitProps.branch, "bold");
+    const mBold = ColorString(params.message.trim(), "bold", "italic");
+    const fCount = pluralOrNot("file", gitProps.fileCount);
+
     actions.push(
-        `If everything above went alright, commit ${ColorString(gitProps.fileCount, "bold")} file(s) to branch ${
-            ColorString(gitProps.branch, "bold")
-        } with message "${ColorString(params.message.trim(), "bold", "italic")}"`,
+        actions.length === 0
+            ? `Commit ${fBold} ${fCount} to branch ${bBold} with message "${mBold}"`
+            : `If everything above went alright, commit ${fBold} ${fCount} to branch ${bBold} with message "${mBold}"`,
     );
 
     if (params.push) {
@@ -81,24 +144,51 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
     }
 
     if (
-        !Interrogate(
-            `Heads up! We're about to take the following actions:\n${actions.join("\n")}\n\n- all of this at ${
+        !params.y && !Interrogate(
+            `Heads up! We're about to take the following actions:\n\n${actions.join("\n")}\n\n- all of this at ${
                 NameProject(
                     project,
                     "all",
                 )
-            }`,
+            }\n`,
         )
-    ) return;
+    ) {
+        LogStuff("Aborting commit.", "bruh");
+        return;
+    }
 
-    // run their commitCmd
-    RunUserCmd({
-        key: "commitCmd",
-        env,
-    });
+    // hear me out
+    // 1. UNSTAGE their files (they probably won't even realize) so we can modify them
+    const toReStage = GetStagedFiles(project);
+    const out = StageFiles(project, "!A");
+    if (out !== "ok") {
+        throw `Not OK code for staging handler.`;
+    }
+
+    // 2. run their commitCmd over UNSTAGED, MODIFIABLE files
+    try {
+        RunUserCmd({
+            key: "commitCmd",
+            env,
+        });
+    } catch {
+        LogStuff(
+            `${
+                ColorString("Your commitCmd failed. For your safety, we've aborted the commit.", "bold")
+            }\nCheck above for your test suite's (or whatever your commitCmd is) output.`,
+            "error",
+        );
+        return;
+    }
 
     // by this point we assume prev task succeeded
-    Git.Commit(
+    // 3. RESTAGE the files like nothing happened
+    // i'm genius developer fr fr
+
+    StageFiles(project, toReStage);
+
+    // and now, commit :D
+    Commit(
         project,
         params.message,
         "none",
@@ -107,13 +197,12 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
 
     if (params.push) {
         // push stuff to git
-        const pushOutput = Git.Push(project, gitProps.branch);
+        const pushOutput = Push(project, gitProps.branch);
         if (pushOutput === 1) {
-            throw new Error(`Git push failed unexpectedly.`);
+            throw new FknError("Git__UE", `Git push failed unexpectedly.`);
         }
     }
 
-    Deno.chdir(CWD);
     LogStuff(`That worked out! Commit "${params.message}" should be live now.`, "tick", ["bold", "bright-green"]);
     return;
 }

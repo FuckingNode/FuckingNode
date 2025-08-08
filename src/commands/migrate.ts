@@ -1,13 +1,13 @@
 import { normalize, validate } from "@zakahacecosas/string-utils";
 import { FULL_NAME } from "../constants.ts";
-import { GetDateNow } from "../functions/date.ts";
+import { GetDateNow, GetElapsedTime } from "../functions/date.ts";
 import { CheckForPath, JoinPaths } from "../functions/filesystem.ts";
-import { LogStuff } from "../functions/io.ts";
+import { LogStuff, Notification } from "../functions/io.ts";
 import { GetProjectEnvironment, NameProject, SpotProject } from "../functions/projects.ts";
 import type { MANAGER_JS, ProjectEnvironment } from "../types/platform.ts";
 import type { TheMigratorConstructedParams } from "./constructors/command.ts";
 import { FkNodeInterop } from "./interop/interop.ts";
-import { rename } from "node:fs";
+import { FknError } from "../functions/error.ts";
 
 function handler(
     from: MANAGER_JS,
@@ -16,7 +16,10 @@ function handler(
 ) {
     try {
         if (env.runtime === "golang" || env.runtime === "rust") {
-            throw new Error("This shouldn't have happened (internal error) - NonJS environment assigned JS-only task (migrate).");
+            throw new FknError(
+                "Internal__ImproperAssignment",
+                "This shouldn't have happened (internal error) - NonJS environment assigned JS-only task (migrate).",
+            );
         }
 
         LogStuff("Please wait (this will take a while)...", "working");
@@ -69,22 +72,24 @@ function handler(
         );
 
         LogStuff("Making a backup of your previous lockfile (4/6)...", "working");
-        if (env.lockfile.name === "bun.lockb" && CheckForPath(JoinPaths(env.root, "bun.lock"))) {
-            // handle case where bun.lockb was replaced with bun.lock
-            rename(env.lockfile.path, JoinPaths(env.root, "bun.lockb.bak"), (e) => {
-                if (e) throw e;
+        if (env.lockfile.path) {
+            if (env.lockfile.name === "bun.lockb" && CheckForPath(JoinPaths(env.root, "bun.lock"))) {
+                // handle case where bun.lockb was replaced with bun.lock
+                Deno.renameSync(env.lockfile.path, JoinPaths(env.root, "bun.lockb.bak"));
                 LogStuff(
                     "Your bun.lockb file will be backed up and replaced with a text-based lockfile (bun.lock).",
                     "bruh",
                 );
-            });
-            Deno.removeSync(env.lockfile.path);
+                Deno.removeSync(env.lockfile.path);
+            } else {
+                Deno.writeTextFileSync(
+                    JoinPaths(env.root, `${env.lockfile.name}.bak`),
+                    Deno.readTextFileSync(env.lockfile.path),
+                );
+                Deno.removeSync(env.lockfile.path);
+            }
         } else {
-            Deno.writeTextFileSync(
-                JoinPaths(env.root, `${env.lockfile.name}.bak`),
-                Deno.readTextFileSync(env.lockfile.path),
-            );
-            Deno.removeSync(env.lockfile.path);
+            LogStuff("No lockfile found, skipping backup.", "warn");
         }
 
         LogStuff("Installing modules with the desired manager (5/6)...", "working");
@@ -98,14 +103,23 @@ function handler(
 }
 export default function TheMigrator(params: TheMigratorConstructedParams): void {
     const { projectPath, wantedManager } = params;
+    const startup = new Date();
 
-    if (!validate(wantedManager)) throw new Error("No target (pnpm, npm, yarn, deno, bun) specified.");
+    if (!validate(wantedManager)) {
+        throw new FknError(
+            "Param__TargetInvalid",
+            "No target (pnpm, npm, yarn, deno, bun) specified.",
+        );
+    }
 
     const desiredManager = normalize(wantedManager);
 
     const MANAGERS = ["pnpm", "npm", "yarn", "deno", "bun"];
     if (!MANAGERS.includes(normalize(desiredManager))) {
-        throw new Error("Target isn't a valid package manager. Only JS environments (NodeJS, Deno, Bun) support migrate.");
+        throw new FknError(
+            "Param__TargetInvalid",
+            "Target isn't a valid package manager. Only JS environments (NodeJS, Deno, Bun) support migrate.",
+        );
     }
 
     const cwd = Deno.cwd();
@@ -114,13 +128,15 @@ export default function TheMigrator(params: TheMigratorConstructedParams): void 
     const workingEnv = GetProjectEnvironment(workingProject);
 
     if (!MANAGERS.includes(workingEnv.manager)) {
-        throw new Error(
+        throw new FknError(
+            "Interop__MigrateUnable",
             `${workingEnv.manager} is not a runtime we can migrate from. Only JS environments (NodeJS, Deno, Bun) support migrate.`,
         );
     }
 
     if (!CheckForPath(workingEnv.main.path)) {
-        throw new Error(
+        throw new FknError(
+            "Env__NoPkgFile",
             "No package.json/deno.json(c) file found, cannot migrate. How will we install your modules without that file?",
         );
     }
@@ -137,6 +153,13 @@ export default function TheMigrator(params: TheMigratorConstructedParams): void 
     );
 
     LogStuff(`That worked out! Enjoy using ${desiredManager} for ${NameProject(workingEnv.root, "all")}`);
+    const elapsed = Date.now() - startup.getTime();
+    if ((elapsed > 120000)) {
+        Notification(
+            `Your project was migrated!`,
+            `From ${workingEnv.manager} to ${desiredManager}. It took ${GetElapsedTime(startup)}, but it's now done!`,
+        );
+    }
 
     Deno.chdir(cwd);
 

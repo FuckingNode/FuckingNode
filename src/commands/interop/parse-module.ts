@@ -55,82 +55,78 @@ export function internalGolangRequireLikeStringParser(content: string[], kw: str
 // * ###
 const internalParsers = {
     GolangPkgFile: (content: string): GolangPkgFile => {
-        try {
-            const lines = content.trim().split("\n");
-            let module: UnknownString = "";
-            let go: UnknownString = "";
-            const require: GolangPkgFile["require"] = {};
+        const lines = content.trim().split("\n");
+        let module: UnknownString = "";
+        let go: UnknownString = "";
+        const require: GolangPkgFile["require"] = {};
 
-            const parsedLines = internalGolangRequireLikeStringParser(lines, "require").filter((line) => line.trim() !== "");
+        const parsedLines = internalGolangRequireLikeStringParser(lines, "require").filter((line) => line.trim() !== "");
 
-            for (const line of parsedLines) {
-                // ?? we assume that module & go version are defined
-                if (line.trim().startsWith("module")) {
-                    module = line.split(" ")[1]?.trim();
-                    // ?? "__NO_GOLANG_MODULE";
-                } else if (line.trim().startsWith("go")) {
-                    const match = line.trim().match(/go\s+(\d+\.\d+)/);
-                    // not mine
-                    go = match ? match[0] : "__NO_GOLANG_VERSION";
-                    // ?? "__NO_GOLANG_MODULE";
-                } else if (line.trim().startsWith("require")) {
-                    // Process the `require` line by checking for multiple strings in one line or across multiple lines
+        for (const line of parsedLines) {
+            // ?? we assume that module & go version are defined
+            if (line.trim().startsWith("module")) {
+                module = line.split(" ")[1]?.trim();
+                // ?? "__NO_GOLANG_MODULE";
+            } else if (line.trim().startsWith("go")) {
+                const match = line.trim().match(/go\s+(\d+\.\d+)/);
+                // not mine
+                go = match ? match[0] : "__NO_GOLANG_VERSION";
+                // ?? "__NO_GOLANG_MODULE";
+            } else if (line.trim().startsWith("require")) {
+                // Process the `require` line by checking for multiple strings in one line or across multiple lines
 
-                    // If there's more than one part (URL + version)
-                    // If it's broken across multiple lines (next line might contain the version), concatenate
-                    const index = parsedLines.indexOf(line);
-                    let newIndex = index + 1;
+                // If there's more than one part (URL + version)
+                // If it's broken across multiple lines (next line might contain the version), concatenate
+                const index = parsedLines.indexOf(line);
+                let newIndex = index + 1;
 
-                    while (newIndex < parsedLines.length) {
-                        const nextLine = parsedLines[newIndex]?.trim();
+                while (newIndex < parsedLines.length) {
+                    const nextLine = parsedLines[newIndex]?.trim();
 
-                        if (nextLine === undefined) {
-                            break; // break if the line is invalid
-                        }
-
-                        const nextParts = nextLine.split(/\s+/);
-
-                        if (nextParts[0] === undefined || nextParts[1] === undefined) {
-                            break; // break if invalid
-                        }
-
-                        const moduleName = nextParts[0].trim();
-                        const version = nextParts[1].trim();
-                        const isIndirect = (nextParts[2] ?? "").includes("indirect") || (nextParts[3] ?? "").includes("indirect");
-                        require[moduleName] = {
-                            version: version,
-                            indirect: isIndirect,
-                        };
-
-                        newIndex++; // Move to the next line after processing
+                    if (nextLine === undefined) {
+                        break; // break if the line is invalid
                     }
+
+                    const nextParts = nextLine.split(/\s+/);
+
+                    if (nextParts[0] === undefined || nextParts[1] === undefined) {
+                        break; // break if invalid
+                    }
+
+                    const moduleName = nextParts[0].trim();
+                    const version = nextParts[1].trim();
+                    const isIndirect = (nextParts[2] ?? "").includes("indirect") || (nextParts[3] ?? "").includes("indirect");
+                    require[moduleName] = {
+                        version: version,
+                        indirect: isIndirect,
+                    };
+
+                    newIndex++; // Move to the next line after processing
                 }
             }
-
-            if (!validate(module) || !validate(go)) {
-                throw new FknError("Env__UnparsableMainFile", `Given go.mod contents are unparsable.\n${content}`);
-            }
-
-            const toReturn: GolangPkgFile = {
-                module,
-                go,
-                require,
-            };
-
-            if (!FkNodeInterop.BareValidators.Golang(toReturn)) {
-                throw new FknError("Env__UnparsableMainFile", `Given go.mod contents are unparsable.`);
-            }
-
-            return toReturn;
-        } catch (e) {
-            throw e;
         }
+
+        if (!validate(module) || !validate(go)) {
+            throw new FknError("Env__PkgFileUnparsable", `Given go.mod contents are unparsable.\n${content}`);
+        }
+
+        const toReturn: GolangPkgFile = {
+            module,
+            go,
+            require,
+        };
+
+        if (!FkNodeInterop.BareValidators.Golang(toReturn)) {
+            throw new FknError("Env__PkgFileUnparsable", `Given go.mod contents are unparsable.`);
+        }
+
+        return toReturn;
     },
     CargoPkgFile: (content: string): CargoPkgFile => {
         const toReturn = parseToml(content);
 
         if (!FkNodeInterop.BareValidators.Cargo(toReturn)) {
-            throw new FknError("Env__UnparsableMainFile", `Given Cargo.toml contents are unparsable.`);
+            throw new FknError("Env__PkgFileUnparsable", `Given Cargo.toml contents are unparsable.`);
         }
 
         return toReturn;
@@ -139,7 +135,7 @@ const internalParsers = {
         const toReturn = parseJsonc(content);
 
         if (!FkNodeInterop.BareValidators.NodeBun(toReturn)) {
-            throw new FknError("Env__UnparsableMainFile", `Given package.json contents are unparsable.`);
+            throw new FknError("Env__PkgFileUnparsable", `Given package.json contents are unparsable.`);
         }
 
         return toReturn;
@@ -148,7 +144,7 @@ const internalParsers = {
         const toReturn = parseJsonc(content);
 
         if (!FkNodeInterop.BareValidators.Deno(toReturn)) {
-            throw new FknError("Env__UnparsableMainFile", `Given deno.json/deno.jsonc contents are unparsable.`);
+            throw new FknError("Env__PkgFileUnparsable", `Given deno.json/deno.jsonc contents are unparsable.`);
         }
 
         return toReturn;
@@ -174,38 +170,34 @@ export const Parsers = {
     Golang: {
         STD: internalParsers.GolangPkgFile,
         CPF: (content: string, version: string | undefined, ws: string[]): FnCPF => {
-            try {
-                const parsedContent = internalParsers.GolangPkgFile(content);
+            const parsedContent = internalParsers.GolangPkgFile(content);
 
-                const deps: FnCPF["deps"] = [];
+            const deps: FnCPF["deps"] = [];
 
-                Object.entries(parsedContent.require ?? []).map(
-                    ([k, v]) => {
-                        deps.push(
-                            {
-                                name: k,
-                                ver: v.version,
-                                rel: v.indirect === true ? "go:ind" : "univ:dep",
-                                src: "pkg.go.dev",
-                            },
-                        );
-                    },
-                );
+            Object.entries(parsedContent.require ?? []).map(
+                ([k, v]) => {
+                    deps.push(
+                        {
+                            name: k,
+                            ver: v.version,
+                            rel: v.indirect === true ? "go:ind" : "univ:dep",
+                            src: "pkg.go.dev",
+                        },
+                    );
+                },
+            );
 
-                return {
-                    name: parsedContent.module,
-                    version: version === undefined ? "Unknown" : version,
-                    rm: "golang",
-                    perPlatProps: {
-                        cargo_edt: "__NTP",
-                    },
-                    ws,
-                    deps: dedupeDependencies(deps),
-                    fknVer: VERSION,
-                };
-            } catch (e) {
-                throw e;
-            }
+            return {
+                name: parsedContent.module,
+                version: version === undefined ? "Unknown" : version,
+                rm: "golang",
+                perPlatProps: {
+                    cargo_edt: "__NTP",
+                },
+                ws,
+                deps: dedupeDependencies(deps),
+                fknVer: VERSION,
+            };
         },
     },
     Cargo: {
@@ -275,7 +267,10 @@ export const Parsers = {
             const parsedContent = internalParsers.NodeBunPkgFile(content);
 
             if (!parsedContent.name) {
-                throw new Error("Invalid package.json file");
+                throw new FknError(
+                    "Env__PkgFileUnparsable",
+                    "Invalid package.json file",
+                );
             }
 
             const deps: FnCPF["deps"] = [];

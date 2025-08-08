@@ -102,12 +102,6 @@ export interface TheSettingsConstructedParams {
  */
 export interface TheUpdaterConstructedParams {
     /**
-     * If true, update will be auto installed.
-     *
-     * @type {boolean}
-     */
-    install: boolean;
-    /**
      * If true, when you're up to date nothing's shown.
      *
      * @type {boolean}
@@ -177,6 +171,22 @@ export interface TheReleaserConstructedParams {
 }
 
 /**
+ * The Builder.
+ * @author ZakaHaceCosas
+ *
+ * @export
+ * @interface TheBuilderConstructedParams
+ */
+export interface TheBuilderConstructedParams {
+    /**
+     * Project to be built.
+     *
+     * @type {UnknownString}
+     */
+    project: UnknownString;
+}
+
+/**
  * The Exporter
  * @author ZakaHaceCosas
  *
@@ -235,6 +245,12 @@ export interface TheCommitterConstructedParams {
      */
     message: UnknownString;
     /**
+     * Files to commit. Either an array of paths or "A" for all files or "S" for staged files.
+     *
+     * @type {UnknownString[] | "A" | "S"}
+     */
+    files: UnknownString[] | "A" | "S";
+    /**
      * Whether to push changes to remote or not.
      *
      * @type {boolean}
@@ -246,6 +262,18 @@ export interface TheCommitterConstructedParams {
      * @type {?UnknownString}
      */
     branch?: UnknownString;
+    /**
+     * Whether to keep previously staged files for committing.
+     *
+     * @type {boolean}
+     */
+    keepStagedFiles: boolean;
+    /**
+     * If true, no confirmation is asked before committing.
+     *
+     * @type {?boolean}
+     */
+    y: boolean;
 }
 
 /**

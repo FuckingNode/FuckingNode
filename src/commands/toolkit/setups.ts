@@ -1,3 +1,4 @@
+import { FknError } from "../../functions/error.ts";
 import { ColorString } from "../../functions/io.ts";
 
 /** Get an embed file. */
@@ -7,7 +8,12 @@ function Get(name: string): string {
     for (const match of dir) {
         if (match.isFile && match.name === name) result = Deno.readTextFileSync(import.meta.dirname + "/setups/" + match.name);
     }
-    if (!result) throw new Error("Invalid name: " + name);
+    if (!result) {
+        throw new FknError(
+            "Internal__InvalidEmbedded",
+            "Invalid name: " + name,
+        );
+    }
     return result;
 }
 

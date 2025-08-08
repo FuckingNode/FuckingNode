@@ -2,51 +2,62 @@ import { format, parse } from "@std/semver";
 import { ColorString, Interrogate, LogStuff } from "../functions/io.ts";
 import { GetProjectEnvironment, NameProject, SpotProject } from "../functions/projects.ts";
 import type { TheReleaserConstructedParams } from "./constructors/command.ts";
-import type { DenoPkgFile, NodePkgFile } from "../types/platform.ts";
+import type { CargoPkgFile } from "../types/platform.ts";
 import { Commander } from "../functions/cli.ts";
-import { Git } from "../functions/git.ts";
+import { AddToGitIgnore, Commit, IsRepo, Push, Tag } from "../functions/git.ts";
 import { RunUserCmd, ValidateUserCmd } from "../functions/user.ts";
 import { validate } from "@zakahacecosas/string-utils";
+import { APP_NAME } from "../constants.ts";
+import { FknError } from "../functions/error.ts";
+import { stringify as stringifyToml } from "@std/toml/stringify";
+import { GetTextIndentSize } from "../functions/filesystem.ts";
+import { RunBuildCmds } from "../functions/build.ts";
 
 export default function TheReleaser(params: TheReleaserConstructedParams) {
-    if (!validate(params.version)) {
-        throw new Error("No version specified!");
-    }
+    if (!validate(params.version)) throw new FknError("Param__VerInvalid", "No version specified!");
 
     // validate version
     try {
         parse(params.version);
     } catch {
-        LogStuff(`Invalid version: ${params.version}. Please use a valid SemVer version.`, "error", "red");
-        return;
+        throw new FknError(
+            "Param__VerInvalid",
+            `Invalid version: ${params.version}. Please use a valid SemVer version.`,
+        );
     }
 
     const parsedVersion = parse(params.version);
-    const project = SpotProject(params.project);
+    const project = (params.project || "").startsWith("--") ? Deno.cwd() : SpotProject(params.project);
     const CWD = Deno.cwd();
     const env = GetProjectEnvironment(project);
-    const canUseGit = Git.IsRepo(project);
+    const canUseGit = IsRepo(project);
 
     Deno.chdir(env.root);
 
     if (env.commands.publish === "__UNSUPPORTED") {
-        throw new Error(`Platform ${env.runtime} doesn't support publishing. Aborting.`);
+        throw new FknError("Interop__PublishUnable", `Platform ${env.runtime} doesn't support publishing. Aborting.`);
     }
 
     const releaseCmd = ValidateUserCmd(env, "releaseCmd");
-
-    // bump version from pkg json first
-    const newPackageFile: NodePkgFile | DenoPkgFile = {
-        ...env.main.stdContent,
-        version: format(parsedVersion),
-    };
+    const buildCmd = ValidateUserCmd(env, "buildCmd");
+    const shouldBuild = env.settings.buildForRelease;
 
     const actions: string[] = [
         `${ColorString(`Update your ${ColorString(env.main.name, "bold")}'s`, "white")} "version" field`,
         `Create a ${ColorString(`${env.main.name}.bak`, "bold")} file, and add it to .gitignore`,
     ];
-
-    if (releaseCmd !== "disable") {
+    if (buildCmd && shouldBuild) {
+        actions.push(
+            `Run your 'buildCmd' (${buildCmd}).`,
+        );
+    }
+    if (releaseCmd) {
+        if (env.runtime === "rust") {
+            throw new FknError(
+                "Task__Release",
+                `Cargo does not support JS-like run, however your fknode.yaml file has the releaseCmd set to "${env.settings.releaseCmd}". To avoid unexpected behavior, we stopped execution. Please, remove the "releaseCmd" key from your config file.`,
+            );
+        }
         actions.push(
             `Run ${
                 ColorString(
@@ -69,9 +80,15 @@ export default function TheReleaser(params: TheReleaserConstructedParams) {
             );
         }
     }
+    if (params.push && !canUseGit) {
+        LogStuff("--push was specified, but you're not in a Git repo, so it'll be ignored.\n");
+    }
     if (!(params.dry === true || env.settings.releaseAlwaysDry === true)) {
         actions.push(
-            ColorString(`Publish your changes to ${ColorString(env.runtime === "deno" ? "JSR" : "npm", "bold")}`, "red"),
+            ColorString(
+                `Publish your changes to ${ColorString(env.runtime === "deno" ? "JSR" : env.runtime === "rust" ? "crates.is" : "npm", "bold")}`,
+                "red",
+            ),
         );
     }
     const confirmation = Interrogate(
@@ -87,34 +104,90 @@ export default function TheReleaser(params: TheReleaserConstructedParams) {
     if (!confirmation) return;
 
     // write the updated pkg file
-    try {
-        Deno.copyFileSync(env.main.path, `${env.main.path}.bak`); // Backup original
-        Deno.writeTextFileSync(env.main.path, JSON.stringify(newPackageFile, undefined, 2));
-    } catch (e) {
-        throw new Error(`Failed to write to '${env.main.path}': ${e}`);
+    Deno.copyFileSync(env.main.path, `${env.main.path}.bak`); // Backup original
+    if (env.runtime === "rust") {
+        const newPackageFile = {
+            ...(env.main.stdContent),
+            package: {
+                ...(env.main.stdContent as CargoPkgFile).package,
+                version: format(parsedVersion),
+            },
+        };
+        Deno.writeTextFileSync(env.main.path, stringifyToml(newPackageFile));
+    } else {
+        const newPackageFile = {
+            ...env.main.stdContent,
+            version: format(parsedVersion),
+        };
+        const indent = GetTextIndentSize(Deno.readTextFileSync(env.main.path));
+        Deno.writeTextFileSync(env.main.path, JSON.stringify(newPackageFile, undefined, indent));
+    }
+
+    // build
+    if (shouldBuild) {
+        if (!buildCmd) LogStuff("No build command(s) specified!", "warn", "bright-yellow");
+        else RunBuildCmds(buildCmd.split("^"));
     }
 
     // run their releaseCmd
-    RunUserCmd({
-        key: "releaseCmd",
-        env,
-    });
+    if (releaseCmd) {
+        RunUserCmd({
+            key: "releaseCmd",
+            env,
+        });
+    }
 
-    // just in case
+    if (params.dry === true || env.settings.releaseAlwaysDry === true) {
+        LogStuff(
+            `Aborted committing, publishing, and whatever else, because either the command you executed or this project's fknode.yaml instructed ${APP_NAME.CASED} to make a "dry-run".\nYour 'releaseCmd' did execute.`,
+            "warn",
+            "bright-yellow",
+        );
+        return;
+    }
+
+    LogStuff(
+        `\nFor safety, we'll first run ${env.manager}'s publish command with "--dry-run", and pause execution. Check that everything went alright, then come back to this terminal session and hit 'Y' so we continue with all tasks you assigned to us.\n(or hit 'N' if something's wrong).\n`,
+        undefined,
+        ["bright-yellow"],
+    );
+
+    Commander(
+        env.commands.base,
+        [
+            ...env.commands.publish,
+            "--dry-run",
+        ],
+        true,
+    );
+    console.log("");
+    const finalConfirmation = Interrogate(
+        "Dry-run complete. Check that everything is alright.\nOnce you did, hit 'Y' so we continue, or 'N' so we abort.",
+        "ask",
+    );
+
+    if (!finalConfirmation) {
+        LogStuff("Aborted successfully. Fix whatever's wrong and come back whenever you wish.", "tick");
+        return;
+    } else {
+        LogStuff("Roger that.", "tick");
+    }
+
     if (canUseGit) {
-        Git.Ignore(
+        // just in case
+        AddToGitIgnore(
             project,
             `${env.main.name}.bak`,
         );
 
-        Git.Commit(
+        Commit(
             project,
             `Release v${format(parsedVersion)} (automated by F*ckingNode)`,
             [env.main.path],
             [],
         );
 
-        Git.Tag(
+        Tag(
             project,
             format(parsedVersion),
             params.push,
@@ -122,28 +195,17 @@ export default function TheReleaser(params: TheReleaserConstructedParams) {
 
         if (params.push) {
             // push stuff to git
-            const pushOutput = Git.Push(project, false);
+            const pushOutput = Push(project, false);
             if (pushOutput === 1) {
-                throw new Error(`Git push failed unexpectedly.`);
+                throw new FknError("Git__UE", `Git push failed unexpectedly.`);
             }
         }
-    }
-
-    if (params.dry === true || env.settings.releaseAlwaysDry === true) {
-        if (env.settings.releaseAlwaysDry === true) {
-            LogStuff(
-                "Note: Package won't be published because the releaseAlwaysDry key in your fknode.yaml is set to true. If you want to publish this package, remove or unset that key.",
-                "warn",
-                "bright-yellow",
-            );
-        }
-        return;
     }
 
     // publish the package
     const publishOutput = Commander(env.commands.base, env.commands.publish);
     if (!publishOutput.success) {
-        throw new Error(`Publish command failed: ${publishOutput.stdout}`);
+        throw new FknError("External__Publish", `Publish command failed: ${publishOutput.stdout}`);
     }
 
     Deno.chdir(CWD);

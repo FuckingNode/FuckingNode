@@ -1,9 +1,8 @@
 import { FWORDS } from "../constants.ts";
 import { ColorString, LogStuff } from "../functions/io.ts";
-import { AddProject, GetAllProjects, GetProjectEnvironment, NameProject, RemoveProject } from "../functions/projects.ts";
-import TheHelper from "./help.ts";
+import { GetAllProjects, GetProjectEnvironment, NameProject } from "../functions/projects.ts";
 import { DEBUG_LOG } from "../functions/error.ts";
-import { sortAlphabetically, testFlag } from "@zakahacecosas/string-utils";
+import { sortAlphabetically, testFlag, UnknownString, validate } from "@zakahacecosas/string-utils";
 
 /**
  * Lists all projects.
@@ -79,51 +78,21 @@ function ListProjects(
     return;
 }
 
-export default function TheManager(args: string[]) {
-    if (!args || args.length === 0) {
-        TheHelper({ query: "manager" });
-        Deno.exit(1);
-    }
-
-    const command = args[1];
-    const secondArg = args[2] ? args[2].trim() : null;
-
-    if (!command) {
-        TheHelper({ query: "manager" });
+export default function TheLister(arg: UnknownString) {
+    if (!validate(arg)) {
+        ListProjects(
+            false,
+        );
         return;
     }
 
-    switch (command.toLowerCase()) {
-        case "add":
-            AddProject(secondArg);
-            break;
-        case "remove":
-            RemoveProject(secondArg);
-            break;
-        case "list":
-            if (secondArg) {
-                let ignoreParam: false | "limit" | "exclude" = false;
-                if (testFlag(secondArg, "ignored")) {
-                    ignoreParam = "limit";
-                } else if (testFlag(secondArg, "alive")) {
-                    ignoreParam = "exclude";
-                }
-                ListProjects(
-                    ignoreParam,
-                );
-            } else {
-                ListProjects(
-                    false,
-                );
-            }
-            break;
-        case "cleanup":
-            LogStuff(
-                "We removed the need to manually cleanup your projects - each time you run the CLI we auto-clean them for you.\nEnjoy!",
-                "comrade",
-            );
-            break;
-        default:
-            TheHelper({ query: "manager" });
+    let ignoreParam: false | "limit" | "exclude" = false;
+    if (testFlag(arg, "ignored")) {
+        ignoreParam = "limit";
+    } else if (testFlag(arg, "alive")) {
+        ignoreParam = "exclude";
     }
+    ListProjects(
+        ignoreParam,
+    );
 }
