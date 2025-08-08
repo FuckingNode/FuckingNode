@@ -12,7 +12,7 @@
     pkgs = import nixpkgs { inherit system; };
 
     pname = "fuckingnode";
-    version = "3.4.1";
+    version = "4.0.0";
 
     urls = {
       "x86_64-linux"   = "https://github.com/FuckingNode/FuckingNode/releases/download/${version}/FuckingNode-linux64";
