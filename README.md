@@ -104,10 +104,7 @@ You can now either:
 
 ## Updates
 
-We auto-check for updates once every few days to tell you about new versions, and have an `upgrade` command so you can update the CLI whenever you want.
-
-> [!NOTE]
-> If it does not work, just run the install script you used for installation, your data will be preserved. Sometimes, self-updating from the executable itself tends to fail.
+Run `fkn upgrade` to check for updates. As of now, you need to re-run the shell command to reinstall the CLI, it's not self-updateabe. Data won't be lost.
 
 ## Documentation
 
