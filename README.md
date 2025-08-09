@@ -1,7 +1,7 @@
 <!-- markdownlint-disable md033 md041-->
 <p align="center">
   <a href="https://fuckingnode.github.io/">
-    <img src="https://raw.githubusercontent.com/FuckingNode/fuckingnode.github.io/refs/heads/main/docs/fkn_logo_light.png" alt="FuckingNode Logo" height=150>
+    <img src="https://fuckingnode.github.io/fkn_logo.webp" alt="FuckingNode Logo" height=150>
     </a>
 </p>
 <h1 align="center">The f*cking chaos of maintaining<br/>JavaScript projects ends here</h1>
