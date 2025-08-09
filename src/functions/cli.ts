@@ -34,12 +34,14 @@ export interface CommanderOutput {
  */
 export function Commander(
     main: string,
-    stuff: string[],
+    stuff: (string | undefined)[],
     showOutput?: boolean,
 ): CommanderOutput {
+    const args = stuff.filter((i) => i !== undefined);
+
     if (showOutput === false) {
         const command = new Deno.Command(main, {
-            args: stuff,
+            args,
             stdout: "piped",
             stderr: "piped",
         });
@@ -55,7 +57,7 @@ export function Commander(
     }
 
     const command = new Deno.Command(main, {
-        args: stuff,
+        args,
         stdout: "inherit",
         stderr: "inherit",
         stdin: "inherit",

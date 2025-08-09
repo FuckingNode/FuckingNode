@@ -19,7 +19,7 @@ function HandleError(
         err,
         "Something went wrong and we don't know what",
         stdout ??
-            "UNDEFINED COMMAND STDOUT/STDERR - Check above, command output is likely to be present in your terminal session.",
+            "UNDEFINED COMMAND STDOUT/STDERR.",
     );
 }
 
@@ -50,18 +50,12 @@ export const InteropedFeatures = {
 
                 const output = Commander(
                     env.commands.exec[0],
-                    env.commands.exec.length === 1
-                        ? [
-                            "eslint",
-                            "--fix",
-                            ".",
-                        ]
-                        : [
-                            env.commands.exec[1],
-                            "eslint",
-                            "--fix",
-                            ".",
-                        ],
+                    [
+                        env.commands.exec[1],
+                        "eslint",
+                        "--fix",
+                        ".",
+                    ],
                     verbose,
                 );
 
@@ -127,18 +121,12 @@ export const InteropedFeatures = {
 
                 const output = Commander(
                     env.commands.exec[0],
-                    env.commands.exec.length === 1
-                        ? [
-                            "prettier",
-                            "--w",
-                            ".",
-                        ]
-                        : [
-                            env.commands.exec[1],
-                            "prettier",
-                            "--w",
-                            ".",
-                        ],
+                    [
+                        env.commands.exec[1],
+                        "prettier",
+                        "--w",
+                        ".",
+                    ],
                     verbose,
                 );
 
