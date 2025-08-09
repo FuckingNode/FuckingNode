@@ -18,14 +18,9 @@ function ResetSettings() {
 
 export default function TheSettings(params: TheSettingsConstructedParams) {
     const args = normalizeArray(params.args);
-    DEBUG_LOG("SETTINGS TOOK", args[0]);
+    DEBUG_LOG("SETTINGS TOOK", args);
 
     if (!args || args.length === 0) {
-        DisplaySettings();
-        return;
-    }
-
-    if (!args[0]) {
         DisplaySettings();
         return;
     }
@@ -41,7 +36,7 @@ export default function TheSettings(params: TheSettingsConstructedParams) {
         case "change":
             if (!validateAgainst(args[1], VALID_SETTINGS)) {
                 LogStuff(
-                    `Invalid option, use one of these keys to tweak settings: ${VALID_SETTINGS.toString()}`,
+                    `Invalid setting, use one of these keys: ${VALID_SETTINGS.toString()}`,
                 );
                 return;
             }

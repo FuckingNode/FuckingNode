@@ -56,7 +56,7 @@ export default function TheAbouter() {
         `Running ${coolStrings.ver}. Written in ${coolStrings.ts}. Powered by ${coolStrings.deno}.\nDeveloped in ${coolStrings.spain} by ${coolStrings.zakaOne} (${coolStrings.zakaTwo} in spanish).\n`,
     );
     LogStuff(
-        `Follow us and join our Discord at ${APP_URLs.WEBSITE}follow-us`,
+        `Follow us and join our Discord at ${ColorString(`${APP_URLs.WEBSITE}follow-us`, "orange")}`,
     );
     LogStuff(
         `We all love freedom, right? This is open-source: ${coolStrings.gitUrl}\n`,

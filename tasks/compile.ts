@@ -96,11 +96,9 @@ if (release) {
         const hashing = CMD.hashCmd.outputSync();
         const hash = new TextDecoder().decode(hashing.stdout).trim();
         hashes[CMD.target] = hash;
-        console.debug(new TextDecoder().decode(hashing.stdout), new TextDecoder().decode(hashing.stderr));
         console.log(CMD.target, "HASH", hash);
         Deno.writeTextFileSync("dist/konbini.hash.yaml", stringifyYaml(hashes));
-        const signing = CMD.signCmd.outputSync();
-        console.debug(new TextDecoder().decode(signing.stdout), new TextDecoder().decode(signing.stderr));
+        CMD.signCmd.outputSync();
         console.log("Signed", CMD.target);
     }
 

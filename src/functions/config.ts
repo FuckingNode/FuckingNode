@@ -138,9 +138,10 @@ export function GetUserSettings(): CF_FKNODE_SETTINGS {
     return stuff;
 }
 
-type setting = keyof CF_FKNODE_SETTINGS;
-
-export const VALID_SETTINGS: setting[] = ["defaultIntensity", "updateFreq", "favEditor", "flushFreq"];
+// TODO (for v5 cause breaking)
+// don't use casing for settings
+// the CLI lowercases params, breaking programmatic changing of settings
+export const VALID_SETTINGS = ["defaultintensity", "defaultmanager", "updatefreq", "faveditor", "flushfreq"] as const;
 
 /**
  * Changes a given user setting to a given value.
@@ -151,91 +152,58 @@ export const VALID_SETTINGS: setting[] = ["defaultIntensity", "updateFreq", "fav
  * @returns {void}
  */
 export function ChangeSetting(
-    setting: setting,
+    setting: typeof VALID_SETTINGS[number],
     value: UnknownString,
 ): void {
     const settingsPath = GetAppPath("SETTINGS");
     const currentSettings = GetUserSettings();
 
-    if (setting === "defaultIntensity") {
+    let newSettings: CF_FKNODE_SETTINGS | undefined;
+
+    if (setting === "defaultintensity") {
         if (!validateAgainst(value, ["normal", "hard", "hard-only", "maxim", "maxim-only"])) {
-            LogStuff(`${value} is not valid. Enter either 'normal', 'hard', 'hard-only', or 'maxim'.`);
-            return;
+            return LogStuff(`${value} is not valid. Enter either 'normal', 'hard', 'hard-only', or 'maxim'.`);
         }
-        const newSettings: CF_FKNODE_SETTINGS = {
-            ...currentSettings,
-            defaultIntensity: value,
-        };
-        Deno.writeTextFileSync(
-            settingsPath,
-            StringifyYaml(newSettings),
-        );
-    } else if (setting === "updateFreq") {
-        const newValue = Math.ceil(Number(value));
-        if (typeof newValue !== "number" || isNaN(newValue) || newValue <= 0) {
-            LogStuff(`${value} is not valid. Enter a valid number greater than 0.`);
-            return;
+        newSettings = { ...currentSettings, defaultIntensity: value };
+    } else if (setting === "defaultmanager") {
+        if (!validateAgainst(value, ["npm", "pnpm", "yarn", "deno", "bun", "cargo", "go"])) {
+            return LogStuff(`${value} is not valid. Enter either "npm", "pnpm", "yarn", "deno", "bun", "cargo", or "go".`);
         }
-        const newSettings: CF_FKNODE_SETTINGS = {
-            ...currentSettings,
-            updateFreq: Math.ceil(newValue),
-        };
-        Deno.writeTextFileSync(
-            settingsPath,
-            StringifyYaml(newSettings),
-        );
-    } else if (setting === "favEditor") {
+        newSettings = { ...currentSettings, defaultManager: value };
+    } else if (setting === "updatefreq") {
+        const freq = Math.ceil(Number(value));
+        if (!Number.isFinite(freq) || freq <= 0) {
+            return LogStuff(`${value} is not valid. Enter a valid number greater than 0.`);
+        }
+        newSettings = { ...currentSettings, updateFreq: freq };
+    } else if (setting === "faveditor") {
         if (!validateAgainst(value, ["vscode", "sublime", "emacs", "atom", "notepad++", "vscodium"])) {
-            LogStuff(
-                `${value} is not valid. Enter either:\n'vscode', 'sublime', 'emacs', 'atom', 'notepad++', or 'vscodium'.`,
-            );
-            return;
+            return LogStuff(`${value} is not valid. Enter one of: vscode, sublime, emacs, atom, notepad++, vscodium.`);
         }
-        const newSettings: CF_FKNODE_SETTINGS = {
-            ...currentSettings,
-            favEditor: value,
-        };
-        Deno.writeTextFileSync(
-            settingsPath,
-            StringifyYaml(newSettings),
-        );
-    } else if (setting === "flushFreq") {
-        const newValue = Math.ceil(Number(value));
-        if (typeof newValue !== "number" || isNaN(newValue) || newValue <= 0) {
-            LogStuff(`${value} is not valid. Enter a valid number greater than 0.`);
-            return;
+        newSettings = { ...currentSettings, favEditor: value };
+    } else if (setting === "flushfreq") {
+        const flush = Math.ceil(Number(value));
+        if (!Number.isFinite(flush) || flush <= 0) {
+            return LogStuff(`${value} is not valid. Enter a valid number greater than 0.`);
         }
-        const newSettings: CF_FKNODE_SETTINGS = {
-            ...currentSettings,
-            flushFreq: newValue,
-        };
-        Deno.writeTextFileSync(
-            settingsPath,
-            StringifyYaml(newSettings),
-        );
+        newSettings = { ...currentSettings, flushFreq: flush };
     } else {
         if (!validateAgainst(value, ["npm", "pnpm", "yarn", "bun", "deno", "cargo", "go"])) {
-            LogStuff(`${value} is not valid. Enter a valid package manager (npm, pnpm, yarn, bun, deno, cargo, go).`);
-            return;
+            return LogStuff(`${value} is not valid. Enter a valid package manager (npm, pnpm, yarn, bun, deno, cargo, go).`);
         }
-        if (["cargo", "go"].includes(value)) {
-            if (
-                !Interrogate(
-                    `Are you sure? ${value} is a non-JS runtime and ${APP_NAME.CASED} is mainly a JS-related CLI; you'll be using JS projects more often.`,
-                )
-            ) return;
-        }
-        const newSettings: CF_FKNODE_SETTINGS = {
-            ...currentSettings,
-            defaultManager: value,
-        };
-        Deno.writeTextFileSync(
-            settingsPath,
-            StringifyYaml(newSettings),
-        );
+        if (
+            ["cargo", "go"].includes(value) &&
+            !Interrogate(
+                `Are you sure? ${value} is a non-JS runtime and ${APP_NAME.CASED} is mainly a JS-related CLI; you'll be using JS projects more often.`,
+            )
+        ) return;
+        newSettings = { ...currentSettings, defaultManager: value };
     }
 
-    LogStuff(`Settings successfully updated! ${setting} is now ${value}`, "tick-clear");
+    if (newSettings) {
+        Deno.writeTextFileSync(settingsPath, StringifyYaml(newSettings));
+        LogStuff(`Settings successfully updated! ${setting} is now ${value}`, "tick-clear");
+    }
 
     return;
 }

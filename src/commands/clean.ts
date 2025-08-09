@@ -110,19 +110,26 @@ export default function TheCleaner(params: TheCleanerConstructedParams) {
         }
     }
 
-    if (realIntensity === "hard") PerformHardCleanup(verbose);
+    if (realIntensity === "hard" || realIntensity === "maxim") PerformHardCleanup(verbose);
     if (realIntensity === "maxim") PerformMaximCleanup(workingProjects);
 
     // go back home
     Deno.chdir(originalLocation);
     LogStuff(
-        `All your ${FWORDS.MFN} projects have been cleaned! Back to ${originalLocation}.`,
+        `${
+            workingProjects.length > 1
+                ? `All your ${FWORDS.MFN} projects have been cleaned!`
+                : `Your ${FWORDS.MFN} project has been cleaned!`
+        } Back to ${originalLocation}.`,
         "tick",
         "bright-green",
     );
     const elapsed = Date.now() - startup.getTime();
     if ((elapsed > 180000)) {
-        Notification(`All your ${FWORDS.MFN} projects have been cleaned!`, `It took us ${GetElapsedTime(startup)}, but we did it!`);
+        Notification(
+            workingProjects.length > 1 ? `All your ${FWORDS.MFN} projects have been cleaned!` : `Your ${FWORDS.MFN} project has been cleaned!`,
+            `It took ${GetElapsedTime(startup)}, but we did it!`,
+        );
     }
     if (verbose) ShowReport(results);
     return;

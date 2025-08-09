@@ -60,4 +60,4 @@ export type GLOBAL_ERROR_CODES =
 /**
  * All possible project validation error codes.
  */
-export type PROJECT_ERROR_CODES = "IsDuplicate" | "NoPkgFile" | "NotFound" | "NoName" | "NoVersion" | "CantGetProjectEnv";
+export type PROJECT_ERROR_CODES = "IsDuplicate" | "NoPkgFile" | "NotFound" | "NoName" | "NoVersion" | "CantGetProjectEnv" | "TooManyLockfiles";

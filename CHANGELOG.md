@@ -6,6 +6,20 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
+## [4.0.1] (09-08-2025)
+
+### Fixed
+
+- Fixed `settings` not working because of wrong input validation.
+- Fixed the `defaultManager` setting not being changeable.
+- Fixed places that showed elapsed time in any task showing wrong times.
+- Fixed the `hard` step of cleanup not running when intensity is `maxim` (which is higher).
+- Fixed cleanup saying "All your projects were cleaned" when there's just one.
+- Fixed `remove` doing an unnecessary function call, wasting some resources.
+- Fixed the CLI crashing when an invalid project manages to make it to the project list. Expected behavior was the project being auto-removed.
+- Fixed the `projectEnvOverride` project setting not always being respected.
+- Fixed projects with a `@owner/package` type of name not being properly identified on Windows.
+
 ## [4.0.0] (08-08-2025)
 
 ### Added

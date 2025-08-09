@@ -12,7 +12,7 @@ Deno.test({
         assertEquals(
             GetBranches(here),
             {
-                current: "v4",
+                current: "master",
                 // update if we add more branches
                 // apparently git clone only clones the branch you're going to use
                 all: [

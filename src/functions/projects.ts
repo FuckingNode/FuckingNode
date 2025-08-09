@@ -30,7 +30,7 @@ import { globSync } from "node:fs";
  */
 export function GetAllProjects(ignored?: false | "limit" | "exclude"): string[] {
     const content = Deno.readTextFileSync(GetAppPath("MOTHERFKRS"));
-    DEBUG_LOG("GetAllProjects CALLED (it's being called too many times i think?)");
+    DEBUG_LOG("GetAllProjects CALLED");
     const list = ParsePathList(content);
     const cleanList = list.filter((p) => CheckForPath(p) === true);
 
@@ -40,12 +40,16 @@ export function GetAllProjects(ignored?: false | "limit" | "exclude"): string[] 
     const aliveReturn: string[] = [];
 
     for (const entry of cleanList) {
-        const protection = GetProjectSettings(entry).divineProtection;
-        if (!protection || protection === "disabled") {
-            if (ignored === "exclude") aliveReturn.push(entry);
-            continue;
+        try {
+            const protection = GetProjectSettings(entry).divineProtection;
+            if (!protection || protection === "disabled") {
+                if (ignored === "exclude") aliveReturn.push(entry);
+                continue;
+            }
+            if (ignored === "limit") ignoredReturn.push(entry);
+        } catch {
+            // ignore
         }
-        if (ignored === "limit") ignoredReturn.push(entry);
     }
 
     if (ignored === "limit") return ignoredReturn;
@@ -222,8 +226,6 @@ export function RemoveProject(
     showOutput: boolean = true,
 ): void {
     try {
-        SpotProject(entry);
-
         const workingEntry = SpotProject(entry);
         if (!workingEntry) return;
 
@@ -286,25 +288,30 @@ export function NameProject(
 
     // if the path cannot be found, just return it, so the user sees it
     if (!CheckForPath(workingPath)) return formattedPath;
-    const env = GetProjectEnvironment(workingPath);
+    try {
+        const env = GetProjectEnvironment(workingPath);
 
-    const pkgFile = env.main.cpfContent;
+        const pkgFile = env.main.cpfContent;
 
-    if (!pkgFile.name) return formattedPath;
+        if (!pkgFile.name) return formattedPath;
 
-    const formattedName = ColorString(pkgFile.name, "bold", env.runtimeColor);
+        const formattedName = ColorString(pkgFile.name, "bold", env.runtimeColor);
 
-    const formattedVersion = pkgFile.version ? `@${ColorString(pkgFile.version, "purple")}` : "";
+        const formattedVersion = pkgFile.version ? `@${ColorString(pkgFile.version, "purple")}` : "";
 
-    const formattedNameVer = `${formattedName}${formattedVersion}`;
+        const formattedNameVer = `${formattedName}${formattedVersion}`;
 
-    const fullNamedProject = `${formattedNameVer} ${formattedPath}`;
+        const fullNamedProject = `${formattedNameVer} ${formattedPath}`;
 
-    if (wanted === "all") return fullNamedProject;
-    else if (wanted === "name") return formattedName;
-    else if (wanted === "path") return formattedPath;
-    else if (wanted === "name-colorless") return pkgFile.name;
-    else return formattedNameVer;
+        if (wanted === "all") return fullNamedProject;
+        else if (wanted === "name") return formattedName;
+        else if (wanted === "path") return formattedPath;
+        else if (wanted === "name-colorless") return pkgFile.name;
+        else return formattedNameVer;
+    } catch {
+        // (needed to prevent crashes from invalid projects)
+        return formattedPath;
+    }
 }
 
 /**
@@ -454,8 +461,9 @@ export function ValidateProject(entry: string, existing: boolean): true | PROJEC
         if (!CheckForPath(env.main.path)) return "NoPkgFile";
         if (!env.main.cpfContent.name) return "NoName";
         if (!env.main.cpfContent.version) return "NoVersion";
-    } catch {
-        return "CantGetProjectEnv";
+    } catch (error) {
+        if (error instanceof FknError && error.code === "Env__SchrodingerLockfile") return "TooManyLockfiles";
+        else return "CantGetProjectEnv";
     }
 
     const isDuplicate = (GetAllProjects()).filter(
@@ -623,9 +631,9 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
      *
      * this resorts to a less conventional method, seeing if user scripts begin with "pnpm", to INFER what the environment is
      */
-    function scriptHas(str: string) {
+    function scriptHas(str: string): boolean {
+        if (!CheckForPath(paths.node.json)) return false;
         const f = Deno.readTextFileSync(paths.node.json);
-        if (!f) return false;
         const s = JSON.parse(f).scripts;
         if (!s) return false;
         return JSON.stringify(
@@ -651,7 +659,7 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
         ),
     };
 
-    const isGolang = pathChecks.golang["pkg"] || pathChecks.golang["lock"];
+    const isGo = pathChecks.golang["pkg"] || pathChecks.golang["lock"];
     const isRust = pathChecks.rust["pkg"] || pathChecks.rust["lock"];
     const isDeno = pathChecks.deno["lock"] ||
         pathChecks.deno["json"] ||
@@ -659,9 +667,18 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
     const isBun = pathChecks.bun["lock"] ||
         pathChecks.bun["lockb"] ||
         pathChecks.bun["toml"];
-    const isNode = pathChecks.node["lockNpm"] ||
-        pathChecks.node["lockPnpm"] ||
-        pathChecks.node["lockYarn"] ||
+    const isPnpm = pathChecks.node["lockPnpm"] ||
+        pathChecks.node["pnpmInfer1"] ||
+        pathChecks.node["pnpmInfer2"] ||
+        scriptHas("pnpm");
+    const isYarn = pathChecks.node["lockYarn"] ||
+        pathChecks.node["yarnInfer1"] ||
+        pathChecks.node["yarnInfer2"] ||
+        scriptHas("yarn");
+    const isNpm = pathChecks.node["lockNpm"] ||
+        pathChecks.node["npmInfer"] ||
+        scriptHas("npm");
+    const isNode = isPnpm || isNpm || isYarn ||
         pathChecks.node["json"];
 
     if (
@@ -673,7 +690,7 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
         );
     }
 
-    const seemsToBeNothing = !isNode && !isBun && !isDeno && !isGolang && !isRust && !CheckForPath(paths.node.json);
+    const seemsToBeNothing = !isNode && !isBun && !isDeno && !isGo && !isRust && !CheckForPath(paths.node.json);
 
     if (seemsToBeNothing) {
         throw new FknError(
@@ -682,7 +699,23 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
         );
     }
 
-    const mainPath = isGolang
+    const lockfiles = ResolveLockfiles(root);
+
+    if (lockfiles.length > 1) {
+        const err = new FknError(
+            "Env__SchrodingerLockfile",
+            `Multiple lockfiles found in ${
+                ColorString(root, "bold")
+            }. This is a bad practice and does not let us properly infer the package manager to use.`,
+        );
+        err.hint =
+            "Either leave just one lockfile, or manually specify the package manager you use via the 'fknode.yaml' file, by adding the 'projectEnvOverride' field with the value of 'npm', 'pnpm', 'bun', 'deno', 'golang', or 'rust'.";
+        throw err;
+    }
+
+    DEBUG_LOG("Is? (G,R,D,B,Y,P,N)", isGo, isRust, isDeno, isBun, isYarn, isPnpm, isNpm, "(isNode?)", isNode);
+
+    const mainPath = isGo
         ? paths.golang.pkg
         : isRust
         ? paths.rust.pkg
@@ -698,7 +731,7 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
 
     const { PackageFileParsers } = FkNodeInterop;
 
-    if (isGolang || settings.projectEnvOverride === "go") {
+    if (settings.projectEnvOverride === "go" || isGo) {
         return {
             root,
             settings,
@@ -728,7 +761,7 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
             workspaces,
         };
     }
-    if (isRust || settings.projectEnvOverride === "cargo") {
+    if (settings.projectEnvOverride === "cargo" || isRust) {
         return {
             root,
             settings,
@@ -758,7 +791,38 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
             workspaces,
         };
     }
-    if (isBun || settings.projectEnvOverride === "bun") {
+    if (settings.projectEnvOverride === "deno" || isDeno) {
+        return {
+            root,
+            settings,
+            runtimeColor,
+            main: {
+                path: mainPath,
+                name: pathChecks.deno["jsonc"] ? "deno.jsonc" : "deno.json",
+                stdContent: PackageFileParsers.Deno.STD(mainString),
+                cpfContent: PackageFileParsers.Deno.CPF(mainString, workspaces),
+            },
+            lockfile: {
+                name: "deno.lock",
+                path: paths.deno.lock,
+            },
+            runtime: "deno",
+            manager: "deno",
+            hall_of_trash,
+            commands: {
+                base: "deno",
+                exec: ["deno", "run"],
+                update: ["outdated", "--update"],
+                clean: "__UNSUPPORTED",
+                run: ["deno", "task"],
+                audit: "__UNSUPPORTED",
+                publish: ["publish", "--check=all"],
+                start: "run",
+            },
+            workspaces,
+        };
+    }
+    if (settings.projectEnvOverride === "bun" || isBun) {
         return {
             root,
             settings,
@@ -790,168 +854,100 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
             workspaces,
         };
     }
-    if (isDeno || settings.projectEnvOverride === "deno") {
+    if (settings.projectEnvOverride === "yarn" || isYarn) {
         return {
             root,
             settings,
             runtimeColor,
             main: {
                 path: mainPath,
-                name: pathChecks.deno["jsonc"] ? "deno.jsonc" : "deno.json",
-                stdContent: PackageFileParsers.Deno.STD(mainString),
-                cpfContent: PackageFileParsers.Deno.CPF(mainString, workspaces),
+                name: "package.json",
+                stdContent: parseJsonc(mainString) as NodePkgFile,
+                cpfContent: PackageFileParsers.NodeBun.CPF(mainString, "yarn", workspaces),
             },
             lockfile: {
-                name: "deno.lock",
-                path: paths.deno.lock,
+                name: "yarn.lock",
+                path: paths.node.lockYarn,
             },
-            runtime: "deno",
-            manager: "deno",
+            runtime: "node",
+            manager: "yarn",
             hall_of_trash,
             commands: {
-                base: "deno",
-                exec: ["deno", "run"],
-                update: ["outdated", "--update"],
-                clean: "__UNSUPPORTED",
-                run: ["deno", "task"],
-                audit: "__UNSUPPORTED",
-                publish: ["publish", "--check=all"],
-                start: "run",
+                base: "yarn",
+                exec: ["yarn", "dlx"],
+                update: ["upgrade"],
+                clean: [["autoclean", "--force"]],
+                run: ["yarn", "run"],
+                audit: ["audit", "--recursive", "--all", "--json"],
+                publish: ["publish", "--non-interactive"],
+                start: "start",
             },
             workspaces,
         };
     }
-    // TODO -do like the rest, if (x) return;, including inferences
-    // also, reorder so its GO-RUST-DENO-BUN-YARN-PNPM-NPM
-    const yarnEnv: ProjectEnvironment = {
-        root,
-        settings,
-        runtimeColor,
-        main: {
-            path: mainPath,
-            name: "package.json",
-            stdContent: parseJsonc(mainString) as NodePkgFile,
-            cpfContent: PackageFileParsers.NodeBun.CPF(mainString, "yarn", workspaces),
-        },
-        lockfile: {
-            name: "yarn.lock",
-            path: paths.node.lockYarn,
-        },
-        runtime: "node",
-        manager: "yarn",
-        hall_of_trash,
-        commands: {
-            base: "yarn",
-            exec: ["yarn", "dlx"],
-            update: ["upgrade"],
-            clean: [["autoclean", "--force"]],
-            run: ["yarn", "run"],
-            audit: ["audit", "--recursive", "--all", "--json"],
-            publish: ["publish", "--non-interactive"],
-            start: "start",
-        },
-        workspaces,
-    };
-    const pnpmEnv: ProjectEnvironment = {
-        root,
-        settings,
-        runtimeColor,
-        main: {
-            path: mainPath,
-            name: "package.json",
-            stdContent: PackageFileParsers.NodeBun.STD(mainString),
-            cpfContent: PackageFileParsers.NodeBun.CPF(mainString, "pnpm", workspaces),
-        },
-        lockfile: {
-            name: "pnpm-lock.yaml",
-            path: paths.node.lockPnpm,
-        },
-        runtime: "node",
-        manager: "pnpm",
-        hall_of_trash,
-        commands: {
-            base: "pnpm",
-            exec: ["pnpm", "dlx"],
-            update: ["update"],
-            clean: [["dedupe"], ["prune"]],
-            run: ["pnpm", "run"],
-            audit: ["audit", "--ignore-registry-errors", "--json"],
-            publish: ["publish"],
-            start: "start",
-        },
-        workspaces,
-    };
-    const npmEnv: ProjectEnvironment = {
-        root,
-        settings,
-        runtimeColor,
-        main: {
-            path: mainPath,
-            name: "package.json",
-            stdContent: PackageFileParsers.NodeBun.STD(mainString),
-            cpfContent: PackageFileParsers.NodeBun.CPF(mainString, "npm", workspaces),
-        },
-        lockfile: {
-            name: "package-lock.json",
-            path: paths.node.lockNpm,
-        },
-        runtime: "node",
-        manager: "npm",
-        hall_of_trash,
-        commands: {
-            base: "npm",
-            exec: ["npx"],
-            update: ["update"],
-            clean: [["dedupe"], ["prune"]],
-            run: ["npm", "run"],
-            audit: ["audit", "--json"],
-            publish: ["publish"],
-            start: "start",
-        },
-        workspaces,
-    };
-
-    switch (settings.projectEnvOverride) {
-        case "npm":
-            return npmEnv;
-        case "pnpm":
-            return pnpmEnv;
-        case "yarn":
-            return yarnEnv;
-        case "__USE_DEFAULT":
-            break;
+    if (settings.projectEnvOverride === "pnpm" || isPnpm) {
+        return {
+            root,
+            settings,
+            runtimeColor,
+            main: {
+                path: mainPath,
+                name: "package.json",
+                stdContent: PackageFileParsers.NodeBun.STD(mainString),
+                cpfContent: PackageFileParsers.NodeBun.CPF(mainString, "pnpm", workspaces),
+            },
+            lockfile: {
+                name: "pnpm-lock.yaml",
+                path: paths.node.lockPnpm,
+            },
+            runtime: "node",
+            manager: "pnpm",
+            hall_of_trash,
+            commands: {
+                base: "pnpm",
+                exec: ["pnpm", "dlx"],
+                update: ["update"],
+                clean: [["dedupe"], ["prune"]],
+                run: ["pnpm", "run"],
+                audit: ["audit", "--ignore-registry-errors", "--json"],
+                publish: ["publish"],
+                start: "start",
+            },
+            workspaces,
+        };
     }
-
-    const lockfiles = ResolveLockfiles(root);
-
-    if (lockfiles.length > 1) {
-        const err = new FknError(
-            "Env__SchrodingerLockfile",
-            `Multiple lockfiles found in ${
-                ColorString(root, "bold")
-            }. This is a bad practice and does not let us properly infer the package manager to use.`,
-        );
-        err.hint =
-            "Either leave just one lockfile, or manually specify the package manager you use via the 'fknode.yaml' file, by adding the 'projectEnvOverride' field with the value of 'npm', 'pnpm', 'bun', 'deno', 'golang', or 'rust'.";
-        throw err;
+    // (|| isNode) assume it's npm if it's node.js and we can't tell the package manager
+    if (settings.projectEnvOverride === "npm" || isNpm || isNode) {
+        return {
+            root,
+            settings,
+            runtimeColor,
+            main: {
+                path: mainPath,
+                name: "package.json",
+                stdContent: PackageFileParsers.NodeBun.STD(mainString),
+                cpfContent: PackageFileParsers.NodeBun.CPF(mainString, "npm", workspaces),
+            },
+            lockfile: {
+                name: "package-lock.json",
+                path: paths.node.lockNpm,
+            },
+            runtime: "node",
+            manager: "npm",
+            hall_of_trash,
+            commands: {
+                base: "npm",
+                exec: ["npx"],
+                update: ["update"],
+                clean: [["dedupe"], ["prune"]],
+                run: ["npm", "run"],
+                audit: ["audit", "--json"],
+                publish: ["publish"],
+                start: "start",
+            },
+            workspaces,
+        };
     }
-
-    const isPnpm = pathChecks.node["lockPnpm"] ||
-        pathChecks.node["pnpmInfer1"] ||
-        pathChecks.node["pnpmInfer2"] ||
-        scriptHas("pnpm");
-    const isYarn = pathChecks.node["lockYarn"] ||
-        pathChecks.node["yarnInfer1"] ||
-        pathChecks.node["yarnInfer2"] ||
-        scriptHas("yarn");
-    const isNpm = pathChecks.node["lockNpm"] ||
-        pathChecks.node["npmInfer"] ||
-        scriptHas("npm");
-    if (isPnpm) return pnpmEnv;
-    if (isYarn) return yarnEnv;
-    if (isNpm) return npmEnv;
-    // assume it's npm if it's node.js and we can't tell the package manager
-    if (!isPnpm && !isYarn && !isNpm && isNode) return npmEnv;
 
     const err = new FknError(
         "Env__CannotDetermine",
@@ -970,7 +966,8 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
  * @returns {string}
  */
 export function SpotProject(name: UnknownString): string {
-    const workingProject = ParsePath(validate(name) ? name : ".");
+    // the regex is because some projects might be called @someone/something
+    const workingProject = validate(name) ? /^@([^\/\s]+)\/([^\/\s]+)$/.test(name) ? name : ParsePath(name) : ParsePath(".");
     const allProjects = GetAllProjects();
     if (allProjects.includes(workingProject)) {
         return workingProject;
@@ -989,13 +986,14 @@ export function SpotProject(name: UnknownString): string {
             NameProject(project, "name-colorless"),
             { strict: false, preserveCase: true, removeCliColors: true },
         );
+        DEBUG_LOG("SPOT", toSpot, "AGAINST", projectName);
         if (toSpot === projectName) {
             return project;
         }
     }
 
     if (CheckForPath(workingProject)) return workingProject;
-    throw new FknError("External__Proj__NotFound", `'${name.trim()}' (=> '${toSpot}') does not exist.`);
+    throw new FknError("External__Proj__NotFound", `'${name.trim()}' (=> '${workingProject}') does not exist.`);
 }
 
 /**

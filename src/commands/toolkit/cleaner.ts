@@ -232,7 +232,7 @@ export function PerformCleanup(
         lint: shouldLint,
     });
 
-    /* "what should we do with the drunken sailor..." */
+    /** "what should we do with the drunken sailor..." */
     const whatShouldWeDo: Record<
         "update" | "lint" | "pretty" | "destroy" | "commit",
         boolean
