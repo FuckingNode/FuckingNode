@@ -428,14 +428,7 @@ export function StageFiles(project: string, files: GIT_FILES): "ok" | "nothingTo
             .filter((file) => validate(file))
             .filter(CheckForPath);
 
-        if (filesToStage.length === 0) {
-            LogStuff(
-                `No files to stage at ${ColorString(project, "bold")}`,
-                "warn",
-                ["bold", "bright-yellow"],
-            );
-            return "nothingToStage";
-        }
+        if (filesToStage.length === 0) return "nothingToStage";
 
         const stageFilesOutput = g(
             project,

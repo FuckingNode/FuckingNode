@@ -21,7 +21,10 @@ function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
         }
         return "ok"; // nothing to do, files alr staged
     }
-    if (Array.isArray(files) && files[0] !== "-A" && files.filter(validate).filter(CheckForPath).length === 0) {
+    if (
+        Array.isArray(files) && files[0] !== "-A" && files.filter(validate).filter(CheckForPath).length === 0 &&
+        !testFlag(files[0] ?? "a", "keep", { allowNonExactString: true, allowQuickFlag: true, allowSingleDash: true })
+    ) {
         LogStuff(
             `No files specified for committing. Specify any of the ${
                 ColorString(GetCommittableFiles(path).length, "bold")
@@ -40,18 +43,6 @@ function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
             : ["(this should never appear in the cli)"];
         // stage them early
         StageFiles(path, (files === "A" || files[0] === "-A") ? "A" : filtered);
-        const staged = GetStagedFiles(path);
-        LogStuff(
-            (files === "A" || files[0] === "-A")
-                ? `Staged all files for commit (${staged.length}).`
-                : `Staged ${staged.length} ${pluralOrNot("file", filtered.length)} for commit:\n${
-                    staged
-                        .map((file) => ColorString("- " + file, "bold", "white"))
-                        .join("\n")
-                }`,
-            "tick",
-            ["bold", "bright-green"],
-        );
         return "ok";
     } catch {
         LogStuff("Something went wrong while staging files. Aborting.", "error");
@@ -78,15 +69,26 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
     }
 
     const env = GetProjectEnvironment(project);
-    const prevStaged = GetStagedFiles(project).length;
+    const prevStaged = GetStagedFiles(project);
 
     if (!params.keepStagedFiles) StageFiles(project, "!A");
     if (params.files[0] === "-A") StageFiles(project, "A");
     const staging = StagingHandler(project, params.files);
     if (staging === "abort") Deno.exit(1);
     if (params.keepStagedFiles) {
-        LogStuff(`Also, keeping ${prevStaged} previously staged ${pluralOrNot("file", prevStaged)} for committing.`, "warn");
+        LogStuff(`Keeping ${prevStaged.length} previously staged ${pluralOrNot("file", prevStaged.length)} for committing.`, "warn");
     }
+    const staged = GetStagedFiles(project);
+    LogStuff(
+        `Staged${params.files[0] === "-A" ? " all files, totalling" : ""} ${staged.length} ${pluralOrNot("file", staged.length)} for commit:\n${
+            staged
+                .slice(0, 7)
+                .map((file) => `${ColorString("- " + file, "bold", "white")}${prevStaged.includes(file) ? " (prev. staged, kept)" : ""}`)
+                .join("\n")
+        }${staged.length > 7 ? `and ${staged.length} more` : ""}`,
+        "tick",
+        ["bold", "bright-green"],
+    );
 
     const commitCmd = ValidateUserCmd(env, "commitCmd");
 
@@ -112,7 +114,7 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
 
     const actions: string[] = [];
 
-    if (commitCmd !== "disable") {
+    if (commitCmd !== null) {
         // otherwise TS shows TypeError for whatever reason
         const typed: string[] = env.commands.run as string[];
 
