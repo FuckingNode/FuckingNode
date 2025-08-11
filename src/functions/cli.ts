@@ -15,21 +15,21 @@ export interface CommanderOutput {
     /**
      * Output of the command. Uses both `stdout` and `stderr`, joined by an \n.
      *
-     * @type {?string}
+     * @type {string}
      */
-    stdout?: string;
+    stdout: string;
 }
 
 /**
  * Executes commands and automatically handles errors.
  *
- * Also, it logs their content synchronously (unless you hide output) so they look "real". PS. THAT ONE TOOK IT'S TIME
+ * Also, it logs their content synchronously (unless you hide output) so they look "real".
  *
  * @async
  * @param {string} main Main command.
  * @param {string[]} stuff Additional args for the command.
- * @param {?boolean} showOutput Defaults to true. If false, the output of the command won't be shown and it'll be returned in the `CommanderOutput` object instead.
- * @returns {CommanderOutput} An object with a boolean telling if it was successful and its output.
+ * @param {?boolean} showOutput Defaults to true. If false, the output of the command won't be shown in the current shell.
+ * @returns {CommanderOutput} An object with a boolean telling if it was successful or not, and its full output.
  */
 export function Commander(
     main: string,
@@ -38,34 +38,28 @@ export function Commander(
 ): CommanderOutput {
     const args = stuff.filter((i) => i !== undefined);
 
-    if (showOutput === false) {
-        const command = new Deno.Command(main, {
-            args,
-            stdout: "piped",
-            stderr: "piped",
-        });
-
-        const process = command.outputSync();
-
-        const result: CommanderOutput = {
-            success: process.success,
-            stdout: `${new TextDecoder().decode(process.stdout)}${process.stderr ? "\n" + new TextDecoder().decode(process.stderr) : ""}`,
-        };
-
-        return result;
-    }
-
-    const command = new Deno.Command(main, {
-        args,
-        stdout: "inherit",
-        stderr: "inherit",
-        stdin: "inherit",
-    });
+    const command = new Deno.Command(
+        main,
+        showOutput === false
+            ? {
+                args,
+                stdout: "piped",
+                stderr: "piped",
+            }
+            : {
+                args,
+                stdout: "inherit",
+                stderr: "inherit",
+                stdin: "inherit",
+            },
+    );
 
     const process = command.outputSync();
+    const decoder = new TextDecoder();
 
     const result: CommanderOutput = {
-        success: process.code === 0,
+        success: process.success,
+        stdout: `${decoder.decode(process.stdout)}${process.stderr ? "\n" + decoder.decode(process.stderr) : ""}`,
     };
 
     return result;

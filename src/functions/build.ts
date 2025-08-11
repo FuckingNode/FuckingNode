@@ -1,3 +1,4 @@
+import { normalize } from "@zakahacecosas/string-utils";
 import { Commander } from "./cli.ts";
 import { LogStuff } from "./io.ts";
 
@@ -10,13 +11,15 @@ export function RunBuildCmds(commands: string[]) {
         }
         LogStuff(`Running command ${commands.indexOf(command) + 1}/${commands.length}`, undefined, "bold");
         try {
-            Commander(
+            const out = Commander(
                 cmd[0],
                 [
                     ...cmd.slice(1),
                 ],
                 true,
             );
+            if (!out.success) throw out.stdout;
+            if (normalize(out.stdout).length === 0) LogStuff("No output received.", undefined, ["half-opaque", "italic"]);
             LogStuff("Done!", undefined, "bold");
         } catch (error) {
             LogStuff(String(error));
