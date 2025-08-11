@@ -6,7 +6,14 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
-## [4.0.2] (Unreleased)
+## [4.0.2-patch.1] (11-08-2025)
+
+### Fixed
+
+- Fixed a possible crash (detected with the new bulk removal), caused by attempting to manually remove temporary files that may no longer exist.
+  - Funnily enough, the fix (which is to stop trying to remove temp files), also implies removing 2 file checks and 1 file read on startup. Minimal but more performance.
+
+## [4.0.2] (11-08-2025)
 
 ### Fixed
 

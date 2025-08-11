@@ -46,7 +46,6 @@ if (normalize(Deno.args[0] ?? "") === "something-fucked-up") {
             GetAppPath("SETTINGS"),
             GetAppPath("ERRORS"),
             GetAppPath("LOGS"),
-            GetAppPath("REM"),
         ];
 
         for (const path of paths) {
@@ -61,7 +60,7 @@ if (normalize(Deno.args[0] ?? "") === "something-fucked-up") {
 }
 
 async function init() {
-    await FreshSetup();
+    FreshSetup();
     await RunScheduledTasks();
     CleanupProjects();
 }

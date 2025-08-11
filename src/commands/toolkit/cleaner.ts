@@ -1,6 +1,6 @@
 import { FULL_NAME, FWORDS, isDef, LOCAL_PLATFORM } from "../../constants.ts";
 import { Commander, ManagerExists } from "../../functions/cli.ts";
-import { GetAppPath, GetUserSettings } from "../../functions/config.ts";
+import { GetUserSettings } from "../../functions/config.ts";
 import { BulkRemove, CheckForPath, JoinPaths, ParsePath } from "../../functions/filesystem.ts";
 import { ColorString, Interrogate, LogStuff } from "../../functions/io.ts";
 import { GetProjectEnvironment, NameProject, SpotProject, UnderstandProjectProtection } from "../../functions/projects.ts";
@@ -454,15 +454,6 @@ export async function PerformHardCleanup(
             LogStuff(error);
         }
     }
-
-    // free the user's space
-    Deno.writeTextFileSync(
-        GetAppPath("REM"),
-        `${tmp}\n`,
-        {
-            append: true,
-        },
-    );
 
     return;
 }

@@ -1,7 +1,7 @@
 import { APP_NAME, DEFAULT_SCHEDULE_FILE, DEFAULT_SETTINGS, FWORDS, LOCAL_PLATFORM } from "../constants.ts";
 import type { CF_FKNODE_SETTINGS } from "../types/config_files.ts";
 import { FknError } from "./error.ts";
-import { BulkRemove, CheckForPath, JoinPaths, ParsePathList } from "./filesystem.ts";
+import { BulkRemove, CheckForPath, JoinPaths } from "./filesystem.ts";
 import { parse as parseYaml } from "@std/yaml";
 import { ColorString, Interrogate, LogStuff, StringifyYaml } from "./io.ts";
 import { type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
@@ -10,11 +10,11 @@ import { format } from "@std/fmt/bytes";
 /**
  * Returns file paths for all config files the app uses.
  *
- * @param {("BASE" | "MOTHERFKRS" | "LOGS" | "SCHEDULE" | "SETTINGS" | "ERRORS" | "REM")} path What path you want.
+ * @param {("BASE" | "MOTHERFKRS" | "LOGS" | "SCHEDULE" | "SETTINGS" | "ERRORS")} path What path you want.
  * @returns {string} The path as a string.
  */
 export function GetAppPath(
-    path: "BASE" | "MOTHERFKRS" | "LOGS" | "SCHEDULE" | "SETTINGS" | "ERRORS" | "REM",
+    path: "BASE" | "MOTHERFKRS" | "LOGS" | "SCHEDULE" | "SETTINGS" | "ERRORS",
 ): string {
     const appDataPath: string = LOCAL_PLATFORM.APPDATA;
 
@@ -39,7 +39,6 @@ export function GetAppPath(
     const SCHEDULE = formatDir("schedule.yaml");
     const SETTINGS = formatDir("settings.yaml");
     const ERRORS = formatDir("errors.log");
-    const REM = formatDir("rem.txt");
 
     if (path === "BASE") return BASE_DIR;
     if (path === "MOTHERFKRS") return PROJECTS;
@@ -47,17 +46,15 @@ export function GetAppPath(
     if (path === "SCHEDULE") return SCHEDULE;
     if (path === "SETTINGS") return SETTINGS;
     if (path === "ERRORS") return ERRORS;
-    if (path === "REM") return REM;
     throw new FknError("Internal__NonexistentAppPath", `Invalid config path ${path} requested.`);
 }
 
 /**
  * Check if config files are present, create them otherwise ("Fresh Setup").
  *
- * @async
  * @returns {void}
  */
-export async function FreshSetup(repairSetts?: boolean): Promise<void> {
+export function FreshSetup(repairSetts?: boolean): void {
     const basePath = GetAppPath("BASE");
     if (!CheckForPath(basePath)) {
         Deno.mkdirSync(basePath, { recursive: true });
@@ -97,19 +94,6 @@ export async function FreshSetup(repairSetts?: boolean): Promise<void> {
             create: true,
         });
     }
-
-    const remPath = GetAppPath("REM");
-    if (!CheckForPath(remPath)) {
-        Deno.writeTextFileSync(remPath, "", {
-            create: true,
-        });
-    }
-
-    const toBeRemoved = ParsePathList(Deno.readTextFileSync(remPath));
-
-    if (toBeRemoved.length === 0) return;
-
-    await BulkRemove(toBeRemoved);
 
     return;
 }

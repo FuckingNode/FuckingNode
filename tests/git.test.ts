@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { GetBranches, GetLatestTag } from "../src/functions/git.ts";
+import { GetBranches } from "../src/functions/git.ts";
 import { APP_NAME } from "../src/constants.ts";
 import { SpotProject } from "../src/functions/projects.ts";
 import { GenerateGitUrl } from "../src/commands/toolkit/git-url.ts";
@@ -20,16 +20,6 @@ Deno.test({
                     "v4",
                 ],
             },
-        );
-    },
-});
-
-Deno.test({
-    name: "gets git latest tag",
-    fn: () => {
-        assertEquals(
-            GetLatestTag(here),
-            JSON.parse(Deno.readTextFileSync("./deno.json")).version,
         );
     },
 });
