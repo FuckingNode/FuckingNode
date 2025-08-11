@@ -61,11 +61,9 @@ if (normalize(Deno.args[0] ?? "") === "something-fucked-up") {
 }
 
 async function init() {
-    const dir = Deno.cwd();
-    FreshSetup();
+    await FreshSetup();
     await RunScheduledTasks();
     CleanupProjects();
-    Deno.chdir(dir);
 }
 
 /** Normalized Deno.args */
@@ -188,11 +186,11 @@ async function main(command: UnknownString) {
         command.toLowerCase()
     ) {
         case "clean":
-            TheCleaner(cleanerArgs);
+            await TheCleaner(cleanerArgs);
             break;
         case "global-clean":
         case "hard-clean":
-            TheCleaner({
+            await TheCleaner({
                 flags: { ...cleanerArgs["flags"] },
                 parameters: {
                     intensity: "hard-only",
@@ -202,8 +200,9 @@ async function main(command: UnknownString) {
             break;
         case "storage-emergency":
         case "maxim-clean":
+        case "get-rid-of-node-modules":
         case "get-rid-of-node_modules":
-            TheCleaner({
+            await TheCleaner({
                 flags: { ...cleanerArgs["flags"] },
                 parameters: {
                     intensity: "maxim-only",
@@ -228,7 +227,7 @@ async function main(command: UnknownString) {
             });
             break;
         case "settings":
-            TheSettings({ args: flags.slice(1) });
+            await TheSettings({ args: flags.slice(1) });
             break;
         case "migrate":
             TheMigrator({ projectPath: (flags[2] ?? Deno.cwd()), wantedManager: flags[1] });
@@ -348,6 +347,7 @@ async function main(command: UnknownString) {
         case "hint":
         case "protip":
         case "pro-tip":
+            LogStuff(`Here's a pro tip!`);
             LogStuff(
                 HINTS[Math.floor(Math.random() * HINTS.length)]!,
                 undefined,

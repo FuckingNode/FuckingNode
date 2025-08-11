@@ -52,7 +52,7 @@ export async function RunScheduledTasks() {
                 lastFlush: GetDateNow(),
             },
         };
-        FlushConfigFiles("logs", true, true);
+        await FlushConfigFiles("logs", true, true);
         Deno.writeTextFileSync(scheduleFilePath, StringifyYaml(updatedScheduleFile));
     }
 }

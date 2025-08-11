@@ -20,8 +20,7 @@ export default function TheKickstarter(params: TheKickstarterConstructedParams) 
     const startup = new Date();
     const { full: repoUrl, name: projectName } = GenerateGitUrl(gitUrl);
 
-    const cwd = Deno.cwd();
-    const clonePath: string = ParsePath(validate(path) ? path : JoinPaths(cwd, projectName));
+    const clonePath: string = ParsePath(validate(path) ? path : JoinPaths(Deno.cwd(), projectName));
 
     const clonePathValidator = CheckForDir(clonePath);
     if (clonePathValidator === "ValidButNotEmpty") {
@@ -120,5 +119,5 @@ export default function TheKickstarter(params: TheKickstarterConstructedParams) 
         );
     }
 
-    Deno.chdir(cwd);
+    return;
 }

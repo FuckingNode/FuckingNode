@@ -19,7 +19,6 @@ function g(path: string, args: string[]): CommanderOutput {
 /**
  * Checks if a given project is a Git repository.
  *
- * @export
  * @param {string} path Path to the repo, or project name.
  * @returns {boolean}
  */
@@ -53,7 +52,6 @@ export function IsRepo(path: string): boolean {
 /**
  * Checks if a local repository has uncommitted changes or not. Returns `true` if you CAN commit (there are no uncommitted changes) and `false` if otherwise.
  *
- * @export
  * @param {string} path Path to the repo, or project name.
  * @returns {boolean | "nonAdded"}
  */

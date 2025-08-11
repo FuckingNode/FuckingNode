@@ -32,7 +32,6 @@ export default function TheSurrenderer(params: TheSurrendererConstructedParams) 
         ))
     ) return;
 
-    const cwd = Deno.cwd();
     Deno.chdir(project);
 
     function valid(str: UnknownString): str is string {
@@ -138,6 +137,4 @@ export default function TheSurrenderer(params: TheSurrendererConstructedParams) 
     );
 
     RemoveProject(project);
-
-    Deno.chdir(cwd);
 }

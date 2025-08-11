@@ -2,8 +2,6 @@ import { UnknownString } from "@zakahacecosas/string-utils";
 
 /**
  * Valid emojis
- *
- * @export
  */
 export type VALID_EMOJIS =
     | "danger"
@@ -45,7 +43,6 @@ type GitHubReleaseAsset = {
 /**
  * An interface so we can type responses from GitHub's REST API.
  *
- * @export
  * @interface GITHUB_RELEASE
  */
 export interface GITHUB_RELEASE {
@@ -65,8 +62,6 @@ export interface GITHUB_RELEASE {
 
 /**
  * A string preceded with "https://"
- *
- * @export
  */
 export type VALID_URL = `https://${string}`;
 
@@ -91,7 +86,5 @@ export type VALID_COLORS =
 
 /**
  * Git file codes.
- *
- * @export
  */
 export type GIT_FILES = UnknownString[] | "A" | "!A" | "S";

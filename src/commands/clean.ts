@@ -9,26 +9,24 @@ import { GetElapsedTime } from "../functions/date.ts";
 
 export type tRESULT = { path: string; status: string; elapsedTime: string };
 
-export default function TheCleaner(params: TheCleanerConstructedParams) {
+export default async function TheCleaner(params: TheCleanerConstructedParams) {
     // params
     const { verbose, update, lint, prettify, destroy, commit } = params.flags;
     const { intensity, project } = params.parameters;
 
-    // original path
-    const originalLocation = Deno.cwd();
     const realIntensity: CleanerIntensity = ValidateIntensity(intensity);
     const startup = new Date();
 
     if (realIntensity === "hard-only") {
-        PerformHardCleanup(verbose);
+        await PerformHardCleanup(verbose);
         return;
     }
 
     // read all projects
-    const projects: string[] = GetAllProjects();
+    const projects = project === 0 ? GetAllProjects() : [SpotProject(project)];
 
     if (realIntensity === "maxim-only") {
-        PerformMaximCleanup(projects);
+        await PerformMaximCleanup(projects);
         return;
     }
 
@@ -47,11 +45,9 @@ export default function TheCleaner(params: TheCleanerConstructedParams) {
         verbose,
     );
 
-    const workingProjects = project === 0 ? projects : [SpotProject(project)];
-
     const results: tRESULT[] = [];
 
-    for (const project of workingProjects) {
+    for (const project of projects) {
         // start time of each cleanup
         const startTime = new Date();
         try {
@@ -110,24 +106,18 @@ export default function TheCleaner(params: TheCleanerConstructedParams) {
         }
     }
 
-    if (realIntensity === "hard" || realIntensity === "maxim") PerformHardCleanup(verbose);
-    if (realIntensity === "maxim") PerformMaximCleanup(workingProjects);
+    if (realIntensity === "hard" || realIntensity === "maxim") await PerformHardCleanup(verbose);
+    if (realIntensity === "maxim") await PerformMaximCleanup(projects);
 
-    // go back home
-    Deno.chdir(originalLocation);
     LogStuff(
-        `${
-            workingProjects.length > 1
-                ? `All your ${FWORDS.MFN} projects have been cleaned!`
-                : `Your ${FWORDS.MFN} project has been cleaned!`
-        } Back to ${originalLocation}.`,
+        projects.length > 1 ? `All your ${FWORDS.MFN} projects have been cleaned!` : `Your ${FWORDS.MFN} project has been cleaned!`,
         "tick",
         "bright-green",
     );
     const elapsed = Date.now() - startup.getTime();
     if ((elapsed > 180000)) {
         Notification(
-            workingProjects.length > 1 ? `All your ${FWORDS.MFN} projects have been cleaned!` : `Your ${FWORDS.MFN} project has been cleaned!`,
+            projects.length > 1 ? `All your ${FWORDS.MFN} projects have been cleaned!` : `Your ${FWORDS.MFN} project has been cleaned!`,
             `It took ${GetElapsedTime(startup)}, but we did it!`,
         );
     }

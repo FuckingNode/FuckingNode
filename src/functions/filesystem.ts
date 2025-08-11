@@ -5,7 +5,6 @@ import { FknError } from "./error.ts";
 /**
  * Returns `true` if a given path exists, `false` if otherwise.
  *
- * @export
  * @param {string} path Path to check for
  * @returns {boolean}
  */
@@ -21,7 +20,6 @@ export function CheckForPath(path: string): boolean {
 /**
  * Checks for a directory, returns a string depending on the result.
  *
- * @export
  * @param {string} path
  * @returns {"NotDir" | "Valid" | "ValidButNotEmpty" | "NotFound"}
  */
@@ -46,7 +44,6 @@ export function CheckForDir(path: string): "NotDir" | "Valid" | "ValidButNotEmpt
 /**
  * Parses a string path, to ensure string cleanness and handle things like relative paths.
  *
- * @export
  * @param {UnknownString} target The string to parse.
  * @returns {string} A string with the parsed path.
  */
@@ -81,7 +78,6 @@ export function ParsePath(target: UnknownString): string {
 /**
  * Parses a string of a lot of file paths separated by newlines or commas, and returns them as an array of individual paths.
  *
- * @export
  * @param {UnknownString} target The string to parse.
  * @returns {string[]} Your `string[]`.
  */
@@ -99,7 +95,6 @@ export function ParsePathList(target: UnknownString): string[] {
 /**
  * Joins two parts of a file path. If they cannot be found, you'll be given back an unparsed join.
  *
- * @export
  * @param {string} pathA First part, e.g. "./my/beginning".
  * @param {string} pathB Second part, e.g. "my/end.txt".
  * @returns {string} Result, e.g. "./my/beginning/my/end.txt".
@@ -117,17 +112,18 @@ export function JoinPaths(pathA: string, pathB: string): string {
 /**
  * Takes an array of paths and removes all of them, with recursive removal enabled.
  *
- * @export
+ * @async
  * @param {string[]} files Array of file paths to remove
  * @returns {void}
  */
-export function BulkRemoveFiles(files: string[]): void {
+export async function BulkRemove(files: string[]): Promise<void> {
     if (files.length === 0) return;
-    files.map((file) => {
-        Deno.removeSync(ParsePath(file), {
+    const promises = files.map((file) =>
+        Deno.remove(ParsePath(file), {
             recursive: true,
-        });
-    });
+        })
+    );
+    await Promise.all(promises);
 }
 
 /** Gets the indent size used by an already read file, with fair enough accuracy. */

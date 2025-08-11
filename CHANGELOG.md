@@ -11,6 +11,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - Fixed `commit` not properly handling `--keep` and `commitCmd`.
+- Fixed `clean` not respecting if you provide an explicit project to be cleaned while using `maxim-only` intensity.
+- Fixed some performance optimization issues
+  - Checking for validity _each time_ your project list is requested. This check already runs once each time you run any command, rerunning _during work_ is useless. Good impact, several read operations saved up.
+  - In some places, the own CLI saves the CWD before changing directories then goes back to it. Made by my old self who didn't know a process' directory changes are independent from the shell's. This has minimal impact, but everything counts.
+  - Now bulk-removal operations are done in parallel.
+- Fixed `setup` being agnostic (not working in "unsupported platforms"). It's not meant to.
+- Fixed hard cleanup quietly continuing without telling you an error happened when it does happen.
 
 ## [4.0.1] (09-08-2025)
 

@@ -18,7 +18,7 @@ function ListProjects(
     if (list.length === 0) {
         if (ignore === "limit") {
             LogStuff(
-                "Huh, you didn't ignore anything! Good to see you care about all your projects (not for long, I can bet).",
+                "Huh, you didn't ignore anything! Good to see you care about all your projects.",
                 "moon-face",
             );
             return;

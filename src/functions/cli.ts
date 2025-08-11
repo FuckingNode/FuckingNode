@@ -25,7 +25,6 @@ export interface CommanderOutput {
  *
  * Also, it logs their content synchronously (unless you hide output) so they look "real". PS. THAT ONE TOOK IT'S TIME
  *
- * @export
  * @async
  * @param {string} main Main command.
  * @param {string[]} stuff Additional args for the command.
@@ -75,7 +74,6 @@ export function Commander(
 /**
  * Validates if a package manager is installed, to check before running anything. Uses `-v` and `--version` as an arg to the command you pass.
  *
- * @export
  * @param {MANAGER_GLOBAL} cmd
  * @returns {boolean} True if it exists, false if it doesn't.
  */

@@ -499,7 +499,6 @@ function DisplayAudit(percentage: number): void {
 /**
  * Handler function for auditing a project.
  *
- * @export
  * @param {ParsedNodeReport} bareReport Parsed npm audit.
  * @returns {FkNodeSecurityAudit}
  */
@@ -540,7 +539,6 @@ export function AuditProject(bareReport: ParsedNodeReport): FkNodeSecurityAudit 
 /**
  * Audits a project for security vulnerabilities. Returns 0 if no vulnerabilities are found, 1 if the project manager doesn't support auditing, or the audit results.
  *
- * @export
  * @param {string} project Path to project to be audited.
  * @returns {FkNodeSecurityAudit | 0 | 1}
  */
@@ -548,7 +546,6 @@ export function PerformAuditing(project: string): FkNodeSecurityAudit | 0 | 1 {
     const workingPath = SpotProject(project);
     const env = GetProjectEnvironment(workingPath);
     const name = NameProject(env.root, "name-ver");
-    const current = Deno.cwd();
     // === "__UNSUPPORTED" already does the job, but typescript wants me to specify
     if (
         env.commands.audit === "__UNSUPPORTED" || env.manager === "deno" || env.manager === "cargo" ||
@@ -587,8 +584,6 @@ export function PerformAuditing(project: string): FkNodeSecurityAudit | 0 | 1 {
     }
 
     const audit = AuditProject(ParseNodeBunReport(res.stdout, env.manager));
-
-    Deno.chdir(current);
 
     return audit;
 }

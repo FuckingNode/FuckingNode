@@ -67,19 +67,18 @@ const devJokes = [
     "ALPHA -> BETA -> RELEASE CANDIDATE -> STAY LIKE THAT FOR AGES -> STABLE -> IT BREAKS -> repeat()",
 ];
 
-/** (used to be secretHints...) */
 export const HINTS = [
-    `F\*ckingProTip (01): try setting the FKNODE_SHALL_WE_DEBUG environment variable to "yeah" in your machine`,
-    "F\*ckingProTip (02): run 'fkn sokoballs'",
-    "F\*ckingProTip (03): cleanup supports a '--verbose' flag that shows CLI output in real time from tasks that are being automated",
-    `F\*ckingProTip (04): critical errors get logged to ${GetAppPath("ERRORS")} in a fairly readable format`,
-    `F\*ckingProTip (05): run 'fkn export <project>', it'll show you what we REALLY understand about your project (and care enough about)`,
-    `F\*ckingProTip (06): 'fkn surrender' has aliases that do the exact same thing but more properly representing why you chose to surrender on a project, for example 'fkn im-done-with <project>', or 'fkn i-give-up <project>'`,
-    `F\*ckingProTip (07): if your drive is nearly full and you desperately need storage, run 'fkn storage-emergency'.\nthank me later. note: desperate situations require desperate measures, be advised.`,
-    `F\*ckingProTip (08): you can kickstart a project with a git prefix (or shorthand or alias or whatever).\nfor example, kickstart gh:cool-guy/cool-repo maps to https://github.com/cool-guy/cool-repo.git - so you type less\nthere's 10 aliases, run 'compat kickstart' to see them all`,
-    `F\*ckingProTip (09): all config files live at ${GetAppPath("BASE")}. touch anything there if you want.`,
-    `F\*ckingProTip (10): if you touch and break any config file (or it breaks because yes), run 'fkn something-fucked-up'. it'll reset all config files except for your project list.`,
-    `F\*ckingProTip (11): here's an actually good pro tip: use DenoJS, or BunJS, or learn another language - just. avoid. Node.`,
+    `Set the FKNODE_SHALL_WE_DEBUG environment variable to "yeah" to see internal debugging logs.`,
+    "Run 'fkn sokoballs'.",
+    "The 'clean' command has a '--verbose' flag that shows CLI output in real time from tasks that are being automated.",
+    `Critical errors are logged in ${GetAppPath("ERRORS")}, in a fairly readable format.`,
+    `After running 'kickstart' on a large repository, you can switch windows and do something else; if it takes more than 2 minutes, whenever we finish we'll send a desktop notification.`,
+    `The 'surrender' command has aliases that do the exact same thing but more properly represent why you chose to surrender on a project.\nFor example 'fkn im-done-with <project>', or 'fkn i-give-up <project>'.`,
+    `If your drive is nearly full and you desperately need storage, run 'fkn storage-emergency'. it'll remove 'node_modules' from all of your projects. You'll need to reinstall later, but desperate situations require desperate measures, and this recovers gigabytes of storage.`,
+    `You can kickstart a project with a Git alias.\nFor example, 'kickstart gh:cool-guy/cool-repo' maps to 'https://github.com/cool-guy/cool-repo.git' - so you type less.\nThere's 10 aliases, run 'compat kickstart' to see them all.`,
+    `All config files live at ${GetAppPath("BASE")}.\nTouch anything there if you want to.`,
+    `If you touch and break any config file, run 'fkn something-fucked-up'. It'll reset all config files except for your project list.`,
+    `Here's an actually good pro tip: use DenoJS, or BunJS, or learn another language.\nJust. Avoid. Node.`,
 ];
 
 const appRelatedJokes = [

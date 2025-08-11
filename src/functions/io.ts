@@ -8,7 +8,6 @@ import { APP_NAME, LOCAL_PLATFORM } from "../constants.ts";
 /**
  * Appends an emoji at the beginning of a message.
  *
- * @export
  * @param {string} message Your message, e.g. `"hi chat"`.
  * @param {VALID_EMOJIS} emoji What emoji you'd like to append, e.g. `"bruh"`.
  * @returns {string} The message with your emoji, e.g. `"😐 hi chat"`.
@@ -66,15 +65,15 @@ export function Emojify(message: string, emoji: VALID_EMOJIS): string {
  * Logs a message to the standard output and saves it to a `.log` file.
  * @author ZakaHaceCosas
  *
- * @export
- * @param {string} message The message to be logged.
+ * @param {any} message The message to be logged.
  * @param {?VALID_EMOJIS} [emoji] Additionally, add an emoji before the log.
  * @param {?(VALID_COLORS | VALID_COLORS[])} [color] Optionally, a color (or more) for the output.
  * @param {?boolean} [verbose] If false, stuff will be saved to `.log` file but not written to the `stdout`. Pass here the variable you use to handle verbose logs.
  * @returns {void} Boolean value if it's a question depending on user input. If it's not a question, to avoid a type error for being `void`, it always returns false.
  */
 export function LogStuff(
-    message: string,
+    // deno-lint-ignore no-explicit-any
+    message: any,
     emoji?: VALID_EMOJIS,
     color?: VALID_COLORS | VALID_COLORS[],
     verbose?: boolean,
@@ -114,7 +113,6 @@ export function LogStuff(
 /**
  * Asks a question to the user in the form of a [y/N] confirm. It returns false for everything except for an explicit yes.
  *
- * @export
  * @param {string} question What to ask?
  * @returns {boolean} User input, or false if none.
  */
@@ -138,7 +136,6 @@ export function Interrogate(question: string, style?: "ask" | "warn" | "heads-up
  * Given a string, returns a CLI-colored version of it.
  * @author ZakaHaceCosas
  *
- * @export
  * @param {(string | number)} string String to color.
  * @param {...VALID_COLORS[]} colors The color you wish to give it. Some styles that aren't "colors" are also allowed, e.g. `bold` or `half-opaque`. You can pass many values to add as many colors as you wish.
  * @returns {string} A colorful string.
@@ -219,7 +216,6 @@ export function ColorString(string: string | number, ...colors: VALID_COLORS[]):
 /**
  * Stringify an object or whatever to YAML, using reusable config.
  *
- * @export
  * @param {unknown} content Whatever to stringify.
  * @returns {string} Stringified YAML.
  */
@@ -239,7 +235,6 @@ export function StringifyYaml(content: unknown): string {
 /**
  * Shows a system UI notification.
  *
- * @export
  * @param {string} title Title of notification.
  * @param {string} msg Main text.
  */

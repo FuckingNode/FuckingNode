@@ -9,41 +9,40 @@ import { parse as parseYaml } from "@std/yaml";
 import { GetAppPath } from "../functions/config.ts";
 import type { CF_FKNODE_SCHEDULE } from "../types/config_files.ts";
 
+async function CheckUpdates(): Promise<CF_FKNODE_SCHEDULE | "rl"> {
+    const scheduleFilePath = GetAppPath("SCHEDULE");
+    const scheduleFileContents = parseYaml(Deno.readTextFileSync(scheduleFilePath)) as CF_FKNODE_SCHEDULE;
+
+    const response = await FetchGitHub(RELEASE_URL);
+
+    if (!response.ok) {
+        // (github has a rate limit, so this is not an error we should be really aware of)
+        if (response.status === 403) return "rl";
+        // there's just one HTTP error app-wide, no need for a FknError
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const content: GITHUB_RELEASE = await response.json();
+
+    const dataToWrite: CF_FKNODE_SCHEDULE = {
+        ...scheduleFileContents,
+        updater: {
+            lastCheck: GetDateNow(),
+            latestVer: content.tag_name,
+        },
+    };
+
+    Deno.writeTextFileSync(scheduleFilePath, StringifyYaml(dataToWrite));
+    return dataToWrite;
+}
+
 /**
  * Checks for updates.
  *
  * @async
- * @export
  * @returns {void}
  */
 export default async function TheUpdater(params: TheUpdaterConstructedParams): Promise<void> {
-    const scheduleFilePath = GetAppPath("SCHEDULE");
-    const scheduleFileContents = parseYaml(Deno.readTextFileSync(scheduleFilePath)) as CF_FKNODE_SCHEDULE;
-
-    async function CheckUpdates(): Promise<CF_FKNODE_SCHEDULE | "rl"> {
-        const response = await FetchGitHub(RELEASE_URL);
-
-        if (!response.ok) {
-            // (github has a rate limit, so this is not an error we should be really aware of)
-            if (response.status === 403) return "rl";
-            // there's just one HTTP error app-wide, no need for a FknError
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const content: GITHUB_RELEASE = await response.json();
-
-        const dataToWrite: CF_FKNODE_SCHEDULE = {
-            ...scheduleFileContents,
-            updater: {
-                lastCheck: GetDateNow(),
-                latestVer: content.tag_name,
-            },
-        };
-
-        Deno.writeTextFileSync(scheduleFilePath, StringifyYaml(dataToWrite));
-        return dataToWrite;
-    }
-
     const needsToUpdate = await CheckUpdates();
 
     if (needsToUpdate === "rl") {

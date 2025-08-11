@@ -8,8 +8,8 @@ export default function TheLauncher(params: TheLauncherConstructedParams) {
     const env = GetProjectEnvironment(path);
 
     Deno.chdir(path);
-
     LaunchUserIDE();
+
     if (env.settings.launchWithUpdate) {
         FkNodeInterop.Features.Update({
             env,

@@ -23,23 +23,21 @@ import { globSync } from "node:fs";
 /**
  * Gets all the users projects and returns their absolute root paths as a `string[]`.
  *
- * @export
  * @async
  * @param {false | "limit" | "exclude"} ignored If "limit", only ignored projects are returned. If "exclude", only projects that aren't ignored are returned.
  * @returns {string[]} The list of projects.
  */
 export function GetAllProjects(ignored?: false | "limit" | "exclude"): string[] {
     const content = Deno.readTextFileSync(GetAppPath("MOTHERFKRS"));
-    DEBUG_LOG("GetAllProjects CALLED");
+    DEBUG_LOG("GetAllProjects CALLED", ignored ? "WITH IGNORANCE PARAM" : "WITH NO IGNORANCE");
     const list = ParsePathList(content);
-    const cleanList = list.filter((p) => CheckForPath(p) === true);
 
-    if (!ignored) return cleanList;
+    if (!ignored) return list;
 
     const ignoredReturn: string[] = [];
     const aliveReturn: string[] = [];
 
-    for (const entry of cleanList) {
+    for (const entry of list) {
         try {
             const protection = GetProjectSettings(entry).divineProtection;
             if (!protection || protection === "disabled") {
@@ -55,13 +53,12 @@ export function GetAllProjects(ignored?: false | "limit" | "exclude"): string[] 
     if (ignored === "limit") return ignoredReturn;
     if (ignored === "exclude") return aliveReturn;
 
-    return cleanList;
+    return list;
 }
 
 /**
  * Adds a new project.
  *
- * @export
  * @param {UnknownString} entry Path to the project.
  * @returns {Promise<void>}
  */
@@ -274,7 +271,6 @@ export function RemoveProject(
 /**
  * Given a path to a project, returns it's name.
  *
- * @export
  * @param {UnknownString} path Path to the **root** of the project.
  * @param {?"name" | "name-colorless" | "path" | "name-ver" | "all"} wanted What to return. `name` returns the name, `path` the file path, `name-ver` a `name@version` string, and `all` returns everything together.
  * @returns {string} The name of the project. If an error happens, it will return the path you provided (that's how we used to name projects anyway).
@@ -356,17 +352,12 @@ export function deepMerge(
 /**
  * Gets a project's fknode.yaml, parses it and returns it.
  *
- * @export
  * @param {string} path Path to the project. Expects an already parsed path.
  * @returns {FullFkNodeYaml} A `FullFkNodeYaml` object.
  */
 function GetProjectSettings(path: string): FullFkNodeYaml {
-    DEBUG_LOG("FKN YAML / ARGS", path);
     const pathToDivineFile = JoinPaths(path, "fknode.yaml");
-    DEBUG_LOG("FKN YAML / READING", pathToDivineFile);
 
-    DEBUG_LOG("FKN YAML / CHECKING FOR FILE", pathToDivineFile);
-    DEBUG_LOG("FKN YAML / EXISTS?", CheckForPath(pathToDivineFile));
     if (!CheckForPath(pathToDivineFile)) {
         DEBUG_LOG("FKN YAML / RESORTING TO DEFAULTS (no fknode.yaml)");
         return DEFAULT_FKNODE_YAML;
@@ -374,14 +365,13 @@ function GetProjectSettings(path: string): FullFkNodeYaml {
 
     const content = Deno.readTextFileSync(pathToDivineFile);
     const divineContent = parseYaml(content);
-    DEBUG_LOG("FKN YAML / RAW DIVINE CONTENT", path, divineContent);
 
     if (!divineContent || typeof divineContent !== "object" || !ValidateFkNodeYaml(divineContent)) {
         DEBUG_LOG("FKN YAML / RESORTING TO DEFAULTS (invalid fknode.yaml)");
         if (!content.includes("UPON INTERACTING")) {
             Deno.writeTextFileSync(
                 pathToDivineFile,
-                `\n# [NOTE (${GetDateNow()}): Invalid file format! (Auto-added by ${APP_NAME.CASED}). DEFAULT SETTINGS WILL BE USED UPON INTERACTING WITH THIS ${FWORDS.MF.toUpperCase()} UNTIL YOU FIX THIS! Refer to ${APP_URLs.WEBSITE} to learn about how fknode.yaml works.]\n`,
+                `\n# [NOTE (${GetDateNow()}): Invalid config file! (Auto-added by ${APP_NAME.CASED}). DEFAULT SETTINGS WILL BE USED UPON INTERACTING WITH THIS ${FWORDS.MF.toUpperCase()} UNTIL YOU FIX THIS FILE! Refer to ${APP_URLs.WEBSITE} to learn about how fknode.yaml works.]\n`,
                 {
                     append: true,
                 },
@@ -390,17 +380,13 @@ function GetProjectSettings(path: string): FullFkNodeYaml {
         return DEFAULT_FKNODE_YAML;
     }
 
-    const mergedSettings = deepMerge(
+    const mergedSettings: FullFkNodeYaml = deepMerge(
         structuredClone(DEFAULT_FKNODE_YAML),
         divineContent,
     );
-    if (!ValidateFkNodeYaml(mergedSettings)) {
-        DEBUG_LOG("FKN YAML / RESORTING TO DEFAULTS (invalid fknode.yaml after merge)");
-        return DEFAULT_FKNODE_YAML;
-    }
-    DEBUG_LOG("FKN YAML / DEEP MERGE", path, mergedSettings);
+    DEBUG_LOG("FKN YAML / WILL RETURN", path, mergedSettings);
 
-    return mergedSettings as FullFkNodeYaml;
+    return mergedSettings;
 }
 
 /**
@@ -582,7 +568,6 @@ export function GetWorkspaces(path: string): string[] {
 /**
  * Returns a project's environment (package manager, runtime, settings, paths to lockfile and `node_modules`, etc...).
  *
- * @export
  * @param {UnknownString} path Path to the project's root.
  * @returns {ProjectEnvironment}
  */
@@ -961,7 +946,6 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
 /**
  * Tries to spot the given project name inside of the project list, returning its root path. If not found, returns the parsed path. It also works when you pass a path, parsing it to handle relative paths.
  *
- * @export
  * @param {UnknownString} name Project's name or path.
  * @returns {string}
  */
@@ -999,7 +983,6 @@ export function SpotProject(name: UnknownString): string {
 /**
  * Cleans up projects that are invalid and probably we won't be able to clean.
  *
- * @export
  * @returns {void}
  */
 export function CleanupProjects(): void {

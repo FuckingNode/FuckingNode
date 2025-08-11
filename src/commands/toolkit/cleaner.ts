@@ -1,7 +1,7 @@
 import { FULL_NAME, FWORDS, isDef, LOCAL_PLATFORM } from "../../constants.ts";
 import { Commander, ManagerExists } from "../../functions/cli.ts";
 import { GetAppPath, GetUserSettings } from "../../functions/config.ts";
-import { BulkRemoveFiles, CheckForPath, JoinPaths, ParsePath } from "../../functions/filesystem.ts";
+import { BulkRemove, CheckForPath, JoinPaths, ParsePath } from "../../functions/filesystem.ts";
 import { ColorString, Interrogate, LogStuff } from "../../functions/io.ts";
 import { GetProjectEnvironment, NameProject, SpotProject, UnderstandProjectProtection } from "../../functions/projects.ts";
 import type { CleanerIntensity } from "../../types/config_params.ts";
@@ -47,9 +47,7 @@ const ProjectCleaningFeatures = {
         const { commands } = env;
         if (commands.clean === "__UNSUPPORTED") {
             LogStuff(
-                `${projectName}'s cleanup is limited, as ${env.manager} doesn't have cleaning commands. If no other feature (linting, prettifying...) was specified, we'll just skip it.`,
-                "warn",
-                "bright-yellow",
+                `${projectName}'s cleanup is limited, as ${env.manager} doesn't have cleanup commands. If no other feature (lint, pretty...) was specified, we'll skip it.`,
             );
             return;
         }
@@ -200,7 +198,6 @@ const ProjectCleaningFeatures = {
 /**
  * Cleans a project.
  *
- * @export
  * @param {string} projectInQuestion
  * @param {boolean} shouldUpdate
  * @param {boolean} shouldLint
@@ -297,13 +294,13 @@ export function PerformCleanup(
 /**
  * Performs a hard cleanup, AKA cleans global caches.
  *
- * @export
+ * @async
  * @param {boolean} verboseLogging
  * @returns {void}
  */
-export function PerformHardCleanup(
+export async function PerformHardCleanup(
     verboseLogging: boolean,
-): void {
+): Promise<void> {
     LogStuff(
         `Time for hard-pruning! ${ColorString("Wait patiently, please (caches will take a while to clean).", "italic")}`,
         "working",
@@ -328,42 +325,62 @@ export function PerformHardCleanup(
     const golangHardPruneArgs: string[] = ["clean", "-modcache"];
 
     if (ManagerExists("npm")) {
-        LogStuff(
-            "NPM",
-            "package",
-            "red",
-        );
-        Commander("npm", npmHardPruneArgs, verboseLogging);
-        LogStuff("Done", "tick");
+        try {
+            LogStuff(
+                "NPM",
+                "package",
+                "red",
+            );
+            Commander("npm", npmHardPruneArgs, verboseLogging);
+            LogStuff("Done", "tick");
+        } catch (error) {
+            LogStuff("Failed!", "error");
+            LogStuff(error);
+        }
     }
     if (ManagerExists("pnpm")) {
-        LogStuff(
-            "PNPM",
-            "package",
-            "bright-yellow",
-        );
-        Commander("pnpm", pnpmHardPruneArgs, true);
-        LogStuff("Done", "tick");
+        try {
+            LogStuff(
+                "PNPM",
+                "package",
+                "bright-yellow",
+            );
+            Commander("pnpm", pnpmHardPruneArgs, true);
+            LogStuff("Done", "tick");
+        } catch (error) {
+            LogStuff("Failed!", "error");
+            LogStuff(error);
+        }
     }
     if (ManagerExists("yarn")) {
-        LogStuff(
-            "YARN",
-            "package",
-            "purple",
-        );
-        Commander("yarn", yarnHardPruneArgs, true);
-        LogStuff("Done", "tick");
+        try {
+            LogStuff(
+                "YARN",
+                "package",
+                "purple",
+            );
+            Commander("yarn", yarnHardPruneArgs, true);
+            LogStuff("Done", "tick");
+        } catch (error) {
+            LogStuff("Failed!", "error");
+            LogStuff(error);
+        }
     }
 
     if (ManagerExists("bun")) {
-        LogStuff(
-            "BUN",
-            "package",
-            "pink",
-        );
-        Commander("bun", ["init", "-y"], verboseLogging); // placebo
-        Commander("bun", bunHardPruneArgs, verboseLogging);
-        LogStuff("Done", "tick");
+        try {
+            LogStuff(
+                "BUN",
+                "package",
+                "pink",
+            );
+            Commander("bun", ["init", "-y"], verboseLogging); // placebo
+            Commander("bun", bunHardPruneArgs, verboseLogging);
+            LogStuff("Done", "tick");
+        } catch (error) {
+            LogStuff("Failed!", "error");
+            LogStuff(error);
+        }
     }
 
     if (ManagerExists("go")) {
@@ -400,8 +417,9 @@ export function PerformHardCleanup(
             // yet we're doing from the "hard" preset and not the
             // "maxim" one
             // epic.
-        } catch {
-            // nothing happened.
+        } catch (error) {
+            LogStuff("Failed!", "error");
+            LogStuff(error);
         }
     }
 
@@ -429,10 +447,11 @@ export function PerformHardCleanup(
                 "package",
                 "orange",
             );
-            BulkRemoveFiles(paths);
+            await BulkRemove(paths);
             LogStuff("Done", "tick");
-        } catch {
-            // nothing happened.
+        } catch (error) {
+            LogStuff("Failed!", "error");
+            LogStuff(error);
         }
     }
 
@@ -451,16 +470,17 @@ export function PerformHardCleanup(
 /**
  * Performs a maxim cleanup, AKA removes node_modules.
  *
- * @export
  * @async
  * @param {string[]} projects Projects to be cleaned.
  * @returns {void}
  */
-export function PerformMaximCleanup(projects: string[]): void {
+export async function PerformMaximCleanup(projects: string[]): Promise<void> {
     LogStuff(
         `Time for maxim-pruning! ${ColorString("Wait patiently, please (node_modules takes a while to remove).", "italic")}`,
         "working",
     );
+
+    const trash = [];
 
     for (const project of projects) {
         const workingProject = SpotProject(project);
@@ -469,10 +489,6 @@ export function PerformMaximCleanup(projects: string[]): void {
 
         if (env.runtime === "rust" || env.runtime === "golang") continue;
 
-        LogStuff(
-            `Maxim pruning for ${name}`,
-            "trash",
-        );
         if (!CheckForPath(env.hall_of_trash)) {
             LogStuff(
                 `Maxim pruning didn't find the node_modules DIR at ${name}. Skipping this ${FWORDS.MF}...`,
@@ -480,21 +496,23 @@ export function PerformMaximCleanup(projects: string[]): void {
             );
             return;
         }
-        // hall_of_trash path should be absolute
-        Deno.removeSync(env.hall_of_trash, {
-            recursive: true,
-        });
         LogStuff(
-            `Maxim pruned ${name}.`,
-            "tick",
+            `Will maxim prune for ${name}`,
+            "trash",
         );
+        // hall_of_trash path should be absolute
+        trash.push(env.hall_of_trash);
     }
+    await BulkRemove(trash);
+    LogStuff(
+        `Maxim pruned all possible projects!`,
+        "tick",
+    );
 }
 
 /**
  * Validates the provided intensity and handles stuff like `--`.
  *
- * @export
  * @param {string} intensity
  * @returns {CleanerIntensity}
  */
@@ -538,7 +556,6 @@ export function ValidateIntensity(intensity: string): CleanerIntensity {
 /**
  * Shows a basic report.
  *
- * @export
  * @param {{ path: string; status: string }[]} results
  * @returns {Promise<void>}
  */
@@ -566,7 +583,6 @@ export function ShowReport(results: tRESULT[]): void {
 /**
  * Resolves all lockfiles of a project.
  *
- * @export
  * @async
  * @param {string} path
  * @returns {Promise<LOCKFILE_GLOBAL[]>} All lockfiles
@@ -592,7 +608,6 @@ export function ResolveLockfiles(path: string): LOCKFILE_GLOBAL[] {
 /**
  * Names a lockfile using a manager name.
  *
- * @export
  * @param {MANAGER_GLOBAL} manager Manager to name
  * @returns {LOCKFILE_GLOBAL} Lockfile name
  */

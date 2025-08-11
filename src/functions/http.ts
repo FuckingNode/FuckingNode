@@ -5,7 +5,6 @@ import { Commander } from "./cli.ts";
 /**
  * Fetches a resource using GitHub's headers.
  *
- * @export
  * @async
  * @param {VALID_URL} url
  * @returns {Promise<Response>}

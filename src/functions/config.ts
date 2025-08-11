@@ -1,7 +1,7 @@
 import { APP_NAME, DEFAULT_SCHEDULE_FILE, DEFAULT_SETTINGS, FWORDS, LOCAL_PLATFORM } from "../constants.ts";
 import type { CF_FKNODE_SETTINGS } from "../types/config_files.ts";
 import { FknError } from "./error.ts";
-import { BulkRemoveFiles, CheckForPath, JoinPaths, ParsePathList } from "./filesystem.ts";
+import { BulkRemove, CheckForPath, JoinPaths, ParsePathList } from "./filesystem.ts";
 import { parse as parseYaml } from "@std/yaml";
 import { ColorString, Interrogate, LogStuff, StringifyYaml } from "./io.ts";
 import { type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
@@ -10,7 +10,6 @@ import { format } from "@std/fmt/bytes";
 /**
  * Returns file paths for all config files the app uses.
  *
- * @export
  * @param {("BASE" | "MOTHERFKRS" | "LOGS" | "SCHEDULE" | "SETTINGS" | "ERRORS" | "REM")} path What path you want.
  * @returns {string} The path as a string.
  */
@@ -55,10 +54,10 @@ export function GetAppPath(
 /**
  * Check if config files are present, create them otherwise ("Fresh Setup").
  *
- * @export
+ * @async
  * @returns {void}
  */
-export function FreshSetup(repairSetts?: boolean): void {
+export async function FreshSetup(repairSetts?: boolean): Promise<void> {
     const basePath = GetAppPath("BASE");
     if (!CheckForPath(basePath)) {
         Deno.mkdirSync(basePath, { recursive: true });
@@ -110,7 +109,7 @@ export function FreshSetup(repairSetts?: boolean): void {
 
     if (toBeRemoved.length === 0) return;
 
-    BulkRemoveFiles(toBeRemoved);
+    await BulkRemove(toBeRemoved);
 
     return;
 }
@@ -118,24 +117,14 @@ export function FreshSetup(repairSetts?: boolean): void {
 /**
  * Returns current user settings.
  *
- * @export
  * @returns {FKNODE_SETTINGS}
  */
 export function GetUserSettings(): CF_FKNODE_SETTINGS {
-    const path = GetAppPath("SETTINGS");
-    const stuff: CF_FKNODE_SETTINGS = parseYaml(Deno.readTextFileSync(path)) as CF_FKNODE_SETTINGS;
-    if (!stuff.flushFreq || !stuff.defaultManager || !stuff.defaultIntensity || !stuff.favEditor || !stuff.updateFreq) {
-        const newStuff: CF_FKNODE_SETTINGS = {
-            flushFreq: stuff.flushFreq ?? DEFAULT_SETTINGS.flushFreq,
-            updateFreq: stuff.updateFreq ?? DEFAULT_SETTINGS.updateFreq,
-            favEditor: stuff.favEditor ?? DEFAULT_SETTINGS.favEditor,
-            defaultIntensity: stuff.defaultIntensity ?? DEFAULT_SETTINGS.defaultIntensity,
-            defaultManager: stuff.defaultManager ?? DEFAULT_SETTINGS.defaultManager,
-        };
-        Deno.writeTextFileSync(path, StringifyYaml(newStuff));
-        return newStuff;
-    }
-    return stuff;
+    const stuff: CF_FKNODE_SETTINGS = parseYaml(Deno.readTextFileSync(GetAppPath("SETTINGS"))) as CF_FKNODE_SETTINGS;
+    return {
+        ...DEFAULT_SETTINGS,
+        ...stuff,
+    };
 }
 
 // TODO (for v5 cause breaking)
@@ -146,7 +135,6 @@ export const VALID_SETTINGS = ["defaultintensity", "defaultmanager", "updatefreq
 /**
  * Changes a given user setting to a given value.
  *
- * @export
  * @param {setting} setting Setting to change.
  * @param {UnknownString} value Value to set it to.
  * @returns {void}
@@ -233,13 +221,13 @@ export function DisplaySettings(): void {
 /**
  * Flushes configuration files.
  *
- * @export
+ * @async
  * @param {UnknownString} target What to flush.
  * @param {boolean} force If true no confirmation prompt will be shown.
  * @param {boolean} [silent=false] If true no success message will be shown.
  * @returns {void}
  */
-export function FlushConfigFiles(target: UnknownString, force: boolean, silent: boolean = false): void {
+export async function FlushConfigFiles(target: UnknownString, force: boolean, silent: boolean = false): Promise<void> {
     if (!validateAgainst(target, ["logs", "projects", "schedules", "errors", "all"])) {
         LogStuff(
             "Specify what to flush. Either 'logs', 'projects', 'schedules', 'errors', or 'all'.",
@@ -274,7 +262,7 @@ export function FlushConfigFiles(target: UnknownString, force: boolean, silent: 
         )
     ) return;
 
-    BulkRemoveFiles(file);
+    await BulkRemove(file);
     if (!silent) LogStuff("That worked out!", "tick-clear");
     return;
 }

@@ -43,8 +43,6 @@ type EXTERNAL_ERROR_CODES = typeof EXTERNAL_ERRORS[number];
 
 /**
  * All possible CLI error codes.
- *
- * @export
  */
 export type GLOBAL_ERROR_CODES =
     | OS_ERROR_CODES

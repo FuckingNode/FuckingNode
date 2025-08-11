@@ -28,7 +28,6 @@ export default function TheReleaser(params: TheReleaserConstructedParams) {
 
     const parsedVersion = parse(params.version);
     const project = (params.project || "").startsWith("--") ? Deno.cwd() : SpotProject(params.project);
-    const CWD = Deno.cwd();
     const env = GetProjectEnvironment(project);
     const canUseGit = IsRepo(project);
 
@@ -208,7 +207,6 @@ export default function TheReleaser(params: TheReleaserConstructedParams) {
         throw new FknError("External__Publish", `Publish command failed: ${publishOutput.stdout}`);
     }
 
-    Deno.chdir(CWD);
     LogStuff(`That worked out! ${params.version} should be live now.`, "tick", ["bold", "bright-green"]);
     return;
 }

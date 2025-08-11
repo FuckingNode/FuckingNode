@@ -80,14 +80,13 @@ function handler(
                     "Your bun.lockb file will be backed up and replaced with a text-based lockfile (bun.lock).",
                     "bruh",
                 );
-                Deno.removeSync(env.lockfile.path);
             } else {
                 Deno.writeTextFileSync(
                     JoinPaths(env.root, `${env.lockfile.name}.bak`),
                     Deno.readTextFileSync(env.lockfile.path),
                 );
-                Deno.removeSync(env.lockfile.path);
             }
+            Deno.removeSync(env.lockfile.path);
         } else {
             LogStuff("No lockfile found, skipping backup.", "warn");
         }
@@ -121,8 +120,6 @@ export default function TheMigrator(params: TheMigratorConstructedParams): void 
             "Target isn't a valid package manager. Only JS environments (NodeJS, Deno, Bun) support migrate.",
         );
     }
-
-    const cwd = Deno.cwd();
 
     const workingProject = SpotProject(projectPath);
     const workingEnv = GetProjectEnvironment(workingProject);
@@ -160,8 +157,6 @@ export default function TheMigrator(params: TheMigratorConstructedParams): void 
             `From ${workingEnv.manager} to ${desiredManager}. It took ${GetElapsedTime(startup)}, but it's now done!`,
         );
     }
-
-    Deno.chdir(cwd);
 
     return;
 }

@@ -9,7 +9,6 @@ import { FKNODE_SHALL_WE_DEBUG } from "../main.ts";
 /**
  * Errors that we know about, or that are caused by the user.
  *
- * @export
  * @class FknError
  * @extends {Error}
  */

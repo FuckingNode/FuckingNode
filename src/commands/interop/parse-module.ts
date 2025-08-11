@@ -25,7 +25,6 @@ import { FkNodeInterop } from "./interop.ts";
  * - by design, parens are included, so it'll always be `["(", ..., ")"]`
  * - capable of handling multiple requires (e.g "`require () require ()`")
  *
- * @export
  * @param {string[]} content string[] (assumes you splitted lines with something like `.split("\n")`)
  * @param {string} kw keyword to use as "key" in `key(vals)`
  * @returns {string[]}

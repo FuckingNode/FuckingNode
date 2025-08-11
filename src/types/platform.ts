@@ -4,7 +4,6 @@ import type { VALID_COLORS } from "./misc.ts";
 /**
  * Understood version of a project's protection settings.
  *
- * @export
  * @interface UnderstoodProjectProtection
  */
 export interface UnderstoodProjectProtection {
@@ -21,7 +20,6 @@ export type CargoDependency = string | { version: string; optional?: boolean; fe
 /**
  * Use this when you just need the name or version of a package, to avoid Node-Deno type issues.
  *
- * @export
  * @interface GenericJsPkgFile
  */
 export interface GenericJsPkgFile {
@@ -32,7 +30,6 @@ export interface GenericJsPkgFile {
 /**
  * NodeJS and BunJS `package.json` props, only the ones we need.
  *
- * @export
  * @interface NodePkgFile
  */
 export interface NodePkgFile extends GenericJsPkgFile {
@@ -48,7 +45,6 @@ export interface NodePkgFile extends GenericJsPkgFile {
 /**
  * DenoJS `deno.json` props, only the ones we need.
  *
- * @export
  * @interface DenoPkgFile
  */
 export interface DenoPkgFile extends GenericJsPkgFile {
@@ -59,7 +55,6 @@ export interface DenoPkgFile extends GenericJsPkgFile {
 /**
  * Rust `Cargo.toml` props, only the ones we need.
  *
- * @export
  * @interface CargoPkgFile
  */
 export interface CargoPkgFile {
@@ -86,7 +81,6 @@ export interface CargoPkgFile {
 /**
  * Go `go.mod` props, only the ones we need.
  *
- * @export
  * @interface GolangPkgFile
  */
 export interface GolangPkgFile {
@@ -393,7 +387,6 @@ interface FnCPFDependency {
  * Fn Common Package File.
  * @author ZakaHaceCosas
  *
- * @export
  * @interface FnCPF
  */
 export interface FnCPF {

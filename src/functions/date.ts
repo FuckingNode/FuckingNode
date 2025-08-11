@@ -5,7 +5,6 @@ const DATE_FMT = "dd-MM-yyyy HH:mm:ss";
 /**
  * Gets the current date (at the moment the function is called) and returns it as a string.
  *
- * @export
  * @returns {string}
  */
 export function GetDateNow(): string {
@@ -25,7 +24,6 @@ export function ParseDate(date: string): Date {
 /**
  * Gets the amount of time passed between `date` and the current date.
  *
- * @export
  * @param {Date} date Date to count from. It should be earlier from now, e.g. if now it's 13:30 and passed `date` is 13:20, elapsed time is of 10 minutes.
  * @returns {string}
  */

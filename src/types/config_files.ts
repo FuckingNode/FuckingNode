@@ -3,15 +3,12 @@ import { MANAGER_GLOBAL } from "./platform.ts";
 
 /**
  * Supported code editors.
- *
- * @export
  */
 export type SUPPORTED_EDITORS = "vscode" | "sublime" | "emacs" | "notepad++" | "atom" | "vscodium";
 
 /**
  * User config
  *
- * @export
  * @interface CF_FKNODE_SETTINGS
  */
 export interface CF_FKNODE_SETTINGS {
@@ -46,7 +43,6 @@ export interface CF_FKNODE_SETTINGS {
 /**
  * A config file for scheduled tasks.
  *
- * @export
  * @interface CF_FKNODE_SCHEDULE
  */
 export interface CF_FKNODE_SCHEDULE {
@@ -215,7 +211,6 @@ export interface FullFkNodeYaml {
 /**
  * Validates if whatever you pass to this is a valid FkNodeYaml file.
  *
- * @export
  * @param {*} obj Whatever
  * @returns {obj is FkNodeYaml}
  */
