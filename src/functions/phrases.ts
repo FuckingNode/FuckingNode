@@ -110,7 +110,7 @@ const quotes = [
     "'Any fool can write code that a computer can understand. Good programmers write code that humans can understand.' - Martin Fowler",
     "'Make it work, make it right, make it fast.' - Kent Beck",
     "'When in doubt, use brute force.' - Ken Thompson",
-    "'If you can’t write it down in English, you can't code it.' - Peter Halpern",
+    "'If you can't write it down in English, you can't code it.' - Peter Halpern",
     "'Get your data structures correct first, and the rest of the program will write itself.' - David Jones",
     "'Always code as if the guy who ends up maintaining your code will be a violent psychopath who knows where you live.' - Rick Osborne",
     "'Don't comment bad code. Rewrite it.' - Brian Kernighan", // if only i wasn't that lazy...

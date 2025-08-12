@@ -19,7 +19,7 @@ function HandleError(
         err,
         "Something went wrong and we don't know what",
         stdout ??
-            "UNDEFINED COMMAND STDOUT/STDERR.",
+            "UNDEFINED COMMAND STDOUT/STDERR. This likely happens if you passed the --verbose flag, if output is shown to you, we cannot store it.",
     );
 }
 

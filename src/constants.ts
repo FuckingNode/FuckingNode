@@ -43,10 +43,8 @@ export const APP_URLs: { REPO: VALID_URL; WEBSITE: VALID_URL } = {
 
 /**
  * Different variants of the f-word for in-app usage. Not fully "explicit" as an asterisk is used, like in f*ck.
- *
- * @interface I_LIKE_JS
  */
-interface I_LIKE_JS {
+export const FWORDS: {
     /**
      * Base word. 4 letters.
      *
@@ -83,14 +81,7 @@ interface I_LIKE_JS {
      * @type {string}
      */
     MFLY: string;
-}
-
-/**
- * Different variants of the f-word for in-app usage. Not fully "explicit" as an asterisk is used, like in f*ck.
- *
- * @type {I_LIKE_JS}
- */
-export const FWORDS: I_LIKE_JS = {
+} = {
     FK: "f*ck",
     FKN: "f*cking",
     MF: "m*therf*cker",
@@ -181,9 +172,6 @@ export function isDis(str: UnknownString): str is "disable" {
     return normalize(str ?? "", { strict: true, preserveCase: false, removeCliColors: true }) === "disable";
 }
 
-// deno-lint-ignore no-explicit-any
-type shutUpAny = any;
-
 /** Info on the user's platform. */
 export const LOCAL_PLATFORM: {
     /** What system platform we're on. `"chad"` = POSIX, `"windows"` = WINDOWS. */
@@ -194,9 +182,9 @@ export const LOCAL_PLATFORM: {
     APPDATA: string;
 } = {
     SYSTEM: (Deno.build.os === "windows" ||
-            (globalThis as shutUpAny).Deno?.build.os === "windows" ||
-            (globalThis as shutUpAny).navigator?.platform?.startsWith("Win") ||
-            (globalThis as shutUpAny).process?.platform?.startsWith("win"))
+            globalThis.Deno?.build.os === "windows" ||
+            globalThis.navigator?.userAgent?.includes("Windows") ||
+            globalThis.process?.platform?.startsWith("win"))
         ? "windows"
         : "chad",
     USER: (Deno.env.get("USERNAME") || Deno.env.get("USER")),

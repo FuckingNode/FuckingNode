@@ -16,9 +16,7 @@ import { format } from "@std/fmt/bytes";
 export function GetAppPath(
     path: "BASE" | "MOTHERFKRS" | "LOGS" | "SCHEDULE" | "SETTINGS" | "ERRORS",
 ): string {
-    const appDataPath: string = LOCAL_PLATFORM.APPDATA;
-
-    if (!validate(appDataPath) || !CheckForPath(appDataPath)) {
+    if (!validate(LOCAL_PLATFORM.APPDATA) || !CheckForPath(LOCAL_PLATFORM.APPDATA)) {
         throw new FknError(
             "Os__NoAppdataNoHome",
             `We searched for ${
@@ -33,7 +31,7 @@ export function GetAppPath(
         return JoinPaths(BASE_DIR, `${APP_NAME.CLI}-${name}`);
     }
 
-    const BASE_DIR = JoinPaths(appDataPath, APP_NAME.CLI);
+    const BASE_DIR = JoinPaths(LOCAL_PLATFORM.APPDATA, APP_NAME.CLI);
     const PROJECTS = formatDir(`${funny}.txt`);
     const LOGS = formatDir("logs.log");
     const SCHEDULE = formatDir("schedule.yaml");

@@ -1,4 +1,4 @@
-import { Commander, CommanderOutput } from "../functions/cli.ts";
+import { Commander } from "../functions/cli.ts";
 import { CheckForPath, JoinPaths, ParsePath } from "../functions/filesystem.ts";
 import { ColorString, LogStuff } from "../functions/io.ts";
 import { GetProjectEnvironment, SpotProject } from "../functions/projects.ts";
@@ -12,7 +12,7 @@ import { GIT_FILES } from "../types/misc.ts";
 // * it's designed that way
 
 /** Runs a Git command with any args. ASSUMES AN ALREADY SPOTTED PATH. */
-function g(path: string, args: string[]): CommanderOutput {
+function g(path: string, args: string[]) {
     return Commander("git", ["-C", path, ...args], false);
 }
 

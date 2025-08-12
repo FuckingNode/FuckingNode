@@ -1,4 +1,4 @@
-export const OS_ERRORS = ["Os__NoAppdataNoHome"] as const;
+export const OS_ERRORS = ["Os__NoAppdataNoHome", "Os__NoEntity"] as const;
 export const FS_ERRORS = ["Fs__Unreal", "Fs__UnparsablePath", "Fs__DemandsEmptying", "Fs__DemandsDIR"] as const;
 export const GIT_ERRORS = ["Git__UE", "Git__UE__Commit", "Git__UE_Push", "Git__UE__IsRepo", "Git__NoBranchAA", "Git__NoBranch"] as const;
 export const ENV_ERRORS = [
@@ -8,7 +8,15 @@ export const ENV_ERRORS = [
     "Env__CannotDetermine",
     "Env__SchrodingerLockfile",
 ] as const;
-export const TASK_ERRORS = ["Task__Release", "Task__Commit", "Task__Launch", "Task__Update", "Task__Lint", "Task__Pretty"] as const;
+export const TASK_ERRORS = [
+    "Task__Release",
+    "Task__Commit",
+    "Task__Launch",
+    "Task__Update",
+    "Task__Lint",
+    "Task__Pretty",
+    "Task__Build",
+] as const;
 export const PARAM_ERRORS = [
     "Param__WhateverUnprovided",
     "Param__TargetInvalid",

@@ -1,3 +1,4 @@
+import { assertThrows } from "@std/assert/throws";
 import { LOCAL_PLATFORM } from "../src/constants.ts";
 import { Commander, ManagerExists } from "../src/functions/cli.ts";
 import { assertEquals } from "@std/assert";
@@ -21,12 +22,14 @@ Deno.test({
 Deno.test({
     name: "commander returns output",
     fn: () => {
-        if (LOCAL_PLATFORM.SYSTEM === "windows") {
-            const out = Commander("powershell", ["echo", "hi"], false);
-            assertEquals(out, { success: true, stdout: "hi\r\n\n" });
-        } else {
-            const out = Commander("echo", ["hi"], false);
-            assertEquals(out, { success: true, stdout: "hi\n\n" });
-        }
+        const command = LOCAL_PLATFORM.SYSTEM === "windows" ? "powershell" : "echo";
+        const args = LOCAL_PLATFORM.SYSTEM === "windows" ? ["echo", "hi"] : ["hi"];
+        const expected = LOCAL_PLATFORM.SYSTEM === "windows" ? "hi\r\n" : "hi\n\n";
+
+        const out1 = Commander(command, args, false);
+        assertEquals(out1, { success: true, stdout: expected });
+        const out2 = Commander(command, args, true);
+        assertEquals(out2, { success: true });
+        assertThrows(() => Commander("i don't exist", []));
     },
 });

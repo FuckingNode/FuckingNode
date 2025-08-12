@@ -1,25 +1,22 @@
 import type { MANAGER_GLOBAL } from "../types/platform.ts";
+import { FknError } from "./error.ts";
+import { LOCAL_PLATFORM } from "../constants.ts";
 
-/**
- * Output of a CLI command called using Commander.
- *
- * @interface CommanderOutput
- */
-export interface CommanderOutput {
-    /**
-     * True if success, false if failure.
-     *
-     * @type {boolean}
-     */
+export function Commander(
+    main: string,
+    stuff: (string | undefined)[],
+    showOutput?: false | boolean,
+): {
     success: boolean;
-    /**
-     * Output of the command. Uses both `stdout` and `stderr`, joined by an \n.
-     *
-     * @type {string}
-     */
     stdout: string;
-}
-
+};
+export function Commander(
+    main: string,
+    stuff: (string | undefined)[],
+    showOutput: true,
+): {
+    success: boolean;
+};
 /**
  * Executes commands and automatically handles errors.
  *
@@ -35,34 +32,63 @@ export function Commander(
     main: string,
     stuff: (string | undefined)[],
     showOutput?: boolean,
-): CommanderOutput {
-    const args = stuff.filter((i) => i !== undefined);
+): {
+    /**
+     * True if success, false if failure.
+     *
+     * @type {boolean}
+     */
+    success: boolean;
+    /**
+     * Output of the command. Uses both `stdout` and `stderr`, joined by an \n.
+     *
+     * @type {string | undefined}
+     */
+    stdout: string | undefined;
+} {
+    try {
+        const args = stuff.filter((i) => i !== undefined);
 
-    const command = new Deno.Command(
-        main,
-        showOutput === false
-            ? {
-                args,
-                stdout: "piped",
-                stderr: "piped",
+        const command = new Deno.Command(
+            main,
+            showOutput === false
+                ? {
+                    args,
+                    stdout: "piped",
+                    stderr: "piped",
+                }
+                : {
+                    args,
+                    stdout: "inherit",
+                    stderr: "inherit",
+                    stdin: "inherit",
+                },
+        );
+
+        const process = command.outputSync();
+        const decoder = new TextDecoder();
+
+        if (showOutput === true) {
+            // @ts-expect-error TS thinks the return type is wrong, but it isn't...
+            return {
+                success: process.success,
+            };
+        }
+
+        return {
+            success: process.success,
+            stdout: `${decoder.decode(process.stdout)}${decoder.decode(process.stderr)}`,
+        };
+    } catch (error) {
+        if (error instanceof Deno.errors.NotFound && error.message.toLowerCase().includes("failed to spawn")) {
+            const err = new FknError("Os__NoEntity", `We attempted to run a shell / CLI command (${main}), but your OS wasn't able find it.`);
+            if (LOCAL_PLATFORM.SYSTEM === "windows") {
+                err.hint =
+                    `Just in case it's a shell command (like, e.g., 'echo') and you input it somewhere like 'buildCmd': it has to be preceded with 'powershell' or 'cmd', as its passed as an argument to this executable.`;
             }
-            : {
-                args,
-                stdout: "inherit",
-                stderr: "inherit",
-                stdin: "inherit",
-            },
-    );
-
-    const process = command.outputSync();
-    const decoder = new TextDecoder();
-
-    const result: CommanderOutput = {
-        success: process.success,
-        stdout: `${decoder.decode(process.stdout)}${process.stderr ? "\n" + decoder.decode(process.stderr) : ""}`,
-    };
-
-    return result;
+        }
+        throw error;
+    }
 }
 
 /**

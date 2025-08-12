@@ -37,9 +37,16 @@ from_tarball = { url = "https://somewhere.com/some_crate-1.0.0.tar.gz" }
 - [ ] Use a character (idk, maybe `*` or `+`) to specify that a command is a _script_ and runs via `npm run (x)` or equivalent. Without it, default to running a shell command. (Or maybe vice versa, use the character to indicate a shell command. Will think about it.)
 - [ ] Allow for spread commands, using --flags instead of plaintext for specific arguments, e.g. `fkn add path1 path2 path3` or `fkclean project1 project2 project3 --intensity=normal`.
 - [ ] Proper self-updating?
-  - A (hopefully) viable is to store the install/update shell command in a script file that also has a directive to kill a specific PID provided on invocation. Then have us to invoke this script passing our own PID, so it kills the process before updating.
-  This is to avoid what made previous self-updating never work, you cannot modify the binary of a running process (my old self didn't knew 😭).
+  - A (hopefully) viable is to store the install/update shell command in a script file that also has a directive to kill a specific PID provided on invocation. Then have us to invoke this script passing our own PID, so it kills the process before updating. This is to avoid what made previous self-updating never work, you cannot modify the binary of a running process (my old self didn't knew 😭).
   - Disable this feature if installed via a package manager.
+
+## Proper error fixing
+
+- [ ] Fix handling of command output.
+  - Piping it lets us store, use, and dump it (which is what we want), but doing that CLI-wide removes the ability to use live / verbose logs, making stuff look worse & more confusing. Inheriting it gives a better, more contextualized look, but is suboptimal. So we have three options, I'll decide on one later on.
+    - Pipe everything and remove verbosity options.
+    - Inherit everything (except places that STRICTLY require to read the stdout) and remove `DebugFknError`.
+    - Enable both, but default to piping and show a warning for inheritance users.
 
 ## Performance
 
