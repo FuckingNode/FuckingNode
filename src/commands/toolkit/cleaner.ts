@@ -1,4 +1,4 @@
-import { FULL_NAME, FWORDS, isDef, LOCAL_PLATFORM } from "../../constants.ts";
+import { FULL_NAME, isDef } from "../../constants.ts";
 import { Commander, ManagerExists } from "../../functions/cli.ts";
 import { GetUserSettings } from "../../functions/config.ts";
 import { BulkRemove, CheckForPath, JoinPaths, ParsePath } from "../../functions/filesystem.ts";
@@ -11,6 +11,8 @@ import { CanCommit, Commit } from "../../functions/git.ts";
 import type { tRESULT } from "../clean.ts";
 import { sortAlphabetically, validate } from "@zakahacecosas/string-utils";
 import { FkNodeInterop } from "../interop/interop.ts";
+import { LOCAL_PLATFORM } from "../../constants/platform.ts";
+import { FWORDS } from "../../constants/fwords.ts";
 
 /**
  * All project cleaning features.

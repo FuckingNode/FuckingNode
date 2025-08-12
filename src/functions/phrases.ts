@@ -5,8 +5,9 @@
  * (bruh i spent my time writing all of this instead of studying)
  */
 
-import { APP_NAME, FWORDS } from "../constants.ts";
+import { APP_NAME } from "../constants/name.ts";
 import { GetAppPath } from "./config.ts";
+import { FWORDS } from "../constants/fwords.ts";
 
 const internalJokes = [
     "Dima definitely approves", // indeed he does

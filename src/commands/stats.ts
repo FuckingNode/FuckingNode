@@ -1,5 +1,5 @@
 import { type UnknownString } from "@zakahacecosas/string-utils";
-import { FWORDS } from "../constants.ts";
+import { FWORDS } from "../constants/fwords.ts";
 import { ColorString, LogStuff } from "../functions/io.ts";
 import { GetProjectEnvironment, SpotProject } from "../functions/projects.ts";
 import { NameProject } from "../functions/projects.ts";

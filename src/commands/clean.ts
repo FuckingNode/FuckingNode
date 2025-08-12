@@ -1,4 +1,4 @@
-import { FWORDS } from "../constants.ts";
+import { FWORDS } from "../constants/fwords.ts";
 import { CheckForPath } from "../functions/filesystem.ts";
 import { LogStuff, Notification } from "../functions/io.ts";
 import { GetAllProjects, NameProject, SpotProject } from "../functions/projects.ts";

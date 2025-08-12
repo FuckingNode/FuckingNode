@@ -13,7 +13,7 @@ import { GenerateGitUrl } from "./toolkit/git-url.ts";
 import { Clone } from "../functions/git.ts";
 import { validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { GetElapsedTime } from "../functions/date.ts";
-import { FWORDS } from "../constants.ts";
+import { FWORDS } from "../constants/fwords.ts";
 
 export default function TheKickstarter(params: TheKickstarterConstructedParams) {
     const { gitUrl, path, manager } = params;

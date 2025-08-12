@@ -1,6 +1,6 @@
 import { compare, parse } from "@std/semver";
 import { FetchGitHub } from "../functions/http.ts";
-import { RELEASE_URL, VERSION } from "../constants.ts";
+import { RELEASE_URL } from "../constants.ts";
 import type { GITHUB_RELEASE } from "../types/misc.ts";
 import { GetDateNow } from "../functions/date.ts";
 import type { TheUpdaterConstructedParams } from "./constructors/command.ts";
@@ -8,6 +8,7 @@ import { ColorString, LogStuff, StringifyYaml } from "../functions/io.ts";
 import { parse as parseYaml } from "@std/yaml";
 import { GetAppPath } from "../functions/config.ts";
 import type { CF_FKNODE_SCHEDULE } from "../types/config_files.ts";
+import * as DenoJson from "../../deno.json" with { type: "json" };
 
 async function CheckUpdates(): Promise<CF_FKNODE_SCHEDULE | "rl"> {
     const scheduleFilePath = GetAppPath("SCHEDULE");
@@ -56,14 +57,14 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
 
     const { latestVer } = needsToUpdate.updater;
 
-    if (compare(parse(VERSION), parse(latestVer)) >= 0) {
+    if (compare(parse(DenoJson.default.version), parse(latestVer)) >= 0) {
         if (params.silent) return;
-        LogStuff(`You're up to date! ${ColorString(VERSION, "bright-green")} is the latest.`, "tick");
+        LogStuff(`You're up to date! ${ColorString(DenoJson.default.version, "bright-green")} is the latest.`, "tick");
         return;
     }
 
     LogStuff(
-        `There's a new version! ${latestVer}. You're on ${VERSION}, btw.`,
+        `There's a new version! ${latestVer}. You're on ${DenoJson.default.version}, btw.`,
         "bulb",
     );
     return;

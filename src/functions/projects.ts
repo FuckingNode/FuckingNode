@@ -2,7 +2,7 @@ import { parse as parseYaml } from "@std/yaml";
 import { parse as parseToml } from "@std/toml";
 import { parse as parseJsonc } from "@std/jsonc";
 import { expandGlobSync } from "@std/fs";
-import { APP_NAME, APP_URLs, DEFAULT_FKNODE_YAML, FWORDS } from "../constants.ts";
+import { APP_URLs, DEFAULT_FKNODE_YAML } from "../constants.ts";
 import type { CargoPkgFile, NodePkgFile, ProjectEnvironment, UnderstoodProjectProtection } from "../types/platform.ts";
 import { CheckForPath, JoinPaths, ParsePath, ParsePathList } from "./filesystem.ts";
 import { ColorString, Interrogate, LogStuff } from "./io.ts";
@@ -19,6 +19,8 @@ import { ResolveLockfiles } from "../commands/toolkit/cleaner.ts";
 import { isGlob } from "@std/path/is-glob";
 import { joinGlobs, normalizeGlob } from "@std/path";
 import { globSync } from "node:fs";
+import { FWORDS } from "../constants/fwords.ts";
+import { APP_NAME } from "../constants/name.ts";
 
 /**
  * Gets all the users projects and returns their absolute root paths as a `string[]`.

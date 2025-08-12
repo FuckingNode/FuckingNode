@@ -1,6 +1,6 @@
 import type { MANAGER_GLOBAL } from "../types/platform.ts";
 import { FknError } from "./error.ts";
-import { LOCAL_PLATFORM } from "../constants.ts";
+import { LOCAL_PLATFORM } from "../constants/platform.ts";
 
 export function Commander(
     main: string,

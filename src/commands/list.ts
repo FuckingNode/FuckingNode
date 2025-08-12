@@ -1,4 +1,4 @@
-import { FWORDS } from "../constants.ts";
+import { FWORDS } from "../constants/fwords.ts";
 import { ColorString, LogStuff } from "../functions/io.ts";
 import { GetAllProjects, GetProjectEnvironment, NameProject } from "../functions/projects.ts";
 import { DEBUG_LOG } from "../functions/error.ts";

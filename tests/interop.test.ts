@@ -1,6 +1,6 @@
 import { FkNodeInterop } from "../src/commands/interop/interop.ts";
 import { assertEquals } from "@std/assert";
-import { VERSION } from "../src/constants.ts";
+import * as DenoJson from "../deno.json" with { type: "json" };
 import { CONSTANTS } from "./constants.ts";
 import { JoinPaths } from "../src/functions/filesystem.ts";
 import type { FnCPF } from "../src/types/platform.ts";
@@ -31,7 +31,7 @@ Deno.test({
                     { name: "bindgen", ver: "0.59", rel: "rst:buildD", src: "crates.io" },
                 ],
                 ws: [],
-                fknVer: VERSION,
+                fknVer: DenoJson.default.version,
             },
         );
     },
@@ -110,7 +110,7 @@ Deno.test({
                     },
                 ],
                 ws: [],
-                fknVer: VERSION,
+                fknVer: DenoJson.default.version,
             },
         );
     },
@@ -153,7 +153,7 @@ Deno.test({
                     },
                 ],
                 ws: [],
-                fknVer: VERSION,
+                fknVer: DenoJson.default.version,
             },
         );
     },
@@ -183,7 +183,7 @@ Deno.test({
                     },
                 ],
                 ws: [],
-                fknVer: VERSION,
+                fknVer: DenoJson.default.version,
             },
         );
     },
@@ -211,7 +211,7 @@ const PKGGEN_TEST_FNCPF: FnCPF = {
         },
     ],
     ws: [],
-    fknVer: VERSION,
+    fknVer: DenoJson.default.version,
 };
 
 Deno.test({

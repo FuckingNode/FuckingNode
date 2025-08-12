@@ -18,7 +18,7 @@ import TheSetuper from "./commands/setup.ts";
 import TheLauncher from "./commands/launch.ts";
 import TheBuilder from "./commands/build.ts";
 // other things
-import { APP_NAME, APP_URLs, FULL_NAME, FWORDS } from "./constants.ts";
+import { APP_URLs, FULL_NAME } from "./constants.ts";
 import { ColorString, LogStuff } from "./functions/io.ts";
 import { FreshSetup, GetAppPath, GetUserSettings } from "./functions/config.ts";
 import { DEBUG_LOG, ErrorHandler } from "./functions/error.ts";
@@ -29,6 +29,8 @@ import { AddProject, CleanupProjects, RemoveProject } from "./functions/projects
 import { LaunchWebsite } from "./functions/http.ts";
 import { HINTS } from "./functions/phrases.ts";
 import { GetDateNow } from "./functions/date.ts";
+import { FWORDS } from "./constants/fwords.ts";
+import { APP_NAME } from "./constants/name.ts";
 
 // this is outside the main loop so it can be executed
 // without depending on other modules

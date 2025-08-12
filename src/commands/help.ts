@@ -1,5 +1,5 @@
 import { normalize, spaceString } from "@zakahacecosas/string-utils";
-import { APP_NAME } from "../constants.ts";
+import { APP_NAME } from "../constants/name.ts";
 import { ColorString, LogStuff } from "../functions/io.ts";
 import type { TheHelperConstructedParams } from "./constructors/command.ts";
 

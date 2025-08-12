@@ -3,7 +3,8 @@ import { GetAppPath } from "./config.ts";
 import { stringify as stringifyYaml } from "@std/yaml";
 import { GetDateNow } from "./date.ts";
 import { Commander } from "./cli.ts";
-import { APP_NAME, LOCAL_PLATFORM } from "../constants.ts";
+import { APP_NAME } from "../constants/name.ts";
+import { LOCAL_PLATFORM } from "../constants/platform.ts";
 
 /**
  * Appends an emoji at the beginning of a message.

@@ -1,4 +1,4 @@
-import { APP_NAME } from "../constants.ts";
+import { APP_NAME } from "../constants/name.ts";
 import { ColorString, LogStuff } from "../functions/io.ts";
 import { GetAllProjects, NameProject } from "../functions/projects.ts";
 import { PerformAuditing } from "./toolkit/auditer.ts";

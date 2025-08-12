@@ -1,4 +1,4 @@
-import { LOCAL_PLATFORM } from "../src/constants.ts";
+import { LOCAL_PLATFORM } from "../src/constants/platform.ts";
 import { RunBuildCmds } from "../src/functions/build.ts";
 
 Deno.test({

@@ -1,93 +1,18 @@
 import type { VALID_URL } from "./types/misc.ts";
-import type { SemVer } from "@std/semver/types";
-import { format, parse } from "@std/semver";
 import type { CF_FKNODE_SCHEDULE, CF_FKNODE_SETTINGS, FullFkNodeYaml } from "./types/config_files.ts";
 import * as DenoJson from "../deno.json" with { type: "json" };
 import { GetDateNow } from "./functions/date.ts";
 import { normalize, type UnknownString } from "@zakahacecosas/string-utils";
 import { ManagerExists } from "./functions/cli.ts";
-
-/**
- * Current app version as a SemVer object. **Change it from `deno.json`.**
- *
- * @type {SemVer}
- */
-const _SV_VER: SemVer = parse(DenoJson.default.version);
-
-/**
- * Current version of the app. Uses the SemVer format.
- *
- * @type {string}
- */
-export const VERSION: string = format(_SV_VER);
-
-/**
- * Best CLI app ever (it's name, so you don't, for example, miss-capitalize it).
- *
- * @type {{CASED: string, CLI: string, SCOPE: string}}
- */
-export const APP_NAME: { CASED: string; CLI: string; SCOPE: string } = {
-    CASED: "FuckingNode",
-    CLI: "fuckingnode",
-    SCOPE: "@zakahacecosas/fuckingnode",
-};
+import { APP_NAME } from "./constants/name.ts";
 
 /** Full, cased name of the app in NAME vVERSION format. */
-export const FULL_NAME: string = `${APP_NAME.CASED} v${VERSION}`;
+export const FULL_NAME: string = `${APP_NAME.CASED} v${DenoJson.default.version}`;
 
 /** URLs have trailing slash (`url.com/`) */
 export const APP_URLs: { REPO: VALID_URL; WEBSITE: VALID_URL } = {
     REPO: "https://github.com/FuckingNode/FuckingNode/",
     WEBSITE: "https://fuckingnode.github.io/",
-};
-
-/**
- * Different variants of the f-word for in-app usage. Not fully "explicit" as an asterisk is used, like in f*ck.
- */
-export const FWORDS: {
-    /**
-     * Base word. 4 letters.
-     *
-     * @type {string}
-     */
-    FK: string;
-    /**
-     * Base word but with -ing.
-     *
-     * @type {string}
-     */
-    FKN: string;
-    /**
-     * Noun. What we call a project that's made with NodeJS. Base word but mentioning his mother (-er).
-     *
-     * @type {string}
-     */
-    MF: string;
-    /**
-     * Plural for `mf`.
-     *
-     * @type {string}
-     */
-    MFS: string;
-    /**
-     * Adjective. What we describe a project that's made with NodeJS as.
-     *
-     * @type {string}
-     */
-    MFN: string;
-    /**
-     * _"Something went **mother** + `fkn` + **ly**"_
-     *
-     * @type {string}
-     */
-    MFLY: string;
-} = {
-    FK: "f*ck",
-    FKN: "f*cking",
-    MF: "m*therf*cker",
-    MFS: "m*therf*ckers",
-    MFN: "m*therf*cking",
-    MFLY: "m*therf*ckingly",
 };
 
 /**
@@ -117,7 +42,7 @@ export const DEFAULT_SETTINGS: CF_FKNODE_SETTINGS = {
  */
 export const DEFAULT_SCHEDULE_FILE: CF_FKNODE_SCHEDULE = {
     updater: {
-        latestVer: VERSION,
+        latestVer: DenoJson.default.version,
         lastCheck: GetDateNow(),
     },
     flusher: {
@@ -171,26 +96,3 @@ export function isDef(str: UnknownString): str is "usedefault" {
 export function isDis(str: UnknownString): str is "disable" {
     return normalize(str ?? "", { strict: true, preserveCase: false, removeCliColors: true }) === "disable";
 }
-
-/** Info on the user's platform. */
-export const LOCAL_PLATFORM: {
-    /** What system platform we're on. `"chad"` = POSIX, `"windows"` = WINDOWS. */
-    SYSTEM: "windows" | "chad";
-    /** Local user's username. */
-    USER: string | undefined;
-    /** APPDATA or whatever it is equivalent to on Linux & macOS. */
-    APPDATA: string;
-} = {
-    SYSTEM: (Deno.build.os === "windows" ||
-            globalThis.Deno?.build.os === "windows" ||
-            globalThis.navigator?.userAgent?.includes("Windows") ||
-            globalThis.process?.platform?.startsWith("win"))
-        ? "windows"
-        : "chad",
-    USER: (Deno.env.get("USERNAME") || Deno.env.get("USER")),
-    APPDATA: (
-        Deno.env.get("APPDATA") ||
-        Deno.env.get("XDG_CONFIG_HOME") ||
-        `${Deno.env.get("HOME") ?? ""}/.config/` // this is a fallback
-    ),
-};

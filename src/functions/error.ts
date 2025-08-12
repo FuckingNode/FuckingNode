@@ -1,10 +1,12 @@
 import { join } from "@std/path/join";
-import { APP_NAME, FWORDS, LOCAL_PLATFORM } from "../constants.ts";
+import { APP_NAME } from "../constants/name.ts";
 import { ColorString } from "./io.ts";
 import type { GLOBAL_ERROR_CODES } from "../types/errors.ts";
 import { GetDateNow } from "./date.ts";
 import { stripCliColors, type UnknownString, validate } from "@zakahacecosas/string-utils";
 import { FKNODE_SHALL_WE_DEBUG } from "../main.ts";
+import { FWORDS } from "../constants/fwords.ts";
+import { LOCAL_PLATFORM } from "../constants/platform.ts";
 
 /**
  * Errors that we know about, or that are caused by the user.
@@ -102,9 +104,9 @@ export class FknError extends Error {
      * @returns {Promise<void>}
      */
     public debug(debuggableContent: UnknownString): void {
-        // base! because if we're already debugging stuff we assume the CLI got to run
+        // APPDATA! because if we're already debugging stuff we assume the CLI got to run
         // meaning that path does exist
-        const debugPath = join(LOCAL_PLATFORM.APPDATA, APP_NAME.CLI, `${APP_NAME.CLI}-errors.log`);
+        const debugPath = join(LOCAL_PLATFORM.APPDATA!, APP_NAME.CLI, `${APP_NAME.CLI}-errors.log`);
         const debuggableError = `\n
 ---
 # BEGIN FknERROR ${this.code} @ ${new Date().toISOString()}

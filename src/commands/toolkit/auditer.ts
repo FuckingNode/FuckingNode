@@ -13,9 +13,10 @@ import { ColorString, Interrogate, LogStuff } from "../../functions/io.ts";
 import { FkNodeSecurityAudit, ParsedNodeReport } from "../../types/audit.ts";
 import { GetProjectEnvironment, NameProject, SpotProject } from "../../functions/projects.ts";
 import { Commander } from "../../functions/cli.ts";
-import { APP_NAME, FWORDS } from "../../constants.ts";
+import { APP_NAME } from "../../constants/name.ts";
 import { DEBUG_LOG } from "../../functions/error.ts";
 import { VULNERABILITY_VECTORS } from "./vectors.ts";
+import { FWORDS } from "../../constants/fwords.ts";
 
 /**
  * **NPM report.** This interface only types properties of our interest.
