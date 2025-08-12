@@ -576,7 +576,7 @@ export function PerformAuditing(project: string): FkNodeSecurityAudit | 0 | 1 {
         return 0;
     }
 
-    if (!res.stdout || res.stdout.trim() === "") {
+    if (!validate(res.stdout)) {
         LogStuff(
             `An error occurred at ${name} and we weren't able to get the stdout. Unable to audit.`,
             "error",

@@ -2,6 +2,8 @@ import type { MANAGER_GLOBAL } from "../types/platform.ts";
 import { FknError } from "./error.ts";
 import { LOCAL_PLATFORM } from "../constants/platform.ts";
 
+const decoder = new TextDecoder();
+
 export function Commander(
     main: string,
     stuff: (string | undefined)[],
@@ -40,18 +42,19 @@ export function Commander(
      */
     success: boolean;
     /**
-     * Output of the command. Uses both `stdout` and `stderr`, joined by an \n.
+     * Output of the command. Uses both `stdout` and `stderr`, joined by an \n. Trimmed.
      *
      * @type {string | undefined}
      */
     stdout: string | undefined;
 } {
     try {
+        const show = showOutput ?? true;
         const args = stuff.filter((i) => i !== undefined);
 
         const command = new Deno.Command(
             main,
-            showOutput === false
+            show === false
                 ? {
                     args,
                     stdout: "piped",
@@ -66,9 +69,8 @@ export function Commander(
         );
 
         const process = command.outputSync();
-        const decoder = new TextDecoder();
 
-        if (showOutput === true) {
+        if (show === true) {
             // @ts-expect-error TS thinks the return type is wrong, but it isn't...
             return {
                 success: process.success,
@@ -77,7 +79,7 @@ export function Commander(
 
         return {
             success: process.success,
-            stdout: `${decoder.decode(process.stdout)}${decoder.decode(process.stderr)}`,
+            stdout: `${decoder.decode(process.stdout)}\n${decoder.decode(process.stderr)}`.trim(),
         };
     } catch (error) {
         if (error instanceof Deno.errors.NotFound && error.message.toLowerCase().includes("failed to spawn")) {
@@ -86,6 +88,7 @@ export function Commander(
                 err.hint =
                     `Just in case it's a shell command (like, e.g., 'echo') and you input it somewhere like 'buildCmd': it has to be preceded with 'powershell' or 'cmd', as its passed as an argument to this executable.`;
             }
+            throw err;
         }
         throw error;
     }
