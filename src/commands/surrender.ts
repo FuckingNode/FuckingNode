@@ -1,13 +1,14 @@
 import { normalize, type UnknownString, validate } from "@zakahacecosas/string-utils";
 import { GetProjectEnvironment, RemoveProject, SpotProject } from "../functions/projects.ts";
 import type { TheSurrendererConstructedParams } from "./constructors/command.ts";
-import { ColorString, Interrogate, LogStuff } from "../functions/io.ts";
+import { Interrogate, LogStuff } from "../functions/io.ts";
 import { NameProject } from "../functions/projects.ts";
 import { APP_URLs, FULL_NAME } from "../constants.ts";
 import { Commit, GetBranches, Push } from "../functions/git.ts";
 import { CheckForPath, JoinPaths } from "../functions/filesystem.ts";
 import { FkNodeInterop } from "./interop/interop.ts";
 import { FknError } from "../functions/error.ts";
+import { ColorString } from "../functions/color.ts";
 
 const deprecationNotices = [
     "# This project is no longer maintained\n\nThis repository is archived and will not receive updates or bug fixes.",
@@ -89,7 +90,7 @@ export default function TheSurrenderer(params: TheSurrendererConstructedParams) 
 
     if (commitTwo === 1) throw new FknError("Git__UE__Commit", "Error committing README changes.");
 
-    FkNodeInterop.Features.Update({ env, verbose: true });
+    FkNodeInterop.Features.Update(env);
 
     const commitThree = Commit(
         project,

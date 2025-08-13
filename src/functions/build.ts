@@ -1,4 +1,4 @@
-// import { normalize } from "@zakahacecosas/string-utils";
+import { normalize } from "@zakahacecosas/string-utils";
 import { Commander } from "./cli.ts";
 import { LogStuff } from "./io.ts";
 import { FknError } from "./error.ts";
@@ -18,7 +18,6 @@ export function RunBuildCmds(commands: string[]) {
                 [
                     ...cmd.slice(1),
                 ],
-                true,
             );
             if (!out.success) {
                 throw new FknError(
@@ -26,7 +25,8 @@ export function RunBuildCmds(commands: string[]) {
                     `Command "${command}" has failed (command #${cmdIndex} in your 'buildCmd' sequence). We've halted execution. Scroll up, as output of this command (if any) should appear in this terminal session.`,
                 );
             }
-            // if (normalize(out.stdout).length === 0) LogStuff("No output received.", undefined, ["half-opaque", "italic"]);
+            if (normalize(out.stdout).length === 0) LogStuff("No output received.", undefined, ["half-opaque", "italic"]);
+            else LogStuff(out.stdout);
             LogStuff("Done!", undefined, "bold");
         } catch (error) {
             LogStuff(String(error));

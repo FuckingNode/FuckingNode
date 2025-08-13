@@ -71,7 +71,6 @@ const devJokes = [
 export const HINTS = [
     `Set the FKNODE_SHALL_WE_DEBUG environment variable to "yeah" to see internal debugging logs.`,
     "Run 'fkn sokoballs'.",
-    "The 'clean' command has a '--verbose' flag that shows CLI output in real time from tasks that are being automated.",
     `Critical errors are logged in ${GetAppPath("ERRORS")}, in a fairly readable format.`,
     `After running 'kickstart' on a large repository, you can switch windows and do something else; if it takes more than 2 minutes, whenever we finish we'll send a desktop notification.`,
     `The 'surrender' command has aliases that do the exact same thing but more properly represent why you chose to surrender on a project.\nFor example 'fkn im-done-with <project>', or 'fkn i-give-up <project>'.`,

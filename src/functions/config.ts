@@ -3,12 +3,13 @@ import type { CF_FKNODE_SETTINGS } from "../types/config_files.ts";
 import { FknError } from "./error.ts";
 import { BulkRemove, CheckForPath, JoinPaths } from "./filesystem.ts";
 import { parse as parseYaml } from "@std/yaml";
-import { ColorString, Interrogate, LogStuff, StringifyYaml } from "./io.ts";
+import { Interrogate, LogStuff, StringifyYaml } from "./io.ts";
 import { type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { format } from "@std/fmt/bytes";
 import { FWORDS } from "../constants/fwords.ts";
 import { LOCAL_PLATFORM } from "../constants/platform.ts";
 import { APP_NAME } from "../constants/name.ts";
+import { ColorString } from "./color.ts";
 
 /**
  * Returns file paths for all config files the app uses.

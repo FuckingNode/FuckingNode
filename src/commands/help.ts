@@ -1,12 +1,12 @@
 import { normalize, spaceString } from "@zakahacecosas/string-utils";
 import { APP_NAME } from "../constants/name.ts";
-import { ColorString, LogStuff } from "../functions/io.ts";
+import { LogStuff } from "../functions/io.ts";
 import type { TheHelperConstructedParams } from "./constructors/command.ts";
+import { ColorString } from "../functions/color.ts";
 
-type helpItem = [string, string | null, string] | [string, string | null, string, boolean];
-type helpThing = helpItem[];
+type HelpItem = [string, string | null, string] | [string, string | null, string, boolean];
 
-function formatCmd(obj: helpThing): string {
+function formatCmd(obj: HelpItem[]): string {
     const strings: string[] = [];
 
     for (const thingy of obj) {
@@ -30,7 +30,7 @@ function formatCmd(obj: helpThing): string {
     return strings.join("\n\n");
 }
 
-function formatCmdWithTitle(title: string, desc: string, obj: helpThing): string {
+function formatCmdWithTitle(title: string, desc: string, obj: HelpItem[]): string {
     return `> ${ColorString(title, "bright-green", "bold")}\n\n>>> Details:\n\n${desc}\n\n>>> Parameters\n\n${formatCmd(obj)}\n`;
 }
 
@@ -53,7 +53,7 @@ export default function TheHelper(params: TheHelperConstructedParams) {
         ],
         [
             "clean",
-            "<intensity | --> [--update] [--verbose] [--lint] [--pretty] [--commit] [--destroy]",
+            "<intensity | --> [--update] [--lint] [--pretty] [--commit] [--destroy]",
             "Cleans all of your projects.",
         ],
         [
@@ -167,7 +167,7 @@ export default function TheHelper(params: TheHelperConstructedParams) {
             "Shows this menu, or the help menu for a specific command, if provided.",
         ],
     ]
-        .map((item) => [...item, true]) as helpItem[]);
+        .map((item) => [...item, true]) as HelpItem[]);
 
     switch (normalize(query ?? "", { strict: true })) {
         case "clean":
@@ -190,11 +190,6 @@ export default function TheHelper(params: TheHelperConstructedParams) {
                             "--update, -u",
                             null,
                             "Update all your projects before cleaning them.",
-                        ],
-                        [
-                            "--verbose, -v",
-                            null,
-                            "Show more detailed ('verbose') logs.\nThis includes live command output, timestamps and a mini report.",
                         ],
                         [
                             "--lint, -l",
@@ -593,7 +588,7 @@ export default function TheHelper(params: TheHelperConstructedParams) {
                 `Usage: ${ColorString(APP_NAME.CLI, "bright-green")} <command> [params...]\n\n${USAGE}\n`,
             );
             LogStuff(
-                "Pro tip: Run 'help <command-name>' to get help with a specific command.",
+                "Run 'help <command-name>' to get help with a specific command.",
                 "bulb",
                 "bright-yellow",
             );

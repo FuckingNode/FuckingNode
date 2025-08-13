@@ -11,14 +11,14 @@ export type tRESULT = { path: string; status: string; elapsedTime: string };
 
 export default async function TheCleaner(params: TheCleanerConstructedParams) {
     // params
-    const { verbose, update, lint, prettify, destroy, commit } = params.flags;
+    const { update, lint, prettify, destroy, commit } = params.flags;
     const { intensity, project } = params.parameters;
 
     const realIntensity: CleanerIntensity = ValidateIntensity(intensity);
     const startup = new Date();
 
     if (realIntensity === "hard-only") {
-        await PerformHardCleanup(verbose);
+        await PerformHardCleanup();
         return;
     }
 
@@ -42,7 +42,6 @@ export default async function TheCleaner(params: TheCleanerConstructedParams) {
         `Cleaning started at ${new Date().toLocaleString()}\n`,
         "working",
         "bright-green",
-        verbose,
     );
 
     const results: tRESULT[] = [];
@@ -81,7 +80,6 @@ export default async function TheCleaner(params: TheCleanerConstructedParams) {
                 destroy,
                 commit,
                 realIntensity,
-                verbose,
             );
 
             const status = "Success"; // preliminaryStatus ? `Success # ${preliminaryStatus}` : "Success";
@@ -106,7 +104,7 @@ export default async function TheCleaner(params: TheCleanerConstructedParams) {
         }
     }
 
-    if (realIntensity === "hard" || realIntensity === "maxim") await PerformHardCleanup(verbose);
+    if (realIntensity === "hard" || realIntensity === "maxim") await PerformHardCleanup();
     if (realIntensity === "maxim") await PerformMaximCleanup(projects);
 
     LogStuff(
@@ -121,6 +119,6 @@ export default async function TheCleaner(params: TheCleanerConstructedParams) {
             `It took ${GetElapsedTime(startup)}, but we did it!`,
         );
     }
-    if (verbose) ShowReport(results);
+    ShowReport(results);
     return;
 }

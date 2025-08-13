@@ -5,11 +5,11 @@ Deno.test({
     name: "build cmds run",
     fn: () => {
         const shell = LOCAL_PLATFORM.SYSTEM === "windows" ? "powershell " : "";
-        console.log(shell);
         RunBuildCmds([
             `${shell}echo 'test'`,
             `${shell}ls`,
             `${shell}echo 'works'`,
+            `${shell}echo ''`,
         ]);
     },
 });

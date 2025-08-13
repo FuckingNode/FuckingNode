@@ -5,7 +5,7 @@ import { expandGlobSync } from "@std/fs";
 import { APP_URLs, DEFAULT_FKNODE_YAML } from "../constants.ts";
 import type { CargoPkgFile, NodePkgFile, ProjectEnvironment, UnderstoodProjectProtection } from "../types/platform.ts";
 import { CheckForPath, JoinPaths, ParsePath, ParsePathList } from "./filesystem.ts";
-import { ColorString, Interrogate, LogStuff } from "./io.ts";
+import { Interrogate, LogStuff } from "./io.ts";
 import { DEBUG_LOG, FknError } from "../functions/error.ts";
 import { type FkNodeYaml, type FullFkNodeYaml, ValidateFkNodeYaml } from "../types/config_files.ts";
 import { GetAppPath } from "./config.ts";
@@ -21,6 +21,7 @@ import { joinGlobs, normalizeGlob } from "@std/path";
 import { globSync } from "node:fs";
 import { FWORDS } from "../constants/fwords.ts";
 import { APP_NAME } from "../constants/name.ts";
+import { ColorString } from "./color.ts";
 
 /**
  * Gets all the users projects and returns their absolute root paths as a `string[]`.

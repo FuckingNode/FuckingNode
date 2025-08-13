@@ -1,10 +1,11 @@
 import { type UnknownString } from "@zakahacecosas/string-utils";
 import { FWORDS } from "../constants/fwords.ts";
-import { ColorString, LogStuff } from "../functions/io.ts";
+import { LogStuff } from "../functions/io.ts";
 import { GetProjectEnvironment, SpotProject } from "../functions/projects.ts";
 import { NameProject } from "../functions/projects.ts";
 import type { FnCPF } from "../types/platform.ts";
 import { RecommendedCommunityStandards } from "./toolkit/rcs.ts";
+import { ColorString } from "../functions/color.ts";
 
 function StringifyDependencyRelationship(rel: FnCPF["deps"][0]["rel"]): string {
     return rel === "univ:dep"

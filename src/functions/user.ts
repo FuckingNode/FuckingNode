@@ -32,7 +32,6 @@ export function RunUserCmd(params: { key: "commitCmd" | "releaseCmd"; env: Proje
     const cmdOutput = Commander(
         env.commands.run[0],
         [env.commands.run[1], cmd],
-        true,
     );
 
     if (!cmdOutput.success) {
@@ -73,7 +72,7 @@ export function LaunchUserIDE() {
             break;
     }
 
-    const out = Commander(executionCommand, ["."], false);
-    if (!out.success) throw new Error(out.stdout ?? "Error launching " + IDE);
+    const out = Commander(executionCommand, ["."]);
+    if (!out.success) throw new Error(`Error launching ${IDE}: ${out.stdout}`);
     return;
 }

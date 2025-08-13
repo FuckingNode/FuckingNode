@@ -4,36 +4,17 @@ import { LOCAL_PLATFORM } from "../constants/platform.ts";
 
 const decoder = new TextDecoder();
 
-export function Commander(
-    main: string,
-    stuff: (string | undefined)[],
-    showOutput?: false | boolean,
-): {
-    success: boolean;
-    stdout: string;
-};
-export function Commander(
-    main: string,
-    stuff: (string | undefined)[],
-    showOutput: true,
-): {
-    success: boolean;
-};
 /**
- * Executes commands and automatically handles errors.
- *
- * Also, it logs their content synchronously (unless you hide output) so they look "real".
+ * Executes commands and automatically handles errors. Doesn't show live output (it used to but...).
  *
  * @async
  * @param {string} main Main command.
- * @param {string[]} stuff Additional args for the command.
- * @param {?boolean} showOutput Defaults to true. If false, the output of the command won't be shown in the current shell.
+ * @param {(string | undefined)[]} stuff Additional args for the command. `undefined` strings get removed.
  * @returns {CommanderOutput} An object with a boolean telling if it was successful or not, and its full output.
  */
 export function Commander(
     main: string,
     stuff: (string | undefined)[],
-    showOutput?: boolean,
 ): {
     /**
      * True if success, false if failure.
@@ -44,38 +25,23 @@ export function Commander(
     /**
      * Output of the command. Uses both `stdout` and `stderr`, joined by an \n. Trimmed.
      *
-     * @type {string | undefined}
+     * @type {string}
      */
-    stdout: string | undefined;
+    stdout: string;
 } {
     try {
-        const show = showOutput ?? true;
         const args = stuff.filter((i) => i !== undefined);
 
         const command = new Deno.Command(
             main,
-            show === false
-                ? {
-                    args,
-                    stdout: "piped",
-                    stderr: "piped",
-                }
-                : {
-                    args,
-                    stdout: "inherit",
-                    stderr: "inherit",
-                    stdin: "inherit",
-                },
+            {
+                args,
+                stdout: "piped",
+                stderr: "piped",
+            },
         );
 
         const process = command.outputSync();
-
-        if (show === true) {
-            // @ts-expect-error TS thinks the return type is wrong, but it isn't...
-            return {
-                success: process.success,
-            };
-        }
 
         return {
             success: process.success,

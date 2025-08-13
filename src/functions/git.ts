@@ -1,11 +1,12 @@
 import { Commander } from "../functions/cli.ts";
 import { CheckForPath, JoinPaths, ParsePath } from "../functions/filesystem.ts";
-import { ColorString, LogStuff } from "../functions/io.ts";
+import { LogStuff } from "../functions/io.ts";
 import { GetProjectEnvironment, SpotProject } from "../functions/projects.ts";
 import { FULL_NAME } from "../constants.ts";
 import { normalize, normalizeArray, StringArray, validate } from "@zakahacecosas/string-utils";
 import { FknError } from "./error.ts";
 import { GIT_FILES } from "../types/misc.ts";
+import { ColorString } from "./color.ts";
 
 // * NOTE
 // * in this file, use Error instead of FknError, then capture all errors and return 1
@@ -13,7 +14,7 @@ import { GIT_FILES } from "../types/misc.ts";
 
 /** Runs a Git command with any args. ASSUMES AN ALREADY SPOTTED PATH. */
 function g(path: string, args: string[]) {
-    return Commander("git", ["-C", path, ...args], false);
+    return Commander("git", ["-C", path, ...args]);
 }
 
 /**
@@ -374,7 +375,6 @@ export function Clone(repoUrl: string, clonePath: string): boolean {
                 repoUrl,
                 clonePath,
             ],
-            false,
         );
         if (!cloneOutput.success) throw new Error(cloneOutput.stdout);
         return true;

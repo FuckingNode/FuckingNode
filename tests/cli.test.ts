@@ -25,10 +25,8 @@ Deno.test({
         const command = LOCAL_PLATFORM.SYSTEM === "windows" ? "powershell" : "echo";
         const args = LOCAL_PLATFORM.SYSTEM === "windows" ? ["echo", "hi"] : ["hi"];
 
-        const out1 = Commander(command, args, false);
-        assertEquals(out1, { success: true, stdout: "hi" });
-        const out2 = Commander(command, args, true);
-        assertEquals(out2, { success: true });
+        const out = Commander(command, args);
+        assertEquals(out, { success: true, stdout: "hi" });
         assertThrows(() => Commander("i don't exist", []));
     },
 });

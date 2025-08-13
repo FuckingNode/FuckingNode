@@ -1,4 +1,4 @@
-import { type UnknownString, validateAgainst } from "@zakahacecosas/string-utils";
+import { validateAgainst } from "@zakahacecosas/string-utils";
 import { Commander } from "../../functions/cli.ts";
 import { LogStuff } from "../../functions/io.ts";
 import type { ProjectEnvironment } from "../../types/platform.ts";
@@ -13,29 +13,20 @@ function HandleError(
         | "Task__Lint"
         | "Task__Pretty"
         | "Task__Launch",
-    stdout: UnknownString,
+    stdout: string,
 ): never {
     DebugFknErr(
         err,
         "Something went wrong and we don't know what",
-        stdout ??
-            "UNDEFINED COMMAND STDOUT/STDERR. This likely happens if you passed the --verbose flag, if output is shown to you, we cannot store it.",
+        stdout,
     );
-}
-
-interface InteropedFeatureParams {
-    /** Project's environment. */
-    env: ProjectEnvironment;
-    /** Whether to use verbose logging for this or not. */
-    verbose: boolean;
 }
 
 /**
  * Cross-runtime compatible tasks. Supports linting, prettifying, and updating dependencies.
  */
 export const InteropedFeatures = {
-    Lint: (params: InteropedFeatureParams): boolean => {
-        const { env, verbose } = params;
+    Lint: (env: ProjectEnvironment): boolean => {
         const script = env.settings.lintCmd;
 
         if (validateAgainst(env.runtime, ["bun", "node"])) {
@@ -56,7 +47,6 @@ export const InteropedFeatures = {
                         "--fix",
                         ".",
                     ],
-                    verbose,
                 );
 
                 if (!output.success) HandleError("Task__Lint", output.stdout);
@@ -66,7 +56,6 @@ export const InteropedFeatures = {
                 const output = Commander(
                     env.commands.run[0],
                     [env.commands.run[1], script],
-                    verbose,
                 );
 
                 if (!output.success) HandleError("Task__Lint", output.stdout);
@@ -77,7 +66,6 @@ export const InteropedFeatures = {
             const output = Commander(
                 "cargo",
                 ["check", "--all-targets", "--workspace"],
-                verbose,
             );
 
             if (!output.success) HandleError("Task__Lint", output.stdout);
@@ -87,7 +75,6 @@ export const InteropedFeatures = {
             const output = Commander(
                 env.commands.run[0],
                 ["check", "."],
-                verbose,
             );
 
             if (!output.success) HandleError("Task__Lint", output.stdout);
@@ -97,7 +84,6 @@ export const InteropedFeatures = {
             const output = Commander(
                 "go",
                 ["vet", "./..."],
-                verbose,
             );
 
             if (!output.success) HandleError("Task__Lint", output.stdout);
@@ -105,8 +91,7 @@ export const InteropedFeatures = {
             return true;
         }
     },
-    Pretty: (params: InteropedFeatureParams): boolean => {
-        const { env, verbose } = params;
+    Pretty: (env: ProjectEnvironment): boolean => {
         const script = env.settings.prettyCmd;
 
         if (validateAgainst(env.runtime, ["bun", "node"])) {
@@ -127,7 +112,6 @@ export const InteropedFeatures = {
                         "--w",
                         ".",
                     ],
-                    verbose,
                 );
 
                 if (!output.success) HandleError("Task__Pretty", output.stdout);
@@ -137,7 +121,6 @@ export const InteropedFeatures = {
                 const output = Commander(
                     env.commands.run[0],
                     [env.commands.run[1], script],
-                    verbose,
                 );
 
                 if (!output.success) HandleError("Task__Pretty", output.stdout);
@@ -150,7 +133,6 @@ export const InteropedFeatures = {
             const output = Commander(
                 env.commands.base,
                 env.runtime === "deno" ? ["fmt"] : ["fmt", "./..."],
-                verbose,
             );
 
             if (!output.success) HandleError("Task__Pretty", output.stdout);
@@ -158,15 +140,13 @@ export const InteropedFeatures = {
             return true;
         }
     },
-    Update: (params: InteropedFeatureParams): boolean => {
-        const { env, verbose } = params;
+    Update: (env: ProjectEnvironment): boolean => {
         const script = env.settings.updateCmdOverride;
 
         if (isDef(script)) {
             const output = Commander(
                 env.commands.base,
                 env.commands.update,
-                verbose,
             );
 
             if (!output.success) HandleError("Task__Update", output.stdout);
@@ -183,7 +163,6 @@ export const InteropedFeatures = {
             const output = Commander(
                 env.commands.run[0],
                 [env.commands.run[1], script],
-                verbose,
             );
 
             if (!output.success) HandleError("Task__Update", output.stdout);
@@ -191,8 +170,7 @@ export const InteropedFeatures = {
             return true;
         }
     },
-    Launch: (params: InteropedFeatureParams): boolean => {
-        const { env, verbose } = params;
+    Launch: (env: ProjectEnvironment): boolean => {
         const script = env.settings.launchCmd;
 
         if (isDis(script)) return true;
@@ -213,7 +191,6 @@ export const InteropedFeatures = {
             const output = Commander(
                 env.commands.base,
                 validateAgainst(env.manager, ["go", "deno", "cargo"]) ? [env.commands.start, env.settings.launchFile] : [env.commands.start],
-                verbose,
             );
 
             if (!output.success) HandleError("Task__Launch", output.stdout);
@@ -224,7 +201,6 @@ export const InteropedFeatures = {
         const output = Commander(
             env.commands.run[0],
             [env.commands.run[1], script],
-            verbose,
         );
 
         if (!output.success) HandleError("Task__Launch", output.stdout);

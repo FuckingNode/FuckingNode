@@ -1,7 +1,8 @@
 import { normalize, table, validate } from "@zakahacecosas/string-utils";
-import { ColorString, LogStuff } from "../functions/io.ts";
+import { LogStuff } from "../functions/io.ts";
 import type { TheCompaterConstructedParams } from "./constructors/command.ts";
 import { APP_URLs } from "../constants.ts";
+import { ColorString } from "../functions/color.ts";
 
 const labels = {
     y: ColorString("Yes", "bright-green"),

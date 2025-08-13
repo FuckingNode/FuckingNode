@@ -1,4 +1,4 @@
-import { ColorString, Interrogate, LogStuff } from "../functions/io.ts";
+import { Interrogate, LogStuff } from "../functions/io.ts";
 import { GetProjectEnvironment, NameProject } from "../functions/projects.ts";
 import type { TheCommitterConstructedParams } from "./constructors/command.ts";
 import { CanCommit, Commit, GetBranches, GetCommittableFiles, GetStagedFiles, IsRepo, Push, StageFiles } from "../functions/git.ts";
@@ -7,6 +7,7 @@ import { RunUserCmd, ValidateUserCmd } from "../functions/user.ts";
 import { GIT_FILES } from "../types/misc.ts";
 import { CheckForPath } from "../functions/filesystem.ts";
 import { FknError } from "../functions/error.ts";
+import { ColorString } from "../functions/color.ts";
 
 function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
     const canCommit = CanCommit(path);

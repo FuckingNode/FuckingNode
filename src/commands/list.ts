@@ -1,8 +1,9 @@
 import { FWORDS } from "../constants/fwords.ts";
-import { ColorString, LogStuff } from "../functions/io.ts";
+import { LogStuff } from "../functions/io.ts";
 import { GetAllProjects, GetProjectEnvironment, NameProject } from "../functions/projects.ts";
 import { DEBUG_LOG } from "../functions/error.ts";
 import { sortAlphabetically, testFlag, UnknownString, validate } from "@zakahacecosas/string-utils";
+import { ColorString } from "../functions/color.ts";
 
 /**
  * Lists all projects.

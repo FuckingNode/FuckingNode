@@ -6,6 +6,19 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
+## [4.1.0] (Unreleased)
+
+_Sort of_ breaking, but nothing important so I won't make a major release.
+
+### Changed
+
+- Now output is not shown live anymore. It gave too many problems as if it's shown live, it cannot be read by the CLI.
+- Now, the "report" shown after a cleanup is no longer hidden behind a flag.
+
+### Removed
+
+- (Breaking) `--verbose` is no longer a feature anywhere.
+
 ## [4.0.2-patch.2] (11-08-2025)
 
 ### Fixed

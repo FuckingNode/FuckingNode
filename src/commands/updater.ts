@@ -4,11 +4,12 @@ import { RELEASE_URL } from "../constants.ts";
 import type { GITHUB_RELEASE } from "../types/misc.ts";
 import { GetDateNow } from "../functions/date.ts";
 import type { TheUpdaterConstructedParams } from "./constructors/command.ts";
-import { ColorString, LogStuff, StringifyYaml } from "../functions/io.ts";
+import { LogStuff, StringifyYaml } from "../functions/io.ts";
 import { parse as parseYaml } from "@std/yaml";
 import { GetAppPath } from "../functions/config.ts";
 import type { CF_FKNODE_SCHEDULE } from "../types/config_files.ts";
 import * as DenoJson from "../../deno.json" with { type: "json" };
+import { ColorString } from "../functions/color.ts";
 
 async function CheckUpdates(): Promise<CF_FKNODE_SCHEDULE | "rl"> {
     const scheduleFilePath = GetAppPath("SCHEDULE");

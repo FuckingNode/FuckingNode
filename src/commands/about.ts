@@ -1,6 +1,6 @@
 import * as DenoJson from "../../deno.json" with { type: "json" };
 import { APP_URLs } from "../constants.ts";
-import { ColorString } from "../functions/io.ts";
+import { ColorString } from "../functions/color.ts";
 import { LogStuff } from "../functions/io.ts";
 import type { VALID_COLORS } from "../types/misc.ts";
 import { ASCII } from "../functions/ascii.ts";

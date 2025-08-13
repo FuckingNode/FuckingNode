@@ -2,10 +2,11 @@ import * as DenoJson from "../../deno.json" with { type: "json" };
 import type { TheExporterConstructedParams } from "./constructors/command.ts";
 import { GetProjectEnvironment, SpotProject } from "../functions/projects.ts";
 import { JoinPaths } from "../functions/filesystem.ts";
-import { ColorString, LogStuff, StringifyYaml } from "../functions/io.ts";
+import { LogStuff, StringifyYaml } from "../functions/io.ts";
 import { FULL_NAME } from "../constants.ts";
 import { GetDateNow } from "../functions/date.ts";
 import { APP_NAME } from "../constants/name.ts";
+import { ColorString } from "../functions/color.ts";
 
 export default function TheExporter(params: TheExporterConstructedParams) {
     const { project } = params;
