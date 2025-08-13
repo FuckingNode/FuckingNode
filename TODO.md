@@ -43,10 +43,9 @@ from_tarball = { url = "https://somewhere.com/some_crate-1.0.0.tar.gz" }
 ## Proper error fixing
 
 - [ ] Fix handling of command output.
-  - Piping it lets us store, use, and dump it (which is what we want), but doing that CLI-wide removes the ability to use live / verbose logs, making stuff look worse & more confusing. Inheriting it gives a better, more contextualized look, but is suboptimal. So we have three options, I'll decide on one later on.
-    - Pipe everything and remove verbosity options.
-    - Inherit everything (except places that STRICTLY require to read the stdout) and remove `DebugFknError`.
-    - Enable both, but default to piping and show a warning for inheritance users.
+  - The codebase mix piping and inheritance. _Piping it lets us store, use, and dump it (which is what we want), but doing that CLI-wide removes the ability to use live / verbose logs, making stuff look worse & more confusing. Inheriting it gives a better, more contextualized look, but is suboptimal._
+
+  Intention is to pipe it everywhere. Doesn't look as good, but works better, which is what matters.
 
 ## Performance
 
