@@ -1,6 +1,19 @@
 import { FknError } from "../../functions/error.ts";
 import { ColorString } from "../../functions/color.ts";
 
+const SUPPORTED_FILES = [
+    "fknode.yaml",
+    ".gitignore",
+    "tsconfig.json",
+    ".editorconfig",
+    ".prettierrc",
+    "LICENSE",
+    ".npmrc",
+    ".dockerignore",
+    ".gitattributes",
+] as const;
+type SUPPORTED_FILE = typeof SUPPORTED_FILES[number];
+
 /** Get an embed file. */
 function Get(name: string): string {
     const dir = Deno.readDirSync(import.meta.dirname + "/setups");
@@ -21,7 +34,7 @@ export const SETUPS: {
     name: string;
     desc: string;
     content: string;
-    seek: "fknode.yaml" | ".gitignore" | "tsconfig.json" | ".editorconfig" | ".prettierrc";
+    seek: SUPPORTED_FILE;
 }[] = [
     {
         name: "fknode-basic",
@@ -77,6 +90,42 @@ export const SETUPS: {
         content: Get(".prettierrc-funy"),
         seek: ".prettierrc",
     },
+    {
+        name: "license-mit",
+        desc: "LICENSE file for the MIT License",
+        content: Get("LICENSE-MIT"),
+        seek: "LICENSE",
+    },
+    {
+        name: "license-gpl3",
+        desc: "LICENSE file for the GNU General Public License v3",
+        content: Get("LICENSE-GPL3"),
+        seek: "LICENSE",
+    },
+    {
+        name: "license-apache2",
+        desc: "LICENSE file for the Apache 2.0 License",
+        content: Get("LICENSE-APACHE2"),
+        seek: "LICENSE",
+    },
+    {
+        name: "gitattributes-eol",
+        desc: "Git attributes file that sets line endings to LF.",
+        content: Get(".gitattributes"),
+        seek: ".gitattributes",
+    },
+    {
+        name: ".dockerignore",
+        desc: "A basic Docker ignore file.",
+        content: Get(".dockerignore"),
+        seek: ".dockerignore",
+    },
+    {
+        name: "npmrc-exact",
+        desc: "A simple npmrc file that saves exact versions instead of ranged versions.",
+        content: Get("npmrc-exact"),
+        seek: ".npmrc",
+    },
 ];
 
 export const VISIBLE_SETUPS = SETUPS.map(({ name, desc, seek }) => ({
@@ -90,7 +139,13 @@ export const VISIBLE_SETUPS = SETUPS.map(({ name, desc, seek }) => ({
             ? "cyan"
             : seek === ".prettierrc"
             ? "bright-yellow"
-            : "orange",
+            : (seek === ".gitattributes" || seek === ".gitignore")
+            ? "orange"
+            : seek === "LICENSE"
+            ? "bright-orange"
+            : seek === ".npmrc"
+            ? "green"
+            : "blue",
     ),
     Description: ColorString(desc, "italic"),
 }));

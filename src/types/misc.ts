@@ -82,7 +82,8 @@ export type VALID_COLORS =
     | "italic"
     | "bright-blue"
     | "bright-yellow"
-    | "orange";
+    | "orange"
+    | "bright-orange";
 
 /**
  * Git file codes.

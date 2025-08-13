@@ -5,7 +5,7 @@ import type { TheSetuperConstructedParams } from "./constructors/command.ts";
 import { parse as parseYaml } from "@std/yaml";
 import { parse as parseJsonc } from "@std/jsonc";
 import { SETUPS, VISIBLE_SETUPS } from "./toolkit/setups.ts";
-import { normalize, table, validate } from "@zakahacecosas/string-utils";
+import { normalize, table, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { FknError } from "../functions/error.ts";
 import { ColorString } from "../functions/color.ts";
 
@@ -42,16 +42,20 @@ export default function TheSetuper(params: TheSetuperConstructedParams) {
         ? parseYaml(setupToUse.content)
         : setupToUse.content;
     const path = JoinPaths(project, setupToUse.seek);
-    const exists = CheckForPath(path);
+    const status = CheckForPath(path)
+        ? validateAgainst(setupToUse.seek, [".prettierrc", "fknode.yaml", "tsconfig.json"]) ? "Merge" : "Over"
+        : "New";
 
     const setupName = `${ColorString(setupToUse.name, "bold")} ${ColorString(setupToUse.seek, "italic")}`;
 
     if (
         !(Interrogate(
             `Should we add the ${setupName} file to ${NameProject(project, "name")}?${
-                exists
+                status === "New"
+                    ? ""
+                    : status === "Merge"
                     ? `\nNote: Your existing ${setupToUse.seek} will be merged with this template. Comments won't be preserved and duplications might happen!`
-                    : ""
+                    : `\nImportant: Your existing ${setupToUse.seek} will be overwritten!`
             }`,
         ))
     ) {
@@ -61,7 +65,7 @@ export default function TheSetuper(params: TheSetuperConstructedParams) {
 
     let finalContent: string;
 
-    if (exists) {
+    if (status === "Merge") {
         const fileContent = Deno.readTextFileSync(path);
         if (setupToUse.seek === "tsconfig.json" || setupToUse.seek === ".prettierrc") {
             const parsedContent = parseJsonc(fileContent);
@@ -70,7 +74,6 @@ export default function TheSetuper(params: TheSetuperConstructedParams) {
             const parsedContent = parseYaml(fileContent);
             finalContent = StringifyYaml(deepMerge(contentToUse, parsedContent));
         } else {
-            // (gitignore or editorconfig)
             finalContent = `${fileContent}\n${contentToUse}`;
         }
     } else {
@@ -87,4 +90,11 @@ export default function TheSetuper(params: TheSetuperConstructedParams) {
     );
 
     LogStuff("Done!", "tick");
+    if (setupToUse.seek === "LICENSE" && !setupToUse.name.includes("gpl")) {
+        LogStuff(
+            `Check your LICENSE file at the ${
+                setupToUse.name.includes("mit") ? "top" : "bottom"
+            } of the file!\nYou need to replace [YYYY] and [AUTHOR] with valid data.`,
+        );
+    }
 }

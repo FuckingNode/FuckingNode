@@ -29,9 +29,9 @@ from_tarball = { url = "https://somewhere.com/some_crate-1.0.0.tar.gz" }
 
 ## Better UX
 
-- [ ] Use the same default threshold for all notifications, and lower it
+- [x] Use the same default threshold for all notifications, and lower it
 - [ ] New settings
-  - [ ] Enable/disable notifications
+  - [x] Enable/disable notifications
   - [ ] Customizable thresholds
 - [ ] Allow to use caret separation in every `Cmd` type of key, to run several commands.
 - [ ] Use a character (idk, maybe `*` or `+`) to specify that a command is a _script_ and runs via `npm run (x)` or equivalent. Without it, default to running a shell command. (Or maybe vice versa, use the character to indicate a shell command. Will think about it.)

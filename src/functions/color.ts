@@ -41,6 +41,8 @@ export function ColorString(string: string | number, ...colors: VALID_COLORS[]):
                 return italic(finalString);
             case "orange":
                 return rgb8(finalString, 202);
+            case "bright-orange":
+                return rgb8(finalString, 215);
         }
     }
 

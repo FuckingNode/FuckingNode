@@ -13,22 +13,25 @@ _Sort of_ breaking, but nothing important so I won't make a major release.
 ### Added
 
 - Added settings to enable/disable notifications and their thresholds.
+- Added more setups to `setup`.
 
 ### Changed
 
 - Now output is not shown live anymore. It gave too many problems as if it's shown live, it cannot be read by the CLI.
 - Now, the "report" shown after a cleanup is no longer hidden behind a flag.
-- Now threshold for notifications were made the same reduced to 30 seconds.
+- Now threshold for notifications were made the same and reduced to 30 seconds.
 
 ### Fixed
 
+- Fixed (FINAL and HOPEFULLY) `buildCmd`.
 - Fixed a missing line break causing `- /path/to/fileand 7 more files` in `commit`.
 - Fixed elapsed time showing 0m 0s sometimes if it only took milliseconds.
 - Fixed calculation of elapsed times. [Thanks.](https://stackoverflow.com/a/21294619)
 
 ### Removed
 
-- (Breaking) `--verbose` is no longer a feature anywhere.
+- (Breaking) `--verbose` is no longer a feature anywhere. Also, removed the ability to see live output of any command that you run.
+  - This was made to fix bugs. Plus, now error dumps should be more likely to have that same output of the erroring command.
 
 ## [4.0.2-patch.2] (11-08-2025)
 
