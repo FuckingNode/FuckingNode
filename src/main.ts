@@ -18,8 +18,8 @@ import TheSetuper from "./commands/setup.ts";
 import TheLauncher from "./commands/launch.ts";
 import TheBuilder from "./commands/build.ts";
 // other things
-import { APP_NAME, APP_URLs, FULL_NAME, FWORDS } from "./constants.ts";
-import { ColorString, LogStuff } from "./functions/io.ts";
+import { APP_URLs, FULL_NAME } from "./constants.ts";
+import { LogStuff } from "./functions/io.ts";
 import { FreshSetup, GetAppPath, GetUserSettings } from "./functions/config.ts";
 import { DEBUG_LOG, ErrorHandler } from "./functions/error.ts";
 import type { TheCleanerConstructedParams } from "./commands/constructors/command.ts";
@@ -29,6 +29,9 @@ import { AddProject, CleanupProjects, RemoveProject } from "./functions/projects
 import { LaunchWebsite } from "./functions/http.ts";
 import { HINTS } from "./functions/phrases.ts";
 import { GetDateNow } from "./functions/date.ts";
+import { FWORDS } from "./constants/fwords.ts";
+import { APP_NAME } from "./constants/name.ts";
+import { ColorString } from "./functions/color.ts";
 
 // this is outside the main loop so it can be executed
 // without depending on other modules
@@ -168,7 +171,6 @@ async function main(command: UnknownString) {
 
     const cleanerArgs: TheCleanerConstructedParams = {
         flags: {
-            verbose: hasFlag("verbose", true),
             update: hasFlag("update", true),
             lint: hasFlag("lint", true),
             prettify: hasFlag("pretty", true),
@@ -360,7 +362,6 @@ async function main(command: UnknownString) {
             TheHelper({});
             LogStuff(`You're seeing this because command '${command}' doesn't exist.`, undefined, ["orange", "italic"]);
     }
-
     Deno.exit(0);
 }
 

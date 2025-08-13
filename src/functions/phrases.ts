@@ -5,8 +5,9 @@
  * (bruh i spent my time writing all of this instead of studying)
  */
 
-import { APP_NAME, FWORDS } from "../constants.ts";
+import { APP_NAME } from "../constants/name.ts";
 import { GetAppPath } from "./config.ts";
+import { FWORDS } from "../constants/fwords.ts";
 
 const internalJokes = [
     "Dima definitely approves", // indeed he does
@@ -70,7 +71,6 @@ const devJokes = [
 export const HINTS = [
     `Set the FKNODE_SHALL_WE_DEBUG environment variable to "yeah" to see internal debugging logs.`,
     "Run 'fkn sokoballs'.",
-    "The 'clean' command has a '--verbose' flag that shows CLI output in real time from tasks that are being automated.",
     `Critical errors are logged in ${GetAppPath("ERRORS")}, in a fairly readable format.`,
     `After running 'kickstart' on a large repository, you can switch windows and do something else; if it takes more than 2 minutes, whenever we finish we'll send a desktop notification.`,
     `The 'surrender' command has aliases that do the exact same thing but more properly represent why you chose to surrender on a project.\nFor example 'fkn im-done-with <project>', or 'fkn i-give-up <project>'.`,
@@ -110,7 +110,7 @@ const quotes = [
     "'Any fool can write code that a computer can understand. Good programmers write code that humans can understand.' - Martin Fowler",
     "'Make it work, make it right, make it fast.' - Kent Beck",
     "'When in doubt, use brute force.' - Ken Thompson",
-    "'If you can’t write it down in English, you can't code it.' - Peter Halpern",
+    "'If you can't write it down in English, you can't code it.' - Peter Halpern",
     "'Get your data structures correct first, and the rest of the program will write itself.' - David Jones",
     "'Always code as if the guy who ends up maintaining your code will be a violent psychopath who knows where you live.' - Rick Osborne",
     "'Don't comment bad code. Rewrite it.' - Brian Kernighan", // if only i wasn't that lazy...

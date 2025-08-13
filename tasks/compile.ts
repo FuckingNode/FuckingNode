@@ -1,4 +1,4 @@
-import { APP_NAME } from "../src/constants.ts";
+import { APP_NAME } from "../src/constants/name.ts";
 import { stringify as stringifyYaml } from "@std/yaml";
 
 const release = Deno.args.includes("--release");

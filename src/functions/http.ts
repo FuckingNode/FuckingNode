@@ -1,4 +1,4 @@
-import { LOCAL_PLATFORM } from "../constants.ts";
+import { LOCAL_PLATFORM } from "../constants/platform.ts";
 import type { VALID_URL } from "../types/misc.ts";
 import { Commander } from "./cli.ts";
 

@@ -5,7 +5,7 @@
 
 import { normalize, type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import type { CargoPkgFile, DenoPkgFile, FnCPF, GolangPkgFile, MANAGER_JS, NodePkgFile } from "../../types/platform.ts";
-import { VERSION } from "../../constants.ts";
+import * as DenoJson from "../../../deno.json" with { type: "json" };
 import { FknError } from "../../functions/error.ts";
 import { parse as parseToml } from "@std/toml";
 import { parse as parseJsonc } from "@std/jsonc";
@@ -195,7 +195,7 @@ export const Parsers = {
                 },
                 ws,
                 deps: dedupeDependencies(deps),
-                fknVer: VERSION,
+                fknVer: DenoJson.default.version,
             };
         },
     },
@@ -256,7 +256,7 @@ export const Parsers = {
                 },
                 deps: dedupeDependencies(deps),
                 ws,
-                fknVer: VERSION,
+                fknVer: DenoJson.default.version,
             };
         },
     },
@@ -295,7 +295,7 @@ export const Parsers = {
                 },
                 deps: dedupeDependencies(deps),
                 ws,
-                fknVer: VERSION,
+                fknVer: DenoJson.default.version,
             };
         },
     },
@@ -333,7 +333,7 @@ export const Parsers = {
                 },
                 deps: dedupeDependencies(deps),
                 ws,
-                fknVer: VERSION,
+                fknVer: DenoJson.default.version,
             };
         },
     },

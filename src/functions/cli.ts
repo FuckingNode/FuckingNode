@@ -1,11 +1,21 @@
 import type { MANAGER_GLOBAL } from "../types/platform.ts";
+import { FknError } from "./error.ts";
+import { LOCAL_PLATFORM } from "../constants/platform.ts";
+
+const decoder = new TextDecoder();
 
 /**
- * Output of a CLI command called using Commander.
+ * Executes commands and automatically handles errors. Doesn't show live output (it used to but...).
  *
- * @interface CommanderOutput
+ * @async
+ * @param {string} main Main command.
+ * @param {(string | undefined)[]} stuff Additional args for the command. `undefined` strings get removed.
+ * @returns {CommanderOutput} An object with a boolean telling if it was successful or not, and its full output.
  */
-export interface CommanderOutput {
+export function Commander(
+    main: string,
+    stuff: (string | undefined)[],
+): {
     /**
      * True if success, false if failure.
      *
@@ -13,56 +23,41 @@ export interface CommanderOutput {
      */
     success: boolean;
     /**
-     * Output of the command. Uses both `stdout` and `stderr`, joined by an \n.
+     * Output of the command. Uses both `stdout` and `stderr`, joined by an \n. Trimmed.
      *
      * @type {string}
      */
     stdout: string;
-}
+} {
+    try {
+        const args = stuff.filter((i) => i !== undefined);
 
-/**
- * Executes commands and automatically handles errors.
- *
- * Also, it logs their content synchronously (unless you hide output) so they look "real".
- *
- * @async
- * @param {string} main Main command.
- * @param {string[]} stuff Additional args for the command.
- * @param {?boolean} showOutput Defaults to true. If false, the output of the command won't be shown in the current shell.
- * @returns {CommanderOutput} An object with a boolean telling if it was successful or not, and its full output.
- */
-export function Commander(
-    main: string,
-    stuff: (string | undefined)[],
-    showOutput?: boolean,
-): CommanderOutput {
-    const args = stuff.filter((i) => i !== undefined);
-
-    const command = new Deno.Command(
-        main,
-        showOutput === false
-            ? {
+        const command = new Deno.Command(
+            main,
+            {
                 args,
                 stdout: "piped",
                 stderr: "piped",
-            }
-            : {
-                args,
-                stdout: "inherit",
-                stderr: "inherit",
-                stdin: "inherit",
             },
-    );
+        );
 
-    const process = command.outputSync();
-    const decoder = new TextDecoder();
+        const process = command.outputSync();
 
-    const result: CommanderOutput = {
-        success: process.success,
-        stdout: `${decoder.decode(process.stdout)}${process.stderr ? "\n" + decoder.decode(process.stderr) : ""}`,
-    };
-
-    return result;
+        return {
+            success: process.success,
+            stdout: `${decoder.decode(process.stdout)}\n${decoder.decode(process.stderr)}`.trim(),
+        };
+    } catch (error) {
+        if (error instanceof Deno.errors.NotFound && error.message.toLowerCase().includes("failed to spawn")) {
+            const err = new FknError("Os__NoEntity", `We attempted to run a shell / CLI command (${main}), but your OS wasn't able find it.`);
+            if (LOCAL_PLATFORM.SYSTEM === "windows") {
+                err.hint =
+                    `Just in case it's a shell command (like, e.g., 'echo') and you input it somewhere like 'buildCmd': it has to be preceded with 'powershell' or 'cmd', as its passed as an argument to this executable.`;
+            }
+            throw err;
+        }
+        throw error;
+    }
 }
 
 /**

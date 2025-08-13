@@ -2,9 +2,10 @@ import { GetAllProjects, GetProjectEnvironment, NameProject, SpotProject } from 
 import { assertEquals } from "@std/assert";
 import { TEST_ONE } from "./constants.ts";
 import { mocks } from "./mocks.ts";
-import { APP_NAME, DEFAULT_FKNODE_YAML } from "../src/constants.ts";
+import { DEFAULT_FKNODE_YAML } from "../src/constants.ts";
 import { parse as parseYaml } from "@std/yaml";
 import { JoinPaths } from "../src/functions/filesystem.ts";
+import { APP_NAME } from "../src/constants/name.ts";
 
 // ACTUAL TESTS
 Deno.test({

@@ -1,6 +1,7 @@
-import { DEFAULT_FKNODE_YAML, VERSION } from "../src/constants.ts";
+import { DEFAULT_FKNODE_YAML } from "../src/constants.ts";
 import { JoinPaths, ParsePath } from "../src/functions/filesystem.ts";
 import type { ProjectEnvironment } from "../src/types/platform.ts";
+import * as DenoJson from "../deno.json" with { type: "json" };
 
 // CONSTANTS
 export const CONSTANTS = {
@@ -52,7 +53,7 @@ const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
                 ws: [
                     ParsePath(`${CONSTANTS.ENV_PATH}/test-two`),
                 ],
-                fknVer: VERSION,
+                fknVer: DenoJson.default.version,
             },
         },
         commands: {

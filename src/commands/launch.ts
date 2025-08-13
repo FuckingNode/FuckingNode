@@ -11,13 +11,7 @@ export default function TheLauncher(params: TheLauncherConstructedParams) {
     LaunchUserIDE();
 
     if (env.settings.launchWithUpdate) {
-        FkNodeInterop.Features.Update({
-            env,
-            verbose: true,
-        });
+        FkNodeInterop.Features.Update(env);
     }
-    FkNodeInterop.Features.Launch({
-        env,
-        verbose: true,
-    });
+    FkNodeInterop.Features.Launch(env);
 }

@@ -4,7 +4,7 @@ import { FlushConfigFiles, GetAppPath, GetUserSettings } from "./config.ts";
 import { GetDateNow, ParseDate } from "./date.ts";
 import { parse as parseYaml } from "@std/yaml";
 import { StringifyYaml } from "./io.ts";
-import { VERSION } from "../constants.ts";
+import * as DenoJson from "../../deno.json" with { type: "json" };
 
 export async function RunScheduledTasks() {
     const { updateFreq, flushFreq } = GetUserSettings();
@@ -36,7 +36,7 @@ export async function RunScheduledTasks() {
             ...scheduleFile,
             updater: {
                 lastCheck: GetDateNow(),
-                latestVer: VERSION,
+                latestVer: DenoJson.default.version,
             },
         };
         await TheUpdater({

@@ -3,7 +3,9 @@ import { GetAppPath } from "./config.ts";
 import { stringify as stringifyYaml } from "@std/yaml";
 import { GetDateNow } from "./date.ts";
 import { Commander } from "./cli.ts";
-import { APP_NAME, LOCAL_PLATFORM } from "../constants.ts";
+import { APP_NAME } from "../constants/name.ts";
+import { LOCAL_PLATFORM } from "../constants/platform.ts";
+import { ColorString } from "./color.ts";
 
 /**
  * Appends an emoji at the beginning of a message.
@@ -68,15 +70,13 @@ export function Emojify(message: string, emoji: VALID_EMOJIS): string {
  * @param {any} message The message to be logged.
  * @param {?VALID_EMOJIS} [emoji] Additionally, add an emoji before the log.
  * @param {?(VALID_COLORS | VALID_COLORS[])} [color] Optionally, a color (or more) for the output.
- * @param {?boolean} [verbose] If false, stuff will be saved to `.log` file but not written to the `stdout`. Pass here the variable you use to handle verbose logs.
- * @returns {void} Boolean value if it's a question depending on user input. If it's not a question, to avoid a type error for being `void`, it always returns false.
+ * @returns {void}
  */
 export function LogStuff(
     // deno-lint-ignore no-explicit-any
     message: any,
     emoji?: VALID_EMOJIS,
     color?: VALID_COLORS | VALID_COLORS[],
-    verbose?: boolean,
 ): void {
     try {
         const finalMessage = emoji ? Emojify(message, emoji) : message;
@@ -88,16 +88,14 @@ export function LogStuff(
         const formattedMessage = `${GetDateNow()} / ${plainMessage}\n`
             .replace(/\n{2,}/g, "\n"); // (fix for adding \n to messages that already have an \n for whatever reason)
 
-        if (verbose ?? true) {
-            if (color) {
-                if (Array.isArray(color)) {
-                    console.log(ColorString(finalMessage, ...color));
-                } else {
-                    console.log(ColorString(finalMessage, color));
-                }
+        if (color) {
+            if (Array.isArray(color)) {
+                console.log(ColorString(finalMessage, ...color));
             } else {
-                console.log(finalMessage);
+                console.log(ColorString(finalMessage, color));
             }
+        } else {
+            console.log(finalMessage);
         }
 
         Deno.writeTextFileSync(
@@ -114,6 +112,7 @@ export function LogStuff(
  * Asks a question to the user in the form of a [y/N] confirm. It returns false for everything except for an explicit yes.
  *
  * @param {string} question What to ask?
+ * @param {?("ask" | "warn" | "heads-up")} style Optional, defines what emoji and color to use.
  * @returns {boolean} User input, or false if none.
  */
 export function Interrogate(question: string, style?: "ask" | "warn" | "heads-up"): boolean {
@@ -130,87 +129,6 @@ export function Interrogate(question: string, style?: "ask" | "warn" | "heads-up
             break;
     }
     return confirm("Confirm?");
-}
-
-/**
- * Given a string, returns a CLI-colored version of it.
- * @author ZakaHaceCosas
- *
- * @param {(string | number)} string String to color.
- * @param {...VALID_COLORS[]} colors The color you wish to give it. Some styles that aren't "colors" are also allowed, e.g. `bold` or `half-opaque`. You can pass many values to add as many colors as you wish.
- * @returns {string} A colorful string.
- */
-export function ColorString(string: string | number, ...colors: VALID_COLORS[]): string {
-    function internalColorString(string: string | number, color: VALID_COLORS): string {
-        const finalString = typeof string === "string" ? string : String(string);
-        const RESET = "\x1b[0m";
-        let colorCode = RESET;
-
-        switch (color) {
-            case "red":
-                colorCode = "\x1b[31m";
-                break;
-            case "white":
-                colorCode = "\x1b[37m";
-                break;
-            case "bold":
-                colorCode = "\x1b[1m";
-                break;
-            case "blue":
-                colorCode = "\x1b[34m";
-                break;
-            case "green":
-                colorCode = "\x1b[32m";
-                break;
-            case "cyan":
-                colorCode = "\x1b[36m";
-                break;
-            case "purple":
-                colorCode = "\x1b[35m";
-                break;
-            case "pink":
-                colorCode = "\x1b[38;5;213m"; // (custom color)
-                break;
-            case "half-opaque":
-                colorCode = "\x1b[2m";
-                break;
-            case "bright-green":
-                colorCode = "\x1b[92m";
-                break;
-            case "bright-blue":
-                colorCode = "\x1b[94m";
-                break;
-            case "bright-yellow":
-                colorCode = "\x1b[93m";
-                break;
-            case "italic":
-                colorCode = "\x1b[3m";
-                break;
-            case "orange":
-                colorCode = "\x1b[38;5;202m"; // (custom color)
-                break;
-            default:
-                break;
-        }
-
-        return `${colorCode}${finalString}${RESET}`;
-    }
-
-    const finalString = typeof string === "string" ? string : String(string);
-
-    if (colors === undefined || colors.length === 0 || !colors[0]) return finalString;
-
-    // initial color
-    let result = internalColorString(finalString, colors[0]);
-
-    // recursively apply ColorFunc with the rest of the arguments
-    for (let i = 1; i < colors.length; i++) {
-        const color = colors[i];
-        if (color === undefined || !color) return finalString;
-        result = internalColorString(result, color);
-    }
-
-    return result;
 }
 
 /**

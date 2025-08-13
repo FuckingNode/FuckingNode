@@ -1,10 +1,11 @@
-import { APP_NAME } from "../constants.ts";
-import { ColorString, LogStuff } from "../functions/io.ts";
+import { APP_NAME } from "../constants/name.ts";
+import { LogStuff } from "../functions/io.ts";
 import { GetAllProjects, NameProject } from "../functions/projects.ts";
 import { PerformAuditing } from "./toolkit/auditer.ts";
 import type { FkNodeSecurityAudit } from "../types/audit.ts";
 import type { TheAuditerConstructedParams } from "./constructors/command.ts";
 import { normalize, testFlag, validate } from "@zakahacecosas/string-utils";
+import { ColorString } from "../functions/color.ts";
 
 export default function TheAuditer(params: TheAuditerConstructedParams) {
     const { project } = params;

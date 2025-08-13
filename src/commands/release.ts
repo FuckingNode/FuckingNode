@@ -1,5 +1,5 @@
 import { format, parse } from "@std/semver";
-import { ColorString, Interrogate, LogStuff } from "../functions/io.ts";
+import { Interrogate, LogStuff } from "../functions/io.ts";
 import { GetProjectEnvironment, NameProject, SpotProject } from "../functions/projects.ts";
 import type { TheReleaserConstructedParams } from "./constructors/command.ts";
 import type { CargoPkgFile } from "../types/platform.ts";
@@ -7,11 +7,12 @@ import { Commander } from "../functions/cli.ts";
 import { AddToGitIgnore, Commit, IsRepo, Push, Tag } from "../functions/git.ts";
 import { RunUserCmd, ValidateUserCmd } from "../functions/user.ts";
 import { validate } from "@zakahacecosas/string-utils";
-import { APP_NAME } from "../constants.ts";
+import { APP_NAME } from "../constants/name.ts";
 import { FknError } from "../functions/error.ts";
 import { stringify as stringifyToml } from "@std/toml/stringify";
 import { GetTextIndentSize } from "../functions/filesystem.ts";
 import { RunBuildCmds } from "../functions/build.ts";
+import { ColorString } from "../functions/color.ts";
 
 export default function TheReleaser(params: TheReleaserConstructedParams) {
     if (!validate(params.version)) throw new FknError("Param__VerInvalid", "No version specified!");
@@ -157,7 +158,6 @@ export default function TheReleaser(params: TheReleaserConstructedParams) {
             ...env.commands.publish,
             "--dry-run",
         ],
-        true,
     );
     console.log("");
     const finalConfirmation = Interrogate(

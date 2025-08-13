@@ -21,14 +21,13 @@ export function CheckForPath(path: string): boolean {
  * Checks for a directory, returns a string depending on the result.
  *
  * @param {string} path
- * @returns {"NotDir" | "Valid" | "ValidButNotEmpty" | "NotFound"}
+ * @returns {"NotDir" | "ValidButNotEmpty" | "NotFound" | "Valid"}
  */
-export function CheckForDir(path: string): "NotDir" | "Valid" | "ValidButNotEmpty" | "NotFound" {
+export function CheckForDir(path: string): "NotDir" | "ValidButNotEmpty" | "NotFound" | "Valid" {
     try {
         const info = Deno.statSync(path);
         if (!info.isDirectory) return "NotDir";
         for (const _ of Deno.readDirSync(path)) {
-            // If we find a single entry, it's not empty.
             return "ValidButNotEmpty";
         }
         return "Valid";

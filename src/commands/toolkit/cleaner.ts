@@ -1,8 +1,8 @@
-import { FULL_NAME, FWORDS, isDef, LOCAL_PLATFORM } from "../../constants.ts";
+import { FULL_NAME, isDef } from "../../constants.ts";
 import { Commander, ManagerExists } from "../../functions/cli.ts";
 import { GetUserSettings } from "../../functions/config.ts";
 import { BulkRemove, CheckForPath, JoinPaths, ParsePath } from "../../functions/filesystem.ts";
-import { ColorString, Interrogate, LogStuff } from "../../functions/io.ts";
+import { Interrogate, LogStuff } from "../../functions/io.ts";
 import { GetProjectEnvironment, NameProject, SpotProject, UnderstandProjectProtection } from "../../functions/projects.ts";
 import type { CleanerIntensity } from "../../types/config_params.ts";
 import type { LOCKFILE_GLOBAL, MANAGER_GLOBAL, ProjectEnvironment } from "../../types/platform.ts";
@@ -11,6 +11,9 @@ import { CanCommit, Commit } from "../../functions/git.ts";
 import type { tRESULT } from "../clean.ts";
 import { sortAlphabetically, validate } from "@zakahacecosas/string-utils";
 import { FkNodeInterop } from "../interop/interop.ts";
+import { LOCAL_PLATFORM } from "../../constants/platform.ts";
+import { FWORDS } from "../../constants/fwords.ts";
+import { ColorString } from "../../functions/color.ts";
 
 /**
  * All project cleaning features.
@@ -19,7 +22,6 @@ const ProjectCleaningFeatures = {
     Update: (
         projectName: string,
         env: ProjectEnvironment,
-        verbose: boolean,
     ) => {
         Deno.chdir(env.root);
         LogStuff(
@@ -27,10 +29,7 @@ const ProjectCleaningFeatures = {
             "working",
         );
         try {
-            const output = FkNodeInterop.Features.Update({
-                env,
-                verbose,
-            });
+            const output = FkNodeInterop.Features.Update(env);
             if (output === true) LogStuff(`Updated dependencies for ${projectName}!`, "tick");
             return;
         } catch (e) {
@@ -41,7 +40,6 @@ const ProjectCleaningFeatures = {
     Clean: (
         projectName: string,
         env: ProjectEnvironment,
-        verbose: boolean,
     ) => {
         Deno.chdir(env.root);
         const { commands } = env;
@@ -57,7 +55,7 @@ const ProjectCleaningFeatures = {
         );
         for (const args of commands.clean) {
             LogStuff(`${commands.base} ${args.join(" ")}`, "wip");
-            Commander(commands.base, args, verbose);
+            Commander(commands.base, args);
         }
         LogStuff(`Cleaned ${projectName}!`, "tick");
 
@@ -66,7 +64,6 @@ const ProjectCleaningFeatures = {
     Lint: (
         projectName: string,
         env: ProjectEnvironment,
-        verbose: boolean,
     ) => {
         Deno.chdir(env.root);
         LogStuff(
@@ -74,10 +71,9 @@ const ProjectCleaningFeatures = {
             "working",
         );
         try {
-            const output = FkNodeInterop.Features.Lint({
+            const output = FkNodeInterop.Features.Lint(
                 env,
-                verbose,
-            });
+            );
             if (output === true) LogStuff(`Linted ${projectName}!`, "tick");
             return;
         } catch (e) {
@@ -88,7 +84,6 @@ const ProjectCleaningFeatures = {
     Pretty: (
         projectName: string,
         env: ProjectEnvironment,
-        verbose: boolean,
     ) => {
         Deno.chdir(env.root);
         LogStuff(
@@ -96,10 +91,7 @@ const ProjectCleaningFeatures = {
             "working",
         );
         try {
-            const output = FkNodeInterop.Features.Pretty({
-                env,
-                verbose,
-            });
+            const output = FkNodeInterop.Features.Pretty(env);
             if (output === true) LogStuff(`Prettified ${projectName}!`, "tick");
             return;
         } catch (e) {
@@ -111,7 +103,6 @@ const ProjectCleaningFeatures = {
         projectName: string,
         env: ProjectEnvironment,
         intensity: CleanerIntensity,
-        verbose: boolean,
     ) => {
         Deno.chdir(env.root);
         try {
@@ -136,11 +127,10 @@ const ProjectCleaningFeatures = {
                             `Didn't destroy ${ColorString(path, "bold")}: it does not exist!`,
                             "warn",
                             "bright-yellow",
-                            verbose,
                         );
                         continue;
                     }
-                    LogStuff(`Error destroying ${path}: ${e}`, "error", "red", verbose);
+                    LogStuff(`Error destroying ${path}: ${e}`, "error", "red");
                     continue;
                 }
             }
@@ -205,7 +195,6 @@ const ProjectCleaningFeatures = {
  * @param {boolean} shouldDestroy
  * @param {boolean} shouldCommit
  * @param {("normal" | "hard" | "maxim")} intensity
- * @param {boolean} verboseLogging
  * @returns {boolean}
  */
 export function PerformCleanup(
@@ -216,7 +205,6 @@ export function PerformCleanup(
     shouldDestroy: boolean,
     shouldCommit: boolean,
     intensity: "normal" | "hard" | "maxim",
-    verboseLogging: boolean,
 ): boolean {
     const motherfuckerInQuestion = ParsePath(projectInQuestion);
     const projectName = ColorString(NameProject(motherfuckerInQuestion, "name"), "bold");
@@ -245,28 +233,24 @@ export function PerformCleanup(
         ProjectCleaningFeatures.Clean(
             projectName,
             workingEnv,
-            verboseLogging,
         );
     }
     if (whatShouldWeDo["update"]) {
         ProjectCleaningFeatures.Update(
             projectName,
             workingEnv,
-            verboseLogging,
         );
     }
     if (whatShouldWeDo["lint"]) {
         ProjectCleaningFeatures.Lint(
             projectName,
             workingEnv,
-            verboseLogging,
         );
     }
     if (whatShouldWeDo["pretty"]) {
         ProjectCleaningFeatures.Pretty(
             projectName,
             workingEnv,
-            verboseLogging,
         );
     }
     if (whatShouldWeDo["destroy"]) {
@@ -274,7 +258,6 @@ export function PerformCleanup(
             projectName,
             workingEnv,
             intensity,
-            verboseLogging,
         );
     }
     if (whatShouldWeDo["commit"]) {
@@ -295,12 +278,10 @@ export function PerformCleanup(
  * Performs a hard cleanup, AKA cleans global caches.
  *
  * @async
- * @param {boolean} verboseLogging
+ * @param {boolean}
  * @returns {void}
  */
-export async function PerformHardCleanup(
-    verboseLogging: boolean,
-): Promise<void> {
+export async function PerformHardCleanup(): Promise<void> {
     LogStuff(
         `Time for hard-pruning! ${ColorString("Wait patiently, please (caches will take a while to clean).", "italic")}`,
         "working",
@@ -331,7 +312,7 @@ export async function PerformHardCleanup(
                 "package",
                 "red",
             );
-            Commander("npm", npmHardPruneArgs, verboseLogging);
+            Commander("npm", npmHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (error) {
             LogStuff("Failed!", "error");
@@ -345,7 +326,7 @@ export async function PerformHardCleanup(
                 "package",
                 "bright-yellow",
             );
-            Commander("pnpm", pnpmHardPruneArgs, true);
+            Commander("pnpm", pnpmHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (error) {
             LogStuff("Failed!", "error");
@@ -359,7 +340,7 @@ export async function PerformHardCleanup(
                 "package",
                 "purple",
             );
-            Commander("yarn", yarnHardPruneArgs, true);
+            Commander("yarn", yarnHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (error) {
             LogStuff("Failed!", "error");
@@ -374,8 +355,8 @@ export async function PerformHardCleanup(
                 "package",
                 "pink",
             );
-            Commander("bun", ["init", "-y"], verboseLogging); // placebo
-            Commander("bun", bunHardPruneArgs, verboseLogging);
+            Commander("bun", ["init", "-y"]); // placebo
+            Commander("bun", bunHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (error) {
             LogStuff("Failed!", "error");
@@ -389,7 +370,7 @@ export async function PerformHardCleanup(
             "package",
             "cyan",
         );
-        Commander("go", golangHardPruneArgs, verboseLogging);
+        Commander("go", golangHardPruneArgs);
         LogStuff("Done", "tick");
     }
     /* if (ManagerExists("deno")) {

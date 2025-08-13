@@ -1,5 +1,5 @@
 import { FknError } from "../../functions/error.ts";
-import { ColorString } from "../../functions/io.ts";
+import { ColorString } from "../../functions/color.ts";
 
 /** Get an embed file. */
 function Get(name: string): string {

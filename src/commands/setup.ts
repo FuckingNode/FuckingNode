@@ -1,5 +1,5 @@
 import { CheckForPath, GetTextIndentSize, JoinPaths } from "../functions/filesystem.ts";
-import { ColorString, Interrogate, LogStuff, StringifyYaml } from "../functions/io.ts";
+import { Interrogate, LogStuff, StringifyYaml } from "../functions/io.ts";
 import { deepMerge, NameProject } from "../functions/projects.ts";
 import type { TheSetuperConstructedParams } from "./constructors/command.ts";
 import { parse as parseYaml } from "@std/yaml";
@@ -7,6 +7,7 @@ import { parse as parseJsonc } from "@std/jsonc";
 import { SETUPS, VISIBLE_SETUPS } from "./toolkit/setups.ts";
 import { normalize, table, validate } from "@zakahacecosas/string-utils";
 import { FknError } from "../functions/error.ts";
+import { ColorString } from "../functions/color.ts";
 
 export default function TheSetuper(params: TheSetuperConstructedParams) {
     if (!validate(params.setup)) {

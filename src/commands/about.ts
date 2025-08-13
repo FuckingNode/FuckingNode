@@ -1,9 +1,11 @@
-import { APP_NAME, APP_URLs, VERSION } from "../constants.ts";
-import { ColorString } from "../functions/io.ts";
+import * as DenoJson from "../../deno.json" with { type: "json" };
+import { APP_URLs } from "../constants.ts";
+import { ColorString } from "../functions/color.ts";
 import { LogStuff } from "../functions/io.ts";
 import type { VALID_COLORS } from "../types/misc.ts";
 import { ASCII } from "../functions/ascii.ts";
 import { phrases } from "../functions/phrases.ts";
+import { APP_NAME } from "../constants/name.ts";
 
 function getRandomPhrase(): string {
     const randomIndex = Math.floor(Math.random() * phrases.length);
@@ -30,7 +32,7 @@ function colorizeText(text: string): string {
 }
 
 const coolStrings = {
-    ver: ColorString(`${APP_NAME.CASED} ${VERSION}`, "bold", "red"),
+    ver: ColorString(`${APP_NAME.CASED} ${DenoJson.default.version}`, "bold", "red"),
     ts: ColorString(`TypeScript ${Deno.version.typescript}`, "bright-blue"),
     deno: ColorString(`Deno ${Deno.version.deno}`, "bright-yellow"),
     spain: ColorString("Spain", "red"),

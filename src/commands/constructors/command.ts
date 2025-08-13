@@ -11,7 +11,6 @@ export interface TheCleanerConstructedParams {
      * `--flags` to be used.
      *
      * @type {{
-     *         verbose: boolean;
      *         update: boolean;
      *         lint: boolean;
      *         prettify: boolean;
@@ -20,7 +19,6 @@ export interface TheCleanerConstructedParams {
      *     }}
      */
     flags: {
-        verbose: boolean;
         update: boolean;
         lint: boolean;
         prettify: boolean;

@@ -1,10 +1,13 @@
 import { join } from "@std/path/join";
-import { APP_NAME, FWORDS, LOCAL_PLATFORM } from "../constants.ts";
-import { ColorString } from "./io.ts";
+import { APP_NAME } from "../constants/name.ts";
+import { ColorString } from "./color.ts";
 import type { GLOBAL_ERROR_CODES } from "../types/errors.ts";
 import { GetDateNow } from "./date.ts";
-import { stripCliColors, type UnknownString, validate } from "@zakahacecosas/string-utils";
+import { type UnknownString, validate } from "@zakahacecosas/string-utils";
 import { FKNODE_SHALL_WE_DEBUG } from "../main.ts";
+import { FWORDS } from "../constants/fwords.ts";
+import { LOCAL_PLATFORM } from "../constants/platform.ts";
+import { stripAnsiCode } from "@std/fmt/colors";
 
 /**
  * Errors that we know about, or that are caused by the user.
@@ -30,7 +33,7 @@ export class FknError extends Error {
         switch (this.code) {
             case "Param__CIntensityInvalid":
                 this.hint =
-                    "Valid intensity levels are 'normal', 'hard', 'hard-only', 'maxim', and 'maxim-only'.\nIf you want to use flags without providing an intensity (e.g. 'clean --verbose'), prepend '-- --' to the command ('clean -- -- -verbose'). Run 'help clean' for more info onto what does each level do.";
+                    "Valid intensity levels are 'normal', 'hard', 'hard-only', 'maxim', and 'maxim-only'.\nIf you want to use flags without providing an intensity (e.g. 'clean --pretty'), prepend '-- --' to the command ('clean -- -- -pretty'). Run 'help clean' for more info onto what does each level do.";
                 break;
             case "Env__CannotDetermine":
                 this.hint =
@@ -102,9 +105,9 @@ export class FknError extends Error {
      * @returns {Promise<void>}
      */
     public debug(debuggableContent: UnknownString): void {
-        // base! because if we're already debugging stuff we assume the CLI got to run
+        // APPDATA! because if we're already debugging stuff we assume the CLI got to run
         // meaning that path does exist
-        const debugPath = join(LOCAL_PLATFORM.APPDATA, APP_NAME.CLI, `${APP_NAME.CLI}-errors.log`);
+        const debugPath = join(LOCAL_PLATFORM.APPDATA!, APP_NAME.CLI, `${APP_NAME.CLI}-errors.log`);
         const debuggableError = `\n
 ---
 # BEGIN FknERROR ${this.code} @ ${new Date().toISOString()}
@@ -119,7 +122,7 @@ ${this.stack}
 -
 below goes the debugged content dump. this could be, for example, an entire project main file, dumped here for reviewal. it could be a sh*t ton of stuff to read
 - DEBUGGABLE CONTENT (in most cases, what the CLI command that was executed returned, in case we were able to gather it)
-${stripCliColors(debuggableContent ?? "UNKNOWN OUTPUT - No debuggableContent was provided, or it was empty.")}
+${stripAnsiCode(debuggableContent ?? "UNKNOWN OUTPUT - No debuggableContent was provided, or it was empty.")}
 ---
 # END   FknERROR ${this.code} # GOOD LUCK FIXING THIS
 ---\n

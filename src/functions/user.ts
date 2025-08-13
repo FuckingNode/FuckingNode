@@ -1,5 +1,5 @@
 import { normalize, validate, validateAgainst } from "@zakahacecosas/string-utils";
-import { DebugFknErr, FknError } from "./error.ts";
+import { FknError } from "./error.ts";
 import type { ProjectEnvironment } from "../types/platform.ts";
 import { Commander } from "./cli.ts";
 import { isDis } from "../constants.ts";
@@ -32,14 +32,12 @@ export function RunUserCmd(params: { key: "commitCmd" | "releaseCmd"; env: Proje
     const cmdOutput = Commander(
         env.commands.run[0],
         [env.commands.run[1], cmd],
-        true,
     );
 
     if (!cmdOutput.success) {
-        DebugFknErr(
+        throw new FknError(
             key === "commitCmd" ? "Task__Commit" : "Task__Release",
-            `Your fknode.yaml's ${key} failed at ${env.root}. The command's output was logged to the error log file.`,
-            cmdOutput.stdout,
+            `Your fknode.yaml's ${key} failed at ${env.root}. Scroll up as their output should've been shown in this terminal session.`,
         );
     }
 }
@@ -74,7 +72,7 @@ export function LaunchUserIDE() {
             break;
     }
 
-    const out = Commander(executionCommand, ["."], false);
-    if (!out.success) throw new Error(out.stdout);
+    const out = Commander(executionCommand, ["."]);
+    if (!out.success) throw new Error(`Error launching ${IDE}: ${out.stdout}`);
     return;
 }

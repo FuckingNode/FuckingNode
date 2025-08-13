@@ -1,19 +1,20 @@
-import { Commander, CommanderOutput } from "../functions/cli.ts";
+import { Commander } from "../functions/cli.ts";
 import { CheckForPath, JoinPaths, ParsePath } from "../functions/filesystem.ts";
-import { ColorString, LogStuff } from "../functions/io.ts";
+import { LogStuff } from "../functions/io.ts";
 import { GetProjectEnvironment, SpotProject } from "../functions/projects.ts";
 import { FULL_NAME } from "../constants.ts";
 import { normalize, normalizeArray, StringArray, validate } from "@zakahacecosas/string-utils";
 import { FknError } from "./error.ts";
 import { GIT_FILES } from "../types/misc.ts";
+import { ColorString } from "./color.ts";
 
 // * NOTE
 // * in this file, use Error instead of FknError, then capture all errors and return 1
 // * it's designed that way
 
 /** Runs a Git command with any args. ASSUMES AN ALREADY SPOTTED PATH. */
-function g(path: string, args: string[]): CommanderOutput {
-    return Commander("git", ["-C", path, ...args], false);
+function g(path: string, args: string[]) {
+    return Commander("git", ["-C", path, ...args]);
 }
 
 /**
@@ -84,7 +85,7 @@ export function CanCommit(path: string): boolean | "nonAdded" {
         if (!remoteStatus.stdout) return false; // if we can't get the remote status, we assume it's not clean
         if (
             remoteStatus.success &&
-            parseInt(remoteStatus.stdout.trim(), 10) > 0
+            parseInt(remoteStatus.stdout, 10) > 0
         ) return false; // local branch is behind the remote, so we shouldn't change stuff
 
         return true; // clean working tree and up to date with remote, we can do whatever we want
@@ -261,7 +262,7 @@ export function GetLatestTag(project: string): string | undefined {
         if (!getTagOutput.stdout) {
             throw new Error(`git describe --tags --abbrev=0 returned an undefined output for ${project}`);
         }
-        return getTagOutput.stdout.trim(); // describe --tags --abbrev=0 should return a string with nothing but the latest tag, so this will do
+        return getTagOutput.stdout; // describe --tags --abbrev=0 should return a string with nothing but the latest tag, so this will do
     } catch (e) {
         LogStuff(
             `Error - could not get latest tag at ${ColorString(project, "bold")} because of error: ${e}`,
@@ -374,7 +375,6 @@ export function Clone(repoUrl: string, clonePath: string): boolean {
                 repoUrl,
                 clonePath,
             ],
-            false,
         );
         if (!cloneOutput.success) throw new Error(cloneOutput.stdout);
         return true;

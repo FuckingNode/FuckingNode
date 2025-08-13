@@ -1,6 +1,6 @@
 import { ManagerExists } from "../functions/cli.ts";
 import { CheckForDir, JoinPaths, ParsePath } from "../functions/filesystem.ts";
-import { ColorString, LogStuff, Notification } from "../functions/io.ts";
+import { LogStuff, Notification } from "../functions/io.ts";
 import { AddProject, GetProjectEnvironment, NameProject } from "../functions/projects.ts";
 import type { TheKickstarterConstructedParams } from "./constructors/command.ts";
 import { FkNodeInterop } from "./interop/interop.ts";
@@ -13,7 +13,8 @@ import { GenerateGitUrl } from "./toolkit/git-url.ts";
 import { Clone } from "../functions/git.ts";
 import { validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { GetElapsedTime } from "../functions/date.ts";
-import { FWORDS } from "../constants.ts";
+import { FWORDS } from "../constants/fwords.ts";
+import { ColorString } from "../functions/color.ts";
 
 export default function TheKickstarter(params: TheKickstarterConstructedParams) {
     const { gitUrl, path, manager } = params;

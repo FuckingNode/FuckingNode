@@ -1,6 +1,4 @@
-import { ColorString } from "../src/functions/io.ts";
-
-console.log(ColorString("we making this good", "bright-blue"));
+console.log("We making this good");
 
 function Run(...args: string[]) {
     const output = new Deno.Command("deno", {

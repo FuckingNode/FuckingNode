@@ -7,15 +7,18 @@
  * (send help)
  */
 
-import { normalize, normalizeArray, stripCliColors, validate, validateAgainst } from "@zakahacecosas/string-utils";
+import { normalize, normalizeArray, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import type { MANAGER_NODE } from "../../types/platform.ts";
-import { ColorString, Interrogate, LogStuff } from "../../functions/io.ts";
+import { Interrogate, LogStuff } from "../../functions/io.ts";
 import { FkNodeSecurityAudit, ParsedNodeReport } from "../../types/audit.ts";
 import { GetProjectEnvironment, NameProject, SpotProject } from "../../functions/projects.ts";
 import { Commander } from "../../functions/cli.ts";
-import { APP_NAME, FWORDS } from "../../constants.ts";
+import { APP_NAME } from "../../constants/name.ts";
 import { DEBUG_LOG } from "../../functions/error.ts";
 import { VULNERABILITY_VECTORS } from "./vectors.ts";
+import { FWORDS } from "../../constants/fwords.ts";
+import { stripAnsiCode } from "@std/fmt/colors";
+import { ColorString } from "../../functions/color.ts";
 
 /**
  * **NPM report.** This interface only types properties of our interest.
@@ -178,20 +181,20 @@ const qps = (s: string): string => s.replaceAll(">", "").replaceAll("<", "").rep
  */
 export function ParseNodeBunReport(jsonString: string, platform: MANAGER_NODE | "bun"): ParsedNodeReport {
     /**
-     * `yarn audit --json` returns something like THIS:
+     * `yarn audit --json` returns something like this:
      * ```json
      * {"jsonThing": "hi"}
      * {"otherJsonThing": "uhh"}
      * // ...
      * ```
-     * which is stupid, BECAUSE THAT IS _NOT_ VALID JSON! therefore the name of the variable
+     * which if i remember correctly is JSONL, but _not_ JSON which feels a bit stupid, therefore the name of the variable
      */
     const yarnStupidJsonFormat = normalizeArray(jsonString.split("\n"), "soft").filter((s) => s.includes('{"type":"auditAdvisory"'))
         .map((
             s,
         ) => JSON.parse(s));
 
-    const halfCleanJsonString = stripCliColors(jsonString).split("\n");
+    const halfCleanJsonString = stripAnsiCode(jsonString).split("\n");
     const ib = halfCleanJsonString.findIndex((s) => s.includes("audit v"));
     const cleanJsonString = halfCleanJsonString.filter((s) => s.trim() !== halfCleanJsonString[ib]).filter(validate).join("\n");
 
@@ -564,7 +567,6 @@ export function PerformAuditing(project: string): FkNodeSecurityAudit | 0 | 1 {
     const res = Commander(
         env.commands.base,
         env.commands.audit,
-        false,
     );
 
     if (res.success) {
@@ -575,7 +577,7 @@ export function PerformAuditing(project: string): FkNodeSecurityAudit | 0 | 1 {
         return 0;
     }
 
-    if (res.stdout.trim() === "") {
+    if (!validate(res.stdout)) {
         LogStuff(
             `An error occurred at ${name} and we weren't able to get the stdout. Unable to audit.`,
             "error",

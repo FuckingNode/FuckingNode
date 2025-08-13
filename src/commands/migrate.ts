@@ -25,7 +25,7 @@ function handler(
         LogStuff("Please wait (this will take a while)...", "working");
 
         LogStuff("Updating dependencies (1/6)...", "working");
-        FkNodeInterop.Features.Update({ env, verbose: true });
+        FkNodeInterop.Features.Update(env);
 
         LogStuff("Removing node_modules (2/6)...", "working");
         Deno.removeSync(env.hall_of_trash, {
@@ -95,7 +95,7 @@ function handler(
         FkNodeInterop.Installers.UniJs(env.root, to);
 
         LogStuff("Updating to ensure lockfile consistency (6/6)...", "working");
-        FkNodeInterop.Features.Update({ env, verbose: true });
+        FkNodeInterop.Features.Update(env);
     } catch (e) {
         LogStuff(`Migration threw an: ${e}`, "error");
     }

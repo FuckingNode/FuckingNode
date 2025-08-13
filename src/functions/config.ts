@@ -1,11 +1,15 @@
-import { APP_NAME, DEFAULT_SCHEDULE_FILE, DEFAULT_SETTINGS, FWORDS, LOCAL_PLATFORM } from "../constants.ts";
+import { DEFAULT_SCHEDULE_FILE, DEFAULT_SETTINGS } from "../constants.ts";
 import type { CF_FKNODE_SETTINGS } from "../types/config_files.ts";
 import { FknError } from "./error.ts";
 import { BulkRemove, CheckForPath, JoinPaths } from "./filesystem.ts";
 import { parse as parseYaml } from "@std/yaml";
-import { ColorString, Interrogate, LogStuff, StringifyYaml } from "./io.ts";
+import { Interrogate, LogStuff, StringifyYaml } from "./io.ts";
 import { type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { format } from "@std/fmt/bytes";
+import { FWORDS } from "../constants/fwords.ts";
+import { LOCAL_PLATFORM } from "../constants/platform.ts";
+import { APP_NAME } from "../constants/name.ts";
+import { ColorString } from "./color.ts";
 
 /**
  * Returns file paths for all config files the app uses.
@@ -16,9 +20,7 @@ import { format } from "@std/fmt/bytes";
 export function GetAppPath(
     path: "BASE" | "MOTHERFKRS" | "LOGS" | "SCHEDULE" | "SETTINGS" | "ERRORS",
 ): string {
-    const appDataPath: string = LOCAL_PLATFORM.APPDATA;
-
-    if (!validate(appDataPath) || !CheckForPath(appDataPath)) {
+    if (!validate(LOCAL_PLATFORM.APPDATA) || !CheckForPath(LOCAL_PLATFORM.APPDATA)) {
         throw new FknError(
             "Os__NoAppdataNoHome",
             `We searched for ${
@@ -33,7 +35,7 @@ export function GetAppPath(
         return JoinPaths(BASE_DIR, `${APP_NAME.CLI}-${name}`);
     }
 
-    const BASE_DIR = JoinPaths(appDataPath, APP_NAME.CLI);
+    const BASE_DIR = JoinPaths(LOCAL_PLATFORM.APPDATA, APP_NAME.CLI);
     const PROJECTS = formatDir(`${funny}.txt`);
     const LOGS = formatDir("logs.log");
     const SCHEDULE = formatDir("schedule.yaml");

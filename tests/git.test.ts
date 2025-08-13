@@ -1,28 +1,7 @@
 import { assertEquals } from "@std/assert";
-import { GetBranches } from "../src/functions/git.ts";
-import { APP_NAME } from "../src/constants.ts";
-import { SpotProject } from "../src/functions/projects.ts";
 import { GenerateGitUrl } from "../src/commands/toolkit/git-url.ts";
 
-const here = SpotProject(APP_NAME.SCOPE);
-
-Deno.test({
-    name: "gets git branches",
-    fn: () => {
-        assertEquals(
-            GetBranches(here),
-            {
-                current: "master",
-                // update if we add more branches
-                // apparently git clone only clones the branch you're going to use
-                all: [
-                    "master",
-                    "v4",
-                ],
-            },
-        );
-    },
-});
+// TODO: figure out how to simulate git environments so we can test everything without messing with the repo or constantly change hardcoded values
 
 Deno.test({
     name: "properly generates git urls",
