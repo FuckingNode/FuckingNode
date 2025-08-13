@@ -86,7 +86,7 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
                 .slice(0, 7)
                 .map((file) => `${ColorString("- " + file, "bold", "white")}${prevStaged.includes(file) ? " (prev. staged, kept)" : ""}`)
                 .join("\n")
-        }${staged.length > 7 ? `and ${staged.length} more` : ""}`,
+        }${staged.length > 7 ? `\nand ${staged.length} more` : ""}`,
         "tick",
         ["bold", "bright-green"],
     );

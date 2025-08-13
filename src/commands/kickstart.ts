@@ -113,12 +113,11 @@ export default function TheKickstarter(params: TheKickstarterConstructedParams) 
     LaunchUserIDE();
 
     const elapsed = Date.now() - startup.getTime();
-    if ((elapsed > 120000)) {
-        Notification(
-            `Kickstart successful!`,
-            `It took ${GetElapsedTime(startup)}, but your project is ready. Go write some ${FWORDS.FKN} good code!`,
-        );
-    }
+    Notification(
+        `Kickstart successful!`,
+        `Your project is ready. It took ${GetElapsedTime(startup)}. Go write some ${FWORDS.FKN} good code!`,
+        elapsed,
+    );
 
     return;
 }

@@ -12,5 +12,14 @@ Deno.test({
             GetElapsedTime(date),
             "3m 35s",
         );
+
+        const date2 = new Date();
+        date2.setMinutes(date2.getMinutes() - 1);
+        date2.setSeconds(date2.getSeconds() - 5);
+
+        assertEquals(
+            GetElapsedTime(date2),
+            "1m 05s",
+        );
     },
 });

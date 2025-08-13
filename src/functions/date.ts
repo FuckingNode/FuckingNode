@@ -1,4 +1,4 @@
-import { format, parse } from "@std/datetime";
+import { difference, format, parse } from "@std/datetime";
 
 const DATE_FMT = "dd-MM-yyyy HH:mm:ss";
 
@@ -28,11 +28,13 @@ export function ParseDate(date: string): Date {
  * @returns {string}
  */
 export function GetElapsedTime(date: Date): string {
-    const diff = Math.abs(new Date().getTime() - date.getTime()); // milliseconds
-    const totalSeconds = Math.floor(diff / 1000);
+    const diff = difference(date, new Date()).milliseconds ?? 0;
 
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
+    if (diff < 1000) return `less than a second`;
 
-    return `${minutes}m ${seconds}s`;
+    // https://stackoverflow.com/a/21294619
+    const minutes = Math.floor(diff / 60000);
+    const seconds = ((diff % 60000) / 1000).toFixed(0);
+
+    return `${minutes}m ${seconds.padStart(2, "0")}s`;
 }

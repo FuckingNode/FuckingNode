@@ -536,11 +536,11 @@ export function ShowReport(results: tRESULT[]): void {
     LogStuff("Report:", "chart");
     const report: string[] = [];
     for (const result of results) {
-        const name = NameProject(result.path, "all");
+        const name = NameProject(result.path, "name-ver");
         const status = ColorString(result.status, "bold");
         const elapsedTime = ColorString(result.elapsedTime, "italic");
 
-        const theResult = `${name} -> ${status}, taking us ${elapsedTime}`;
+        const theResult = `${name} -> ${status}, taking ${elapsedTime}`;
         report.push(theResult);
     }
     const sortedReport = sortAlphabetically(report).join("\n");

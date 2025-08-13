@@ -32,12 +32,28 @@ export interface CF_FKNODE_SETTINGS {
     defaultIntensity: CleanerIntensity;
     /**
      * User's favorite code editor.
+     *
+     * @type {SUPPORTED_EDITORS}
      */
     favEditor: SUPPORTED_EDITORS;
     /**
      * Default package manager / runtime to use for features like `kickstart`.
+     *
+     * @type {MANAGER_GLOBAL}
      */
     defaultManager: MANAGER_GLOBAL;
+    /**
+     * If true notifications are shown only if a task takes more than 30 seconds. Else, they're always shown.
+     *
+     * @type {boolean}
+     */
+    thresholdNotifications: boolean;
+    /**
+     * If true, notifications are shown for certain tasks upon completion.
+     *
+     * @type {boolean}
+     */
+    showNotifications: boolean;
 }
 
 /**

@@ -116,7 +116,16 @@ export function GetUserSettings(): CF_FKNODE_SETTINGS {
 // TODO (for v5 cause breaking)
 // don't use casing for settings
 // the CLI lowercases params, breaking programmatic changing of settings
-export const VALID_SETTINGS = ["defaultintensity", "defaultmanager", "updatefreq", "faveditor", "flushfreq"] as const;
+// use dashes instead
+export const VALID_SETTINGS = [
+    "defaultintensity",
+    "defaultmanager",
+    "updatefreq",
+    "faveditor",
+    "flushfreq",
+    "shownotifications",
+    "thresholdnotifications",
+] as const;
 
 /**
  * Changes a given user setting to a given value.
@@ -161,6 +170,16 @@ export function ChangeSetting(
             return LogStuff(`${value} is not valid. Enter a valid number greater than 0.`);
         }
         newSettings = { ...currentSettings, flushFreq: flush };
+    } else if (setting === "shownotifications") {
+        if (!validateAgainst(value, ["true", "false"])) {
+            return LogStuff(`${value} is not valid. Enter either 'true' or 'false'.`);
+        }
+        newSettings = { ...currentSettings, showNotifications: value === "true" };
+    } else if (setting === "thresholdnotifications") {
+        if (!validateAgainst(value, ["true", "false"])) {
+            return LogStuff(`${value} is not valid. Enter either 'true' or 'false'.`);
+        }
+        newSettings = { ...currentSettings, thresholdNotifications: value === "true" };
     } else {
         if (!validateAgainst(value, ["npm", "pnpm", "yarn", "bun", "deno", "cargo", "go"])) {
             return LogStuff(`${value} is not valid. Enter a valid package manager (npm, pnpm, yarn, bun, deno, cargo, go).`);
@@ -191,13 +210,23 @@ export function DisplaySettings(): void {
     const settings = GetUserSettings();
 
     const formattedSettings = [
-        `Update frequency: Each ${ColorString(settings.updateFreq, "bright-green")} days. ${ColorString("updateFreq", "half-opaque", "italic")}`,
-        `Default cleaner intensity: ${ColorString(settings.defaultIntensity, "bright-green")}. ${
+        `Check for updates             | Every ${ColorString(settings.updateFreq, "bright-green")} days. ${
+            ColorString("updateFreq", "half-opaque", "italic")
+        }`,
+        `Default cleaner intensity     | ${ColorString(settings.defaultIntensity, "bright-green")}. ${
             ColorString("defaultIntensity", "half-opaque", "italic")
         }`,
-        `Favorite editor: ${ColorString(settings.favEditor, "bright-green")}. ${ColorString("favEditor", "half-opaque", "italic")}`,
-        `Auto-flush log file frequency: Each ${ColorString(settings.flushFreq, "bright-green")} days. ${
+        `Favorite code editor          | ${ColorString(settings.favEditor, "bright-green")}. ${
+            ColorString("favEditor", "half-opaque", "italic")
+        }`,
+        `Auto-flush log file           | Every ${ColorString(settings.flushFreq, "bright-green")} days. ${
             ColorString("flushFreq", "half-opaque", "italic")
+        }`,
+        `Send system notifications     | ${ColorString(settings.showNotifications ? "Enabled" : "Disabled", "bright-green")}. ${
+            ColorString("showNotifications", "half-opaque", "italic")
+        }`,
+        `Threshold notifications (30") | ${ColorString(settings.thresholdNotifications ? "Enabled" : "Disabled", "bright-green")}. ${
+            ColorString("thresholdNotifications", "half-opaque", "italic")
         }`,
     ].join("\n");
 

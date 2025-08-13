@@ -14,8 +14,8 @@ export default async function TheCleaner(params: TheCleanerConstructedParams) {
     const { update, lint, prettify, destroy, commit } = params.flags;
     const { intensity, project } = params.parameters;
 
-    const realIntensity: CleanerIntensity = ValidateIntensity(intensity);
     const startup = new Date();
+    const realIntensity: CleanerIntensity = ValidateIntensity(intensity);
 
     if (realIntensity === "hard-only") {
         await PerformHardCleanup();
@@ -113,12 +113,11 @@ export default async function TheCleaner(params: TheCleanerConstructedParams) {
         "bright-green",
     );
     const elapsed = Date.now() - startup.getTime();
-    if ((elapsed > 180000)) {
-        Notification(
-            projects.length > 1 ? `All your ${FWORDS.MFN} projects have been cleaned!` : `Your ${FWORDS.MFN} project has been cleaned!`,
-            `It took ${GetElapsedTime(startup)}, but we did it!`,
-        );
-    }
+    Notification(
+        projects.length > 1 ? `All your ${FWORDS.MFN} projects have been cleaned!` : `Your ${FWORDS.MFN} project has been cleaned!`,
+        `We did it! It took ${GetElapsedTime(startup)}.`,
+        elapsed,
+    );
     ShowReport(results);
     return;
 }

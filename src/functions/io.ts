@@ -1,5 +1,5 @@
 import type { VALID_COLORS, VALID_EMOJIS } from "../types/misc.ts";
-import { GetAppPath } from "./config.ts";
+import { GetAppPath, GetUserSettings } from "./config.ts";
 import { stringify as stringifyYaml } from "@std/yaml";
 import { GetDateNow } from "./date.ts";
 import { Commander } from "./cli.ts";
@@ -155,8 +155,12 @@ export function StringifyYaml(content: unknown): string {
  *
  * @param {string} title Title of notification.
  * @param {string} msg Main text.
+ * @param {number} elapsed Elapsed time, for checking the threshold.
  */
-export function Notification(title: string, msg: string) {
+export function Notification(title: string, msg: string, elapsed: number): void {
+    const settings = GetUserSettings();
+    if (!settings.showNotifications) return;
+    if (settings.thresholdNotifications && elapsed < 30000) return;
     // NOTE: we should show our logo
     // requires to bundle it / add it to the installer script
     // on Windows, to write XML inside of the damn script :sob:

@@ -151,12 +151,11 @@ export default function TheMigrator(params: TheMigratorConstructedParams): void 
 
     LogStuff(`That worked out! Enjoy using ${desiredManager} for ${NameProject(workingEnv.root, "all")}`);
     const elapsed = Date.now() - startup.getTime();
-    if ((elapsed > 120000)) {
-        Notification(
-            `Your project was migrated!`,
-            `From ${workingEnv.manager} to ${desiredManager}. It took ${GetElapsedTime(startup)}, but it's now done!`,
-        );
-    }
+    Notification(
+        `Your project was migrated!`,
+        `From ${workingEnv.manager} to ${desiredManager}, all set! It took ${GetElapsedTime(startup)}.`,
+        elapsed,
+    );
 
     return;
 }

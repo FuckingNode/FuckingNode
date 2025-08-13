@@ -6,3 +6,4 @@ destroy:
         - "dist"
 commitActions: false
 commitCmd: "precommit"
+prettyCmd: "good"

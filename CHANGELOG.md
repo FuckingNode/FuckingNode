@@ -10,10 +10,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 _Sort of_ breaking, but nothing important so I won't make a major release.
 
+### Added
+
+- Added settings to enable/disable notifications and their thresholds.
+
 ### Changed
 
 - Now output is not shown live anymore. It gave too many problems as if it's shown live, it cannot be read by the CLI.
 - Now, the "report" shown after a cleanup is no longer hidden behind a flag.
+- Now threshold for notifications were made the same reduced to 30 seconds.
+
+### Fixed
+
+- Fixed a missing line break causing `- /path/to/fileand 7 more files` in `commit`.
+- Fixed elapsed time showing 0m 0s sometimes if it only took milliseconds.
+- Fixed calculation of elapsed times. [Thanks.](https://stackoverflow.com/a/21294619)
 
 ### Removed
 

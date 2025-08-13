@@ -134,7 +134,7 @@ export default function TheHelper(params: TheHelperConstructedParams) {
         [
             "settings",
             "[setting] [extra parameters]",
-            "Allows you to change settings. Run it without args to see current settings.",
+            "Allows you to view or change settings. Run it without args to see current settings.",
         ],
         [
             "compat",
