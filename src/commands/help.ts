@@ -369,14 +369,14 @@ export default function TheHelper(params: TheHelperConstructedParams) {
                     "This is a simple automation, since all package managers understand each other nowadays.\nIt just speeds up the process by needing to run a single command instead of several.",
                     [
                         [
-                            "<project>",
-                            null,
-                            "Project to be migrated.",
-                        ],
-                        [
                             "<target>",
                             null,
                             "Target package manager (npm, pnpm, yarn, deno, or bun).\nWe rely on each manager's ability to understand the other one.",
+                        ],
+                        [
+                            "<project>",
+                            null,
+                            "Project to be migrated. Uses the CWD if not provided.",
                         ],
                     ],
                 ),

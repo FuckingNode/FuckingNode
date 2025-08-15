@@ -1,11 +1,12 @@
 import { validateAgainst } from "@zakahacecosas/string-utils";
 import { Commander } from "../../functions/cli.ts";
-import { LogStuff } from "../../functions/io.ts";
+import { LogStuff, Notification } from "../../functions/io.ts";
 import type { ProjectEnvironment } from "../../types/platform.ts";
 import { DebugFknErr, FknError } from "../../functions/error.ts";
 import { FkNodeInterop } from "./interop.ts";
 import { isDef, isDis } from "../../constants.ts";
 import { NameProject } from "../../functions/projects.ts";
+import { GetAppPath } from "../../functions/config.ts";
 
 function HandleError(
     err:
@@ -15,6 +16,11 @@ function HandleError(
         | "Task__Launch",
     stdout: string,
 ): never {
+    Notification(
+        `An error happened with ${err.split("__")[1]!.toLowerCase()} task!`,
+        `The error log was dumped to ${GetAppPath("ERRORS")}.`,
+        300000,
+    );
     DebugFknErr(
         err,
         "Something went wrong and we don't know what",

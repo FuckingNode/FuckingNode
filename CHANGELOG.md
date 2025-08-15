@@ -6,7 +6,24 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
-## [4.1.0] (Unreleased)
+## Unreleased
+
+### Added
+
+- Added a system notification prompt whenever a cleaning task (e.g. lint) fails. Respects `showNotifications` setting.
+- Added (back) showing more details into the final report. It shows what features `divineProtection` prevented (if any) and (this is new) what features failed (if any).
+
+### Changed
+
+- Now the cleanup process should look a bit cleaner in your terminal, we changed spacing and stuff for it to look better.
+- Now the "cleanup is limited" notice only shows when the project is actually skipped.
+- Now the completion notification tells you if any error happened during cleanup.
+
+### Fixed
+
+- Fixed the help menu displaying `migrate`'s parameters in wrong order.
+
+## [4.1.0] (14-08-2025)
 
 _Sort of_ breaking, but nothing important so I won't make a major release.
 

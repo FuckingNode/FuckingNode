@@ -8,7 +8,7 @@ import type { CleanerIntensity } from "../../types/config_params.ts";
 import type { LOCKFILE_GLOBAL, MANAGER_GLOBAL, ProjectEnvironment } from "../../types/platform.ts";
 import { FknError } from "../../functions/error.ts";
 import { CanCommit, Commit } from "../../functions/git.ts";
-import type { tRESULT } from "../clean.ts";
+import type { RESULT } from "../clean.ts";
 import { sortAlphabetically, validate } from "@zakahacecosas/string-utils";
 import { FkNodeInterop } from "../interop/interop.ts";
 import { LOCAL_PLATFORM } from "../../constants/platform.ts";
@@ -22,6 +22,7 @@ const ProjectCleaningFeatures = {
     Update: (
         projectName: string,
         env: ProjectEnvironment,
+        errors: string[],
     ) => {
         Deno.chdir(env.root);
         LogStuff(
@@ -32,8 +33,9 @@ const ProjectCleaningFeatures = {
             const output = FkNodeInterop.Features.Update(env);
             if (output === true) LogStuff(`Updated dependencies for ${projectName}!`, "tick");
             return;
-        } catch (e) {
-            LogStuff(`Failed to update deps for ${projectName}: ${e}`, "warn", "bright-yellow");
+        } catch {
+            LogStuff(`Failed to update deps for ${projectName}!`, "warn", "bright-yellow");
+            errors.push("updater");
             return;
         }
     },
@@ -43,12 +45,7 @@ const ProjectCleaningFeatures = {
     ) => {
         Deno.chdir(env.root);
         const { commands } = env;
-        if (commands.clean === "__UNSUPPORTED") {
-            LogStuff(
-                `${projectName}'s cleanup is limited, as ${env.manager} doesn't have cleanup commands. If no other feature (lint, pretty...) was specified, we'll skip it.`,
-            );
-            return;
-        }
+        if (commands.clean === "__UNSUPPORTED") return;
         LogStuff(
             `Cleaning ${projectName}.`,
             "working",
@@ -64,6 +61,7 @@ const ProjectCleaningFeatures = {
     Lint: (
         projectName: string,
         env: ProjectEnvironment,
+        errors: string[],
     ) => {
         Deno.chdir(env.root);
         LogStuff(
@@ -78,12 +76,14 @@ const ProjectCleaningFeatures = {
             return;
         } catch (e) {
             LogStuff(`Failed to lint ${projectName}: ${e}`, "warn", "bright-yellow");
+            errors.push("linter");
             return;
         }
     },
     Pretty: (
         projectName: string,
         env: ProjectEnvironment,
+        errors: string[],
     ) => {
         Deno.chdir(env.root);
         LogStuff(
@@ -96,6 +96,7 @@ const ProjectCleaningFeatures = {
             return;
         } catch (e) {
             LogStuff(`Failed to pretty ${projectName}: ${e}`, "warn", "bright-yellow");
+            errors.push("prettifier");
             return;
         }
     },
@@ -103,6 +104,7 @@ const ProjectCleaningFeatures = {
         projectName: string,
         env: ProjectEnvironment,
         intensity: CleanerIntensity,
+        errors: string[],
     ) => {
         Deno.chdir(env.root);
         try {
@@ -123,10 +125,11 @@ const ProjectCleaningFeatures = {
                     continue;
                 } catch (e) {
                     if (String(e).includes("os error 2")) {
+                        // using ColorString instead of the 3rd arg is on purpose
+                        // emojis in italic look WEIRD
                         LogStuff(
-                            `Didn't destroy ${ColorString(path, "bold")}: it does not exist!`,
-                            "warn",
-                            "bright-yellow",
+                            ColorString(`No need to destroy ${ColorString(path, "bold")}: it does not exist.`, "italic"),
+                            "tick",
                         );
                         continue;
                     }
@@ -138,6 +141,7 @@ const ProjectCleaningFeatures = {
             return;
         } catch (e) {
             LogStuff(`Failed to destroy stuff at ${projectName}: ${e}`, "warn", "bright-yellow");
+            errors.push("destroyer");
             return;
         }
     },
@@ -205,12 +209,25 @@ export function PerformCleanup(
     shouldDestroy: boolean,
     shouldCommit: boolean,
     intensity: "normal" | "hard" | "maxim",
-): boolean {
+): {
+    protection: string | null;
+    errors: string | null;
+} {
     const motherfuckerInQuestion = ParsePath(projectInQuestion);
     const projectName = ColorString(NameProject(motherfuckerInQuestion, "name"), "bold");
-    const workingEnv = GetProjectEnvironment(motherfuckerInQuestion);
+    const env = GetProjectEnvironment(motherfuckerInQuestion);
 
-    const { doClean, doDestroy, doLint, doPrettify, doUpdate } = UnderstandProjectProtection(workingEnv.settings, {
+    const protections: string[] = [];
+    const errors: string[] = [];
+
+    ([[shouldUpdate, "updater"], [shouldLint, "linter"], [shouldPrettify, "prettifier"], [shouldDestroy, "destroyer"], [true, "cleaner"]] as [
+        boolean,
+        "updater",
+    ][]).forEach((v) => {
+        if (v[0] === true && (env.settings.divineProtection === "*" || env.settings.divineProtection.includes(v[1]))) protections.push(v[1]);
+    });
+
+    const { doClean, doDestroy, doLint, doPrettify, doUpdate } = UnderstandProjectProtection(env.settings, {
         update: shouldUpdate,
         prettify: shouldPrettify,
         destroy: shouldDestroy,
@@ -222,54 +239,69 @@ export function PerformCleanup(
         "update" | "lint" | "pretty" | "destroy" | "commit",
         boolean
     > = {
-        update: doUpdate || (workingEnv.settings.flagless?.flaglessUpdate === true),
-        lint: doLint || (workingEnv.settings.flagless?.flaglessLint === true),
-        pretty: doPrettify || (workingEnv.settings.flagless?.flaglessPretty === true),
-        destroy: doDestroy || (workingEnv.settings.flagless?.flaglessDestroy === true),
-        commit: shouldCommit || (workingEnv.settings.flagless?.flaglessCommit === true),
+        update: doUpdate || (env.settings.flagless?.flaglessUpdate === true),
+        lint: doLint || (env.settings.flagless?.flaglessLint === true),
+        pretty: doPrettify || (env.settings.flagless?.flaglessPretty === true),
+        destroy: doDestroy || (env.settings.flagless?.flaglessDestroy === true),
+        commit: shouldCommit || (env.settings.flagless?.flaglessCommit === true),
     };
+
+    if (env.commands.clean === "__UNSUPPORTED" && Object.values(whatShouldWeDo).every((v) => v === false)) {
+        LogStuff(
+            `${projectName} will be skipped. ${
+                ColorString(env.manager, "bold")
+            } has no cleanup commands and no other feature is being used here.`,
+        );
+    }
 
     if (doClean) {
         ProjectCleaningFeatures.Clean(
             projectName,
-            workingEnv,
+            env,
         );
     }
     if (whatShouldWeDo["update"]) {
         ProjectCleaningFeatures.Update(
             projectName,
-            workingEnv,
+            env,
+            errors,
         );
     }
     if (whatShouldWeDo["lint"]) {
         ProjectCleaningFeatures.Lint(
             projectName,
-            workingEnv,
+            env,
+            errors,
         );
     }
     if (whatShouldWeDo["pretty"]) {
         ProjectCleaningFeatures.Pretty(
             projectName,
-            workingEnv,
+            env,
+            errors,
         );
     }
     if (whatShouldWeDo["destroy"]) {
         ProjectCleaningFeatures.Destroy(
             projectName,
-            workingEnv,
+            env,
             intensity,
+            errors,
         );
     }
     if (whatShouldWeDo["commit"]) {
         ProjectCleaningFeatures.Commit(
-            workingEnv,
+            env,
             whatShouldWeDo["update"],
             whatShouldWeDo["lint"],
             whatShouldWeDo["pretty"],
         );
     }
 
-    return true;
+    return {
+        protection: protections.length === 0 ? null : protections.map((s) => s.toUpperCase()).join(" & "),
+        errors: errors.length === 0 ? null : errors.map((s) => s.toUpperCase()).join(" & "),
+    };
 }
 
 // cache cleaning is global, so doing these for every project like we used to do
@@ -526,25 +558,40 @@ export function ValidateIntensity(intensity: string): CleanerIntensity {
 }
 
 /**
- * Shows a basic report.
+ * Shows a report with the results of the cleanup.
  *
- * @param {{ path: string; status: string }[]} results
- * @returns {Promise<void>}
+ * @param {RESULT[]} results
+ * @returns {void}
  */
-export function ShowReport(results: tRESULT[]): void {
-    // shows a report
-    LogStuff("Report:", "chart");
+export function ShowReport(results: RESULT[]): void {
+    console.log("");
+    LogStuff("Report:\n", "chart");
     const report: string[] = [];
     for (const result of results) {
         const name = NameProject(result.path, "name-ver");
         const status = ColorString(result.status, "bold");
         const elapsedTime = ColorString(result.elapsedTime, "italic");
+        const protection = result.extras?.ignored
+            ? ColorString(
+                `\n--> The above ${ColorString("was divinely protected from", "blue", "bold", "italic")} ${
+                    ColorString(result.extras?.ignored, "bold")
+                }`,
+                "italic",
+            )
+            : "";
+        const errors = result.extras?.failed
+            ? ColorString(
+                `\n--> The above ${ColorString("faced errors with", "bold", "red", "italic")} ${ColorString(result.extras?.failed, "bold")}`,
+                "italic",
+            )
+            : "";
 
-        const theResult = `${name} -> ${status}, taking ${elapsedTime}`;
+        const theResult = `${name} -> ${status}, taking ${elapsedTime}${protection}${errors}`;
         report.push(theResult);
     }
     const sortedReport = sortAlphabetically(report).join("\n");
     LogStuff(sortedReport, undefined);
+    console.log("");
     LogStuff(
         `Cleaning completed at ${new Date().toLocaleString()}`,
         "tick",

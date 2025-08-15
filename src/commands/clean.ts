@@ -7,7 +7,15 @@ import { PerformCleanup, PerformHardCleanup, PerformMaximCleanup, ShowReport, Va
 import type { CleanerIntensity } from "../types/config_params.ts";
 import { GetElapsedTime } from "../functions/date.ts";
 
-export type tRESULT = { path: string; status: string; elapsedTime: string };
+export type RESULT = {
+    path: string;
+    status: "Not found" | "Success" | "Partial success" | "Failed";
+    elapsedTime: string;
+    extras: undefined | {
+        ignored?: string;
+        failed?: string;
+    };
+};
 
 export default async function TheCleaner(params: TheCleanerConstructedParams) {
     // params
@@ -39,12 +47,12 @@ export default async function TheCleaner(params: TheCleanerConstructedParams) {
     }
 
     LogStuff(
-        `Cleaning started at ${new Date().toLocaleString()}\n`,
+        `Cleaning started at ${new Date().toLocaleString()}`,
         "working",
         "bright-green",
     );
 
-    const results: tRESULT[] = [];
+    const results: RESULT[] = [];
 
     for (const project of projects) {
         // start time of each cleanup
@@ -60,19 +68,19 @@ export default async function TheCleaner(params: TheCleanerConstructedParams) {
                     path: project,
                     status: "Not found",
                     elapsedTime: GetElapsedTime(startTime),
+                    extras: undefined,
                 });
                 continue;
             }
 
             Deno.chdir(project);
 
-            // TODO - readd preliminary status (basically showing '... # * protected' in report and a log warning for the user)
-
+            console.log("");
             LogStuff(
                 `Cleaning the ${NameProject(project)} ${FWORDS.MF}...`,
                 "package",
             );
-            PerformCleanup(
+            const res = PerformCleanup(
                 project,
                 update,
                 lint,
@@ -82,13 +90,26 @@ export default async function TheCleaner(params: TheCleanerConstructedParams) {
                 realIntensity,
             );
 
-            const status = "Success"; // preliminaryStatus ? `Success # ${preliminaryStatus}` : "Success";
-
-            results.push({
+            const result: RESULT = {
                 path: project,
-                status,
+                status: res.errors !== null ? "Partial success" : "Success",
                 elapsedTime: GetElapsedTime(startTime),
-            });
+                extras: undefined,
+            };
+
+            if (res.protection !== null) {
+                result.extras = {
+                    ignored: res.protection,
+                };
+            }
+            if (res.errors !== null) {
+                result.extras = {
+                    ...result.extras,
+                    failed: res.errors,
+                };
+            }
+
+            results.push(result);
         } catch (e) {
             LogStuff(
                 `Error while working around with ${NameProject(project, "name")}: ${e}`,
@@ -99,6 +120,7 @@ export default async function TheCleaner(params: TheCleanerConstructedParams) {
                 path: project,
                 status: "Failed",
                 elapsedTime: GetElapsedTime(startTime),
+                extras: undefined,
             });
             continue;
         }
@@ -115,7 +137,11 @@ export default async function TheCleaner(params: TheCleanerConstructedParams) {
     const elapsed = Date.now() - startup.getTime();
     Notification(
         projects.length > 1 ? `All your ${FWORDS.MFN} projects have been cleaned!` : `Your ${FWORDS.MFN} project has been cleaned!`,
-        `We did it! It took ${GetElapsedTime(startup)}.`,
+        `We did it! It took ${GetElapsedTime(startup)}. ${
+            results.some((r) => (r.extras && r.extras.failed && r.extras.failed.trim().length > 0))
+                ? "Errors happened, though. Check the report in your terminal session."
+                : ""
+        }`,
         elapsed,
     );
     ShowReport(results);
