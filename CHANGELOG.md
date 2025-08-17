@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - Fixed the help menu displaying `migrate`'s parameters in wrong order.
+- Fixed (one last time) `buildCmd`: `stderr` was not being shown when a command failed.
 
 ## [4.1.0] (14-08-2025)
 

@@ -104,7 +104,7 @@ export class FknError extends Error {
      * @param {string} debuggableContent The content to be dumped.
      * @returns {Promise<void>}
      */
-    public debug(debuggableContent: UnknownString): void {
+    public debug(debuggableContent: UnknownString, showWarn: boolean = true): void {
         // APPDATA! because if we're already debugging stuff we assume the CLI got to run
         // meaning that path does exist
         const debugPath = join(LOCAL_PLATFORM.APPDATA!, APP_NAME.CLI, `${APP_NAME.CLI}-errors.log`);
@@ -127,7 +127,7 @@ ${stripAnsiCode(debuggableContent ?? "UNKNOWN OUTPUT - No debuggableContent was 
 # END   FknERROR ${this.code} # GOOD LUCK FIXING THIS
 ---\n
         `.trim();
-        console.warn(ColorString(`For details about what happened, see last entry @ ${debugPath}`, "orange"));
+        if (showWarn) console.warn(ColorString(`For details about what happened, see last entry @ ${debugPath}`, "orange"));
         Deno.writeTextFileSync(
             debugPath,
             debuggableError,
@@ -175,10 +175,16 @@ export function DEBUG_LOG(...a: unknown[]): void {
 }
 
 /** Throws a `FknError` and writes any debuggable content. */
-export function DebugFknErr(code: GLOBAL_ERROR_CODES, message: UnknownString, debuggableContent: UnknownString): never {
+export function DebugFknErr(
+    code: GLOBAL_ERROR_CODES,
+    message: UnknownString,
+    debuggableContent: UnknownString,
+    showWarn: boolean = true,
+): never {
     const err = new FknError(code, validate(message) ? message : undefined);
     err.debug(
         debuggableContent,
+        showWarn,
     );
     throw err;
 }

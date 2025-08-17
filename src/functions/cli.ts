@@ -52,7 +52,7 @@ export function Commander(
             const err = new FknError("Os__NoEntity", `We attempted to run a shell / CLI command (${main}), but your OS wasn't able find it.`);
             if (LOCAL_PLATFORM.SYSTEM === "windows") {
                 err.hint =
-                    `Just in case it's a shell command (like, e.g., 'echo') and you input it somewhere like 'buildCmd': it has to be preceded with 'powershell' or 'cmd', as its passed as an argument to this executable.`;
+                    `Just in case it's a shell command (like 'echo' or 'ls') and you input it somewhere like 'buildCmd': it has to be preceded with 'powershell', as its passed as an argument to this executable.`;
             }
             throw err;
         }
