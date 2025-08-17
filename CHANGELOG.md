@@ -10,7 +10,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- Added a system notification prompt whenever a cleaning task (e.g. lint) fails. Respects `showNotifications` setting.
+- Added more system notification prompts. They all respect `showNotifications` setting.
+  - Whenever a cleaning task (e.g. lint) fails.
+  - When a `build` finishes.
 - Added (back) showing more details into the final report. It shows what features `divineProtection` prevented (if any) and (this is new) what features failed (if any).
 
 ### Changed
