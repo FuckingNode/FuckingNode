@@ -4,6 +4,7 @@ import { ValidateUserCmd } from "../functions/user.ts";
 import { LogStuff, Notification } from "../functions/io.ts";
 import { RunBuildCmds } from "../functions/build.ts";
 import { stripAnsiCode } from "@std/fmt/colors";
+import { GetElapsedTime } from "../functions/date.ts";
 
 export default function TheBuilder(params: TheBuilderConstructedParams) {
     const project = (params.project || "").startsWith("--") ? Deno.cwd() : SpotProject(params.project);
@@ -31,7 +32,7 @@ export default function TheBuilder(params: TheBuilderConstructedParams) {
 
     Notification(
         "Build completed!",
-        `Your build of ${stripAnsiCode(projectName)} succeeded! Elapsed ${elapsed}.`,
+        `Your build of ${stripAnsiCode(projectName)} succeeded! Elapsed ${GetElapsedTime(startup)}.`,
         elapsed,
     );
 

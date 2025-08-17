@@ -2,6 +2,7 @@ import { normalize } from "@zakahacecosas/string-utils";
 import { Commander } from "./cli.ts";
 import { LogStuff } from "./io.ts";
 import { DebugFknErr, FknError } from "./error.ts";
+import { ColorString } from "./color.ts";
 
 export function RunBuildCmds(commands: string[]) {
     for (const command of commands) {
@@ -11,7 +12,7 @@ export function RunBuildCmds(commands: string[]) {
             continue;
         }
         const cmdIndex = commands.indexOf(command) + 1;
-        LogStuff(`Running command ${cmdIndex}/${commands.length}`, undefined, "bold");
+        LogStuff(`Running command ${cmdIndex}/${commands.length} | ${ColorString(command, "half-opaque", "italic")}`, undefined, "bold");
         try {
             const out = Commander(
                 cmd[0],

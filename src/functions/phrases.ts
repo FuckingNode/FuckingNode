@@ -34,7 +34,9 @@ const internalQuotes = [
     "'Dookie in da pookie' - Dima",
     "'learn as if you will live forever, live like you will die tomorrow' - EpicSprout", // poetic
     "'widnwos sucsk' - Serge", // he got a point, kind of
-    "'We either have one ball, or we have two'", // he got a point there, too
+    "'We either have one ball, or we have two' - Serge", // he got a point there, too
+    "'at the end of the day, all sokoballers will sokoball' - Serge", // ...
+    // this project is sponsoring https://sokora.org at this point
 ];
 
 const coolJokes = [
