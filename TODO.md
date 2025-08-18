@@ -42,22 +42,18 @@ from_tarball = { url = "https://somewhere.com/some_crate-1.0.0.tar.gz" }
 
 ## Proper error fixing
 
-- [x] Fix handling of command output. (SHOULD BE done, and test passes. Test it a bit more then remove this if it works).
-  - The codebase mix piping and inheritance. _Piping it lets us store, use, and dump it (which is what we want), but doing that CLI-wide removes the ability to use live / verbose logs, making stuff look worse & more confusing. Inheriting it gives a better, more contextualized look, but is suboptimal._
-
-  Intention is to pipe it everywhere. Doesn't look as good, but works better, which is what matters.
 - [ ] ReferenceError.
   - This is code-related. Now that I am adding a few tests I'm stumbling across ReferenceErrors because of problems with variable initialization? Maybe I'm stupid and am doing something very wrong (possibly) but for what I've seen, I have many circular imports leading to use of variables before Deno initializes them. If whenever I get one I move whatever export is not initialized to an individual file, it fixes. So if a commit randomly moves an export and changes 20 files because of it it's because of this.
 
 ## Performance
 
 - [ ] Find places where parallel operation (`async + Promise.all`) is viable to improve performance.
-  - [ ] Do _not_ parallelize cleanup. Keep that for V5, as it implies severe rewriting.
+  - Do _not_ parallelize cleanup, tho. Keep that for V5, as it implies severe rewriting.
 
 ## Chores & development
 
 - [ ] **Actually write some f\*cking tests.** TDD is the way to go.
 - [ ] Cleanup the codebase (it's getting kinda messy ngl).
-  - [ ] Remove audit tests. That's actually _the only feature that shouldn't have a test suite._
-  - [ ] Either fix Nix hashing or drop Nix support (preferably the 1st one).
-  - [ ] Follow my own f\*cking guidelines, there are different ways of coding mixed up in the same project :skull: (this means updating old code to match `CONTRIBUTING.md`).
+  - [x] Remove audit tests. That's actually _the only feature that shouldn't have a test suite._
+  - [ ] Fix Nix hashing.
+  - [ ] Review all code to follow my own f\*cking guidelines, there are different ways of coding mixed up in the same project :skull: (this means updating old code to match `CONTRIBUTING.md`).

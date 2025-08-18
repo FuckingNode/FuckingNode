@@ -5,6 +5,8 @@ import { Commander } from "./cli.ts";
 import { isDis } from "../constants.ts";
 import type { CF_FKNODE_SETTINGS } from "../types/config_files.ts";
 import { GetUserSettings } from "./config.ts";
+import { ColorString } from "./color.ts";
+import { LogStuff } from "./io.ts";
 
 export function ValidateUserCmd(env: ProjectEnvironment, key: "commitCmd" | "releaseCmd" | "buildCmd"): string | null {
     const command = env.settings[key];
@@ -28,6 +30,12 @@ export function RunUserCmd(params: { key: "commitCmd" | "releaseCmd"; env: Proje
     const cmd = ValidateUserCmd(env, key);
 
     if (!cmd) return;
+
+    LogStuff(
+        `Running your ${key} | ${ColorString([env.commands.run[0], env.commands.run[1], cmd].join(" "), "half-opaque", "italic")}`,
+        undefined,
+        "bold",
+    );
 
     const cmdOutput = Commander(
         env.commands.run[0],
