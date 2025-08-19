@@ -1,8 +1,9 @@
 import { normalize } from "@zakahacecosas/string-utils";
 import { Commander } from "./cli.ts";
-import { LogStuff } from "./io.ts";
-import { DebugFknErr, FknError } from "./error.ts";
+import { LogStuff, Notification } from "./io.ts";
+import { DebugFknErr, ErrorHandler } from "./error.ts";
 import { ColorString } from "./color.ts";
+import { GetAppPath } from "./config.ts";
 
 export function RunBuildCmds(commands: string[]) {
     for (const command of commands) {
@@ -22,9 +23,16 @@ export function RunBuildCmds(commands: string[]) {
             );
             if (!out.success) {
                 LogStuff(out.stdout ?? "(No stdout/stderr was written by the command)");
+                Notification(
+                    `Your buildCmd failed!`,
+                    `Command "${command}" (#${cmdIndex}) failed, so we've halted execution.`,
+                    30000,
+                );
                 DebugFknErr(
                     "Task__Build",
-                    `Command "${command}" has failed (command #${cmdIndex} in your 'buildCmd' sequence). We've halted execution.`,
+                    `Command "${command}" has failed (command #${cmdIndex}) in your 'buildCmd' sequence. We've halted execution. Error log, if any, was dumped into ${
+                        GetAppPath("ERRORS")
+                    }.`,
                     out.stdout,
                     false,
                 );
@@ -33,9 +41,13 @@ export function RunBuildCmds(commands: string[]) {
             else LogStuff(out.stdout);
             LogStuff("Done!", undefined, "bold");
         } catch (error) {
-            LogStuff((error as FknError).message, "danger", "red");
+            Notification(
+                "Your buildCmd failed!",
+                "Check your terminal for details.",
+                300000,
+            );
             // halt execution, especially to avoid releases
-            Deno.exit(1);
+            ErrorHandler(error);
         }
     }
 }

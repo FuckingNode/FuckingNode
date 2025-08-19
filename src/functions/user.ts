@@ -4,9 +4,11 @@ import type { ProjectEnvironment } from "../types/platform.ts";
 import { Commander } from "./cli.ts";
 import { isDis } from "../constants.ts";
 import type { CF_FKNODE_SETTINGS } from "../types/config_files.ts";
-import { GetUserSettings } from "./config.ts";
+import { GetAppPath, GetUserSettings } from "./config.ts";
 import { ColorString } from "./color.ts";
-import { LogStuff } from "./io.ts";
+import { LogStuff, Notification } from "./io.ts";
+import { DebugFknErr } from "./error.ts";
+import { NameProject } from "./projects.ts";
 
 export function ValidateUserCmd(env: ProjectEnvironment, key: "commitCmd" | "releaseCmd" | "buildCmd"): string | null {
     const command = env.settings[key];
@@ -42,10 +44,18 @@ export function RunUserCmd(params: { key: "commitCmd" | "releaseCmd"; env: Proje
         [env.commands.run[1], cmd],
     );
 
+    LogStuff(cmdOutput.stdout);
+
     if (!cmdOutput.success) {
-        throw new FknError(
+        Notification(
+            `Your ${key} failed at ${NameProject(env.root, "name-colorless")}!`,
+            `Error was dumped to ${GetAppPath("ERRORS")}, and it appear in the terminal as well.`,
+            30000,
+        );
+        DebugFknErr(
             key === "commitCmd" ? "Task__Commit" : "Task__Release",
             `Your fknode.yaml's ${key} failed at ${env.root}. Scroll up as their output should've been shown in this terminal session.`,
+            cmdOutput.stdout,
         );
     }
 }

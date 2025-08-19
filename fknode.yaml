@@ -7,3 +7,4 @@ destroy:
 commitActions: false
 commitCmd: "precommit"
 prettyCmd: "good"
+buildCmd: "cmd ls^cmd tree^sodapda"

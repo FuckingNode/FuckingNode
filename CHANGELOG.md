@@ -6,6 +6,18 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
+## Unreleased
+
+### Added
+
+- Added even more system notification prompts.
+  - Whenever a `buildCmd`, `releaseCmd`, or `commitCmd` fails.
+- Added back showing output (not live, of course) to `commitCmd` and `releaseCmd`.
+
+### Changed
+
+- Now the standard, full `FknError` is shown when a `buildCmd` fails, instead of just the message.
+
 ## [4.2.0] (17-08-2025)
 
 ### Added
