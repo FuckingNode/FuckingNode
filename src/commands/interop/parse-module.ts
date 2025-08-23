@@ -288,7 +288,7 @@ export const Parsers = {
 
             return {
                 name: parsedContent.name,
-                version: parsedContent.version ?? "0.0.0",
+                version: parsedContent.version ?? "Unknown",
                 rm: rt,
                 perPlatProps: {
                     cargo_edt: "__NTP",
@@ -326,7 +326,7 @@ export const Parsers = {
 
             return {
                 name: parsedContent.name ?? "__ERROR_NOT_PROVIDED",
-                version: parsedContent.version ?? "0.0.0",
+                version: parsedContent.version ?? "Unknown",
                 rm: "deno",
                 perPlatProps: {
                     cargo_edt: "__NTP",
