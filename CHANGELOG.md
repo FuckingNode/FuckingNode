@@ -17,6 +17,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Changed
 
 - Now the standard, full `FknError` is shown when a `buildCmd` fails, instead of just the message.
+- Now, when a package of yours doesn't have a version, it'll always say `@Unknown` instead of `@0.0.0`.
+
+### Fixed
+
+- Fixed Golang packages showing _two_ warnings when not in a Git repo or no Git tags exist. Now when these "errors" happen, version is assumed to be 'Unknown' and no warning shows up.
 
 ## [4.2.0] (17-08-2025)
 

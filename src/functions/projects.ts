@@ -12,7 +12,7 @@ import { GetAppPath } from "./config.ts";
 import { GetDateNow } from "./date.ts";
 import type { PROJECT_ERROR_CODES } from "../types/errors.ts";
 import { FkNodeInterop } from "../commands/interop/interop.ts";
-import { GetLatestTag } from "../functions/git.ts";
+import { GetLatestTag, IsRepo } from "../functions/git.ts";
 import { internalGolangRequireLikeStringParser } from "../commands/interop/parse-module.ts";
 import { normalize, normalizeArray, toUpperCaseFirst, type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { ResolveLockfiles } from "../commands/toolkit/cleaner.ts";
@@ -720,6 +720,18 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
     const { PackageFileParsers } = FkNodeInterop;
 
     if (settings.projectEnvOverride === "go" || isGo) {
+        let goTag = undefined;
+
+        // this is a bit of a glue fix and looks like it'd *slightly* hurt performance
+        // blame it on google, idiots couldn't think of a 'version' field in go.mod
+        // and chose to rely on git :sob:
+        try {
+            if (!IsRepo(root)) throw "";
+            goTag = GetLatestTag(root);
+        } catch {
+            // nothing
+        }
+
         return {
             root,
             settings,
@@ -728,7 +740,7 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
                 path: mainPath,
                 name: "go.mod",
                 stdContent: PackageFileParsers.Golang.STD(mainString),
-                cpfContent: PackageFileParsers.Golang.CPF(mainString, GetLatestTag(root), workspaces),
+                cpfContent: PackageFileParsers.Golang.CPF(mainString, goTag, workspaces),
             },
             lockfile: {
                 name: "go.sum",
