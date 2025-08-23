@@ -55,5 +55,5 @@ from_tarball = { url = "https://somewhere.com/some_crate-1.0.0.tar.gz" }
 - [ ] **Actually write some f\*cking tests.** TDD is the way to go.
 - [ ] Cleanup the codebase (it's getting kinda messy ngl).
   - [x] Remove audit tests. That's actually _the only feature that shouldn't have a test suite._
-  - [ ] Fix Nix hashing.
+  - [x] Fix Nix hashing.
   - [ ] Review all code to follow my own f\*cking guidelines, there are different ways of coding mixed up in the same project :skull: (this means updating old code to match `CONTRIBUTING.md`).

@@ -23,10 +23,10 @@
 
 
     sha256s = {
-     "aarch64-linux" = "1k12jsbng9v7hzpcyfgkq9ga1magxlf2m46gs0x1lwlgw34f1znc";
-     "x86_64-linux" = "12pm08y8d20y40mfzxhn8pqbmh681bnrjzfm7nckj2z23zgj2dgx";
-     "x86_64-darwin" = "08wzjaka5fvbpkniaislv72kavc0bdfdmyrikn7xca72ci5xdvim";
-     "aarch64-darwin" = "0yhhzznfdx7hzk94wjva6g0iwqa08mq86vw8q9bvmm7cjmaphkgg";
+     "aarch64-linux" = "15fma4qnljx48k7ff7kry99a42pi6phcwzyvpw5i8fb0x91gj7zl";
+     "x86_64-linux" = "0lk8am42g8n255gj1j3yyk1ksvvkxggdsbb0zgy9cjf6pn5mqam4";
+     "x86_64-darwin" = "0ybmgbjdkdfpxkd46wnrzcwxl24am92bv774fn9ajaxnv2sqbl7j";
+     "aarch64-darwin" = "1xi4m6mf9qan34303yvi2a7bs3ghrhrpprkcm3wivdqmhj0q07vf";
     };
 
   in {
@@ -64,22 +64,23 @@
       set -euo pipefail
 
       version="${version}"
+      echo $version
       base_url="https://github.com/FuckingNode/FuckingNode/releases/download/$version"
 
       declare -A urls=(
         ["x86_64-linux"]="$base_url/FuckingNode-linux64"
-        ["aarch64-linux"]="$base_url/FuckingNode-linux_arm"
-        ["x86_64-darwin"]="$base_url/FuckingNode-macos64"
-        ["aarch64-darwin"]="$base_url/FuckingNode-macos_arm"
+        ["aarch64-linux"]="$base_url/FuckingNode-linuxArm"
+        ["x86_64-darwin"]="$base_url/FuckingNode-mac64"
+        ["aarch64-darwin"]="$base_url/FuckingNode-macArm"
       )
 
-      echo "  sha256s = {"
+      echo "sha256s = {"
       for platform in "''${!urls[@]}"; do
         url="''${urls[$platform]}"
         hash=$(nix-prefetch-url --type sha256 "$url" 2>/dev/null)
-        printf '    "%s" = "%s";\n' "$platform" "$hash"
+        printf '  "%s" = "%s";\n' "$platform" "$hash"
       done
-      echo "  };"
+      echo "};"
     '';
 
     devShell = pkgs.mkShell {
