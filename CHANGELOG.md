@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - Fixed Golang packages showing _two_ warnings when not in a Git repo or no Git tags exist. Now when these "errors" happen, version is assumed to be 'Unknown' and no warning shows up.
+- Fixed the informative comment in exported FnCPFs showing the CLI's name and version twice.
 
 ## [4.2.0] (17-08-2025)
 
