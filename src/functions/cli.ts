@@ -1,6 +1,5 @@
 import type { MANAGER_GLOBAL } from "../types/platform.ts";
 import { FknError } from "./error.ts";
-import { LOCAL_PLATFORM } from "../constants/platform.ts";
 
 const decoder = new TextDecoder();
 
@@ -49,33 +48,25 @@ export function Commander(
         };
     } catch (error) {
         if (error instanceof Deno.errors.NotFound && error.message.toLowerCase().includes("failed to spawn")) {
-            const err = new FknError("Os__NoEntity", `We attempted to run a shell / CLI command (${main}), but your OS wasn't able find it.`);
-            if (LOCAL_PLATFORM.SYSTEM === "windows") {
-                err.hint =
-                    `Just in case it's a shell command (like 'echo' or 'ls') and you input it somewhere like 'buildCmd': it has to be preceded with 'powershell', as its passed as an argument to this executable.`;
-            }
-            throw err;
+            throw new FknError("Os__NoEntity", `We attempted to run a shell / CLI command (${main}), but your OS wasn't able find it.`);
         }
         throw error;
     }
 }
 
 /**
- * Validates if a package manager is installed, to check before running anything. Uses `-v` and `--version` as an arg to the command you pass.
+ * Validates if a package manager is installed, to check before running anything.
  *
- * @param {MANAGER_GLOBAL} cmd
+ * @param {MANAGER_GLOBAL} cmd Manager to check for.
  * @returns {boolean} True if it exists, false if it doesn't.
  */
 export function ManagerExists(cmd: MANAGER_GLOBAL): boolean {
     try {
-        const process = new Deno.Command(cmd, {
+        return new Deno.Command(cmd, {
             args: cmd === "go" ? ["help"] : ["-v"],
             stdout: "null",
             stderr: "null",
-        });
-
-        // sync on purpose so we pause execution until we 100% know if command exists or not
-        return process.outputSync().success;
+        }).outputSync().success;
     } catch {
         // error = false
         return false;

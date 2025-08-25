@@ -690,15 +690,12 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
     const lockfiles = ResolveLockfiles(root);
 
     if (lockfiles.length > 1) {
-        const err = new FknError(
+        throw new FknError(
             "Env__SchrodingerLockfile",
             `Multiple lockfiles found in ${
                 ColorString(root, "bold")
             }. This is a bad practice and does not let us properly infer the package manager to use.`,
         );
-        err.hint =
-            "Either leave just one lockfile, or manually specify the package manager you use via the 'fknode.yaml' file, by adding the 'projectEnvOverride' field with the value of 'npm', 'pnpm', 'bun', 'deno', 'golang', or 'rust'.";
-        throw err;
     }
 
     DEBUG_LOG("Is? (G,R,D,B,Y,P,N)", isGo, isRust, isDeno, isBun, isYarn, isPnpm, isNpm, "(isNode?)", isNode);
@@ -949,13 +946,10 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
         };
     }
 
-    const err = new FknError(
+    throw new FknError(
         "Env__CannotDetermine",
         `Failed to determine the environment of '${root}'. We attempt to infer by all means possible the pkg manager of a project but sometimes fail. We kindly ask you to report this as an issue at ${APP_URLs.REPO} so we can fix it.`,
     );
-    err.hint =
-        "To (manually) fix this, manually specify the package manager you use via the 'fknode.yaml' file, by adding the 'projectEnvOverride' field with the value of 'npm', 'pnpm', 'bun', 'deno', 'golang', or 'rust'.";
-    throw err;
 }
 
 /**

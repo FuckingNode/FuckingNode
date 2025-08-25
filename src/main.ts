@@ -32,6 +32,7 @@ import { GetDateNow } from "./functions/date.ts";
 import { FWORDS } from "./constants/fwords.ts";
 import { APP_NAME } from "./constants/name.ts";
 import { ColorString } from "./functions/color.ts";
+import { LOCAL_PLATFORM } from "./constants/platform.ts";
 
 // this is outside the main loop so it can be executed
 // without depending on other modules
@@ -121,9 +122,13 @@ async function main(command: UnknownString) {
         console.log(
             "PROC NAME",
             new TextDecoder().decode(
-                new Deno.Command("ps", {
-                    args: ["-p", Deno.pid.toString(), "-o", "comm="],
-                }).outputSync().stdout,
+                LOCAL_PLATFORM.SYSTEM === "windows"
+                    ? new Deno.Command("powershell", {
+                        args: ["Get-Process", "-Id", Deno.pid.toString()],
+                    }).outputSync().stdout
+                    : new Deno.Command("ps", {
+                        args: ["-p", Deno.pid.toString(), "-o", "comm="],
+                    }).outputSync().stdout,
             ).trim(),
         );
         console.log(

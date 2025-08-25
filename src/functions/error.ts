@@ -8,6 +8,7 @@ import { FKNODE_SHALL_WE_DEBUG } from "../main.ts";
 import { FWORDS } from "../constants/fwords.ts";
 import { LOCAL_PLATFORM } from "../constants/platform.ts";
 import { stripAnsiCode } from "@std/fmt/colors";
+import { ALIASES } from "../commands/toolkit/git-url.ts";
 
 /**
  * Errors that we know about, or that are caused by the user.
@@ -37,7 +38,13 @@ export class FknError extends Error {
                 break;
             case "Env__CannotDetermine":
                 this.hint =
-                    "Check 'Thrown message' as that might help you. If not present, or it didn't help you, you should open up an issue on GitHub.";
+                    "To (manually) fix this, manually specify the package manager you use via the 'fknode.yaml' file, by adding the 'projectEnvOverride' field with the value of 'npm', 'pnpm', 'bun', 'deno', 'golang', or 'rust'.";
+                break;
+            case "Os__NoEntity":
+                if (LOCAL_PLATFORM.SYSTEM === "windows") {
+                    this.hint =
+                        `Just in case it's a shell command (like 'echo' or 'ls') and you input it somewhere like 'buildCmd': it has to be preceded with 'powershell', as its passed as an argument to this executable.`;
+                }
                 break;
             case "Fs__Unreal":
                 this.hint =
@@ -71,6 +78,26 @@ export class FknError extends Error {
                     LOCAL_PLATFORM.SYSTEM === "windows" ? "." : " or casing mistakes (you're on Linux mate, paths are case-sensitive)."
                 }`;
                 break;
+            case "Env__SchrodingerLockfile":
+                this.hint =
+                    "Either leave just one lockfile, or manually specify the package manager you use via the 'fknode.yaml' file, by adding the 'projectEnvOverride' field with the value of 'npm', 'pnpm', 'bun', 'deno', 'golang', or 'rust'.";
+                break;
+            case "Git__NoBranch":
+                this.hint =
+                    "Choose the right branch. If you're sure you've chosen the right one and think this might be a bug, file an issue on GitHub.";
+                break;
+            case "Git__NoBranchAA":
+                this.hint = "This is likely a bug. Please file an issue on GitHub.";
+                break;
+            case "Param__GitTargetInvalid":
+                this.hint =
+                    "Provide a proper URL (that points to a Git repo). If you provide a valid URL without ending in .git we'll auto-append it for you.";
+                break;
+            case "Param__GitTargetAliasInvalid":
+                this.hint = `Provide a valid Git alias. These follow the PROVIDER:OWNER/REPO format, where PROVIDED is any of these:\n${
+                    Object.keys(ALIASES).join(", ")
+                }`;
+                break;
         }
         if (Error.captureStackTrace) Error.captureStackTrace(this, FknError);
     }
@@ -102,7 +129,7 @@ export class FknError extends Error {
      *
      * @public
      * @param {string} debuggableContent The content to be dumped.
-     * @returns {Promise<void>}
+     * @returns {void}
      */
     public debug(debuggableContent: UnknownString, showWarn: boolean = true): void {
         // APPDATA! because if we're already debugging stuff we assume the CLI got to run

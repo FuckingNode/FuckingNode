@@ -2,7 +2,7 @@ import { type UnknownString, validate, validateAgainst } from "@zakahacecosas/st
 import { LogStuff } from "../../functions/io.ts";
 import { FknError } from "../../functions/error.ts";
 
-const gitAliases: Record<string, (arg: string) => string> = {
+export const ALIASES: Record<string, (arg: string) => string> = {
     gh: (repo: string) => `https://github.com/${repo}.git`,
     gl: (repo: string) => `https://gitlab.com/${repo}.git`,
     bb: (repo: string) => `https://bitbucket.org/${repo}.git`,
@@ -73,11 +73,11 @@ export function GenerateGitUrl(str: UnknownString): {
     if (!validate(alias)) throw new FknError("Param__GitTargetAliasInvalid", "Missing alias.");
     if (!validate(repo)) throw new FknError("Param__GitTargetAliasInvalid", "Missing repository.");
 
-    if (!gitAliases[alias]) {
+    if (!ALIASES[alias]) {
         throw new FknError(
             "Param__GitTargetAliasInvalid",
             `Alias '${alias}' is not recognized.\nValid aliases are ${
-                Object.keys(gitAliases).join(", ")
+                Object.keys(ALIASES).join(", ")
             }.\nRun 'compat kickstart' to see where does each alias point to.`,
         );
     }
@@ -85,5 +85,5 @@ export function GenerateGitUrl(str: UnknownString): {
     const parts = repo.split("/");
     if (parts.length !== 2) throw new FknError("Param__GitTargetAliasInvalid", "Git shorthand must be in a 'owner/repo' format.");
 
-    return GenerateGitUrl(gitAliases[alias](repo));
+    return GenerateGitUrl(ALIASES[alias](repo));
 }

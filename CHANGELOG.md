@@ -6,7 +6,7 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
-## Unreleased
+## [4.3.0] (Unreleased)
 
 ### Added
 
@@ -19,11 +19,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Now the standard, full `FknError` is shown when a `buildCmd` fails, instead of just the message.
 - Now, when a package of yours doesn't have a version, it'll always say `@Unknown` instead of `@0.0.0`.
 - Now checking for updates doesn't show current version number twice.
+- Now a few more FknErrors were given hints to help sort issues out.
 
 ### Fixed
 
 - Fixed Golang packages showing _two_ warnings when not in a Git repo or no Git tags exist. Now when these "errors" happen, version is assumed to be 'Unknown' and no warning shows up.
 - Fixed the informative comment in exported FnCPFs showing the CLI's name and version twice.
+- Fixed `FKNDBG_PROC` not working on Windows.
 
 ## [4.2.0] (17-08-2025)
 
