@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Now the standard, full `FknError` is shown when a `buildCmd` fails, instead of just the message.
 - Now, when a package of yours doesn't have a version, it'll always say `@Unknown` instead of `@0.0.0`.
+- Now checking for updates doesn't show current version number twice.
 
 ### Fixed
 

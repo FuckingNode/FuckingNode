@@ -65,7 +65,9 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
     }
 
     LogStuff(
-        `There's a new version! ${latestVer}. You're on ${DenoJson.default.version}, btw.`,
+        `There's a new version! ${ColorString(latestVer, "bright-green")}. You're on ${
+            ColorString(DenoJson.default.version, "green")
+        }, by the way.`,
         "bulb",
     );
     return;
