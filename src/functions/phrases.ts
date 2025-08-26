@@ -1,8 +1,6 @@
 /**
  * This file contains random phrases for the about page. You're not supposed to edit it, however funny additions are always welcome :).
  * Some of these are the kind of jokes only some people (mostly friends of mine) understand. Others are just really random (but real) phrases. But hey, any funny addition is, as I said, welcome.
- *
- * (bruh i spent my time writing all of this instead of studying)
  */
 
 import { APP_NAME } from "../constants/name.ts";
@@ -12,14 +10,10 @@ import { FWORDS } from "../constants/fwords.ts";
 const internalJokes = [
     "Dima definitely approves", // indeed he does
     "Sokora Seal of Approval", // and i'm proud of it
-    "(not) powered by Vuelto <https://vuelto.pp.ua/>", // rewrite to Vuelto coming 2026
-    "Proudly running on anything but a FireBlitz server", // those who know :skull:
-    "not made in germany", // those who know :skull:
     `(it's named this way because Node is ${FWORDS.FKN} annoying, not because I ${FWORDS.FK}ed it)`, // (someone really asked me)
     "Proudly made by ZakaHaceCosas (translates to 'ZakaMakesStuff')", // YOO
     "Proudly developed in Spain (the S is silent)", // elections here don't work, i swear
     "i should be studying chemistry and i'm writing random phrases for this thing", // real btw
-    "weeb > furry", // indeed
     "haccing skill #3: download a CLI tool", // the 3rd one in a series
 ];
 
@@ -30,12 +24,12 @@ const internalQuotes = [
     "'am jok' - Serge", // hes jok
     "'please don't kil' - Serge",
     "'shork thinking its smol fish crushes goose!!!!' - Serge",
-    "'it's sokover' - Serge", // from the creators of it's joever (not)
+    "'its sokover' - Serge", // from the creators of it's joever (not)
     "'Dookie in da pookie' - Dima",
-    "'learn as if you will live forever, live like you will die tomorrow' - EpicSprout", // poetic
+    "'Learn as if you will live forever, live like you will die tomorrow' - EpicSprout", // poetic
     "'widnwos sucsk' - Serge", // he got a point, kind of
     "'We either have one ball, or we have two' - Serge", // he got a point there, too
-    "'at the end of the day, all sokoballers will sokoball' - Serge", // ...
+    "'At the end of the day, all sokoballers will sokoball' - Serge", // ...
     // this project is sponsoring https://sokora.org at this point
 ];
 
@@ -72,15 +66,14 @@ const devJokes = [
 
 export const HINTS = [
     `Set the FKNODE_SHALL_WE_DEBUG environment variable to "yeah" to see internal debugging logs.`,
-    "Run 'fkn sokoballs'.",
     `Critical errors are logged in ${GetAppPath("ERRORS")}, in a fairly readable format.`,
     `After running 'kickstart' on a large repository, you can switch windows and do something else; if it takes more than 2 minutes, whenever we finish we'll send a desktop notification.`,
     `The 'surrender' command has aliases that do the exact same thing but more properly represent why you chose to surrender on a project.\nFor example 'fkn im-done-with <project>', or 'fkn i-give-up <project>'.`,
     `If your drive is nearly full and you desperately need storage, run 'fkn storage-emergency'. it'll remove 'node_modules' from all of your projects. You'll need to reinstall later, but desperate situations require desperate measures, and this recovers gigabytes of storage.`,
-    `You can kickstart a project with a Git alias.\nFor example, 'kickstart gh:cool-guy/cool-repo' maps to 'https://github.com/cool-guy/cool-repo.git' - so you type less.\nThere's 10 aliases, run 'compat kickstart' to see them all.`,
+    `You can kickstart a project with a Git alias.\nFor example, 'kickstart gh:cool-guy/cool-repo' maps to 'https://github.com/cool-guy/cool-repo.git' - so you type less.\nThere's 10 aliases, run 'compat kickstart' to see all.`,
     `All config files live at ${GetAppPath("BASE")}.\nTouch anything there if you want to.`,
     `If you touch and break any config file, run 'fkn something-fucked-up'. It'll reset all config files except for your project list.`,
-    `Here's an actually good pro tip: use DenoJS, or BunJS, or learn another language.\nJust. Avoid. Node.`,
+    `Here's an actually good pro tip: use DenoJS, or BunJS, or learn another language like Go or Rust.\nJust. Avoid. Node.`,
 ];
 
 const appRelatedJokes = [

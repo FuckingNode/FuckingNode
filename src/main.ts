@@ -345,7 +345,11 @@ async function main(command: UnknownString) {
             });
             break;
         case "sokoballs":
-            LaunchWebsite("https://tenor.com/view/sokora-dunk-ice-skate-ice-dunk-balling-gif-7665972654807661282?quality=lossless");
+            LaunchWebsite(
+                Math.random() > 0.5
+                    ? "https://tenor.com/view/sokora-sokodunk-sokoballs-sokora-dunk-dunk-gif-9264211909049323587?quality=lossless"
+                    : "https://tenor.com/view/sokora-dunk-ice-skate-ice-dunk-balling-gif-7665972654807661282?quality=lossless",
+            );
             break;
         case "tip":
         case "hint":
