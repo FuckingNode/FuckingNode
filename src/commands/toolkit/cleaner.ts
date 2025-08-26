@@ -304,16 +304,12 @@ export function PerformCleanup(
     };
 }
 
-// cache cleaning is global, so doing these for every project like we used to do
-// is a waste of resources
 /**
  * Performs a hard cleanup, AKA cleans global caches.
  *
- * @async
- * @param {boolean}
  * @returns {void}
  */
-export async function PerformHardCleanup(): Promise<void> {
+export function PerformHardCleanup(): void {
     LogStuff(
         `Time for hard-pruning! ${ColorString("Wait patiently, please (caches will take a while to clean).", "italic")}`,
         "working",
@@ -324,17 +320,13 @@ export async function PerformHardCleanup(): Promise<void> {
     }); // we make a temporal dir where we'll do "placebo" inits, as bun requires you to be in a bun project for it to clean stuff
     // for deno idk if its necessary but i'll do it anyway
 
-    Deno.chdir(tmp); // assuming this is called from the main cleaner, which at the end returns to the DIR it should.
+    Deno.chdir(tmp);
 
     const npmHardPruneArgs: string[] = ["cache", "clean", "--force"];
     const pnpmHardPruneArgs: string[] = ["store", "prune"];
     const yarnHardPruneArgs: string[] = ["cache", "clean"];
-    // bun and deno don't support yet project-wide cleanup
-    // but they do support system-wide cleanup thanks to this
-    // now F*kingNode is F*ckingJavascriptRuntimes :]
     const bunHardPruneArgs: string[] = ["pm", "cache", "rm"];
     // const denoHardPruneArgs: string[] = ["clean"];
-    // cross platform!!
     const golangHardPruneArgs: string[] = ["clean", "-modcache"];
 
     if (ManagerExists("npm")) {
@@ -344,6 +336,7 @@ export async function PerformHardCleanup(): Promise<void> {
                 "package",
                 "red",
             );
+            LogStuff(`Running ${ColorString(npmHardPruneArgs.join(" "), "italic")}`, undefined, ["bold", "half-opaque"]);
             Commander("npm", npmHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (error) {
@@ -358,6 +351,7 @@ export async function PerformHardCleanup(): Promise<void> {
                 "package",
                 "bright-yellow",
             );
+            LogStuff(`Running ${ColorString(pnpmHardPruneArgs.join(" "), "italic")}`, undefined, ["bold", "half-opaque"]);
             Commander("pnpm", pnpmHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (error) {
@@ -372,6 +366,7 @@ export async function PerformHardCleanup(): Promise<void> {
                 "package",
                 "purple",
             );
+            LogStuff(`Running ${ColorString(yarnHardPruneArgs.join(" "), "italic")}`, undefined, ["bold", "half-opaque"]);
             Commander("yarn", yarnHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (error) {
@@ -388,6 +383,7 @@ export async function PerformHardCleanup(): Promise<void> {
                 "pink",
             );
             Commander("bun", ["init", "-y"]); // placebo
+            LogStuff(`Running ${ColorString(bunHardPruneArgs.join(" "), "italic")}`, undefined, ["bold", "half-opaque"]);
             Commander("bun", bunHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (error) {
@@ -397,13 +393,19 @@ export async function PerformHardCleanup(): Promise<void> {
     }
 
     if (ManagerExists("go")) {
-        LogStuff(
-            "GOLANG",
-            "package",
-            "cyan",
-        );
-        Commander("go", golangHardPruneArgs);
-        LogStuff("Done", "tick");
+        try {
+            LogStuff(
+                "GOLANG",
+                "package",
+                "cyan",
+            );
+            LogStuff(`Running ${ColorString(golangHardPruneArgs.join(" "), "italic")}`, undefined, ["bold", "half-opaque"]);
+            Commander("go", golangHardPruneArgs);
+            LogStuff("Done", "tick");
+        } catch (error) {
+            LogStuff("Failed!", "error");
+            LogStuff(error);
+        }
     }
     /* if (ManagerExists("deno")) {
         Commander("deno", ["init"], false); // placebo 2
@@ -418,12 +420,13 @@ export async function PerformHardCleanup(): Promise<void> {
     if (ManagerExists("deno")) {
         try {
             const denoDir: string | undefined = Deno.env.get("DENO_DIR");
-            if (!denoDir) throw "lmao";
+            if (!denoDir) throw "DENO_DIR is not defined in your environment variable set. Cannot clear Deno caches.";
             LogStuff(
                 "DENO",
                 "package",
                 "bright-blue",
             );
+            LogStuff(`Deleting ${ColorString(denoDir, "italic")}`, undefined, ["bold", "half-opaque"]);
             Deno.removeSync(denoDir);
             LogStuff("Done", "tick");
             // the CLI calls this kind of behaviors "maxim" cleanup
@@ -439,30 +442,27 @@ export async function PerformHardCleanup(): Promise<void> {
     // rust requires a gluefix too
     if (ManagerExists("cargo")) {
         try {
-            const paths: string[] = [];
+            let path: string;
             if (LOCAL_PLATFORM.SYSTEM === "windows") {
                 const envPath = Deno.env.get("USERPROFILE");
-                if (!envPath) throw "lmao";
-                paths.push(
-                    JoinPaths(envPath, ".cargo/registry"),
-                    JoinPaths(envPath, ".cargo/git"),
-                    JoinPaths(envPath, ".cargo/bin"),
-                );
+                if (!envPath) throw "USERPROFILE is not defined in your environment variable set. Cannot clear caches.";
+                path = JoinPaths(envPath, ".cargo/registry");
             } else {
-                paths.push(
-                    ParsePath("~/.cargo/registry"),
-                    ParsePath("~/.cargo/git"),
-                    ParsePath("~/.cargo/bin"),
-                );
+                path = ParsePath("~/.cargo/registry");
             }
             LogStuff(
                 "CARGO",
                 "package",
                 "orange",
             );
-            await BulkRemove(paths);
+            LogStuff(`Deleting ${ColorString(path, "italic")}`, undefined, ["bold", "half-opaque"]);
+            Deno.removeSync(path, { recursive: true });
             LogStuff("Done", "tick");
         } catch (error) {
+            if (error instanceof Deno.errors.NotFound) {
+                LogStuff("Apparently there's no Cargo registry cache.", "moon-face", "italic");
+                LogStuff("Done", "tick");
+            }
             LogStuff("Failed!", "error");
             LogStuff(error);
         }
@@ -491,6 +491,7 @@ export async function PerformMaximCleanup(projects: string[]): Promise<void> {
         const name = NameProject(workingProject, "name");
         const env = GetProjectEnvironment(workingProject);
 
+        // TODO: add cargo target
         if (env.runtime === "rust" || env.runtime === "golang") continue;
 
         if (!CheckForPath(env.hall_of_trash)) {

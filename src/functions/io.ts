@@ -6,6 +6,7 @@ import { Commander } from "./cli.ts";
 import { APP_NAME } from "../constants/name.ts";
 import { LOCAL_PLATFORM } from "../constants/platform.ts";
 import { ColorString } from "./color.ts";
+import { stripAnsiCode } from "@std/fmt/colors";
 
 /**
  * Appends an emoji at the beginning of a message.
@@ -79,11 +80,10 @@ export function LogStuff(
     color?: VALID_COLORS | VALID_COLORS[],
 ): void {
     try {
+        if (typeof message !== "string") message = String(message);
         const finalMessage = emoji ? Emojify(message, emoji) : message;
 
-        // deno-lint-ignore no-control-regex
-        const regex = /\x1b\[[0-9;]*[a-zA-Z]/g;
-        const plainMessage = finalMessage.replace(regex, "");
+        const plainMessage = stripAnsiCode(finalMessage);
 
         const formattedMessage = `${GetDateNow()} / ${plainMessage}\n`
             .replace(/\n{2,}/g, "\n"); // (fix for adding \n to messages that already have an \n for whatever reason)

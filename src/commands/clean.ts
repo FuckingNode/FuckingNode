@@ -26,7 +26,7 @@ export default async function TheCleaner(params: TheCleanerConstructedParams) {
     const realIntensity: CleanerIntensity = ValidateIntensity(intensity);
 
     if (realIntensity === "hard-only") {
-        await PerformHardCleanup();
+        PerformHardCleanup();
         return;
     }
 
@@ -126,7 +126,7 @@ export default async function TheCleaner(params: TheCleanerConstructedParams) {
         }
     }
 
-    if (realIntensity === "hard" || realIntensity === "maxim") await PerformHardCleanup();
+    if (realIntensity === "hard" || realIntensity === "maxim") PerformHardCleanup();
     if (realIntensity === "maxim") await PerformMaximCleanup(projects);
 
     LogStuff(

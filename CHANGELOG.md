@@ -20,12 +20,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Now, when a package of yours doesn't have a version, it'll always say `@Unknown` instead of `@0.0.0`.
 - Now checking for updates doesn't show current version number twice.
 - Now a few more FknErrors were given hints to help sort issues out.
+- Now hard cleanup shows what actions are actually running.
+- Now hard cleanup consistently handles errors across all runtimes.
 
 ### Fixed
 
 - Fixed Golang packages showing _two_ warnings when not in a Git repo or no Git tags exist. Now when these "errors" happen, version is assumed to be 'Unknown' and no warning shows up.
 - Fixed the informative comment in exported FnCPFs showing the CLI's name and version twice.
 - Fixed `FKNDBG_PROC` not working on Windows.
+- Fixed a critical mistake where hard cleanup would delete your entire Cargo installation.
+- Fixed a theoretical issue where the program would crash if a non-string value was console logged.
+- Fixed error messages for some hard cleanup scenarios.
 
 ## [4.2.0] (17-08-2025)
 

@@ -37,13 +37,17 @@
             "dependencies": ["good", "test"]
         },
         "compile": {
-            "description": "Compiles the CLI",
+            "description": "Compiles the CLI.",
             "command": "deno -A tasks/compile.ts",
             "dependencies": ["good", "test"]
         },
         "test": {
-            "description": "Runs all tests",
+            "description": "Runs all tests.",
             "command": "deno test --allow-all"
+        },
+        "benchmark": {
+            "description": "Runs all benchmarks.",
+            "command": "deno -A src/bench/task.ts"
         }
     },
     "compilerOptions": {
