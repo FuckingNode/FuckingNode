@@ -1,6 +1,6 @@
 import { format, parse } from "@std/semver";
 import { Interrogate, LogStuff } from "../functions/io.ts";
-import { GetProjectEnvironment, NameProject, SpotProject } from "../functions/projects.ts";
+import { GetProjectEnvironment, NameProject } from "../functions/projects.ts";
 import type { TheReleaserConstructedParams } from "./constructors/command.ts";
 import type { CargoPkgFile } from "../types/platform.ts";
 import { Commander } from "../functions/cli.ts";
@@ -28,9 +28,8 @@ export default async function TheReleaser(params: TheReleaserConstructedParams):
     }
 
     const parsedVersion = parse(params.version);
-    const project = (params.project || "").startsWith("--") ? Deno.cwd() : await SpotProject(params.project);
-    const env = await GetProjectEnvironment(project);
-    const canUseGit = IsRepo(project);
+    const env = await GetProjectEnvironment(params.project);
+    const canUseGit = IsRepo(env.root);
 
     Deno.chdir(env.root);
 
@@ -93,7 +92,7 @@ export default async function TheReleaser(params: TheReleaserConstructedParams):
     }
     const confirmation = Interrogate(
         `Heads up! We're about to take the following actions:\n${actions.join("\n")}\n\n- all of this at ${await NameProject(
-            project,
+            env.root,
             "all",
         )}`,
         "heads-up",
@@ -173,7 +172,7 @@ export default async function TheReleaser(params: TheReleaserConstructedParams):
     if (canUseGit) {
         // just in case
         AddToGitIgnore(
-            project,
+            env.root,
             `${env.main.name}.bak`,
         );
         LogStuff(
@@ -182,19 +181,19 @@ export default async function TheReleaser(params: TheReleaserConstructedParams):
         );
 
         Commit(
-            project,
+            env.root,
             `Release v${format(parsedVersion)} (automated by F*ckingNode)`,
             [env.main.path],
             [],
         );
 
         Tag(
-            project,
+            env.root,
             format(parsedVersion),
             params.push,
         );
 
-        if (params.push) Push(project, false);
+        if (params.push) Push(env.root, false);
     }
 
     // publish the package

@@ -1,9 +1,13 @@
 import TheLister from "../commands/list.ts";
-import { IsRepo } from "../functions/git.ts";
-import { AddProject, RemoveProject } from "../functions/projects.ts";
+import { GetBranches, IsRepo } from "../functions/git.ts";
+import { AddProject, GetProjectEnvironment, RemoveProject } from "../functions/projects.ts";
 
 Deno.bench("lister", async () => {
     await TheLister(undefined);
+});
+
+Deno.bench("lister (ignored)", async () => {
+    await TheLister("ignored");
 });
 
 Deno.bench("adder", async (b) => {
@@ -22,4 +26,12 @@ Deno.bench("remover", async (b) => {
 
 Deno.bench("git check for repo", () => {
     IsRepo(".");
+});
+
+Deno.bench("git get branches", () => {
+    GetBranches(".");
+});
+
+Deno.bench("get project env", async () => {
+    await GetProjectEnvironment(".");
 });

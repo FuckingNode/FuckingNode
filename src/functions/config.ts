@@ -21,7 +21,7 @@ import { ColorString } from "./color.ts";
 export function GetAppPath(
     path: "BASE" | "MOTHERFKRS" | "SCHEDULE" | "SETTINGS" | "ERRORS",
 ): string {
-    if (!validate(LOCAL_PLATFORM.APPDATA) || !(CheckForPath(LOCAL_PLATFORM.APPDATA))) {
+    if (!validate(LOCAL_PLATFORM.APPDATA)) {
         throw new FknError(
             "Os__NoAppdataNoHome",
             `We searched for ${
@@ -30,23 +30,17 @@ export function GetAppPath(
         );
     }
 
-    const funny = FWORDS.MFS.toLowerCase().replace("*", "o").replace("*", "u");
+    const BASE_DIR = JoinPaths(LOCAL_PLATFORM.APPDATA, APP_NAME.CLI);
 
     function formatDir(name: string): string {
         return JoinPaths(BASE_DIR, `${APP_NAME.CLI}-${name}`);
     }
 
-    const BASE_DIR = JoinPaths(LOCAL_PLATFORM.APPDATA, APP_NAME.CLI);
-    const PROJECTS = formatDir(`${funny}.txt`);
-    const SCHEDULE = formatDir("schedule.yaml");
-    const SETTINGS = formatDir("settings.yaml");
-    const ERRORS = formatDir("errors.log");
-
     if (path === "BASE") return BASE_DIR;
-    if (path === "MOTHERFKRS") return PROJECTS;
-    if (path === "SCHEDULE") return SCHEDULE;
-    if (path === "SETTINGS") return SETTINGS;
-    if (path === "ERRORS") return ERRORS;
+    if (path === "MOTHERFKRS") return formatDir(`${FWORDS.MFS.replace("*", "o").replace("*", "u")}.txt`);
+    if (path === "SCHEDULE") return formatDir("schedule.yaml");
+    if (path === "SETTINGS") return formatDir("settings.yaml");
+    if (path === "ERRORS") return formatDir("errors.log");
     throw new FknError("Internal__NonexistentAppPath", `Invalid config path ${path} requested.`);
 }
 

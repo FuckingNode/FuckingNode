@@ -1,7 +1,7 @@
 import type { UnknownString } from "@zakahacecosas/string-utils";
 import { FWORDS } from "../constants/fwords.ts";
 import { LogStuff } from "../functions/io.ts";
-import { GetProjectEnvironment, SpotProject } from "../functions/projects.ts";
+import { GetProjectEnvironment } from "../functions/projects.ts";
 import { NameProject } from "../functions/projects.ts";
 import type { FnCPF } from "../types/platform.ts";
 import { RecommendedCommunityStandards } from "./toolkit/rcs.ts";
@@ -22,9 +22,8 @@ function StringifyDependencyRelationship(rel: FnCPF["deps"][0]["rel"]): string {
 }
 
 export default async function TheStatistics(target: UnknownString): Promise<void> {
-    const project = await SpotProject(target);
-    const env = await GetProjectEnvironment(project);
-    const name = await NameProject(project, "all");
+    const env = await GetProjectEnvironment(target);
+    const name = await NameProject(env.root, "all");
 
     LogStuff(
         `${name} · ${ColorString(env.runtime, "bold")} runtime · ${ColorString(env.manager, "bold")} pkg manager`,

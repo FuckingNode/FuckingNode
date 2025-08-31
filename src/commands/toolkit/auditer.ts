@@ -11,7 +11,7 @@ import { normalize, normalizeArray, validate, validateAgainst } from "@zakahacec
 import type { MANAGER_NODE } from "../../types/platform.ts";
 import { Interrogate, LogStuff } from "../../functions/io.ts";
 import type { FkNodeSecurityAudit, ParsedNodeReport } from "../../types/audit.ts";
-import { GetProjectEnvironment, NameProject, SpotProject } from "../../functions/projects.ts";
+import { GetProjectEnvironment, NameProject } from "../../functions/projects.ts";
 import { Commander } from "../../functions/cli.ts";
 import { APP_NAME } from "../../constants/name.ts";
 import { DEBUG_LOG } from "../../functions/error.ts";
@@ -547,8 +547,7 @@ export function AuditProject(bareReport: ParsedNodeReport): FkNodeSecurityAudit 
  * @returns {FkNodeSecurityAudit | 0 | 1}
  */
 export async function PerformAuditing(project: string): Promise<FkNodeSecurityAudit | 0 | 1> {
-    const workingPath = await SpotProject(project);
-    const env = await GetProjectEnvironment(workingPath);
+    const env = await GetProjectEnvironment(project);
     const name = await NameProject(env.root, "name-ver");
     // === "__UNSUPPORTED" already does the job, but typescript wants me to specify
     if (

@@ -13,9 +13,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Added an option to customize (in milliseconds) the threshold for notifications.
 - Added the option to use GLFM instead of GFM for `surrender` (via `--gitlab/-gl`).
 - Added `deprecate` and `nevermind` as aliases to `surrender`.
-- Added asynchronous / parallel operation to improve the CLI's performance.
+- Added several changes to improve the CLI's performance.
   - FuckingNode runs some checks every time before actually running. _Just_ parallelizing them made the entire CLI much, MUCH faster.
-  - Git-related operations used to check for filepaths _twice_, this duplication was removed.
+  - Git-related and project environment-related operations used to check for filepaths _twice_, this duplication was removed.
+  - Optimized config filepaths.
+    - Removed a useless lowercasing call when getting any path.
+    - A string conversion needed for the project's list file happened whenever _any_ path was queried, now it only happens when we query that specific file.
+    - All paths were initialized when querying any path, now only the base one (needed) is.
+  - Removed useless file existence checks where we already know a file exists.
 
 ### Changed
 

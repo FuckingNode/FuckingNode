@@ -228,7 +228,6 @@ export async function RemoveProject(
 ): Promise<void> {
     try {
         const workingEntry = await SpotProject(entry);
-        if (!workingEntry) return;
 
         const list = GetAllProjects(false);
         const index = list.indexOf(workingEntry);
@@ -242,7 +241,7 @@ export async function RemoveProject(
             return;
         }
 
-        if (index !== -1) list.splice(index, 1); // remove only 1st coincidence, to avoid issues
+        if (index !== -1) list.splice(index, 1);
         Deno.writeTextFileSync(GetAppPath("MOTHERFKRS"), list.join("\n") + "\n");
 
         if (list.length > 0 && showOutput === true) {
@@ -260,6 +259,7 @@ export async function RemoveProject(
             return;
         }
     } catch (e) {
+        // TODO(@ZakaHaceCosas) this is duplicate above, check which one actually works
         if (e instanceof FknError && e.code === "External__Proj__NotFound") {
             LogStuff(
                 `Bruh, that mf doesn't exist yet.\nAnother typo? We took: ${entry} (=> ${entry ? ParsePath(entry) : "undefined?"})`,
@@ -577,8 +577,6 @@ export function GetWorkspaces(path: string): string[] {
 export async function GetProjectEnvironment(path: UnknownString): Promise<ProjectEnvironment> {
     DEBUG_LOG("CALLED GetProjectEnvironment WITH path", path);
     const root = await SpotProject(path);
-
-    if (!CheckForPath(root)) throw new FknError("Fs__Unreal", `Path ${root} doesn't exist.`);
 
     const hall_of_trash = JoinPaths(root, "node_modules");
     const workspaces = GetWorkspaces(root);
@@ -949,7 +947,10 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
  */
 export async function SpotProject(name: UnknownString): Promise<string> {
     // the regex is because some projects might be called @someone/something
-    const workingProject = validate(name) ? /^@([^\/\s]+)\/([^\/\s]+)$/.test(name) ? name : ParsePath(name) : ParsePath(".");
+    // and the startsWith is to catch --flags
+    const workingProject = (validate(name) && !name.startsWith("-"))
+        ? /^@([^\/\s]+)\/([^\/\s]+)$/.test(name) ? name : ParsePath(name)
+        : ParsePath(".");
     if (CheckForPath(workingProject)) return workingProject;
 
     const allProjects = GetAllProjects();

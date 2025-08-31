@@ -1,4 +1,4 @@
-import { GetProjectEnvironment, NameProject, SpotProject } from "../functions/projects.ts";
+import { GetProjectEnvironment, NameProject } from "../functions/projects.ts";
 import type { TheBuilderConstructedParams } from "./constructors/command.ts";
 import { ValidateUserCmd } from "../functions/user.ts";
 import { LogStuff, Notification } from "../functions/io.ts";
@@ -7,8 +7,7 @@ import { stripAnsiCode } from "@std/fmt/colors";
 import { GetElapsedTime } from "../functions/date.ts";
 
 export default async function TheBuilder(params: TheBuilderConstructedParams): Promise<void> {
-    const project = (params.project || "").startsWith("--") ? Deno.cwd() : await SpotProject(params.project);
-    const env = await GetProjectEnvironment(project);
+    const env = await GetProjectEnvironment(params.project);
     const projectName = await NameProject(env.root, "name");
 
     Deno.chdir(env.root);

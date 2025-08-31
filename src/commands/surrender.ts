@@ -1,5 +1,5 @@
 import { normalize, type UnknownString, validate } from "@zakahacecosas/string-utils";
-import { GetProjectEnvironment, RemoveProject, SpotProject } from "../functions/projects.ts";
+import { GetProjectEnvironment, RemoveProject } from "../functions/projects.ts";
 import type { TheSurrendererConstructedParams } from "./constructors/command.ts";
 import { Interrogate, LogStuff } from "../functions/io.ts";
 import { NameProject } from "../functions/projects.ts";
@@ -25,19 +25,18 @@ function shuffle<T>(arr: T[]): T {
 }
 
 export default async function TheSurrenderer(params: TheSurrendererConstructedParams): Promise<void> {
-    const project = await SpotProject(params.project);
-    const env = await GetProjectEnvironment(project);
+    const env = await GetProjectEnvironment(params.project);
 
     if (
         !Interrogate(
-            `Are you 100% sure that ${await NameProject(project, "all")} ${
+            `Are you 100% sure that ${await NameProject(env.root, "all")} ${
                 ColorString("should be deprecated?\nThis is not something you can undo!", "orange")
             }`,
             "warn",
         )
     ) return;
 
-    Deno.chdir(project);
+    Deno.chdir(env.root);
 
     function valid(str: UnknownString): str is string {
         if (!validate(str)) return false;
@@ -72,7 +71,7 @@ export default async function TheSurrenderer(params: TheSurrendererConstructedPa
     ) return;
 
     Commit(
-        project,
+        env.root,
         `Add all uncommitted changes (automated by ${FULL_NAME})`,
         "all",
         [],
@@ -83,7 +82,7 @@ export default async function TheSurrenderer(params: TheSurrendererConstructedPa
     if (CheckForPath(README)) Deno.writeTextFileSync(README, `${message}\n${Deno.readTextFileSync(README)}`);
 
     Commit(
-        project,
+        env.root,
         `Add deprecation notice (automated by ${FULL_NAME})`,
         "all",
         [],
@@ -92,13 +91,13 @@ export default async function TheSurrenderer(params: TheSurrendererConstructedPa
     FkNodeInterop.Features.Update(env);
 
     Commit(
-        project,
+        env.root,
         `Update dependencies one last time (automated by ${FULL_NAME})`,
         "all",
         [],
     );
 
-    Push(project, GetBranches(project).current);
+    Push(env.root, GetBranches(env.root).current);
 
     LogStuff("Project deprecated successfully, sir.", "comrade", "red");
     const rem = Interrogate(
@@ -116,7 +115,7 @@ export default async function TheSurrenderer(params: TheSurrendererConstructedPa
         Deno.removeSync(env.root, { recursive: true });
     }
 
-    await RemoveProject(project);
+    await RemoveProject(env.root);
 
     LogStuff(
         `${

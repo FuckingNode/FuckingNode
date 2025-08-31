@@ -3,7 +3,7 @@ import { FULL_NAME } from "../constants.ts";
 import { GetDateNow, GetElapsedTime } from "../functions/date.ts";
 import { CheckForPath, JoinPaths } from "../functions/filesystem.ts";
 import { LogStuff, Notification } from "../functions/io.ts";
-import { GetProjectEnvironment, NameProject, SpotProject } from "../functions/projects.ts";
+import { GetProjectEnvironment, NameProject } from "../functions/projects.ts";
 import type { MANAGER_JS, ProjectEnvironment } from "../types/platform.ts";
 import type { TheMigratorConstructedParams } from "./constructors/command.ts";
 import { FkNodeInterop } from "./interop/interop.ts";
@@ -122,8 +122,7 @@ export default async function TheMigrator(params: TheMigratorConstructedParams):
         );
     }
 
-    const workingProject = await SpotProject(projectPath);
-    const workingEnv = await GetProjectEnvironment(workingProject);
+    const workingEnv = await GetProjectEnvironment(projectPath);
 
     if (!MANAGERS.includes(workingEnv.manager)) {
         throw new FknError(
@@ -132,6 +131,9 @@ export default async function TheMigrator(params: TheMigratorConstructedParams):
         );
     }
 
+    // TODO(@ZakaHaceCosas): does GPE even validate this
+    // if it does, remove this
+    // if it doesn't, make it do, then remove this
     if (!(CheckForPath(workingEnv.main.path))) {
         throw new FknError(
             "Env__NoPkgFile",
@@ -139,8 +141,10 @@ export default async function TheMigrator(params: TheMigratorConstructedParams):
         );
     }
 
+    const projectName = await NameProject(workingEnv.root, "all");
+
     LogStuff(
-        `Migrating ${workingProject} to ${desiredManager} has a chance of messing your versions up.\nYour lockfile will be backed up and synced to ensure coherence.`,
+        `Migrating ${projectName} to ${desiredManager} has a chance of messing your versions up.\nYour lockfile will be backed up and synced to ensure coherence.`,
         "warn",
     );
 
@@ -150,7 +154,7 @@ export default async function TheMigrator(params: TheMigratorConstructedParams):
         workingEnv,
     );
 
-    LogStuff(`That worked out! Enjoy using ${desiredManager} for ${await NameProject(workingEnv.root, "all")}`);
+    LogStuff(`That worked out! Enjoy using ${desiredManager} for ${projectName}`);
     const elapsed = Date.now() - startup.getTime();
     Notification(
         `Your project was migrated!`,

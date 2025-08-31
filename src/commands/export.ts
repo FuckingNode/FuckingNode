@@ -1,5 +1,5 @@
 import type { TheExporterConstructedParams } from "./constructors/command.ts";
-import { GetProjectEnvironment, SpotProject } from "../functions/projects.ts";
+import { GetProjectEnvironment } from "../functions/projects.ts";
 import { JoinPaths } from "../functions/filesystem.ts";
 import { LogStuff, StringifyYaml } from "../functions/io.ts";
 import { FULL_NAME } from "../constants.ts";
@@ -8,10 +8,7 @@ import { APP_NAME } from "../constants/name.ts";
 import { ColorString } from "../functions/color.ts";
 
 export default async function TheExporter(params: TheExporterConstructedParams): Promise<void> {
-    const { project } = params;
-
-    const workingProject = await SpotProject(project);
-    const env = await GetProjectEnvironment(workingProject);
+    const env = await GetProjectEnvironment(params.project);
 
     const cpfString = params.json === true ? JSON.stringify(env.main.cpfContent, undefined, 2) : StringifyYaml(env.main.cpfContent);
 
