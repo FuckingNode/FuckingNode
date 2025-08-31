@@ -100,7 +100,8 @@ function handler(
         LogStuff(`Migration threw an: ${e}`, "error");
     }
 }
-export default function TheMigrator(params: TheMigratorConstructedParams): void {
+
+export default async function TheMigrator(params: TheMigratorConstructedParams): Promise<void> {
     const { projectPath, wantedManager } = params;
     const startup = new Date();
 
@@ -121,8 +122,8 @@ export default function TheMigrator(params: TheMigratorConstructedParams): void 
         );
     }
 
-    const workingProject = SpotProject(projectPath);
-    const workingEnv = GetProjectEnvironment(workingProject);
+    const workingProject = await SpotProject(projectPath);
+    const workingEnv = await GetProjectEnvironment(workingProject);
 
     if (!MANAGERS.includes(workingEnv.manager)) {
         throw new FknError(
@@ -131,7 +132,7 @@ export default function TheMigrator(params: TheMigratorConstructedParams): void 
         );
     }
 
-    if (!CheckForPath(workingEnv.main.path)) {
+    if (!(CheckForPath(workingEnv.main.path))) {
         throw new FknError(
             "Env__NoPkgFile",
             "No package.json/deno.json(c) file found, cannot migrate. How will we install your modules without that file?",
@@ -149,7 +150,7 @@ export default function TheMigrator(params: TheMigratorConstructedParams): void 
         workingEnv,
     );
 
-    LogStuff(`That worked out! Enjoy using ${desiredManager} for ${NameProject(workingEnv.root, "all")}`);
+    LogStuff(`That worked out! Enjoy using ${desiredManager} for ${await NameProject(workingEnv.root, "all")}`);
     const elapsed = Date.now() - startup.getTime();
     Notification(
         `Your project was migrated!`,

@@ -3,9 +3,9 @@ import { LaunchUserIDE } from "../functions/user.ts";
 import type { TheLauncherConstructedParams } from "./constructors/command.ts";
 import { FkNodeInterop } from "./interop/interop.ts";
 
-export default function TheLauncher(params: TheLauncherConstructedParams) {
-    const path = SpotProject(params.project ?? Deno.cwd());
-    const env = GetProjectEnvironment(path);
+export default async function TheLauncher(params: TheLauncherConstructedParams) {
+    const path = await SpotProject(params.project ?? Deno.cwd());
+    const env = await GetProjectEnvironment(path);
 
     Deno.chdir(path);
     LaunchUserIDE();
@@ -13,5 +13,5 @@ export default function TheLauncher(params: TheLauncherConstructedParams) {
     if (env.settings.launchWithUpdate) {
         FkNodeInterop.Features.Update(env);
     }
-    FkNodeInterop.Features.Launch(env);
+    await FkNodeInterop.Features.Launch(env);
 }

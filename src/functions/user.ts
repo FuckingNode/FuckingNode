@@ -26,7 +26,7 @@ export function ValidateUserCmd(env: ProjectEnvironment, key: "commitCmd" | "rel
     return cmd;
 }
 
-export function RunUserCmd(params: { key: "commitCmd" | "releaseCmd"; env: ProjectEnvironment }) {
+export async function RunUserCmd(params: { key: "commitCmd" | "releaseCmd"; env: ProjectEnvironment }) {
     const { env, key } = params;
 
     const cmd = ValidateUserCmd(env, key);
@@ -48,7 +48,7 @@ export function RunUserCmd(params: { key: "commitCmd" | "releaseCmd"; env: Proje
 
     if (!cmdOutput.success) {
         Notification(
-            `Your ${key} failed at ${NameProject(env.root, "name-colorless")}!`,
+            `Your ${key} failed at ${await NameProject(env.root, "name-colorless")}!`,
             `Error was dumped to ${GetAppPath("ERRORS")}, and it appear in the terminal as well.`,
             30000,
         );
@@ -61,7 +61,7 @@ export function RunUserCmd(params: { key: "commitCmd" | "releaseCmd"; env: Proje
 }
 
 export function LaunchUserIDE() {
-    const IDE: CF_FKNODE_SETTINGS["fav-editor"] = GetUserSettings()["fav-editor"];
+    const IDE: CF_FKNODE_SETTINGS["fav-editor"] = (GetUserSettings())["fav-editor"];
 
     if (!validateAgainst(IDE, ["vscode", "sublime", "emacs", "notepad++", "atom", "vscodium"])) {
         throw new FknError("External__Setting__FavIde", `${IDE} is not a supported editor! Cannot launch it.`);

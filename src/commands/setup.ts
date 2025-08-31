@@ -9,7 +9,7 @@ import { normalize, table, validate, validateAgainst } from "@zakahacecosas/stri
 import { FknError } from "../functions/error.ts";
 import { ColorString } from "../functions/color.ts";
 
-export default function TheSetuper(params: TheSetuperConstructedParams) {
+export default async function TheSetuper(params: TheSetuperConstructedParams) {
     if (!validate(params.setup)) {
         LogStuff(table(VISIBLE_SETUPS));
         LogStuff(
@@ -20,7 +20,7 @@ export default function TheSetuper(params: TheSetuperConstructedParams) {
 
     const project = validate(params.project) ? params.project : ".";
 
-    if (!CheckForPath(project)) {
+    if (!(CheckForPath(project))) {
         throw new FknError("Param__TargetInvalid", `Specified path ${params.project} doesn't exist!`);
     }
 
@@ -50,7 +50,7 @@ export default function TheSetuper(params: TheSetuperConstructedParams) {
 
     if (
         !(Interrogate(
-            `Should we add the ${setupName} file to ${NameProject(project, "name")}?${
+            `Should we add the ${setupName} file to ${await NameProject(project, "name")}?${
                 status === "New"
                     ? ""
                     : status === "Merge"

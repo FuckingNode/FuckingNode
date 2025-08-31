@@ -2,21 +2,21 @@ import TheLister from "../commands/list.ts";
 import { IsRepo } from "../functions/git.ts";
 import { AddProject, RemoveProject } from "../functions/projects.ts";
 
-Deno.bench("lister", () => {
-    TheLister(undefined);
+Deno.bench("lister", async () => {
+    await TheLister(undefined);
 });
 
-Deno.bench("adder", (b) => {
-    RemoveProject(".");
+Deno.bench("adder", async (b) => {
+    await RemoveProject(".");
     b.start();
-    AddProject(".");
+    await AddProject(".");
     b.end();
 });
 
-Deno.bench("remover", (b) => {
-    AddProject(".");
+Deno.bench("remover", async (b) => {
+    await AddProject(".");
     b.start();
-    RemoveProject(".");
+    await RemoveProject(".");
     b.end();
 });
 

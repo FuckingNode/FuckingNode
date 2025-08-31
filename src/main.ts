@@ -33,6 +33,7 @@ import { FWORDS } from "./constants/fwords.ts";
 import { APP_NAME } from "./constants/name.ts";
 import { ColorString } from "./functions/color.ts";
 import { LOCAL_PLATFORM } from "./constants/platform.ts";
+import { BulkRemove } from "./functions/filesystem.ts";
 
 // this is outside the main loop so it can be executed
 // without depending on other modules
@@ -45,15 +46,13 @@ if (normalize(Deno.args[0] ?? "") === "something-fucked-up") {
     );
     const c = confirm("Confirm reset?");
     if (c === true) {
-        const paths = [
-            GetAppPath("SCHEDULE"),
-            GetAppPath("SETTINGS"),
-            GetAppPath("ERRORS"),
-        ];
-
-        for (const path of paths) {
-            Deno.removeSync(path, { recursive: true });
-        }
+        await BulkRemove(
+            [
+                GetAppPath("SCHEDULE"),
+                GetAppPath("SETTINGS"),
+                GetAppPath("ERRORS"),
+            ],
+        );
 
         console.log(`Done. Don't ${FWORDS.FK} up again this time.`);
     } else {
@@ -170,7 +169,7 @@ async function main(command: UnknownString) {
     const projectArg = (isNotFlag(flags[1])) ? flags[1] : 0 as const;
     DEBUG_LOG("PROJECT ARG IS", projectArg);
     DEBUG_LOG("FLAGS[2]", flags[2], isNotFlag(flags[2]));
-    const intensityArg = isNotFlag(flags[2]) ? flags[2] : GetUserSettings()["default-intensity"];
+    const intensityArg = isNotFlag(flags[2]) ? flags[2] : (GetUserSettings())["default-intensity"];
     DEBUG_LOG("INTENSITY ARG IS", intensityArg);
 
     const cleanerArgs: TheCleanerConstructedParams = {
@@ -216,16 +215,16 @@ async function main(command: UnknownString) {
             });
             break;
         case "list":
-            TheLister(flags[1]);
+            await TheLister(flags[1]);
             break;
         case "add":
-            AddProject(flags[1]);
+            await AddProject(flags[1]);
             break;
         case "remove":
-            RemoveProject(flags[1]);
+            await RemoveProject(flags[1]);
             break;
         case "kickstart":
-            TheKickstarter({
+            await TheKickstarter({
                 gitUrl: flags[1],
                 path: flags[2],
                 manager: flags[3],
@@ -235,7 +234,7 @@ async function main(command: UnknownString) {
             await TheSettings({ args: flags.slice(1) });
             break;
         case "migrate":
-            TheMigrator({ projectPath: (flags[2] ?? Deno.cwd()), wantedManager: flags[1] });
+            await TheMigrator({ projectPath: (flags[2] ?? Deno.cwd()), wantedManager: flags[1] });
             break;
         case "self-update":
         case "upgrade":
@@ -246,13 +245,13 @@ async function main(command: UnknownString) {
             TheAbouter();
             break;
         case "build":
-            TheBuilder({
+            await TheBuilder({
                 project: (flags[1] ?? Deno.cwd()),
             });
             break;
         case "release":
         case "publish":
-            TheReleaser({
+            await TheReleaser({
                 version: flags[1],
                 project: (flags[2] ?? Deno.cwd()),
                 push: hasFlag("push", true),
@@ -264,7 +263,7 @@ async function main(command: UnknownString) {
             const indexB = flags.indexOf("-b");
             const indexElse = flags.indexOf("--");
             const filesEnd = indexBranch !== -1 ? indexBranch : (indexB !== -1 ? indexB : indexElse !== -1 ? indexElse : undefined);
-            TheCommitter({
+            await TheCommitter({
                 message: flags[1],
                 files: flags.slice(2, filesEnd),
                 branch: indexBranch !== -1 ? flags[indexBranch + 1] : (indexB !== -1 ? flags[indexB + 1] : undefined),
@@ -283,7 +282,7 @@ async function main(command: UnknownString) {
         // these are the wildest imho:
         case "im-done-with":
         case "nevermind":
-            TheSurrenderer({
+            await TheSurrenderer({
                 project: flags[1],
                 message: flags[2],
                 alternative: flags[3],
@@ -295,20 +294,21 @@ async function main(command: UnknownString) {
         case "setup":
         case "configure":
         case "preset":
-            TheSetuper({
+            await TheSetuper({
                 setup: flags[1],
                 project: flags[2],
             });
             break;
         case "launch":
-            TheLauncher({
+            await TheLauncher({
                 project: flags[1],
             });
             break;
+        case "cpf":
         case "export":
         case "gen-cpf":
         case "generate-cpf":
-            TheExporter({
+            await TheExporter({
                 project: (flags[1] ?? Deno.cwd()),
                 json: hasFlag("json", false),
                 cli: hasFlag("cli", false),
@@ -321,7 +321,7 @@ async function main(command: UnknownString) {
             });
             break;
         case "stats":
-            TheStatistics(flags[1]);
+            await TheStatistics(flags[1]);
             break;
         case "documentation":
         case "docs":
@@ -342,7 +342,7 @@ async function main(command: UnknownString) {
             LaunchWebsite(`${APP_URLs.WEBSITE}repo`);
             break;
         case "audit":
-            TheAuditer({
+            await TheAuditer({
                 project: flags[1] ?? null,
             });
             break;

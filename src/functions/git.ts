@@ -1,6 +1,5 @@
 import { Commander } from "../functions/cli.ts";
 import { CheckForPath, JoinPaths, ParsePath } from "../functions/filesystem.ts";
-import { GetProjectEnvironment, SpotProject } from "../functions/projects.ts";
 import { FULL_NAME } from "../constants.ts";
 import { normalize, normalizeArray, StringArray, validate } from "@zakahacecosas/string-utils";
 import { FknError } from "./error.ts";
@@ -20,11 +19,9 @@ function g(path: string, args: string[]) {
  */
 export function IsRepo(path: string): boolean {
     try {
-        const resolvedPath = SpotProject(path);
-
         // make sure we're in a repo
         const output = g(
-            resolvedPath,
+            path,
             [
                 "rev-parse",
                 "--is-inside-work-tree",
@@ -52,13 +49,11 @@ export function IsRepo(path: string): boolean {
  */
 export function CanCommit(path: string): boolean | "nonAdded" {
     try {
-        const resolvedPath = SpotProject(path);
-
         // make sure we're in a repo
-        if (!IsRepo(resolvedPath)) return false;
+        if (!IsRepo(path)) return false;
 
         // check for uncommitted changes
-        const localChanges = g(resolvedPath, ["status"]);
+        const localChanges = g(path, ["status"]);
 
         if (
             (/nothing added to to commit but untracked files present|no changes added to commit/.test(localChanges.stdout ?? ""))
@@ -70,7 +65,7 @@ export function CanCommit(path: string): boolean | "nonAdded" {
         ) return false; // if anything happens we assume the tree isn't clean, just in case.
 
         // check if the local branch is behind the remote
-        const remoteStatus = g(resolvedPath, [
+        const remoteStatus = g(path, [
             "rev-list",
             "--count",
             "--left-only",
@@ -87,9 +82,8 @@ export function CanCommit(path: string): boolean | "nonAdded" {
         throw new FknError("Git__CanCommit", `An error happened validating the Git working tree: ${e}`);
     }
 }
-export function Commit(project: string, message: string, add: string[] | "all" | "none", avoid: string[]): void {
+export function Commit(path: string, message: string, add: string[] | "all" | "none", avoid: string[]): void {
     try {
-        const path = SpotProject(project);
         const toAdd = Array.isArray(add) ? add : add === "none" ? [] : add === "all" ? ["."] : [];
 
         if (toAdd.length > 0) {
@@ -125,14 +119,12 @@ export function Commit(project: string, message: string, add: string[] | "all" |
     } catch (e) {
         throw new FknError(
             "Git__Commit",
-            `Couldn't create commit ${ColorString(message, "bold")} at ${ColorString(project, "bold")}: ${e}`,
+            `Couldn't create commit ${ColorString(message, "bold")} at ${ColorString(path, "bold")}: ${e}`,
         );
     }
 }
-export function Push(project: string, branch: string | false): void {
+export function Push(path: string, branch: string | false): void {
     try {
-        const path = SpotProject(project);
-
         const pushToBranch = branch === false ? [] : ["origin", branch.trim()];
 
         const pushOutput = g(
@@ -147,22 +139,16 @@ export function Push(project: string, branch: string | false): void {
     } catch (e) {
         throw new FknError(
             "Git__Push",
-            `Couldn't push at ${ColorString(project, "bold")}: ${e}`,
+            `Couldn't push at ${ColorString(path, "bold")}: ${e}`,
         );
     }
 }
 /**
  * Make sure to `Commit()` changes to `.gitignore`.
  */
-export function AddToGitIgnore(project: string, toBeIgnored: string): void {
+export function AddToGitIgnore(path: string, toBeIgnored: string): void {
+    const gitIgnoreFile = JoinPaths(path, ".gitignore");
     try {
-        const path = SpotProject(project);
-        const env = GetProjectEnvironment(path);
-        const gitIgnoreFile = JoinPaths(env.root, ".gitignore");
-        if (!CheckForPath(gitIgnoreFile)) {
-            Deno.writeTextFileSync(gitIgnoreFile, "");
-            return;
-        }
         const gitIgnoreContent = Deno.readTextFileSync(gitIgnoreFile);
 
         if (gitIgnoreContent.includes(toBeIgnored)) return;
@@ -177,16 +163,21 @@ export function AddToGitIgnore(project: string, toBeIgnored: string): void {
 
         return;
     } catch (e) {
+        if (e instanceof Deno.errors.NotFound) {
+            Deno.writeTextFileSync(
+                gitIgnoreFile,
+                `# auto-added by ${FULL_NAME} release command\n${toBeIgnored}\n`,
+            );
+        }
         throw new FknError(
             "Git__Ignore",
-            `Couldn't gitignore file ${toBeIgnored} at ${ColorString(project, "bold")}: ${e}`,
+            `Couldn't gitignore file ${toBeIgnored} at ${ColorString(path, "bold")}: ${e}`,
         );
     }
 }
 
-export function Tag(project: string, tag: string, push: boolean): void {
+export function Tag(path: string, tag: string, push: boolean): void {
     try {
-        const path = SpotProject(project);
         const tagOutput = g(path, [
             "tag",
             tag.trim(),
@@ -207,19 +198,18 @@ export function Tag(project: string, tag: string, push: boolean): void {
     } catch (e) {
         throw new FknError(
             "Git__MkTag",
-            `Couldn't create tag ${tag} at ${ColorString(project, "bold")}: ${e}`,
+            `Couldn't create tag ${tag} at ${ColorString(path, "bold")}: ${e}`,
         );
     }
 }
 /**
  * Gets the latest tag for a project.
  *
- * @param project Project path. **Assumes it's parsed & spotted.**
+ * @param path Project path. **Assumes it's parsed & spotted.**
  * @returns A string with the tag name, or `undefined` if an error happens.
  */
-export function GetLatestTag(project: string): string | undefined {
+export function GetLatestTag(path: string): string | undefined {
     try {
-        const path = SpotProject(project);
         const getTagOutput = g(
             path,
             [
@@ -236,7 +226,7 @@ export function GetLatestTag(project: string): string | undefined {
     } catch (e) {
         throw new FknError(
             "Git__GLTag",
-            `Couldn't get latest tag at ${ColorString(project, "bold")} because of error: ${e}`,
+            `Couldn't get latest tag at ${ColorString(path, "bold")} because of error: ${e}`,
         );
     }
 }
@@ -244,12 +234,11 @@ export function GetLatestTag(project: string): string | undefined {
  * Get all files that are staged.
  *
  * @export
- * @param {string} project
+ * @param {string} path
  * @returns {string[]}
  */
-export function GetStagedFiles(project: string): string[] {
+export function GetStagedFiles(path: string): string[] {
     try {
-        const path = SpotProject(project);
         const getFilesOutput = g(
             path,
             [
@@ -264,13 +253,12 @@ export function GetStagedFiles(project: string): string[] {
     } catch (e) {
         throw new FknError(
             "Git__GStaged",
-            `Couldn't get files ready for commit (staged) at ${ColorString(project, "bold")}: ${e}`,
+            `Couldn't get files ready for commit (staged) at ${ColorString(path, "bold")}: ${e}`,
         );
     }
 }
-export function GetCommittableFiles(project: string): string[] {
+export function GetCommittableFiles(path: string): string[] {
     try {
-        const path = SpotProject(project);
         const getFilesOutput = g(
             path,
             [
@@ -286,7 +274,7 @@ export function GetCommittableFiles(project: string): string[] {
     } catch (e) {
         throw new FknError(
             "Git__GCommittable",
-            `Couldn't get modified (committable) files at ${ColorString(project, "bold")}: ${e}`,
+            `Couldn't get modified (committable) files at ${ColorString(path, "bold")}: ${e}`,
         );
     }
 }

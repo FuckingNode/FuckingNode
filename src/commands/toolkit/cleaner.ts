@@ -145,7 +145,7 @@ const ProjectCleaningFeatures = {
             return;
         }
     },
-    Commit: (
+    Commit: async (
         env: ProjectEnvironment,
         shouldUpdate: boolean,
         shouldLint: boolean,
@@ -182,7 +182,7 @@ const ProjectCleaningFeatures = {
         }
 
         Commit(ParsePath(env.root), getCommitMessage(), "all", []);
-        LogStuff(`Committed your changes to ${NameProject(env.root, "name")}!`, "tick");
+        LogStuff(`Committed your changes to ${await NameProject(env.root, "name")}!`, "tick");
         return;
     },
 };
@@ -197,9 +197,9 @@ const ProjectCleaningFeatures = {
  * @param {boolean} shouldDestroy
  * @param {boolean} shouldCommit
  * @param {("normal" | "hard" | "maxim")} intensity
- * @returns {boolean}
+ * @returns {Promise<{ protection: string | null; errors: string | null; }>}
  */
-export function PerformCleanup(
+export async function PerformCleanup(
     projectInQuestion: string,
     shouldUpdate: boolean,
     shouldLint: boolean,
@@ -207,13 +207,13 @@ export function PerformCleanup(
     shouldDestroy: boolean,
     shouldCommit: boolean,
     intensity: "normal" | "hard" | "maxim",
-): {
+): Promise<{
     protection: string | null;
     errors: string | null;
-} {
+}> {
     const motherfuckerInQuestion = ParsePath(projectInQuestion);
-    const projectName = ColorString(NameProject(motherfuckerInQuestion, "name"), "bold");
-    const env = GetProjectEnvironment(motherfuckerInQuestion);
+    const projectName = ColorString(await NameProject(motherfuckerInQuestion, "name"), "bold");
+    const env = await GetProjectEnvironment(motherfuckerInQuestion);
 
     const protections: string[] = [];
     const errors: string[] = [];
@@ -485,14 +485,14 @@ export async function PerformMaximCleanup(projects: string[]): Promise<void> {
     const trash = [];
 
     for (const project of projects) {
-        const workingProject = SpotProject(project);
-        const name = NameProject(workingProject, "name");
-        const env = GetProjectEnvironment(workingProject);
+        const workingProject = await SpotProject(project);
+        const name = await NameProject(workingProject, "name");
+        const env = await GetProjectEnvironment(workingProject);
 
         // TODO: add cargo target
         if (env.runtime === "rust" || env.runtime === "golang") continue;
 
-        if (!CheckForPath(env.hall_of_trash)) {
+        if (!(CheckForPath(env.hall_of_trash))) {
             LogStuff(
                 `Maxim pruning didn't find the node_modules DIR at ${name}. Skipping this ${FWORDS.MF}...`,
                 "bruh",
@@ -527,7 +527,7 @@ export function ValidateIntensity(intensity: string): CleanerIntensity {
     }
 
     const workingIntensity = cleanedIntensity as CleanerIntensity | "--";
-    const defaultIntensity = GetUserSettings()["default-intensity"];
+    const defaultIntensity = (GetUserSettings())["default-intensity"];
 
     if (workingIntensity === "--") {
         return defaultIntensity;
@@ -560,14 +560,13 @@ export function ValidateIntensity(intensity: string): CleanerIntensity {
  * Shows a report with the results of the cleanup.
  *
  * @param {RESULT[]} results
- * @returns {void}
  */
-export function ShowReport(results: RESULT[]): void {
+export async function ShowReport(results: RESULT[]): Promise<void> {
     console.log("");
     LogStuff("Report:\n", "chart");
     const report: string[] = [];
     for (const result of results) {
-        const name = NameProject(result.path, "name-ver");
+        const name = await NameProject(result.path, "name-ver");
         const status = ColorString(result.status, "bold");
         const elapsedTime = ColorString(result.elapsedTime, "italic");
         const protection = result.extras?.ignored
@@ -601,9 +600,8 @@ export function ShowReport(results: RESULT[]): void {
 /**
  * Resolves all lockfiles of a project.
  *
- * @async
  * @param {string} path
- * @returns {Promise<LOCKFILE_GLOBAL[]>} All lockfiles
+ * @returns {LOCKFILE_GLOBAL[]} All lockfiles
  */
 export function ResolveLockfiles(path: string): LOCKFILE_GLOBAL[] {
     const lockfiles: LOCKFILE_GLOBAL[] = [];

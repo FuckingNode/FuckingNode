@@ -14,7 +14,7 @@ import { GetTextIndentSize } from "../functions/filesystem.ts";
 import { RunBuildCmds } from "../functions/build.ts";
 import { ColorString } from "../functions/color.ts";
 
-export default function TheReleaser(params: TheReleaserConstructedParams) {
+export default async function TheReleaser(params: TheReleaserConstructedParams) {
     if (!validate(params.version)) throw new FknError("Param__VerInvalid", "No version specified!");
 
     // validate version
@@ -28,8 +28,8 @@ export default function TheReleaser(params: TheReleaserConstructedParams) {
     }
 
     const parsedVersion = parse(params.version);
-    const project = (params.project || "").startsWith("--") ? Deno.cwd() : SpotProject(params.project);
-    const env = GetProjectEnvironment(project);
+    const project = (params.project || "").startsWith("--") ? Deno.cwd() : await SpotProject(params.project);
+    const env = await GetProjectEnvironment(project);
     const canUseGit = IsRepo(project);
 
     Deno.chdir(env.root);
@@ -92,12 +92,10 @@ export default function TheReleaser(params: TheReleaserConstructedParams) {
         );
     }
     const confirmation = Interrogate(
-        `Heads up! We're about to take the following actions:\n${actions.join("\n")}\n\n- all of this at ${
-            NameProject(
-                project,
-                "all",
-            )
-        }`,
+        `Heads up! We're about to take the following actions:\n${actions.join("\n")}\n\n- all of this at ${await NameProject(
+            project,
+            "all",
+        )}`,
         "heads-up",
     );
 
@@ -131,7 +129,7 @@ export default function TheReleaser(params: TheReleaserConstructedParams) {
 
     // run their releaseCmd
     if (releaseCmd) {
-        RunUserCmd({
+        await RunUserCmd({
             key: "releaseCmd",
             env,
         });

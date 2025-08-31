@@ -545,10 +545,10 @@ export function AuditProject(bareReport: ParsedNodeReport): FkNodeSecurityAudit 
  * @param {string} project Path to project to be audited.
  * @returns {FkNodeSecurityAudit | 0 | 1}
  */
-export function PerformAuditing(project: string): FkNodeSecurityAudit | 0 | 1 {
-    const workingPath = SpotProject(project);
-    const env = GetProjectEnvironment(workingPath);
-    const name = NameProject(env.root, "name-ver");
+export async function PerformAuditing(project: string): Promise<FkNodeSecurityAudit | 0 | 1> {
+    const workingPath = await SpotProject(project);
+    const env = await GetProjectEnvironment(workingPath);
+    const name = await NameProject(env.root, "name-ver");
     // === "__UNSUPPORTED" already does the job, but typescript wants me to specify
     if (
         env.commands.audit === "__UNSUPPORTED" || env.manager === "deno" || env.manager === "cargo" ||

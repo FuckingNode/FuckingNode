@@ -7,7 +7,7 @@ import type { TheAuditerConstructedParams } from "./constructors/command.ts";
 import { normalize, testFlag, validate } from "@zakahacecosas/string-utils";
 import { ColorString } from "../functions/color.ts";
 
-export default function TheAuditer(params: TheAuditerConstructedParams) {
+export default async function TheAuditer(params: TheAuditerConstructedParams) {
     const { project } = params;
 
     const shouldAuditAll = !validate(project) ||
@@ -24,7 +24,7 @@ export default function TheAuditer(params: TheAuditerConstructedParams) {
             audit: FkNodeSecurityAudit;
         }[] = [];
         for (const project of projects) {
-            const res = PerformAuditing(project);
+            const res = await PerformAuditing(project);
             if (typeof res === "number") continue;
             report.push({
                 project: project,
@@ -32,8 +32,8 @@ export default function TheAuditer(params: TheAuditerConstructedParams) {
             });
         }
 
-        const reportDetails = report.map((item) => {
-            const name = NameProject(item.project, "name-ver");
+        const reportDetails = report.map(async (item) => {
+            const name = await NameProject(item.project, "name-ver");
             const string = `${name} # ${ColorString(`${item.audit.percentage.toFixed(2)}%`, "bold")} risk factor`;
             return string;
         });
@@ -46,7 +46,7 @@ export default function TheAuditer(params: TheAuditerConstructedParams) {
             "chart",
         );
     } else {
-        PerformAuditing(project);
+        await PerformAuditing(project);
     }
 
     LogStuff("Audit complete!", "tick-clear");

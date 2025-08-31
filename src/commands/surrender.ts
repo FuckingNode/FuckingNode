@@ -24,13 +24,13 @@ function shuffle<T>(arr: T[]): T {
     return arr[Math.floor(Math.random() * arr.length)]!;
 }
 
-export default function TheSurrenderer(params: TheSurrendererConstructedParams) {
-    const project = SpotProject(params.project);
-    const env = GetProjectEnvironment(project);
+export default async function TheSurrenderer(params: TheSurrendererConstructedParams) {
+    const project = await SpotProject(params.project);
+    const env = await GetProjectEnvironment(project);
 
     if (
         !Interrogate(
-            `Are you 100% sure that ${NameProject(project, "all")} ${
+            `Are you 100% sure that ${await NameProject(project, "all")} ${
                 ColorString("should be deprecated?\nThis is not something you can undo!", "orange")
             }`,
             "warn",
@@ -116,7 +116,7 @@ export default function TheSurrenderer(params: TheSurrendererConstructedParams) 
         Deno.removeSync(env.root, { recursive: true });
     }
 
-    RemoveProject(project);
+    await RemoveProject(project);
 
     LogStuff(
         `${

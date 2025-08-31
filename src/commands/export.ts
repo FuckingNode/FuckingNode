@@ -7,11 +7,11 @@ import { GetDateNow } from "../functions/date.ts";
 import { APP_NAME } from "../constants/name.ts";
 import { ColorString } from "../functions/color.ts";
 
-export default function TheExporter(params: TheExporterConstructedParams) {
+export default async function TheExporter(params: TheExporterConstructedParams) {
     const { project } = params;
 
-    const workingProject = SpotProject(project);
-    const env = GetProjectEnvironment(workingProject);
+    const workingProject = await SpotProject(project);
+    const env = await GetProjectEnvironment(workingProject);
 
     const cpfString = params.json === true ? JSON.stringify(env.main.cpfContent, undefined, 2) : StringifyYaml(env.main.cpfContent);
 

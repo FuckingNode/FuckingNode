@@ -16,14 +16,14 @@ import { GetElapsedTime } from "../functions/date.ts";
 import { FWORDS } from "../constants/fwords.ts";
 import { ColorString } from "../functions/color.ts";
 
-export default function TheKickstarter(params: TheKickstarterConstructedParams) {
+export default async function TheKickstarter(params: TheKickstarterConstructedParams) {
     const { gitUrl, path, manager } = params;
     const startup = new Date();
     const { full: repoUrl, name: projectName } = GenerateGitUrl(gitUrl);
 
     const clonePath: string = ParsePath(validate(path) ? path : JoinPaths(Deno.cwd(), projectName));
 
-    const clonePathValidator = CheckForDir(clonePath);
+    const clonePathValidator = await CheckForDir(clonePath);
     if (clonePathValidator === "ValidButNotEmpty") {
         throw new FknError(
             "Fs__DemandsEmptying",
@@ -72,10 +72,10 @@ export default function TheKickstarter(params: TheKickstarterConstructedParams) 
         }
     }
 
-    AddProject(Deno.cwd());
+    await AddProject(Deno.cwd());
 
     // assume we skipped error
-    const env = GetProjectEnvironment(Deno.cwd());
+    const env = await GetProjectEnvironment(Deno.cwd());
 
     const initialManager = validateAgainst(manager, ["npm", "pnpm", "yarn", "deno", "bun"]) ? manager : env.manager;
 
@@ -83,7 +83,7 @@ export default function TheKickstarter(params: TheKickstarterConstructedParams) 
         ? initialManager
         : ManagerExists(env.manager)
         ? env.manager
-        : GetUserSettings()["default-manager"];
+        : (GetUserSettings())["default-manager"];
 
     if (!managerToUse) {
         throw new FknError(
@@ -107,7 +107,7 @@ export default function TheKickstarter(params: TheKickstarterConstructedParams) 
         FkNodeInterop.Installers.UniJs(Deno.cwd(), managerToUse);
     }
 
-    LogStuff(`Great! ${NameProject(Deno.cwd(), "name-ver")} is now setup. Enjoy!`, "tick-clear");
+    LogStuff(`Great! ${await NameProject(Deno.cwd(), "name-ver")} is now setup. Enjoy!`, "tick-clear");
 
     LaunchUserIDE();
 

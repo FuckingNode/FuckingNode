@@ -33,7 +33,7 @@ export const mocks = {
 then, whenever you need to use it inside of a test, proceed like this:
 
 ```ts
-Deno.test("cool test!!", async () => {
+Deno.test("cool test!!", () => {
     // save the original implementation
     const originalReadTextFileSync = Deno.readTextFileSync;
     // now mock the function by assigning the original function to a call to the "mocker" function

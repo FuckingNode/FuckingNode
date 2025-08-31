@@ -53,7 +53,7 @@ function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
     }
 }
 
-export default function TheCommitter(params: TheCommitterConstructedParams) {
+export default async function TheCommitter(params: TheCommitterConstructedParams) {
     if (!validate(params.message)) {
         throw new FknError(
             "Param__WhateverUnprovided",
@@ -71,7 +71,7 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
         return;
     }
 
-    const env = GetProjectEnvironment(project);
+    const env = await GetProjectEnvironment(project);
     const prevStaged = GetStagedFiles(project);
 
     if (!params.keepStagedFiles) StageFiles(project, "!A");
@@ -161,12 +161,10 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
 
     if (
         !params.y && !Interrogate(
-            `Heads up! We're about to take the following actions:\n\n${actions.join("\n")}\n\n- all of this at ${
-                NameProject(
-                    project,
-                    "all",
-                )
-            }\n`,
+            `Heads up! We're about to take the following actions:\n\n${actions.join("\n")}\n\n- all of this at ${await NameProject(
+                project,
+                "all",
+            )}\n`,
         )
     ) {
         LogStuff("Aborting commit.", "bruh");
@@ -182,7 +180,7 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
 
     // 2. run their commitCmd over UNSTAGED, MODIFIABLE files
     try {
-        RunUserCmd({
+        await RunUserCmd({
             key: "commitCmd",
             env,
         });

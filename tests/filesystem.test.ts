@@ -26,7 +26,7 @@ Deno.test({
 
 Deno.test({
     name: "checks for paths and DIRs correctly",
-    fn: () => {
+    fn: async () => {
         assertEquals(
             CheckForPath(JoinPaths(Deno.cwd(), "fknode.yaml")),
             true,
@@ -38,7 +38,7 @@ Deno.test({
         );
 
         assertEquals(
-            CheckForDir(Deno.cwd()),
+            await CheckForDir(Deno.cwd()),
             "ValidButNotEmpty",
         );
 

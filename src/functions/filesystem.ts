@@ -20,23 +20,21 @@ export function CheckForPath(path: string): boolean {
 /**
  * Checks for a directory, returns a string depending on the result.
  *
+ * @async
  * @param {string} path
- * @returns {"NotDir" | "ValidButNotEmpty" | "NotFound" | "Valid"}
+ * @returns {Promise<"NotDir" | "ValidButNotEmpty" | "NotFound" | "Valid">}
  */
-export function CheckForDir(path: string): "NotDir" | "ValidButNotEmpty" | "NotFound" | "Valid" {
+export async function CheckForDir(path: string): Promise<"NotDir" | "ValidButNotEmpty" | "NotFound" | "Valid"> {
     try {
-        const info = Deno.statSync(path);
+        const info = await Deno.stat(path);
         if (!info.isDirectory) return "NotDir";
-        for (const _ of Deno.readDirSync(path)) {
-            return "ValidButNotEmpty";
-        }
+        for await (const _ of Deno.readDir(path)) return "ValidButNotEmpty";
         return "Valid";
     } catch (e) {
-        if (e instanceof Deno.errors.NotFound) {
-            return "NotFound"; // path doesn't exist.
-        } else {
-            throw e; // unexpected sh*t happened
-        }
+        // path doesn't exist.
+        if (e instanceof Deno.errors.NotFound) return "NotFound";
+        // unexpected sh*t happened
+        throw e;
     }
 }
 
@@ -113,20 +111,18 @@ export function JoinPaths(pathA: string, pathB: string): string {
  *
  * @async
  * @param {string[]} files Array of file paths to remove
- * @returns {void}
  */
 export async function BulkRemove(files: string[]): Promise<void> {
     if (files.length === 0) return;
-    const promises = files.map((file) =>
+    await Promise.all(files.map((file) =>
         Deno.remove(ParsePath(file), {
             recursive: true,
         })
-    );
-    await Promise.all(promises);
+    ));
 }
 
 /** Gets the indent size used by an already read file, with fair enough accuracy. */
-export function GetTextIndentSize(file: string) {
+export function GetTextIndentSize(file: string): number {
     const line = file.trim().split("\n")[1] || "";
     const indentSize: number = line.length - line.trim().length || 4;
     return indentSize;

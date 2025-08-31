@@ -26,7 +26,6 @@ import { ColorString } from "./color.ts";
 /**
  * Gets all the users projects and returns their absolute root paths as a `string[]`.
  *
- * @async
  * @param {false | "limit" | "exclude"} ignored If "limit", only ignored projects are returned. If "exclude", only projects that aren't ignored are returned.
  * @returns {string[]} The list of projects.
  */
@@ -62,21 +61,24 @@ export function GetAllProjects(ignored?: false | "limit" | "exclude"): string[] 
 /**
  * Adds a new project.
  *
+ * @async
  * @param {UnknownString} entry Path to the project.
  * @returns {Promise<void>}
  */
-export function AddProject(
+export async function AddProject(
     entry: UnknownString,
     glob: boolean = false,
-): void {
+): Promise<void> {
     if (validate(entry) && isGlob(entry)) {
-        globSync(entry).filter((f) => Deno.statSync(f).isDirectory).forEach((p) => AddProject(p, true));
+        globSync(entry)
+            .filter((f) => Deno.statSync(f).isDirectory)
+            .forEach(async (p) => await AddProject(p, true));
         return;
     }
 
     const workingEntry = ParsePath(validate(entry) ? entry : Deno.cwd());
 
-    if (!CheckForPath(workingEntry)) throw new FknError("Fs__Unreal", `Path "${workingEntry}" doesn't exist.`);
+    if (!(CheckForPath(workingEntry))) throw new FknError("Fs__Unreal", `Path "${workingEntry}" doesn't exist.`);
 
     function addTheEntry(name: string) {
         Deno.writeTextFileSync(GetAppPath("MOTHERFKRS"), `${workingEntry}\n`, {
@@ -89,10 +91,10 @@ export function AddProject(
     }
 
     try {
-        const env = GetProjectEnvironment(workingEntry);
-        const projectName = NameProject(workingEntry, "all");
+        const env = await GetProjectEnvironment(workingEntry);
+        const projectName = await NameProject(workingEntry, "all");
 
-        const validation = ValidateProject(workingEntry, false);
+        const validation = await ValidateProject(workingEntry, false);
 
         if (validation !== true) {
             if (validation === "IsDuplicate") {
@@ -139,7 +141,7 @@ export function AddProject(
         const workspaceString: string[] = [];
 
         for (const ws of workspaces) {
-            workspaceString.push(NameProject(ws, "all"));
+            workspaceString.push(await NameProject(ws, "all"));
         }
 
         const addWorkspaces = Interrogate(
@@ -177,12 +179,11 @@ export function AddProject(
         // possible fix would be to skip that check and pass to them a default env override of the parent's env
         // would probably force us to tell workspaces from parents apart in projects list
         // hence this TODO is for V5, this solution (best imho) requires a huge breaking change (projects list)
-        const workspaceResults = ws.map((w) => {
-            const res = ValidateProject(w, false);
-            return { w, isValid: res === true };
-        });
-
-        const workspaces = workspaceResults
+        const workspaces = (await Promise.all(
+            ws.map(async (w) => {
+                return { w, isValid: await ValidateProject(w, false) === true };
+            }),
+        ))
             .filter(({ isValid }) => isValid)
             .map(({ w }) => w);
 
@@ -220,19 +221,18 @@ export function AddProject(
  *
  * @async
  * @param {UnknownString} entry Path to the project.
- * @returns {void}
  */
-export function RemoveProject(
+export async function RemoveProject(
     entry: UnknownString,
     showOutput: boolean = true,
-): void {
+): Promise<void> {
     try {
-        const workingEntry = SpotProject(entry);
+        const workingEntry = await SpotProject(entry);
         if (!workingEntry) return;
 
         const list = GetAllProjects(false);
         const index = list.indexOf(workingEntry);
-        const name = NameProject(workingEntry, "name");
+        const name = await NameProject(workingEntry, "name");
 
         if (!list.includes(workingEntry)) {
             LogStuff(
@@ -277,19 +277,19 @@ export function RemoveProject(
  *
  * @param {UnknownString} path Path to the **root** of the project.
  * @param {?"name" | "name-colorless" | "path" | "name-ver" | "all"} wanted What to return. `name` returns the name, `path` the file path, `name-ver` a `name@version` string, and `all` returns everything together.
- * @returns {string} The name of the project. If an error happens, it will return the path you provided (that's how we used to name projects anyway).
+ * @returns {Promise<string>} The name of the project. If an error happens, it will return the path you provided (that's how we used to name projects anyway).
  */
-export function NameProject(
+export async function NameProject(
     path: UnknownString,
     wanted?: "name" | "name-colorless" | "path" | "name-ver" | "all",
-): string {
+): Promise<string> {
     const workingPath = ParsePath(path);
     const formattedPath = ColorString(workingPath, "italic", "half-opaque");
 
     // if the path cannot be found, just return it, so the user sees it
-    if (!CheckForPath(workingPath)) return formattedPath;
+    if (!(CheckForPath(workingPath))) return formattedPath;
     try {
-        const env = GetProjectEnvironment(workingPath);
+        const env = await GetProjectEnvironment(workingPath);
 
         const pkgFile = env.main.cpfContent;
 
@@ -441,14 +441,14 @@ export function UnderstandProjectProtection(settings: FkNodeYaml, options: {
  * @param {boolean} existing True if you're validating an existing project, false if it's a new one to be added.
  * @returns {Promise<true | PROJECT_ERROR_CODES>} True if it's valid, a `PROJECT_ERROR_CODES` otherwise.
  */
-export function ValidateProject(entry: string, existing: boolean): true | PROJECT_ERROR_CODES {
+export async function ValidateProject(entry: string, existing: boolean): Promise<true | PROJECT_ERROR_CODES> {
     const workingEntry = ParsePath(entry);
-    if (!CheckForPath(workingEntry)) return "NotFound";
-    // GetProjectEnvironment() already does some validations by itself, so we can just use it here
+    if (!(CheckForPath(workingEntry))) return "NotFound";
+    // await GetProjectEnvironment() already does some validations by itself, so we can just use it here
     try {
-        const env = GetProjectEnvironment(workingEntry);
+        const env = await GetProjectEnvironment(workingEntry);
 
-        if (!CheckForPath(env.main.path)) return "NoPkgFile";
+        if (!(CheckForPath(env.main.path))) return "NoPkgFile";
         if (!env.main.cpfContent.name) return "NoName";
         if (!env.main.cpfContent.version) return "NoVersion";
     } catch (error) {
@@ -556,9 +556,7 @@ export function GetWorkspaces(path: string): string[] {
             for (const dir of expandGlobSync(fullPath)) {
                 DEBUG_LOG("GLOBED", dir);
                 if (!CheckForPath(dir.path)) continue;
-                if (dir.isDirectory) {
-                    absoluteWorkspaces.push(dir.path);
-                }
+                if (dir.isDirectory) absoluteWorkspaces.push(dir.path);
             }
         }
 
@@ -573,11 +571,11 @@ export function GetWorkspaces(path: string): string[] {
  * Returns a project's environment (package manager, runtime, settings, paths to lockfile and `node_modules`, etc...).
  *
  * @param {UnknownString} path Path to the project's root.
- * @returns {ProjectEnvironment}
+ * @returns {Promise<ProjectEnvironment>}
  */
-export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
+export async function GetProjectEnvironment(path: UnknownString): Promise<ProjectEnvironment> {
     DEBUG_LOG("CALLED GetProjectEnvironment WITH path", path);
-    const root = SpotProject(path);
+    const root = await SpotProject(path);
 
     if (!CheckForPath(root)) throw new FknError("Fs__Unreal", `Path ${root} doesn't exist.`);
 
@@ -631,21 +629,11 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
     }
 
     const pathChecks = {
-        deno: Object.fromEntries(
-            Object.entries(paths.deno).map(([key, path]) => [key, CheckForPath(path)]),
-        ),
-        bun: Object.fromEntries(
-            Object.entries(paths.bun).map(([key, path]) => [key, CheckForPath(path)]),
-        ),
-        node: Object.fromEntries(
-            Object.entries(paths.node).map(([key, path]) => [key, CheckForPath(path)]),
-        ),
-        golang: Object.fromEntries(
-            Object.entries(paths.golang).map(([key, path]) => [key, CheckForPath(path)]),
-        ),
-        rust: Object.fromEntries(
-            Object.entries(paths.rust).map(([key, path]) => [key, CheckForPath(path)]),
-        ),
+        deno: Object.fromEntries(Object.entries(paths.deno).map(([key, path]) => [key, CheckForPath(path)] as const)),
+        bun: Object.fromEntries(Object.entries(paths.bun).map(([key, path]) => [key, CheckForPath(path)] as const)),
+        node: Object.fromEntries(Object.entries(paths.node).map(([key, path]) => [key, CheckForPath(path)] as const)),
+        golang: Object.fromEntries(Object.entries(paths.golang).map(([key, path]) => [key, CheckForPath(path)] as const)),
+        rust: Object.fromEntries(Object.entries(paths.rust).map(([key, path]) => [key, CheckForPath(path)] as const)),
     };
 
     const isGo = pathChecks.golang["pkg"] || pathChecks.golang["lock"];
@@ -679,7 +667,7 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
         );
     }
 
-    const seemsToBeNothing = !isNode && !isBun && !isDeno && !isGo && !isRust && !CheckForPath(paths.node.json);
+    const seemsToBeNothing = !isNode && !isBun && !isDeno && !isGo && !isRust && !(CheckForPath(paths.node.json));
 
     if (seemsToBeNothing) {
         throw new FknError(
@@ -831,7 +819,7 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
             },
             lockfile: {
                 name: pathChecks.bun["lockb"] ? "bun.lockb" : "bun.lock",
-                path: CheckForPath(paths.bun.lock) ? paths.bun.lock : null,
+                path: paths.bun.lock,
             },
             runtime: "bun",
             manager: "bun",
@@ -954,13 +942,15 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
 /**
  * Tries to spot the given project name inside of the project list, returning its root path. If not found, returns the parsed path. It also works when you pass a path, parsing it to handle relative paths.
  *
+ * @async
  * @param {UnknownString} name Project's name or path.
  * @returns {string}
  */
-export function SpotProject(name: UnknownString): string {
+export async function SpotProject(name: UnknownString): Promise<string> {
     // the regex is because some projects might be called @someone/something
     const workingProject = validate(name) ? /^@([^\/\s]+)\/([^\/\s]+)$/.test(name) ? name : ParsePath(name) : ParsePath(".");
     if (CheckForPath(workingProject)) return workingProject;
+
     const allProjects = GetAllProjects();
     if (allProjects.includes(workingProject)) {
         return workingProject;
@@ -970,7 +960,7 @@ export function SpotProject(name: UnknownString): string {
 
     for (const project of allProjects) {
         const projectName = normalize(
-            NameProject(project, "name-colorless"),
+            await NameProject(project, "name-colorless"),
             { strict: false, preserveCase: true, removeCliColors: true },
         );
         DEBUG_LOG("SPOT", toSpot, "AGAINST", projectName);
@@ -984,33 +974,31 @@ export function SpotProject(name: UnknownString): string {
 
 /**
  * Cleans up projects that are invalid and probably we won't be able to clean.
- * TODO: this slows down the CLI by A LOT
- *
- * @returns {void}
  */
-export function CleanupProjects(): void {
+export async function CleanupProjects(): Promise<void> {
     const listOfRemovals: { project: string; issue: PROJECT_ERROR_CODES }[] = [];
 
     const allProjects = GetAllProjects();
 
-    for (const project of allProjects) {
-        const validation = ValidateProject(project, true);
-
-        if (validation !== true) {
-            listOfRemovals.push({ project, issue: validation });
-        }
-    }
+    Promise.all(
+        allProjects.map(async (project) => {
+            const issue = await ValidateProject(project, true);
+            if (issue !== true) listOfRemovals.push({ project, issue });
+        }),
+    );
 
     if (listOfRemovals.length === 0) return;
 
     DEBUG_LOG("INVALIDATED", listOfRemovals);
 
-    for (const { project } of listOfRemovals) RemoveProject(project, false);
+    for (const { project } of listOfRemovals) await RemoveProject(project, false);
 
-    // dedupe the list
     Deno.writeTextFileSync(
         GetAppPath("MOTHERFKRS"),
-        Array.from(new Set(GetAllProjects())).join("\n") + "\n",
+        // removed Array.from(new Set()) to test if "IsDuplicate" is reliable enough
+        // removing that should yield better performance
+        // TODO: properly test
+        (GetAllProjects()).join("\n") + "\n",
     );
 
     return;

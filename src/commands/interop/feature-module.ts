@@ -176,21 +176,19 @@ export const InteropedFeatures = {
             return true;
         }
     },
-    Launch: (env: ProjectEnvironment): boolean => {
+    Launch: async (env: ProjectEnvironment): Promise<void> => {
         const script = env.settings.launchCmd;
 
-        if (isDis(script)) return true;
+        if (isDis(script)) return;
 
         if (isDef(script)) {
             if (validateAgainst(env.manager, ["go", "deno", "cargo"]) && !env.settings.launchFile) {
                 throw new FknError(
                     "Task__Launch",
-                    `You tried to launch project ${
-                        NameProject(
-                            env.root,
-                            "name",
-                        )
-                    } without specifying a launchFile in your fknode.yaml. ${env.runtime} requires to specify what file to run.`,
+                    `You tried to launch project ${await NameProject(
+                        env.root,
+                        "name",
+                    )} without specifying a launchFile in your fknode.yaml. ${env.runtime} requires to specify what file to run.`,
                 );
             }
 
@@ -201,7 +199,7 @@ export const InteropedFeatures = {
 
             if (!output.success) HandleError("Task__Launch", output.stdout);
 
-            return true;
+            return;
         }
 
         const output = Commander(
@@ -211,6 +209,6 @@ export const InteropedFeatures = {
 
         if (!output.success) HandleError("Task__Launch", output.stdout);
 
-        return true;
+        return;
     },
 };

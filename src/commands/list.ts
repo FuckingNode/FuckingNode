@@ -9,11 +9,10 @@ import { ColorString } from "../functions/color.ts";
  * Lists all projects.
  *
  * @param {"limit" | "exclude" | false} ignore
- * @returns {void}
  */
-function ListProjects(
+async function ListProjects(
     ignore: "limit" | "exclude" | false,
-): void {
+) {
     const list = GetAllProjects(ignore);
     DEBUG_LOG("FULL PROJECT LIST", list);
     if (list.length === 0) {
@@ -44,7 +43,7 @@ function ListProjects(
     if (ignore === "limit") {
         message = `Here are the ${FWORDS.MFS} you added (and ignored) so far:\n`;
         for (const entry of list) {
-            const protection = (GetProjectEnvironment(entry)).settings.divineProtection; // array
+            const protection = (await GetProjectEnvironment(entry)).settings.divineProtection; // array
             let protectionString: string;
             if (!(Array.isArray(protection))) {
                 protectionString = "ERROR: CANNOT READ SETTINGS, CHECK YOUR FKNODE.YAML!";
@@ -53,7 +52,7 @@ function ListProjects(
             }
 
             toPrint.push(
-                `${NameProject(entry, "all")} (${
+                `${await NameProject(entry, "all")} (${
                     ColorString(
                         protectionString,
                         "bold",
@@ -64,12 +63,12 @@ function ListProjects(
     } else if (ignore === "exclude") {
         message = `Here are the ${FWORDS.MFS} you added (and haven't ignored) so far:\n`;
         for (const entry of list) {
-            toPrint.push(NameProject(entry, "all"));
+            toPrint.push(await NameProject(entry, "all"));
         }
     } else {
         message = `Here are the ${FWORDS.MFS} you added so far:\n`;
         for (const entry of list) {
-            toPrint.push(NameProject(entry, "all"));
+            toPrint.push(await NameProject(entry, "all"));
         }
     }
 
@@ -79,9 +78,9 @@ function ListProjects(
     return;
 }
 
-export default function TheLister(arg: UnknownString) {
+export default async function TheLister(arg: UnknownString) {
     if (!validate(arg)) {
-        ListProjects(
+        await ListProjects(
             false,
         );
         return;
@@ -93,7 +92,7 @@ export default function TheLister(arg: UnknownString) {
     } else if (testFlag(arg, "alive")) {
         ignoreParam = "exclude";
     }
-    ListProjects(
+    await ListProjects(
         ignoreParam,
     );
 }

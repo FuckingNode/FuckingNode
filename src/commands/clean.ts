@@ -31,7 +31,7 @@ export default async function TheCleaner(params: TheCleanerConstructedParams) {
     }
 
     // read all projects
-    const projects = project === 0 ? GetAllProjects() : [SpotProject(project)];
+    const projects = project === 0 ? GetAllProjects() : [await SpotProject(project)];
 
     if (realIntensity === "maxim-only") {
         await PerformMaximCleanup(projects);
@@ -58,7 +58,7 @@ export default async function TheCleaner(params: TheCleanerConstructedParams) {
         // start time of each cleanup
         const startTime = new Date();
         try {
-            if (!CheckForPath(project)) {
+            if (!(CheckForPath(project))) {
                 LogStuff(
                     `Path not found: ${project}. You might want to update your list of ${FWORDS.MFS}.`,
                     "error",
@@ -77,10 +77,10 @@ export default async function TheCleaner(params: TheCleanerConstructedParams) {
 
             console.log("");
             LogStuff(
-                `Cleaning the ${NameProject(project)} ${FWORDS.MF}...`,
+                `Cleaning the ${await NameProject(project)} ${FWORDS.MF}...`,
                 "package",
             );
-            const res = PerformCleanup(
+            const res = await PerformCleanup(
                 project,
                 update,
                 lint,
@@ -112,7 +112,7 @@ export default async function TheCleaner(params: TheCleanerConstructedParams) {
             results.push(result);
         } catch (e) {
             LogStuff(
-                `Error while working around with ${NameProject(project, "name")}: ${e}`,
+                `Error while working around with ${await NameProject(project, "name")}: ${e}`,
                 "error",
                 "red",
             );
@@ -144,6 +144,6 @@ export default async function TheCleaner(params: TheCleanerConstructedParams) {
         }`,
         elapsed,
     );
-    ShowReport(results);
+    await ShowReport(results);
     return;
 }

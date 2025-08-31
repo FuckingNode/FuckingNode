@@ -14,13 +14,14 @@ import { ColorString } from "./color.ts";
 /**
  * Returns file paths for all config files the app uses.
  *
+ * @async
  * @param {("BASE" | "MOTHERFKRS" | "SCHEDULE" | "SETTINGS" | "ERRORS")} path What path you want.
  * @returns {string} The path as a string.
  */
 export function GetAppPath(
     path: "BASE" | "MOTHERFKRS" | "SCHEDULE" | "SETTINGS" | "ERRORS",
 ): string {
-    if (!validate(LOCAL_PLATFORM.APPDATA) || !CheckForPath(LOCAL_PLATFORM.APPDATA)) {
+    if (!validate(LOCAL_PLATFORM.APPDATA) || !(CheckForPath(LOCAL_PLATFORM.APPDATA))) {
         throw new FknError(
             "Os__NoAppdataNoHome",
             `We searched for ${
@@ -51,42 +52,43 @@ export function GetAppPath(
 
 /**
  * Check if config files are present, create them otherwise ("Fresh Setup").
- *
- * @returns {void}
  */
-export function FreshSetup(repairSetts?: boolean): void {
-    const basePath = GetAppPath("BASE");
-    if (!CheckForPath(basePath)) {
-        Deno.mkdirSync(basePath, { recursive: true });
-    }
+export async function FreshSetup(repairSetts?: boolean): Promise<void> {
+    const [basePath, projectPath, errorLogsPath, settingsPath, schedulePath] = await Promise.all([
+        GetAppPath("BASE"),
+        GetAppPath("MOTHERFKRS"),
+        GetAppPath("ERRORS"),
+        GetAppPath("SETTINGS"),
+        GetAppPath("SCHEDULE"),
+    ]);
 
-    const projectPath = GetAppPath("MOTHERFKRS");
-    if (!CheckForPath(projectPath)) {
-        Deno.writeTextFileSync(projectPath, "", {
-            create: true,
-        });
-    }
-
-    const errorLogsPath = GetAppPath("ERRORS");
-    if (!CheckForPath(errorLogsPath)) {
-        Deno.writeTextFileSync(errorLogsPath, "", {
-            create: true,
-        });
-    }
-
-    const settingsPath = GetAppPath("SETTINGS");
-    if ((!CheckForPath(settingsPath) || repairSetts === true)) {
-        Deno.writeTextFileSync(settingsPath, StringifyYaml(DEFAULT_SETTINGS), {
-            create: true,
-        });
-    }
-
-    const schedulePath = GetAppPath("SCHEDULE");
-    if (!CheckForPath(schedulePath)) {
-        Deno.writeTextFileSync(schedulePath, StringifyYaml(DEFAULT_SCHEDULE_FILE), {
-            create: true,
-        });
-    }
+    await Promise.all([
+        (async () => {
+            if (!(CheckForPath(basePath))) {
+                await Deno.mkdir(basePath, { recursive: true });
+            }
+        })(),
+        (async () => {
+            if (!(CheckForPath(projectPath))) {
+                await Deno.writeTextFile(projectPath, "", { create: true });
+            }
+        })(),
+        (async () => {
+            if (!(CheckForPath(errorLogsPath))) {
+                await Deno.writeTextFile(errorLogsPath, "", { create: true });
+            }
+        })(),
+        (async () => {
+            if (!(CheckForPath(settingsPath)) || repairSetts === true) {
+                await Deno.writeTextFile(settingsPath, StringifyYaml(DEFAULT_SETTINGS), { create: true });
+            }
+        })(),
+        (async () => {
+            if (!(CheckForPath(schedulePath))) {
+                await Deno.writeTextFile(schedulePath, StringifyYaml(DEFAULT_SCHEDULE_FILE), { create: true });
+            }
+        })(),
+    ]);
 
     return;
 }
@@ -94,7 +96,7 @@ export function FreshSetup(repairSetts?: boolean): void {
 /**
  * Returns current user settings.
  *
- * @returns {FKNODE_SETTINGS}
+ * @returns {CF_FKNODE_SETTINGS}
  */
 export function GetUserSettings(): CF_FKNODE_SETTINGS {
     const stuff: CF_FKNODE_SETTINGS = parseYaml(Deno.readTextFileSync(GetAppPath("SETTINGS"))) as CF_FKNODE_SETTINGS;
@@ -109,7 +111,6 @@ export function GetUserSettings(): CF_FKNODE_SETTINGS {
  *
  * @param {setting} setting Setting to change.
  * @param {UnknownString} value Value to set it to.
- * @returns {void}
  */
 export function ChangeSetting(
     setting: keyof CF_FKNODE_SETTINGS,
@@ -186,8 +187,6 @@ export function ChangeSetting(
 
 /**
  * Formats user settings and logs them.
- *
- * @returns {void}
  */
 export function DisplaySettings(): void {
     const settings = GetUserSettings();
@@ -229,7 +228,6 @@ export function DisplaySettings(): void {
  * @param {UnknownString} target What to flush.
  * @param {boolean} force If true no confirmation prompt will be shown.
  * @param {boolean} [silent=false] If true no success message will be shown.
- * @returns {void}
  */
 export async function FlushConfigFiles(target: UnknownString, force: boolean, silent: boolean = false): Promise<void> {
     if (!validateAgainst(target, ["logs", "projects", "schedules", "errors", "all"])) {
@@ -253,6 +251,7 @@ export async function FlushConfigFiles(target: UnknownString, force: boolean, si
         ];
     }
 
+    // TODO: parallelize
     const fileSize = typeof file === "string"
         ? Deno.statSync(file).size
         : (file.map((item) => Deno.statSync(item).size)).reduce((acc, num) => acc + num, 0);

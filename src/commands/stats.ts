@@ -21,10 +21,10 @@ function StringifyDependencyRelationship(rel: FnCPF["deps"][0]["rel"]): string {
         : "Dependency...?";
 }
 
-export default function TheStatistics(target: UnknownString) {
-    const project = SpotProject(target);
-    const env = GetProjectEnvironment(project);
-    const name = NameProject(project, "all");
+export default async function TheStatistics(target: UnknownString) {
+    const project = await SpotProject(target);
+    const env = await GetProjectEnvironment(project);
+    const name = await NameProject(project, "all");
 
     LogStuff(
         `${name} · ${ColorString(env.runtime, "bold")} runtime · ${ColorString(env.manager, "bold")} pkg manager`,
