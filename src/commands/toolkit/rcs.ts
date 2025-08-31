@@ -1,10 +1,10 @@
 import { validateAgainst } from "@zakahacecosas/string-utils";
-import { ProjectEnvironment } from "../../types/platform.ts";
+import type { ProjectEnvironment } from "../../types/platform.ts";
 import { LogStuff } from "../../functions/io.ts";
 import { parse } from "@std/semver";
 import { ColorString } from "../../functions/color.ts";
 
-export function RecommendedCommunityStandards(env: ProjectEnvironment) {
+export function RecommendedCommunityStandards(env: ProjectEnvironment): void {
     // deno-lint-ignore no-explicit-any
     const content = env.main.stdContent as any;
 

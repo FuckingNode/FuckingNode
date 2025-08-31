@@ -80,7 +80,7 @@ export async function AddProject(
 
     if (!(CheckForPath(workingEntry))) throw new FknError("Fs__Unreal", `Path "${workingEntry}" doesn't exist.`);
 
-    function addTheEntry(name: string) {
+    function addTheEntry(name: string): void {
         Deno.writeTextFileSync(GetAppPath("MOTHERFKRS"), `${workingEntry}\n`, {
             append: true,
         });
@@ -175,7 +175,7 @@ export async function AddProject(
         const ws = GetWorkspaces(workingEntry);
         if (ws.length === 0) throw e;
 
-        // TODO (V5) - known issue: workspaces tend to lack lockfiles
+        // TODO(@ZakaHaceCosas) (V5) - known issue: workspaces tend to lack lockfiles
         // possible fix would be to skip that check and pass to them a default env override of the parent's env
         // would probably force us to tell workspaces from parents apart in projects list
         // hence this TODO is for V5, this solution (best imho) requires a huge breaking change (projects list)
@@ -320,7 +320,7 @@ export async function NameProject(
  * @returns {boolean}
  */
 export function isObject(
-    // deno-lint-ignore no-explicit-any
+    // deno-lint-ignore explicit-module-boundary-types no-explicit-any
     item: any,
     // deno-lint-ignore no-explicit-any
 ): item is Record<string, any> {
@@ -331,11 +331,12 @@ export function isObject(
  * Deep merge two objects. Not my code, from https://stackoverflow.com/a/34749873.
  */
 export function deepMerge(
-    // deno-lint-ignore no-explicit-any
+    // deno-lint-ignore explicit-module-boundary-types no-explicit-any
     target: any,
     // deno-lint-ignore no-explicit-any
     ...sources: any[]
-) {
+    // deno-lint-ignore no-explicit-any
+): any {
     if (!sources.length) return target;
     const source = sources.shift();
 
@@ -997,7 +998,7 @@ export async function CleanupProjects(): Promise<void> {
         GetAppPath("MOTHERFKRS"),
         // removed Array.from(new Set()) to test if "IsDuplicate" is reliable enough
         // removing that should yield better performance
-        // TODO: properly test
+        // TODO(@ZakaHaceCosas) properly test
         (GetAllProjects()).join("\n") + "\n",
     );
 

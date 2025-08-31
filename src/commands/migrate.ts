@@ -13,7 +13,7 @@ function handler(
     from: MANAGER_JS,
     to: MANAGER_JS,
     env: ProjectEnvironment,
-) {
+): void {
     try {
         if (env.runtime === "golang" || env.runtime === "rust") {
             throw new FknError(

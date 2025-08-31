@@ -26,7 +26,7 @@ export function ValidateUserCmd(env: ProjectEnvironment, key: "commitCmd" | "rel
     return cmd;
 }
 
-export async function RunUserCmd(params: { key: "commitCmd" | "releaseCmd"; env: ProjectEnvironment }) {
+export async function RunUserCmd(params: { key: "commitCmd" | "releaseCmd"; env: ProjectEnvironment }): Promise<void> {
     const { env, key } = params;
 
     const cmd = ValidateUserCmd(env, key);
@@ -60,7 +60,7 @@ export async function RunUserCmd(params: { key: "commitCmd" | "releaseCmd"; env:
     }
 }
 
-export function LaunchUserIDE() {
+export function LaunchUserIDE(): void {
     const IDE: CF_FKNODE_SETTINGS["fav-editor"] = (GetUserSettings())["fav-editor"];
 
     if (!validateAgainst(IDE, ["vscode", "sublime", "emacs", "notepad++", "atom", "vscodium"])) {

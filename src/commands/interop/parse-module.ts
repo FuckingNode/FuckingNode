@@ -150,9 +150,9 @@ const internalParsers = {
     },
 };
 
-export const dedupeDependencies = (deps: FnCPF["deps"]) => {
+export function dedupeDependencies(deps: FnCPF["deps"]): FnCPF["deps"] {
     return deps.filter((dep, index, self) => index === self.findIndex((d) => d.name === dep.name));
-};
+}
 
 export const findDependency = (target: string, deps: FnCPF["deps"]): FnCPF["deps"][0] | undefined => {
     return deps.find((dep) =>
@@ -210,7 +210,7 @@ export const Parsers = {
                 depsObject: CargoPkgFile["dependencies"] | undefined,
                 rValue: FnCPF["deps"][0]["rel"],
                 depsArray: { name: string; ver: string; rel: string; src: string }[],
-            ) {
+            ): void {
                 Object.entries(depsObject ?? {}).forEach(([k, v]) => {
                     depsArray.push({
                         name: k,
@@ -277,7 +277,7 @@ export const Parsers = {
                 depsObject: NodePkgFile["dependencies"] | undefined,
                 rValue: FnCPF["deps"][0]["rel"],
                 depsArray: { name: string; ver: string; rel: string; src: string }[],
-            ) {
+            ): void {
                 Object.entries(depsObject ?? {}).map(([k, v]) => {
                     depsArray.push({ name: k, ver: v, rel: rValue, src: "npm" });
                 });

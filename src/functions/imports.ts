@@ -11,7 +11,7 @@ import { join, parse } from "@std/path";
 export async function GetTsImports(dir: string): Promise<Set<string>> {
     const imports = new Set<string>();
 
-    async function walk(directory: string) {
+    async function walk(directory: string): Promise<void> {
         const files = Deno.readDirSync(directory);
         await Promise.all(files.map(async (file) => {
             const fullPath = join(directory, file.name);

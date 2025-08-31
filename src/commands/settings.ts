@@ -5,7 +5,7 @@ import { normalizeArray, testFlag, validate, validateAgainst } from "@zakahaceco
 import type { CF_FKNODE_SETTINGS } from "../types/config_files.ts";
 import { DEFAULT_SETTINGS } from "../constants.ts";
 
-function ResetSettings() {
+function ResetSettings(): void {
     const confirmation = Interrogate(
         "Are you sure you want to reset your settings to the defaults? Current settings will be lost",
     );
@@ -17,7 +17,7 @@ function ResetSettings() {
     DisplaySettings();
 }
 
-export default async function TheSettings(params: TheSettingsConstructedParams) {
+export default async function TheSettings(params: TheSettingsConstructedParams): Promise<void> {
     const VALID_SETTINGS: (keyof CF_FKNODE_SETTINGS)[] = Object.keys(DEFAULT_SETTINGS) as (keyof CF_FKNODE_SETTINGS)[];
     const args = normalizeArray(params.args);
 

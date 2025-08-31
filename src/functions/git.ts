@@ -3,11 +3,11 @@ import { CheckForPath, JoinPaths, ParsePath } from "../functions/filesystem.ts";
 import { FULL_NAME } from "../constants.ts";
 import { normalize, normalizeArray, StringArray, validate } from "@zakahacecosas/string-utils";
 import { FknError } from "./error.ts";
-import { GIT_FILES } from "../types/misc.ts";
+import type { GIT_FILES } from "../types/misc.ts";
 import { ColorString } from "./color.ts";
 
 /** Runs a Git command with any args. ASSUMES AN ALREADY SPOTTED PATH. */
-function g(path: string, args: string[]) {
+function g(path: string, args: string[]): ReturnType<typeof Commander> {
     return Commander("git", ["-C", path, ...args]);
 }
 

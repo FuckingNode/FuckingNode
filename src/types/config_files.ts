@@ -1,5 +1,5 @@
 import type { CleanerIntensity } from "./config_params.ts";
-import { MANAGER_GLOBAL } from "./platform.ts";
+import type { MANAGER_GLOBAL } from "./platform.ts";
 
 /**
  * Supported code editors.
@@ -237,7 +237,7 @@ export interface FullFkNodeYaml {
  * @returns {obj is FkNodeYaml}
  */
 export function ValidateFkNodeYaml(
-    // deno-lint-ignore no-explicit-any
+    // deno-lint-ignore explicit-module-boundary-types no-explicit-any
     obj: any,
 ): obj is FkNodeYaml {
     if (!obj || typeof obj !== "object") {

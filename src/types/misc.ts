@@ -1,4 +1,4 @@
-import { UnknownString } from "@zakahacecosas/string-utils";
+import type { UnknownString } from "@zakahacecosas/string-utils";
 
 /**
  * Valid emojis

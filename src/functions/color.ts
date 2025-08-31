@@ -1,5 +1,5 @@
 import { blue, bold, brightBlue, brightGreen, brightYellow, cyan, dim, green, italic, magenta, red, rgb8, white } from "@std/fmt/colors";
-import { VALID_COLORS } from "../types/misc.ts";
+import type { VALID_COLORS } from "../types/misc.ts";
 
 /**
  * Given a string, returns a CLI-colored version of it.

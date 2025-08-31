@@ -164,7 +164,7 @@ const ProjectCleaningFeatures = {
             return;
         }
         Deno.chdir(env.root);
-        function getCommitMessage() {
+        function getCommitMessage(): string {
             if (
                 validate(env.settings.commitMessage) && !(isDef(env.settings.commitMessage))
             ) {
@@ -486,10 +486,12 @@ export async function PerformMaximCleanup(projects: string[]): Promise<void> {
 
     for (const project of projects) {
         const workingProject = await SpotProject(project);
-        const name = await NameProject(workingProject, "name");
-        const env = await GetProjectEnvironment(workingProject);
+        const [name, env] = await Promise.all([
+            NameProject(workingProject, "name"),
+            GetProjectEnvironment(workingProject),
+        ]);
 
-        // TODO: add cargo target
+        // TODO(@ZakaHaceCosas) add cargo target
         if (env.runtime === "rust" || env.runtime === "golang") continue;
 
         if (!(CheckForPath(env.hall_of_trash))) {

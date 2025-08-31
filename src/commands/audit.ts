@@ -7,7 +7,7 @@ import type { TheAuditerConstructedParams } from "./constructors/command.ts";
 import { normalize, testFlag, validate } from "@zakahacecosas/string-utils";
 import { ColorString } from "../functions/color.ts";
 
-export default async function TheAuditer(params: TheAuditerConstructedParams) {
+export default async function TheAuditer(params: TheAuditerConstructedParams): Promise<void> {
     const { project } = params;
 
     const shouldAuditAll = !validate(project) ||

@@ -6,13 +6,13 @@ import { parse as parseYaml } from "@std/yaml";
 import { StringifyYaml } from "./io.ts";
 import * as DenoJson from "../../deno.json" with { type: "json" };
 
-export async function RunScheduledTasks() {
+export async function RunScheduledTasks(): Promise<void> {
     const settings = GetUserSettings();
     const scheduleFilePath: string = GetAppPath("SCHEDULE");
     const scheduleFile: CF_FKNODE_SCHEDULE = parseYaml(Deno.readTextFileSync(scheduleFilePath)) as CF_FKNODE_SCHEDULE;
 
     const currentDate: Date = new Date();
-    function CalculateDifference(date: Date) {
+    function CalculateDifference(date: Date): number {
         return (currentDate.getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
     }
 

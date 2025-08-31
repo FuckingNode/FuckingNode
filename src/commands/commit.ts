@@ -4,7 +4,7 @@ import type { TheCommitterConstructedParams } from "./constructors/command.ts";
 import { CanCommit, Commit, GetBranches, GetCommittableFiles, GetStagedFiles, IsRepo, Push, StageFiles } from "../functions/git.ts";
 import { normalize, pluralOrNot, testFlag, validate } from "@zakahacecosas/string-utils";
 import { RunUserCmd, ValidateUserCmd } from "../functions/user.ts";
-import { GIT_FILES } from "../types/misc.ts";
+import type { GIT_FILES } from "../types/misc.ts";
 import { CheckForPath } from "../functions/filesystem.ts";
 import { FknError } from "../functions/error.ts";
 import { ColorString } from "../functions/color.ts";
@@ -53,7 +53,7 @@ function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
     }
 }
 
-export default async function TheCommitter(params: TheCommitterConstructedParams) {
+export default async function TheCommitter(params: TheCommitterConstructedParams): Promise<void> {
     if (!validate(params.message)) {
         throw new FknError(
             "Param__WhateverUnprovided",
@@ -85,7 +85,6 @@ export default async function TheCommitter(params: TheCommitterConstructedParams
     const staged = GetStagedFiles(project);
     for (const f of staged) {
         if (NOT_COMMITTABLE.some((s) => f.includes(s))) {
-            // TODO: show what specific file made this fire up
             throw new FknError(
                 "Git__Forbidden",
                 `Forbidden file detected! '${f}' cannot be committed.`,

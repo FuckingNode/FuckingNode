@@ -17,7 +17,7 @@ export type RESULT = {
     };
 };
 
-export default async function TheCleaner(params: TheCleanerConstructedParams) {
+export default async function TheCleaner(params: TheCleanerConstructedParams): Promise<void> {
     // params
     const { update, lint, prettify, destroy, commit } = params.flags;
     const { intensity, project } = params.parameters;

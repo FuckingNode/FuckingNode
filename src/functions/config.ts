@@ -32,7 +32,7 @@ export function GetAppPath(
 
     const funny = FWORDS.MFS.toLowerCase().replace("*", "o").replace("*", "u");
 
-    function formatDir(name: string) {
+    function formatDir(name: string): string {
         return JoinPaths(BASE_DIR, `${APP_NAME.CLI}-${name}`);
     }
 
@@ -251,7 +251,7 @@ export async function FlushConfigFiles(target: UnknownString, force: boolean, si
         ];
     }
 
-    // TODO: parallelize
+    // TODO(@ZakaHaceCosas) parallelize
     const fileSize = typeof file === "string"
         ? Deno.statSync(file).size
         : (file.map((item) => Deno.statSync(item).size)).reduce((acc, num) => acc + num, 0);

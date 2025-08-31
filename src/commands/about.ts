@@ -47,7 +47,7 @@ const phrase = getRandomPhrase();
 const index = phrases.indexOf(phrase) + 1;
 const dashLength = Math.min(phrase.length, 45);
 
-export default function TheAbouter() {
+export default function TheAbouter(): void {
     LogStuff(colorizeText(ASCII));
     LogStuff(
         `${"-".repeat(dashLength)}\n${ColorString(phrase, "bright-green", "italic")}\n${

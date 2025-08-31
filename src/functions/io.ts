@@ -14,7 +14,7 @@ import { ColorString } from "./color.ts";
  * @returns {string} The message with your emoji, e.g. `"😐 hi chat"`.
  */
 export function Emojify(message: string, emoji: VALID_EMOJIS): string {
-    function GetEmoji(emoji: VALID_EMOJIS) {
+    function GetEmoji(emoji: VALID_EMOJIS): string {
         switch (emoji) {
             case "danger":
                 return `🛑`;
@@ -66,13 +66,13 @@ export function Emojify(message: string, emoji: VALID_EMOJIS): string {
  * Logs a message to the standard output and saves it to a `.log` file.
  * @author ZakaHaceCosas
  *
- * @param {any} message The message to be logged.
+ * @param {unknown} message The message to be logged.
  * @param {?VALID_EMOJIS} [emoji] Additionally, add an emoji before the log.
  * @param {?(VALID_COLORS | VALID_COLORS[])} [color] Optionally, a color (or more) for the output.
  * @returns {void}
  */
 export function LogStuff(
-    // deno-lint-ignore no-explicit-any
+    // deno-lint-ignore explicit-module-boundary-types no-explicit-any
     message: any,
     emoji?: VALID_EMOJIS,
     color?: VALID_COLORS | VALID_COLORS[],

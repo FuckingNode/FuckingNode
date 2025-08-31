@@ -5,7 +5,7 @@ import { DebugFknErr, ErrorHandler } from "./error.ts";
 import { ColorString } from "./color.ts";
 import { GetAppPath } from "./config.ts";
 
-export function RunBuildCmds(commands: string[]) {
+export function RunBuildCmds(commands: string[]): void {
     for (const command of commands) {
         const cmd = command.split(" ");
         if (!cmd[0]) {

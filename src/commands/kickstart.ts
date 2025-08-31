@@ -16,7 +16,7 @@ import { GetElapsedTime } from "../functions/date.ts";
 import { FWORDS } from "../constants/fwords.ts";
 import { ColorString } from "../functions/color.ts";
 
-export default async function TheKickstarter(params: TheKickstarterConstructedParams) {
+export default async function TheKickstarter(params: TheKickstarterConstructedParams): Promise<void> {
     const { gitUrl, path, manager } = params;
     const startup = new Date();
     const { full: repoUrl, name: projectName } = GenerateGitUrl(gitUrl);

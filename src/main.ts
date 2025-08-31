@@ -61,7 +61,7 @@ if (normalize(Deno.args[0] ?? "") === "something-fucked-up") {
     Deno.exit(0);
 }
 
-async function init() {
+async function init(): Promise<void> {
     FreshSetup();
     await RunScheduledTasks();
     CleanupProjects();
@@ -109,7 +109,7 @@ function isNotFlag(arg: UnknownString): arg is string {
     return !str.startsWith("-") && !str.startsWith("--");
 }
 
-async function main(command: UnknownString) {
+async function main(command: UnknownString): Promise<void> {
     // debug commands
     if (FKNODE_SHALL_WE_DEBUG || Deno.args[0]?.startsWith("FKNDBG")) {
         console.log(ColorString("FKNDBG at " + GetDateNow(), "italic"));

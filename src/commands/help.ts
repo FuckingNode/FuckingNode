@@ -34,7 +34,7 @@ function formatCmdWithTitle(title: string, desc: string, obj: HelpItem[]): strin
     return `> ${ColorString(title, "bright-green", "bold")}\n\n>>> Details:\n\n${desc}\n\n>>> Parameters\n\n${formatCmd(obj)}\n`;
 }
 
-function projectReminder() {
+function projectReminder(): void {
     LogStuff(
         "Note: <project> is either a file path OR a project's name.\nIn places where we can assume the project is already added (like 'clean', 'remove', or 'stats'),\nyou can pass the project's name (as it appears in the package file) and it should be recognized.",
         undefined,
@@ -42,7 +42,7 @@ function projectReminder() {
     );
 }
 
-export default function TheHelper(params: TheHelperConstructedParams) {
+export default function TheHelper(params: TheHelperConstructedParams): void {
     const { query } = params;
 
     const USAGE = formatCmd([

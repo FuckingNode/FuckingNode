@@ -9,7 +9,7 @@ import { normalize, table, validate, validateAgainst } from "@zakahacecosas/stri
 import { FknError } from "../functions/error.ts";
 import { ColorString } from "../functions/color.ts";
 
-export default async function TheSetuper(params: TheSetuperConstructedParams) {
+export default async function TheSetuper(params: TheSetuperConstructedParams): Promise<void> {
     if (!validate(params.setup)) {
         LogStuff(table(VISIBLE_SETUPS));
         LogStuff(

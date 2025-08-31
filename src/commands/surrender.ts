@@ -19,12 +19,12 @@ const deprecationNotices: ((proj: string) => string)[] = [
     (p) => `# End of Life notice\n\nThis project, **${p}** has reached *End of Life* (EOL). It is deprecated and thus no longer supported.`,
 ];
 
-// TODO: make this into a jsr package or something, idk
+// TODO(@ZakaHaceCosas): make this into a jsr package or something, idk
 function shuffle<T>(arr: T[]): T {
     return arr[Math.floor(Math.random() * arr.length)]!;
 }
 
-export default async function TheSurrenderer(params: TheSurrendererConstructedParams) {
+export default async function TheSurrenderer(params: TheSurrendererConstructedParams): Promise<void> {
     const project = await SpotProject(params.project);
     const env = await GetProjectEnvironment(project);
 

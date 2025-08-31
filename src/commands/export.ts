@@ -7,7 +7,7 @@ import { GetDateNow } from "../functions/date.ts";
 import { APP_NAME } from "../constants/name.ts";
 import { ColorString } from "../functions/color.ts";
 
-export default async function TheExporter(params: TheExporterConstructedParams) {
+export default async function TheExporter(params: TheExporterConstructedParams): Promise<void> {
     const { project } = params;
 
     const workingProject = await SpotProject(project);

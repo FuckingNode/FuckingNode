@@ -10,7 +10,7 @@
 import { normalize, normalizeArray, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import type { MANAGER_NODE } from "../../types/platform.ts";
 import { Interrogate, LogStuff } from "../../functions/io.ts";
-import { FkNodeSecurityAudit, ParsedNodeReport } from "../../types/audit.ts";
+import type { FkNodeSecurityAudit, ParsedNodeReport } from "../../types/audit.ts";
 import { GetProjectEnvironment, NameProject, SpotProject } from "../../functions/projects.ts";
 import { Commander } from "../../functions/cli.ts";
 import { APP_NAME } from "../../constants/name.ts";
@@ -366,7 +366,8 @@ export function InterrogateVulnerableProject(questions: string[]): Omit<
 
     const isTrue = (s: InterrogatoryResponse): boolean => validateAgainst(s, ["true+2", "true+1"]);
 
-    // TODO - add detailed questions for new vectors
+    // TODO(@ZakaHaceCosas) - add detailed questions for new vectors
+    // smh i'm SO lazy to do this... but i swear i'll do it by V5
     for (const question of questions) {
         const response = handleQuestion({ q: question, f: false, r: true, w: 1 });
 

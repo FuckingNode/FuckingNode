@@ -6,7 +6,7 @@ import { RunBuildCmds } from "../functions/build.ts";
 import { stripAnsiCode } from "@std/fmt/colors";
 import { GetElapsedTime } from "../functions/date.ts";
 
-export default async function TheBuilder(params: TheBuilderConstructedParams) {
+export default async function TheBuilder(params: TheBuilderConstructedParams): Promise<void> {
     const project = (params.project || "").startsWith("--") ? Deno.cwd() : await SpotProject(params.project);
     const env = await GetProjectEnvironment(project);
     const projectName = await NameProject(env.root, "name");

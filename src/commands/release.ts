@@ -14,7 +14,7 @@ import { GetTextIndentSize } from "../functions/filesystem.ts";
 import { RunBuildCmds } from "../functions/build.ts";
 import { ColorString } from "../functions/color.ts";
 
-export default async function TheReleaser(params: TheReleaserConstructedParams) {
+export default async function TheReleaser(params: TheReleaserConstructedParams): Promise<void> {
     if (!validate(params.version)) throw new FknError("Param__VerInvalid", "No version specified!");
 
     // validate version
