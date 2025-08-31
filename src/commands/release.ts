@@ -178,6 +178,10 @@ export default function TheReleaser(params: TheReleaserConstructedParams) {
             project,
             `${env.main.name}.bak`,
         );
+        LogStuff(
+            `Ignored ${env.main.name}.bak successfully`,
+            "tick",
+        );
 
         Commit(
             project,
@@ -192,13 +196,7 @@ export default function TheReleaser(params: TheReleaserConstructedParams) {
             params.push,
         );
 
-        if (params.push) {
-            // push stuff to git
-            const pushOutput = Push(project, false);
-            if (pushOutput === 1) {
-                throw new FknError("Git__UE", `Git push failed unexpectedly.`);
-            }
-        }
+        if (params.push) Push(project, false);
     }
 
     // publish the package

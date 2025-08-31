@@ -9,6 +9,8 @@ import { CheckForPath } from "../functions/filesystem.ts";
 import { FknError } from "../functions/error.ts";
 import { ColorString } from "../functions/color.ts";
 
+const NOT_COMMITTABLE = [".env", ".env.local", ".sqlite", ".db", "node_modules", ".bak"];
+
 function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
     const canCommit = CanCommit(path);
     if (canCommit === false) {
@@ -79,7 +81,18 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
     if (params.keepStagedFiles) {
         LogStuff(`Keeping ${prevStaged.length} previously staged ${pluralOrNot("file", prevStaged.length)} for committing.`, "warn");
     }
+
     const staged = GetStagedFiles(project);
+    for (const f of staged) {
+        if (NOT_COMMITTABLE.some((s) => f.includes(s))) {
+            // TODO: show what specific file made this fire up
+            throw new FknError(
+                "Git__Forbidden",
+                `Forbidden file detected! '${f}' cannot be committed.`,
+            );
+        }
+    }
+
     LogStuff(
         `Staged${params.files[0] === "-A" ? " all files, totalling" : ""} ${staged.length} ${pluralOrNot("file", staged.length)} for commit:\n${
             staged
@@ -96,7 +109,7 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
     const branches = GetBranches(project);
 
     const gitProps = {
-        fileCount: GetStagedFiles(project).length,
+        fileCount: staged.length,
         branch: (params.branch && !testFlag(params.branch, "push", { allowQuickFlag: true, allowSingleDash: true }))
             ? branches.all.includes(normalize(params.branch)) ? params.branch : "__ERROR"
             : branches.current,
@@ -162,7 +175,6 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
 
     // hear me out
     // 1. UNSTAGE their files (they probably won't even realize) so we can modify them
-    const toReStage = GetStagedFiles(project);
     const out = StageFiles(project, "!A");
     if (out !== "ok") {
         throw `Not OK code for staging handler.`;
@@ -187,8 +199,7 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
     // by this point we assume prev task succeeded
     // 3. RESTAGE the files like nothing happened
     // i'm genius developer fr fr
-
-    StageFiles(project, toReStage);
+    StageFiles(project, staged);
 
     // and now, commit :D
     Commit(
@@ -198,14 +209,11 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
         [],
     );
 
-    if (params.push) {
-        // push stuff to git
-        const pushOutput = Push(project, gitProps.branch);
-        if (pushOutput === 1) {
-            throw new FknError("Git__UE", `Git push failed unexpectedly.`);
-        }
-    }
+    if (params.push) Push(project, gitProps.branch);
 
-    LogStuff(`That worked out! Commit "${params.message}" should be live now.`, "tick", ["bold", "bright-green"]);
+    LogStuff(`That worked out! Commit "${params.message}" should be ${params.push ? "done and live" : "done"} now.`, "tick", [
+        "bold",
+        "bright-green",
+    ]);
     return;
 }

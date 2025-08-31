@@ -12,7 +12,7 @@ import { GetAppPath } from "./config.ts";
 import { GetDateNow } from "./date.ts";
 import type { PROJECT_ERROR_CODES } from "../types/errors.ts";
 import { FkNodeInterop } from "../commands/interop/interop.ts";
-import { GetLatestTag, IsRepo } from "../functions/git.ts";
+import { GetLatestTag } from "../functions/git.ts";
 import { internalGolangRequireLikeStringParser } from "../commands/interop/parse-module.ts";
 import { normalize, normalizeArray, toUpperCaseFirst, type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { ResolveLockfiles } from "../commands/toolkit/cleaner.ts";
@@ -173,8 +173,10 @@ export function AddProject(
         const ws = GetWorkspaces(workingEntry);
         if (ws.length === 0) throw e;
 
-        // returning {w, res} and not res is some weird workaround i searched up
-        // because JS Arrays cannot handle promises from .filter()
+        // TODO (V5) - known issue: workspaces tend to lack lockfiles
+        // possible fix would be to skip that check and pass to them a default env override of the parent's env
+        // would probably force us to tell workspaces from parents apart in projects list
+        // hence this TODO is for V5, this solution (best imho) requires a huge breaking change (projects list)
         const workspaceResults = ws.map((w) => {
             const res = ValidateProject(w, false);
             return { w, isValid: res === true };
@@ -184,7 +186,6 @@ export function AddProject(
             .filter(({ isValid }) => isValid)
             .map(({ w }) => w);
 
-        // TODO - known issue: workspaces tend to lack lockfiles
         // invalidating valid projects
         if (workspaces.length === 0) {
             LogStuff(
@@ -717,13 +718,11 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
     const { PackageFileParsers } = FkNodeInterop;
 
     if (settings.projectEnvOverride === "go" || isGo) {
-        let goTag = undefined;
+        let goTag: string | undefined = undefined;
 
-        // this is a bit of a glue fix and looks like it'd *slightly* hurt performance
-        // blame it on google, idiots couldn't think of a 'version' field in go.mod
+        // idiots at google couldn't think of a 'version' field in go.mod
         // and chose to rely on git :sob:
         try {
-            if (!IsRepo(root)) throw "";
             goTag = GetLatestTag(root);
         } catch {
             // nothing
@@ -961,17 +960,12 @@ export function GetProjectEnvironment(path: UnknownString): ProjectEnvironment {
 export function SpotProject(name: UnknownString): string {
     // the regex is because some projects might be called @someone/something
     const workingProject = validate(name) ? /^@([^\/\s]+)\/([^\/\s]+)$/.test(name) ? name : ParsePath(name) : ParsePath(".");
+    if (CheckForPath(workingProject)) return workingProject;
     const allProjects = GetAllProjects();
     if (allProjects.includes(workingProject)) {
         return workingProject;
     }
 
-    if (!validate(name)) {
-        throw new FknError(
-            "Param__WhateverUnprovided",
-            "Invalid project path or name provided, or none provided at all.",
-        );
-    }
     const toSpot = normalize(name, { strict: false, preserveCase: true, removeCliColors: true });
 
     for (const project of allProjects) {
@@ -985,12 +979,12 @@ export function SpotProject(name: UnknownString): string {
         }
     }
 
-    if (CheckForPath(workingProject)) return workingProject;
-    throw new FknError("External__Proj__NotFound", `'${name.trim()}' (=> '${workingProject}') does not exist.`);
+    throw new FknError("External__Proj__NotFound", `'${name!.trim()}' (=> '${workingProject}') does not exist.`);
 }
 
 /**
  * Cleans up projects that are invalid and probably we won't be able to clean.
+ * TODO: this slows down the CLI by A LOT
  *
  * @returns {void}
  */

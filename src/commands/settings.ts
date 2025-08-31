@@ -1,7 +1,9 @@
 import { Interrogate, LogStuff } from "../functions/io.ts";
 import type { TheSettingsConstructedParams } from "./constructors/command.ts";
-import { ChangeSetting, DisplaySettings, FlushConfigFiles, FreshSetup, VALID_SETTINGS } from "../functions/config.ts";
+import { ChangeSetting, DisplaySettings, FlushConfigFiles, FreshSetup } from "../functions/config.ts";
 import { normalizeArray, testFlag, validate, validateAgainst } from "@zakahacecosas/string-utils";
+import type { CF_FKNODE_SETTINGS } from "../types/config_files.ts";
+import { DEFAULT_SETTINGS } from "../constants.ts";
 
 function ResetSettings() {
     const confirmation = Interrogate(
@@ -16,6 +18,7 @@ function ResetSettings() {
 }
 
 export default async function TheSettings(params: TheSettingsConstructedParams) {
+    const VALID_SETTINGS: (keyof CF_FKNODE_SETTINGS)[] = Object.keys(DEFAULT_SETTINGS) as (keyof CF_FKNODE_SETTINGS)[];
     const args = normalizeArray(params.args);
 
     if (!args || args.length === 0) {

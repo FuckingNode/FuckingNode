@@ -98,6 +98,10 @@ export class FknError extends Error {
                     Object.keys(ALIASES).join(", ")
                 }`;
                 break;
+            case "Git__Forbidden":
+                this.hint =
+                    "Sensible files like .env or node_modules/ are intentionally banned from commits (to prevent a catastrophe). Please, manually unstage this file, then re-run without staging it (and preferably add it to .gitignore).";
+                break;
         }
         if (Error.captureStackTrace) Error.captureStackTrace(this, FknError);
     }
@@ -139,22 +143,25 @@ export class FknError extends Error {
 ---
 # BEGIN FknERROR ${this.code} @ ${new Date().toISOString()}
 ---
-- INFO (so you know where you at)
+>>> INFO (so you know where you at)
 Timestamp      :  ${GetDateNow()},
 FknError code  :  ${this.code},
 Thrown message :  ${this.message},
 Thrown hint    :  ${this.hint},
-- STACK (so the dev knows where he at)
+>>> STACK (so the dev knows where he at)
 ${this.stack}
--
-below goes the debugged content dump. this could be, for example, an entire project main file, dumped here for reviewal. it could be a sh*t ton of stuff to read
-- DEBUGGABLE CONTENT (in most cases, what the CLI command that was executed returned, in case we were able to gather it)
+>>> DEBUGGABLE CONTENT
+below goes the debugged content dump (in most cases, what the CLI command that was executed returned).
+it may happen to be a sh*t ton of stuff to read.
+>>> BEGIN DEBUGGABLE CONTENT
 ${stripAnsiCode(debuggableContent ?? "UNKNOWN OUTPUT - No debuggableContent was provided, or it was empty.")}
----
+>>> END DEBUGGABLE CONTENT
 # END   FknERROR ${this.code} # GOOD LUCK FIXING THIS
 ---\n
-        `.trim();
-        if (showWarn) console.warn(ColorString(`For details about what happened, see last entry @ ${debugPath}`, "orange"));
+        `;
+        if (showWarn) {
+            console.warn(ColorString(`An exception occurred. For details about what happened, see the last entry of ${debugPath}`, "orange"));
+        }
         Deno.writeTextFileSync(
             debugPath,
             debuggableError,

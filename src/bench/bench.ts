@@ -1,4 +1,5 @@
 import TheLister from "../commands/list.ts";
+import { IsRepo } from "../functions/git.ts";
 import { AddProject, RemoveProject } from "../functions/projects.ts";
 
 Deno.bench("lister", () => {
@@ -17,4 +18,8 @@ Deno.bench("remover", (b) => {
     b.start();
     RemoveProject(".");
     b.end();
+});
+
+Deno.bench("git check for repo", () => {
+    IsRepo(".");
 });

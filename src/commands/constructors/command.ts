@@ -295,11 +295,17 @@ export interface TheSurrendererConstructedParams {
      */
     learnMoreUrl: UnknownString;
     /**
-     * Is it a GitHub repository? If true, GitHub's `> [!TAGS]` will be used for a prettier string.
+     * Whether to use GitHub flavored MarkDown.
      *
      * @type {?boolean}
      */
-    isGitHub?: boolean;
+    gfm?: boolean;
+    /**
+     * Whether to use GitLab flavored MarkDown.
+     *
+     * @type {?boolean}
+     */
+    glfm?: boolean;
 }
 
 /**

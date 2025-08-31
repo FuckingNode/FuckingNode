@@ -14,11 +14,11 @@ import { ColorString } from "./color.ts";
 /**
  * Returns file paths for all config files the app uses.
  *
- * @param {("BASE" | "MOTHERFKRS" | "LOGS" | "SCHEDULE" | "SETTINGS" | "ERRORS")} path What path you want.
+ * @param {("BASE" | "MOTHERFKRS" | "SCHEDULE" | "SETTINGS" | "ERRORS")} path What path you want.
  * @returns {string} The path as a string.
  */
 export function GetAppPath(
-    path: "BASE" | "MOTHERFKRS" | "LOGS" | "SCHEDULE" | "SETTINGS" | "ERRORS",
+    path: "BASE" | "MOTHERFKRS" | "SCHEDULE" | "SETTINGS" | "ERRORS",
 ): string {
     if (!validate(LOCAL_PLATFORM.APPDATA) || !CheckForPath(LOCAL_PLATFORM.APPDATA)) {
         throw new FknError(
@@ -37,14 +37,12 @@ export function GetAppPath(
 
     const BASE_DIR = JoinPaths(LOCAL_PLATFORM.APPDATA, APP_NAME.CLI);
     const PROJECTS = formatDir(`${funny}.txt`);
-    const LOGS = formatDir("logs.log");
     const SCHEDULE = formatDir("schedule.yaml");
     const SETTINGS = formatDir("settings.yaml");
     const ERRORS = formatDir("errors.log");
 
     if (path === "BASE") return BASE_DIR;
     if (path === "MOTHERFKRS") return PROJECTS;
-    if (path === "LOGS") return LOGS;
     if (path === "SCHEDULE") return SCHEDULE;
     if (path === "SETTINGS") return SETTINGS;
     if (path === "ERRORS") return ERRORS;
@@ -65,13 +63,6 @@ export function FreshSetup(repairSetts?: boolean): void {
     const projectPath = GetAppPath("MOTHERFKRS");
     if (!CheckForPath(projectPath)) {
         Deno.writeTextFileSync(projectPath, "", {
-            create: true,
-        });
-    }
-
-    const logsPath = GetAppPath("LOGS");
-    if (!CheckForPath(logsPath)) {
-        Deno.writeTextFileSync(logsPath, "", {
             create: true,
         });
     }
@@ -113,20 +104,6 @@ export function GetUserSettings(): CF_FKNODE_SETTINGS {
     };
 }
 
-// TODO (for v5 cause breaking)
-// don't use casing for settings
-// the CLI lowercases params, breaking programmatic changing of settings
-// use dashes instead
-export const VALID_SETTINGS = [
-    "defaultintensity",
-    "defaultmanager",
-    "updatefreq",
-    "faveditor",
-    "flushfreq",
-    "shownotifications",
-    "thresholdnotifications",
-] as const;
-
 /**
  * Changes a given user setting to a given value.
  *
@@ -135,7 +112,7 @@ export const VALID_SETTINGS = [
  * @returns {void}
  */
 export function ChangeSetting(
-    setting: typeof VALID_SETTINGS[number],
+    setting: keyof CF_FKNODE_SETTINGS,
     value: UnknownString,
 ): void {
     const settingsPath = GetAppPath("SETTINGS");
@@ -143,43 +120,49 @@ export function ChangeSetting(
 
     let newSettings: CF_FKNODE_SETTINGS | undefined;
 
-    if (setting === "defaultintensity") {
+    if (setting === "default-intensity") {
         if (!validateAgainst(value, ["normal", "hard", "hard-only", "maxim", "maxim-only"])) {
             return LogStuff(`${value} is not valid. Enter either 'normal', 'hard', 'hard-only', or 'maxim'.`);
         }
-        newSettings = { ...currentSettings, defaultIntensity: value };
-    } else if (setting === "defaultmanager") {
+        newSettings = { ...currentSettings, "default-intensity": value };
+    } else if (setting === "default-manager") {
         if (!validateAgainst(value, ["npm", "pnpm", "yarn", "deno", "bun", "cargo", "go"])) {
             return LogStuff(`${value} is not valid. Enter either "npm", "pnpm", "yarn", "deno", "bun", "cargo", or "go".`);
         }
-        newSettings = { ...currentSettings, defaultManager: value };
-    } else if (setting === "updatefreq") {
+        newSettings = { ...currentSettings, "default-manager": value };
+    } else if (setting === "update-freq") {
         const freq = Math.ceil(Number(value));
         if (!Number.isFinite(freq) || freq <= 0) {
             return LogStuff(`${value} is not valid. Enter a valid number greater than 0.`);
         }
-        newSettings = { ...currentSettings, updateFreq: freq };
-    } else if (setting === "faveditor") {
+        newSettings = { ...currentSettings, "update-freq": freq };
+    } else if (setting === "notification-threshold-value") {
+        const freq = Math.ceil(Number(value));
+        if (!Number.isFinite(freq) || freq <= 1000) {
+            return LogStuff(`${value} is not valid. Enter a valid number greater than 1000.`);
+        }
+        newSettings = { ...currentSettings, "notification-threshold-value": freq };
+    } else if (setting === "fav-editor") {
         if (!validateAgainst(value, ["vscode", "sublime", "emacs", "atom", "notepad++", "vscodium"])) {
             return LogStuff(`${value} is not valid. Enter one of: vscode, sublime, emacs, atom, notepad++, vscodium.`);
         }
-        newSettings = { ...currentSettings, favEditor: value };
-    } else if (setting === "flushfreq") {
+        newSettings = { ...currentSettings, "fav-editor": value };
+    } else if (setting === "flush-freq") {
         const flush = Math.ceil(Number(value));
         if (!Number.isFinite(flush) || flush <= 0) {
             return LogStuff(`${value} is not valid. Enter a valid number greater than 0.`);
         }
-        newSettings = { ...currentSettings, flushFreq: flush };
-    } else if (setting === "shownotifications") {
+        newSettings = { ...currentSettings, "flush-freq": flush };
+    } else if (setting === "notifications") {
         if (!validateAgainst(value, ["true", "false"])) {
             return LogStuff(`${value} is not valid. Enter either 'true' or 'false'.`);
         }
-        newSettings = { ...currentSettings, showNotifications: value === "true" };
-    } else if (setting === "thresholdnotifications") {
+        newSettings = { ...currentSettings, notifications: value === "true" };
+    } else if (setting === "notification-threshold") {
         if (!validateAgainst(value, ["true", "false"])) {
             return LogStuff(`${value} is not valid. Enter either 'true' or 'false'.`);
         }
-        newSettings = { ...currentSettings, thresholdNotifications: value === "true" };
+        newSettings = { ...currentSettings, "notification-threshold": value === "true" };
     } else {
         if (!validateAgainst(value, ["npm", "pnpm", "yarn", "bun", "deno", "cargo", "go"])) {
             return LogStuff(`${value} is not valid. Enter a valid package manager (npm, pnpm, yarn, bun, deno, cargo, go).`);
@@ -190,7 +173,7 @@ export function ChangeSetting(
                 `Are you sure? ${value} is a non-JS runtime and ${APP_NAME.CASED} is mainly a JS-related CLI; you'll be using JS projects more often.`,
             )
         ) return;
-        newSettings = { ...currentSettings, defaultManager: value };
+        newSettings = { ...currentSettings, "default-manager": value };
     }
 
     if (newSettings) {
@@ -210,23 +193,29 @@ export function DisplaySettings(): void {
     const settings = GetUserSettings();
 
     const formattedSettings = [
-        `Check for updates             | Every ${ColorString(settings.updateFreq, "bright-green")} days. ${
-            ColorString("updateFreq", "half-opaque", "italic")
+        `Check for updates             | Every ${ColorString(settings["update-freq"], "bright-green")} days. ${
+            ColorString("update-freq", "half-opaque", "italic")
         }`,
-        `Default cleaner intensity     | ${ColorString(settings.defaultIntensity, "bright-green")}. ${
-            ColorString("defaultIntensity", "half-opaque", "italic")
+        `Default cleaner intensity     | ${ColorString(settings["default-intensity"], "bright-green")}. ${
+            ColorString("default-intensity", "half-opaque", "italic")
         }`,
-        `Favorite code editor          | ${ColorString(settings.favEditor, "bright-green")}. ${
-            ColorString("favEditor", "half-opaque", "italic")
+        `Default package manager       | ${ColorString(settings["default-manager"], "bright-green")}. ${
+            ColorString("default-manager", "half-opaque", "italic")
         }`,
-        `Auto-flush log file           | Every ${ColorString(settings.flushFreq, "bright-green")} days. ${
-            ColorString("flushFreq", "half-opaque", "italic")
+        `Favorite code editor          | ${ColorString(settings["fav-editor"], "bright-green")}. ${
+            ColorString("fav-editor", "half-opaque", "italic")
         }`,
-        `Send system notifications     | ${ColorString(settings.showNotifications ? "Enabled" : "Disabled", "bright-green")}. ${
-            ColorString("showNotifications", "half-opaque", "italic")
+        `Auto-flush log file           | Every ${ColorString(settings["flush-freq"], "bright-green")} days. ${
+            ColorString("flush-freq", "half-opaque", "italic")
         }`,
-        `Threshold notifications (30") | ${ColorString(settings.thresholdNotifications ? "Enabled" : "Disabled", "bright-green")}. ${
-            ColorString("thresholdNotifications", "half-opaque", "italic")
+        `Send system notifications     | ${ColorString(settings.notifications ? "Enabled" : "Disabled", "bright-green")}. ${
+            ColorString("notifications", "half-opaque", "italic")
+        }`,
+        `Threshold notifications?      | ${ColorString(settings["notification-threshold"] ? "Enabled" : "Disabled", "bright-green")}. ${
+            ColorString("notification-threshold", "half-opaque", "italic")
+        }`,
+        `Notification threshold        | ${ColorString(settings["notification-threshold-value"], "bright-green")} milliseconds. ${
+            ColorString("notification-threshold", "half-opaque", "italic")
         }`,
     ].join("\n");
 
@@ -253,13 +242,11 @@ export async function FlushConfigFiles(target: UnknownString, force: boolean, si
 
     let file: string[];
 
-    if (target === "logs") file = [GetAppPath("LOGS")];
-    else if (target === "projects") file = [GetAppPath("MOTHERFKRS")];
+    if (target === "projects") file = [GetAppPath("MOTHERFKRS")];
     else if (target === "schedules") file = [GetAppPath("SCHEDULE")];
     else if (target === "errors") file = [GetAppPath("ERRORS")];
     else {
         file = [
-            GetAppPath("LOGS"),
             GetAppPath("MOTHERFKRS"),
             GetAppPath("SCHEDULE"),
             GetAppPath("ERRORS"),

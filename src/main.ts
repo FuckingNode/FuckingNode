@@ -28,7 +28,7 @@ import { normalize, testFlag, testFlags, type UnknownString, validate } from "@z
 import { AddProject, CleanupProjects, RemoveProject } from "./functions/projects.ts";
 import { LaunchWebsite } from "./functions/http.ts";
 import { HINTS } from "./functions/phrases.ts";
-import { GetDateNow } from "./functions/date.ts";
+import { GetDateNow, GetElapsedTime } from "./functions/date.ts";
 import { FWORDS } from "./constants/fwords.ts";
 import { APP_NAME } from "./constants/name.ts";
 import { ColorString } from "./functions/color.ts";
@@ -49,7 +49,6 @@ if (normalize(Deno.args[0] ?? "") === "something-fucked-up") {
             GetAppPath("SCHEDULE"),
             GetAppPath("SETTINGS"),
             GetAppPath("ERRORS"),
-            GetAppPath("LOGS"),
         ];
 
         for (const path of paths) {
@@ -164,14 +163,14 @@ async function main(command: UnknownString) {
 
     if (!validate(command)) {
         TheHelper({});
-        Deno.exit(0);
+        return;
     }
 
     DEBUG_LOG("FLAGS[1]", flags[1], isNotFlag(flags[1]));
     const projectArg = (isNotFlag(flags[1])) ? flags[1] : 0 as const;
     DEBUG_LOG("PROJECT ARG IS", projectArg);
     DEBUG_LOG("FLAGS[2]", flags[2], isNotFlag(flags[2]));
-    const intensityArg = isNotFlag(flags[2]) ? flags[2] : GetUserSettings().defaultIntensity;
+    const intensityArg = isNotFlag(flags[2]) ? flags[2] : GetUserSettings()["default-intensity"];
     DEBUG_LOG("INTENSITY ARG IS", intensityArg);
 
     const cleanerArgs: TheCleanerConstructedParams = {
@@ -276,18 +275,21 @@ async function main(command: UnknownString) {
             break;
         }
         case "surrender":
+        case "deprecate":
         case "give-up":
         case "i-give-up":
         case "its-over":
         case "i-really-hate":
-        // "im-done-with <project>" is wild LMAO
+        // these are the wildest imho:
         case "im-done-with":
+        case "nevermind":
             TheSurrenderer({
                 project: flags[1],
                 message: flags[2],
                 alternative: flags[3],
                 learnMoreUrl: flags[4],
-                isGitHub: hasFlag("github", false) || hasFlag("gh", false),
+                gfm: hasFlag("github", false) || hasFlag("gh", false),
+                glfm: hasFlag("gitlab", false) || hasFlag("gl", false),
             });
             break;
         case "setup":
@@ -369,16 +371,18 @@ async function main(command: UnknownString) {
             TheHelper({});
             LogStuff(`You're seeing this because command '${command}' doesn't exist.`, undefined, ["orange", "italic"]);
     }
-    Deno.exit(0);
 }
 
 // I SWEAR - THE FACT THAT THIS "IF" WAS MISSING MADE ALL THE TEST SUITE NOT WORK LMFAO
 // javascript is definitely... something
 if (import.meta.main) {
     try {
+        const STARTUP = new Date();
         await init();
 
         await main(flags[0]);
+        DEBUG_LOG("STARTUP TIME", GetElapsedTime(STARTUP));
+        Deno.exit(0);
     } catch (e) {
         ErrorHandler(e);
     }

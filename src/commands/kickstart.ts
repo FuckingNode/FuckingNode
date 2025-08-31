@@ -41,8 +41,7 @@ export default function TheKickstarter(params: TheKickstarterConstructedParams) 
     LogStuff("Let's begin! Wait a moment please...", "tick-clear", ["bright-green", "bold"]);
     LogStuff(`Cloning from ${repoUrl}`);
 
-    const gitOutput = Clone(repoUrl, clonePath);
-    if (!gitOutput) Deno.exit(1);
+    Clone(repoUrl, clonePath);
 
     Deno.chdir(clonePath);
 
@@ -84,7 +83,7 @@ export default function TheKickstarter(params: TheKickstarterConstructedParams) 
         ? initialManager
         : ManagerExists(env.manager)
         ? env.manager
-        : GetUserSettings().defaultManager;
+        : GetUserSettings()["default-manager"];
 
     if (!managerToUse) {
         throw new FknError(

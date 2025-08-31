@@ -7,7 +7,7 @@ import { StringifyYaml } from "./io.ts";
 import * as DenoJson from "../../deno.json" with { type: "json" };
 
 export async function RunScheduledTasks() {
-    const { updateFreq, flushFreq } = GetUserSettings();
+    const settings = GetUserSettings();
     const scheduleFilePath: string = GetAppPath("SCHEDULE");
     const scheduleFile: CF_FKNODE_SCHEDULE = parseYaml(Deno.readTextFileSync(scheduleFilePath)) as CF_FKNODE_SCHEDULE;
 
@@ -31,7 +31,7 @@ export async function RunScheduledTasks() {
         },
     };
 
-    if (dates.updater.diff >= updateFreq) {
+    if (dates.updater.diff >= settings["update-freq"]) {
         const updatedScheduleFile: CF_FKNODE_SCHEDULE = {
             ...scheduleFile,
             updater: {
@@ -45,7 +45,7 @@ export async function RunScheduledTasks() {
         Deno.writeTextFileSync(scheduleFilePath, StringifyYaml(updatedScheduleFile));
     }
 
-    if (dates.flusher.diff >= flushFreq) {
+    if (dates.flusher.diff >= settings["flush-freq"]) {
         const updatedScheduleFile: CF_FKNODE_SCHEDULE = {
             ...scheduleFile,
             flusher: {

@@ -61,7 +61,7 @@ export function RunUserCmd(params: { key: "commitCmd" | "releaseCmd"; env: Proje
 }
 
 export function LaunchUserIDE() {
-    const IDE: CF_FKNODE_SETTINGS["favEditor"] = GetUserSettings().favEditor;
+    const IDE: CF_FKNODE_SETTINGS["fav-editor"] = GetUserSettings()["fav-editor"];
 
     if (!validateAgainst(IDE, ["vscode", "sublime", "emacs", "notepad++", "atom", "vscodium"])) {
         throw new FknError("External__Setting__FavIde", `${IDE} is not a supported editor! Cannot launch it.`);

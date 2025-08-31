@@ -28,13 +28,14 @@ export const RELEASE_URL: VALID_URL = `https://api.github.com/repos/ZakaHaceCosa
  * @type {CF_FKNODE_SETTINGS}
  */
 export const DEFAULT_SETTINGS: CF_FKNODE_SETTINGS = {
-    updateFreq: 5,
-    flushFreq: 14,
-    defaultIntensity: "normal",
-    favEditor: "vscode",
-    defaultManager: ManagerExists("pnpm") ? "pnpm" : "npm",
-    thresholdNotifications: true,
-    showNotifications: true,
+    "update-freq": 5,
+    "flush-freq": 14,
+    "default-intensity": "normal",
+    "fav-editor": "vscode",
+    "default-manager": ManagerExists("bun") ? "bun" : ManagerExists("pnpm") ? "pnpm" : "npm",
+    notifications: true,
+    "notification-threshold": false,
+    "notification-threshold-value": 10000,
 };
 
 /**

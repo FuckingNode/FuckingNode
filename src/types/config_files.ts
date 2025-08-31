@@ -17,43 +17,49 @@ export interface CF_FKNODE_SETTINGS {
      *
      * @type {number}
      */
-    updateFreq: number;
+    "update-freq": number;
     /**
      * How often should the CLI clear log files.
      *
      * @type {number}
      */
-    flushFreq: number;
+    "flush-freq": number;
     /**
      * Default cleaner intensity, for running `clean` with no args.
      *
      * @type {CleanerIntensity}
      */
-    defaultIntensity: CleanerIntensity;
+    "default-intensity": CleanerIntensity;
     /**
      * User's favorite code editor.
      *
      * @type {SUPPORTED_EDITORS}
      */
-    favEditor: SUPPORTED_EDITORS;
+    "fav-editor": SUPPORTED_EDITORS;
     /**
      * Default package manager / runtime to use for features like `kickstart`.
      *
      * @type {MANAGER_GLOBAL}
      */
-    defaultManager: MANAGER_GLOBAL;
+    "default-manager": MANAGER_GLOBAL;
     /**
      * If true notifications are shown only if a task takes more than 30 seconds. Else, they're always shown.
      *
      * @type {boolean}
      */
-    thresholdNotifications: boolean;
+    "notification-threshold": boolean;
     /**
      * If true, notifications are shown for certain tasks upon completion.
      *
      * @type {boolean}
      */
-    showNotifications: boolean;
+    notifications: boolean;
+    /**
+     * Duration, in milliseconds, of notifications' threshold.
+     *
+     * @type {number}
+     */
+    "notification-threshold-value": number;
 }
 
 /**

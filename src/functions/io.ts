@@ -1,12 +1,10 @@
 import type { VALID_COLORS, VALID_EMOJIS } from "../types/misc.ts";
-import { GetAppPath, GetUserSettings } from "./config.ts";
+import { GetUserSettings } from "./config.ts";
 import { stringify as stringifyYaml } from "@std/yaml";
-import { GetDateNow } from "./date.ts";
 import { Commander } from "./cli.ts";
 import { APP_NAME } from "../constants/name.ts";
 import { LOCAL_PLATFORM } from "../constants/platform.ts";
 import { ColorString } from "./color.ts";
-import { stripAnsiCode } from "@std/fmt/colors";
 
 /**
  * Appends an emoji at the beginning of a message.
@@ -83,11 +81,6 @@ export function LogStuff(
         if (typeof message !== "string") message = String(message);
         const finalMessage = emoji ? Emojify(message, emoji) : message;
 
-        const plainMessage = stripAnsiCode(finalMessage);
-
-        const formattedMessage = `${GetDateNow()} / ${plainMessage}\n`
-            .replace(/\n{2,}/g, "\n"); // (fix for adding \n to messages that already have an \n for whatever reason)
-
         if (color) {
             if (Array.isArray(color)) {
                 console.log(ColorString(finalMessage, ...color));
@@ -97,12 +90,6 @@ export function LogStuff(
         } else {
             console.log(finalMessage);
         }
-
-        Deno.writeTextFileSync(
-            GetAppPath("LOGS"),
-            formattedMessage,
-            { append: true },
-        );
     } catch (e) {
         throw `Error logging stuff: ${e}`;
     }
@@ -159,8 +146,8 @@ export function StringifyYaml(content: unknown): string {
  */
 export function Notification(title: string, msg: string, elapsed: number): void {
     const settings = GetUserSettings();
-    if (!settings.showNotifications) return;
-    if (settings.thresholdNotifications && elapsed < 30000) return;
+    if (!settings.notifications) return;
+    if (settings["notification-threshold"] && elapsed < settings["notification-threshold-value"]) return;
     // NOTE: we should show our logo
     // requires to bundle it / add it to the installer script
     // on Windows, to write XML inside of the damn script :sob:

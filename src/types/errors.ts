@@ -1,6 +1,22 @@
 export const OS_ERRORS = ["Os__NoAppdataNoHome", "Os__NoEntity"] as const;
 export const FS_ERRORS = ["Fs__Unreal", "Fs__UnparsablePath", "Fs__DemandsEmptying", "Fs__DemandsDIR"] as const;
-export const GIT_ERRORS = ["Git__UE", "Git__UE__Commit", "Git__UE_Push", "Git__UE__IsRepo", "Git__NoBranchAA", "Git__NoBranch"] as const;
+export const GIT_ERRORS = [
+    "Git__GCommittable",
+    "Git__CanCommit",
+    "Git__GBranches",
+    "Git__Ignore",
+    "Git__Commit",
+    "Git__Clone",
+    "Git__Push",
+    "Git__MkTag",
+    "Git__GLTag",
+    "Git__GStaged",
+    "Git__Stage",
+    "Git__IsRepo",
+    "Git__NoBranchAA",
+    "Git__Forbidden",
+    "Git__NoBranch",
+] as const;
 export const ENV_ERRORS = [
     "Env__MissingMotor",
     "Env__NoPkgFile",

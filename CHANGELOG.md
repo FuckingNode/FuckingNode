@@ -6,6 +6,34 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
+## [5.0.0] (Unreleased)
+
+### Added
+
+- Added an option to customize (in milliseconds) the threshold for notifications.
+- Added the option to use GLFM instead of GFM for `surrender` (via `--gitlab/-gl`).
+- Added `deprecate` and `nevermind` as aliases to `surrender`.
+
+### Changed
+
+- (Breaking) Now setting keys were changed and use dashes, much more common for CLIs (and also makes keys consistent with what you see when running `settings`).
+- Now, if installed, Bun will be the default package manager.
+- Now Git errors should be much more properly handled and reported.
+- Now the error dump file should be more readable.
+- Now `surrender` templates will take your project's name and use it within the template.
+- Now overall performance was optimized.
+  - Avoiding unnecessary checks for spotting project paths.
+  - Remove duplicate calls to check for staged files via `commit`.
+  - Remove `logs.log`, removing a ton of file writes.
+
+### Removed
+
+- (Breaking) Removed the `logs.log` file, where _everything_ that happened in the CLI was logged. This meant writing to a file every time we wrote to the stdout, slowing the CLI down and taking up unneeded space. This change improves performance.
+  - Errors still get logged to the `errors.log` file.
+- Removed emojis from `surrender` templates. They're not too professional, you know.
+
+<!-- Once V5 is done, take the benchmark set and run it on V4.3.0 and compare results. Log the improvement here. -->
+
 ## [4.3.0] (26-08-2025)
 
 ### Added
