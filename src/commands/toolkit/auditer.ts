@@ -214,8 +214,8 @@ export function ParseNodeBunReport(jsonString: string, platform: MANAGER_NODE | 
         for (const _entry of report) {
             const entry = _entry.data.advisory;
             /** Compares major SemVer version of current version and fixed version. */
-            const impliesBreakingChanges = qps(entry.patched_versions) ===
-                qps(entry.vulnerable_versions);
+            const impliesBreakingChanges = qps(entry.patched_versions)
+                === qps(entry.vulnerable_versions);
 
             brokenDeps.push(impliesBreakingChanges);
             severities.push(entry.severity);
@@ -274,8 +274,8 @@ export function ParseNodeBunReport(jsonString: string, platform: MANAGER_NODE | 
 
         for (const entry of Object.values(report.advisories)) {
             /** Compares major SemVer version of current version and fixed version. */
-            const impliesBreakingChanges = qps(entry.findings[0]!.version) ===
-                qps(entry.patched_versions);
+            const impliesBreakingChanges = qps(entry.findings[0]!.version)
+                === qps(entry.patched_versions);
 
             advisories.push(entry.github_advisory_id);
             severities.push(entry.severity);
@@ -290,15 +290,10 @@ export function ParseNodeBunReport(jsonString: string, platform: MANAGER_NODE | 
     const questions = AnalyzeSecurityVectorKeywords(initialKws);
     let severity: "low" | "moderate" | "high" | "critical";
 
-    if (severities.includes("critical")) {
-        severity = "critical";
-    } else if (severities.includes("high")) {
-        severity = "high";
-    } else if (severities.includes("moderate")) {
-        severity = "moderate";
-    } else {
-        severity = "low";
-    }
+    if (severities.includes("critical")) severity = "critical";
+    else if (severities.includes("high")) severity = "high";
+    else if (severities.includes("moderate")) severity = "moderate";
+    else severity = "low";
 
     const breaking = brokenDeps.includes(true);
 
@@ -551,8 +546,8 @@ export async function PerformAuditing(project: string): Promise<FkNodeSecurityAu
     const name = await NameProject(env.root, "name-ver");
     // === "__UNSUPPORTED" already does the job, but typescript wants me to specify
     if (
-        env.commands.audit === "__UNSUPPORTED" || env.manager === "deno" || env.manager === "cargo" ||
-        env.manager === "go"
+        env.commands.audit === "__UNSUPPORTED" || env.manager === "deno" || env.manager === "cargo"
+        || env.manager === "go"
     ) {
         LogStuff(
             `Audit is unsupported for ${env.manager.toUpperCase()} (${project}).`,

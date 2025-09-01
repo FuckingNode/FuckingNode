@@ -9,8 +9,6 @@ export default async function TheLauncher(params: TheLauncherConstructedParams):
     Deno.chdir(env.root);
     LaunchUserIDE();
 
-    if (env.settings.launchWithUpdate) {
-        FkNodeInterop.Features.Update(env);
-    }
+    if (env.settings.launchWithUpdate) FkNodeInterop.Features.Update(env);
     await FkNodeInterop.Features.Launch(env);
 }

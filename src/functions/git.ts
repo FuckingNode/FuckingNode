@@ -28,8 +28,8 @@ export function IsRepo(path: string): boolean {
             ],
         );
         if (
-            !output.success ||
-            normalize(output.stdout, { strict: true, removeCliColors: true }) !== "true"
+            !output.success
+            || normalize(output.stdout, { strict: true, removeCliColors: true }) !== "true"
         ) return false; // anything unsuccessful means uncommitted changes
 
         return true;
@@ -60,8 +60,8 @@ export function CanCommit(path: string): boolean | "nonAdded" {
         ) return "nonAdded";
 
         if (
-            (/nothing to commit|working tree clean/.test(localChanges.stdout ?? "")) ||
-            !localChanges.success // anything that isn't 0 means something is in the tree
+            (/nothing to commit|working tree clean/.test(localChanges.stdout ?? ""))
+            || !localChanges.success // anything that isn't 0 means something is in the tree
         ) return false; // if anything happens we assume the tree isn't clean, just in case.
 
         // check if the local branch is behind the remote
@@ -73,8 +73,8 @@ export function CanCommit(path: string): boolean | "nonAdded" {
         ]);
         if (!remoteStatus.stdout) return false; // if we can't get the remote status, we assume it's not clean
         if (
-            remoteStatus.success &&
-            parseInt(remoteStatus.stdout, 10) > 0
+            remoteStatus.success
+            && parseInt(remoteStatus.stdout, 10) > 0
         ) return false; // local branch is behind the remote, so we shouldn't change stuff
 
         return true; // clean working tree and up to date with remote, we can do whatever we want

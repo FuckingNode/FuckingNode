@@ -25,8 +25,8 @@ function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
         return "ok"; // nothing to do, files alr staged
     }
     if (
-        Array.isArray(files) && files[0] !== "-A" && files.filter(validate).filter(CheckForPath).length === 0 &&
-        !testFlag(files[0] ?? "a", "keep", { allowNonExactString: true, allowQuickFlag: true, allowSingleDash: true })
+        Array.isArray(files) && files[0] !== "-A" && files.filter(validate).filter(CheckForPath).length === 0
+        && !testFlag(files[0] ?? "a", "keep", { allowNonExactString: true, allowQuickFlag: true, allowSingleDash: true })
     ) {
         LogStuff(
             `No files specified for committing. Specify any of the ${
@@ -173,9 +173,7 @@ export default async function TheCommitter(params: TheCommitterConstructedParams
     // hear me out
     // 1. UNSTAGE their files (they probably won't even realize) so we can modify them
     const out = StageFiles(project, "!A");
-    if (out !== "ok") {
-        throw `Not OK code for staging handler.`;
-    }
+    if (out !== "ok") throw `Not OK code for staging handler.`;
 
     // 2. run their commitCmd over UNSTAGED, MODIFIABLE files
     try {

@@ -110,8 +110,8 @@ const ProjectCleaningFeatures = {
         try {
             if (!env.settings.destroy) return;
             if (
-                !env.settings.destroy.intensities.includes(intensity) &&
-                !env.settings.destroy.intensities.includes("*")
+                !env.settings.destroy.intensities.includes(intensity)
+                && !env.settings.destroy.intensities.includes("*")
             ) return;
             if (env.settings.destroy.targets.length === 0) return;
             for (const target of env.settings.destroy.targets) {
@@ -218,7 +218,10 @@ export async function PerformCleanup(
     const protections: string[] = [];
     const errors: string[] = [];
 
-    ([[shouldUpdate, "updater"], [shouldLint, "linter"], [shouldPrettify, "prettifier"], [shouldDestroy, "destroyer"], [true, "cleaner"]] as [
+    ([[shouldUpdate, "updater"], [shouldLint, "linter"], [shouldPrettify, "prettifier"], [shouldDestroy, "destroyer"], [
+        true,
+        "cleaner",
+    ]] as [
         boolean,
         "updater",
     ][]).forEach((v) => {
@@ -529,21 +532,13 @@ export function ValidateIntensity(intensity: string): CleanerIntensity {
     const workingIntensity = cleanedIntensity as CleanerIntensity | "--";
     const defaultIntensity = (GetUserSettings())["default-intensity"];
 
-    if (workingIntensity === "--") {
-        return defaultIntensity;
-    }
+    if (workingIntensity === "--") return defaultIntensity;
 
-    if (workingIntensity === "normal") {
-        return "normal";
-    }
+    if (workingIntensity === "normal") return "normal";
 
-    if (workingIntensity === "hard") {
-        return "hard";
-    }
+    if (workingIntensity === "hard") return "hard";
 
-    if (workingIntensity === "hard-only") {
-        return "hard-only";
-    }
+    if (workingIntensity === "hard-only") return "hard-only";
 
     if (workingIntensity === "maxim" || workingIntensity === "maxim-only") {
         const confirmMaxim = Interrogate(
@@ -607,9 +602,7 @@ export function ResolveLockfiles(path: string): LOCKFILE_GLOBAL[] {
         "go.sum",
         "Cargo.lock",
     ];
-    for (const lockfile of possibleLockfiles) {
-        if (CheckForPath(JoinPaths(path, lockfile))) lockfiles.push(lockfile);
-    }
+    for (const lockfile of possibleLockfiles) if (CheckForPath(JoinPaths(path, lockfile))) lockfiles.push(lockfile);
     return lockfiles;
 }
 

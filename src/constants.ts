@@ -33,7 +33,7 @@ export const DEFAULT_SETTINGS: CF_FKNODE_SETTINGS = {
     "default-intensity": "normal",
     "fav-editor": "vscode",
     "default-manager": ManagerExists("bun") ? "bun" : ManagerExists("pnpm") ? "pnpm" : "npm",
-    notifications: true,
+    "notifications": true,
     "notification-threshold": false,
     "notification-threshold-value": 10000,
 };

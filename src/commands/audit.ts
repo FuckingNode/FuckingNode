@@ -10,8 +10,9 @@ import { ColorString } from "../functions/color.ts";
 export default async function TheAuditer(params: TheAuditerConstructedParams): Promise<void> {
     const { project } = params;
 
-    const shouldAuditAll = !validate(project) ||
-        testFlag(project, "all", { allowQuickFlag: true, allowSingleDash: true, allowNonExactString: true }) || normalize(project) === "--";
+    const shouldAuditAll = !validate(project)
+        || testFlag(project, "all", { allowQuickFlag: true, allowSingleDash: true, allowNonExactString: true })
+        || normalize(project) === "--";
 
     if (shouldAuditAll) {
         const projects = GetAllProjects();

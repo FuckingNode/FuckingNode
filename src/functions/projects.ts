@@ -102,9 +102,8 @@ export async function AddProject(
         const validation = await ValidateProject(workingEntry, false);
 
         if (validation !== true) {
-            if (validation === "IsDuplicate") {
-                LogStuff(`bruh, ${projectName} is already added! No need to re-add it.`, "bruh");
-            } else if (validation === "NoName") {
+            if (validation === "IsDuplicate") LogStuff(`bruh, ${projectName} is already added! No need to re-add it.`, "bruh");
+            else if (validation === "NoName") {
                 LogStuff(
                     `Error adding ${projectName}: no name!\nSee how the project's name is missing? We can't work with that, we need a name to identify the project.\nPlease set "name" in your package file to something valid.`,
                     "error",
@@ -137,9 +136,7 @@ export async function AddProject(
 
         const workspaceString: string[] = [];
 
-        for (const ws of workspaces) {
-            workspaceString.push(await NameProject(ws, "all"));
-        }
+        for (const ws of workspaces) workspaceString.push(await NameProject(ws, "all"));
 
         const addWorkspaces = Interrogate(
             `Hey! This looks like a ${FWORDS.FKN} monorepo. We've found these workspaces:\n\n${
@@ -199,9 +196,7 @@ export async function AddProject(
             }.\n\nShould we add them to your list so they're all cleaned?`,
         );
 
-        if (!addWorkspaces) {
-            return;
-        }
+        if (!addWorkspaces) return;
 
         const allEntries = [workingEntry, ...workspaces].join("\n") + "\n";
         Deno.writeTextFileSync(GetAppPath("MOTHERFKRS"), allEntries, { append: true });
@@ -629,25 +624,25 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
 
     const isGo = pathChecks.golang["pkg"] || pathChecks.golang["lock"];
     const isRust = pathChecks.rust["pkg"] || pathChecks.rust["lock"];
-    const isDeno = pathChecks.deno["lock"] ||
-        pathChecks.deno["json"] ||
-        pathChecks.deno["jsonc"];
-    const isBun = pathChecks.bun["lock"] ||
-        pathChecks.bun["lockb"] ||
-        pathChecks.bun["toml"];
-    const isPnpm = pathChecks.node["lockPnpm"] ||
-        pathChecks.node["pnpmInfer1"] ||
-        pathChecks.node["pnpmInfer2"] ||
-        scriptHas("pnpm");
-    const isYarn = pathChecks.node["lockYarn"] ||
-        pathChecks.node["yarnInfer1"] ||
-        pathChecks.node["yarnInfer2"] ||
-        scriptHas("yarn");
-    const isNpm = pathChecks.node["lockNpm"] ||
-        pathChecks.node["npmInfer"] ||
-        scriptHas("npm");
-    const isNode = isPnpm || isNpm || isYarn ||
-        pathChecks.node["json"];
+    const isDeno = pathChecks.deno["lock"]
+        || pathChecks.deno["json"]
+        || pathChecks.deno["jsonc"];
+    const isBun = pathChecks.bun["lock"]
+        || pathChecks.bun["lockb"]
+        || pathChecks.bun["toml"];
+    const isPnpm = pathChecks.node["lockPnpm"]
+        || pathChecks.node["pnpmInfer1"]
+        || pathChecks.node["pnpmInfer2"]
+        || scriptHas("pnpm");
+    const isYarn = pathChecks.node["lockYarn"]
+        || pathChecks.node["yarnInfer1"]
+        || pathChecks.node["yarnInfer2"]
+        || scriptHas("yarn");
+    const isNpm = pathChecks.node["lockNpm"]
+        || pathChecks.node["npmInfer"]
+        || scriptHas("npm");
+    const isNode = isPnpm || isNpm || isYarn
+        || pathChecks.node["json"];
 
     if (
         !pathChecks.node["json"] && !pathChecks.deno["json"] && !pathChecks.bun["toml"] && !pathChecks.golang["pkg"] && !pathChecks.rust["pkg"]
@@ -946,9 +941,7 @@ export async function SpotProject(name: UnknownString): Promise<string> {
     if (CheckForPath(workingProject)) return workingProject;
 
     const allProjects = GetAllProjects();
-    if (allProjects.includes(workingProject)) {
-        return workingProject;
-    }
+    if (allProjects.includes(workingProject)) return workingProject;
 
     const toSpot = normalize(name, { strict: false, preserveCase: true, removeCliColors: true });
 
@@ -958,9 +951,7 @@ export async function SpotProject(name: UnknownString): Promise<string> {
             { strict: false, preserveCase: true, removeCliColors: true },
         );
         DEBUG_LOG("SPOT", toSpot, "AGAINST", projectName);
-        if (toSpot === projectName) {
-            return project;
-        }
+        if (toSpot === projectName) return project;
     }
 
     throw new FknError("External__Proj__NotFound", `'${name!.trim()}' (=> '${workingProject}') does not exist.`);

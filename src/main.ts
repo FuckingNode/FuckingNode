@@ -112,7 +112,9 @@ function isNotFlag(arg: UnknownString): arg is string {
 async function main(command: UnknownString): Promise<void> {
     // debug commands
     if (FKNODE_SHALL_WE_DEBUG || Deno.args[0]?.startsWith("FKNDBG")) {
-        console.log(`${ColorString("FKNDBG at " + GetDateNow(), "italic")}\nFKNDBG Logs aren't stored into the .log file.\n${"-".repeat(37)}`);
+        console.log(
+            `${ColorString("FKNDBG at " + GetDateNow(), "italic")}\nFKNDBG Logs aren't stored into the .log file.\n${"-".repeat(37)}`,
+        );
     }
     if (Deno.args[0] === "FKNDBG_PROC") {
         console.log(
@@ -142,9 +144,7 @@ async function main(command: UnknownString): Promise<void> {
     if (Deno.args[0] === "FKNDBG_MEM") {
         const mem = Deno.memoryUsage();
         console.log("MEM USAGE:");
-        for (const [k, v] of Object.entries(mem)) {
-            console.log(`${k.padEnd(10)}: ${(v / 1024 / 1024).toFixed(2)} MB`);
-        }
+        for (const [k, v] of Object.entries(mem)) console.log(`${k.padEnd(10)}: ${(v / 1024 / 1024).toFixed(2)} MB`);
         return;
     }
     if (Deno.args[0] === "FKNDBG_WHO") {

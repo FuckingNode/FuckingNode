@@ -160,7 +160,9 @@ ${stripAnsiCode(debuggableContent ?? "UNKNOWN OUTPUT - No debuggableContent was 
 ---\n
         `;
         if (showWarn) {
-            console.warn(ColorString(`An exception occurred. For details about what happened, see the last entry of ${debugPath}`, "orange"));
+            console.warn(
+                ColorString(`An exception occurred. For details about what happened, see the last entry of ${debugPath}`, "orange"),
+            );
         }
         Deno.writeTextFileSync(
             debugPath,

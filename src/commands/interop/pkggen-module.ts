@@ -81,7 +81,7 @@ export const Generators: {
     /** Generates a `Cargo.toml` from a FnCPF. */
     Cargo: (cpf: FnCPF, additionalParams?: object): ExtraProps<CargoPkgFile> => {
         const generatedPkgFile: ExtraProps<CargoPkgFile> = {
-            package: cpf.perPlatProps.cargo_edt
+            "package": cpf.perPlatProps.cargo_edt
                 ? {
                     name: cpf.name,
                     version: cpf.version,
@@ -91,10 +91,10 @@ export const Generators: {
                     name: cpf.name,
                     version: cpf.version,
                 },
-            dependencies: getCargoDeps(cpf, "univ:dep"),
+            "dependencies": getCargoDeps(cpf, "univ:dep"),
             "dev-dependencies": getCargoDeps(cpf, "univ:devD"),
             "build-dependencies": getCargoDeps(cpf, "rst:buildD"),
-            workspace: { members: cpf.ws },
+            "workspace": { members: cpf.ws },
         };
 
         return deepMerge(generatedPkgFile, additionalParams);

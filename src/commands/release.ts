@@ -79,9 +79,7 @@ export default async function TheReleaser(params: TheReleaserConstructedParams):
             );
         }
     }
-    if (params.push && !canUseGit) {
-        LogStuff("--push was specified, but you're not in a Git repo, so it'll be ignored.\n");
-    }
+    if (params.push && !canUseGit) LogStuff("--push was specified, but you're not in a Git repo, so it'll be ignored.\n");
     if (!(params.dry === true || env.settings.releaseAlwaysDry === true)) {
         actions.push(
             ColorString(
@@ -198,9 +196,7 @@ export default async function TheReleaser(params: TheReleaserConstructedParams):
 
     // publish the package
     const publishOutput = Commander(env.commands.base, env.commands.publish);
-    if (!publishOutput.success) {
-        throw new FknError("External__Publish", `Publish command failed: ${publishOutput.stdout}`);
-    }
+    if (!publishOutput.success) throw new FknError("External__Publish", `Publish command failed: ${publishOutput.stdout}`);
 
     LogStuff(`That worked out! ${params.version} should be live now.`, "tick", ["bold", "bright-green"]);
     return;

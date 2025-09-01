@@ -82,15 +82,11 @@ const internalParsers = {
                 while (newIndex < parsedLines.length) {
                     const nextLine = parsedLines[newIndex]?.trim();
 
-                    if (nextLine === undefined) {
-                        break; // break if the line is invalid
-                    }
+                    if (nextLine === undefined) break; // break if the line is invalid
 
                     const nextParts = nextLine.split(/\s+/);
 
-                    if (nextParts[0] === undefined || nextParts[1] === undefined) {
-                        break; // break if invalid
-                    }
+                    if (nextParts[0] === undefined || nextParts[1] === undefined) break; // break if invalid
 
                     const moduleName = nextParts[0].trim();
                     const version = nextParts[1].trim();
@@ -156,8 +152,8 @@ export function dedupeDependencies(deps: FnCPF["deps"]): FnCPF["deps"] {
 
 export const findDependency = (target: string, deps: FnCPF["deps"]): FnCPF["deps"][0] | undefined => {
     return deps.find((dep) =>
-        normalize(dep.name, { strict: true, preserveCase: true, removeCliColors: true }) ===
-            normalize(target, { strict: true, preserveCase: true, removeCliColors: true })
+        normalize(dep.name, { strict: true, preserveCase: true, removeCliColors: true })
+            === normalize(target, { strict: true, preserveCase: true, removeCliColors: true })
     );
 };
 
@@ -230,22 +226,22 @@ export const Parsers = {
                     ? parsedContent.package?.name
                     : parsedContent.package?.name?.workspace === true
                     ? parsedContent.workspace?.package?.name
-                    : "unknown-name") ??
-                    "unknown-name";
+                    : "unknown-name")
+                    ?? "unknown-name";
             const version =
                 (typeof parsedContent.package?.version === "string"
                     ? parsedContent.package?.version
                     : parsedContent.package?.version?.workspace === true
                     ? parsedContent.workspace?.package?.version
-                    : "unknown-ver") ??
-                    "unknown-ver";
+                    : "unknown-ver")
+                    ?? "unknown-ver";
             const cargo_edt =
                 (typeof parsedContent.package?.edition === "string"
                     ? parsedContent.package?.edition
                     : parsedContent.package?.edition?.workspace === true
                     ? parsedContent.workspace?.package?.edition
-                    : "unknown-edt") ??
-                    "unknown-edt";
+                    : "unknown-edt")
+                    ?? "unknown-edt";
 
             return {
                 name,
@@ -312,8 +308,8 @@ export const Parsers = {
             Object.values(parsedContent.imports ?? {}).map((v) => {
                 const t = v.match(denoImportRegex); // Directly use the match result
                 if (
-                    t && t.groups && t.groups["package"] && t.groups["version"] &&
-                    validateAgainst(t.groups["source"], ["npm", "jsr"])
+                    t && t.groups && t.groups["package"] && t.groups["version"]
+                    && validateAgainst(t.groups["source"], ["npm", "jsr"])
                 ) {
                     deps.push({
                         name: t.groups["package"], // Scope/package

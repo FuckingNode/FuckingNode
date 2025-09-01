@@ -58,16 +58,16 @@ export interface DenoPkgFile extends GenericJsPkgFile {
  * @interface CargoPkgFile
  */
 export interface CargoPkgFile {
-    package?: {
+    "package"?: {
         name: string | { workspace: true };
         version: string | { workspace: true };
         /** If unclear, the Rust "edition" is the Rust version to be used. */
         edition?: string | { workspace: true };
     };
-    dependencies?: Record<string, CargoDependency>;
+    "dependencies"?: Record<string, CargoDependency>;
     "dev-dependencies"?: Record<string, CargoDependency>;
     "build-dependencies"?: Record<string, CargoDependency>;
-    workspace?: {
+    "workspace"?: {
         package?: {
             name: string;
             version: string;

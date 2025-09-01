@@ -245,7 +245,7 @@ Deno.test({
     fn: () => {
         assertEquals(
             FkNodeInterop.Generators.Deno(PKGGEN_TEST_FNCPF, {
-                "lock": true,
+                lock: true,
             }),
             {
                 name: "test",
@@ -270,7 +270,7 @@ Deno.test({
                 },
             }),
             {
-                package: {
+                "package": {
                     name: "test",
                     version: "0.59.123",
                     edition: "2021",
@@ -280,10 +280,10 @@ Deno.test({
                 "dev-dependencies": {
                     typescript: "^4.4.3",
                 },
-                dependencies: {
+                "dependencies": {
                     eslint: "^7.32.0",
                 },
-                workspace: {
+                "workspace": {
                     members: [],
                 },
             },

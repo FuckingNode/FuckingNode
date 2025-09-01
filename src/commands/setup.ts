@@ -20,9 +20,7 @@ export default async function TheSetuper(params: TheSetuperConstructedParams): P
 
     const project = validate(params.project) ? params.project : ".";
 
-    if (!(CheckForPath(project))) {
-        throw new FknError("Param__TargetInvalid", `Specified path ${params.project} doesn't exist!`);
-    }
+    if (!(CheckForPath(project))) throw new FknError("Param__TargetInvalid", `Specified path ${params.project} doesn't exist!`);
 
     const desiredSetup = normalize(params.setup, { strict: true });
     const setupToUse = SETUPS.find((s) => (normalize(s.name, { strict: true })) === desiredSetup);

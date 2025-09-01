@@ -19,11 +19,8 @@ export const mocks = {
         return (path: string | URL): string => { // same return type as the mock func
             // here goes the specific logic
             const resolvedPath = typeof path === "string" ? path : path.toString();
-            if (resolvedPath === GetAppPath("MOTHERFKRS")) {
-                return `${CONSTANTS.ENV_PATH}/test-one`; // we give /test-one instead of \\test-one in purpose to ensure paths are parsed before returning them
-            } else {
-                return Deno.readTextFileSync(path); // (path: string | URL): Promise<string>
-            }
+            if (resolvedPath === GetAppPath("MOTHERFKRS")) return `${CONSTANTS.ENV_PATH}/test-one`; // we give /test-one instead of \\test-one in purpose to ensure paths are parsed before returning them
+            else return Deno.readTextFileSync(path); // (path: string | URL): Promise<string>
         };
     },
     // bla bla bla...

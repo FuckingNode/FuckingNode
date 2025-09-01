@@ -53,7 +53,7 @@ export interface CF_FKNODE_SETTINGS {
      *
      * @type {boolean}
      */
-    notifications: boolean;
+    "notifications": boolean;
     /**
      * Duration, in milliseconds, of notifications' threshold.
      *
@@ -240,17 +240,15 @@ export function ValidateFkNodeYaml(
     // deno-lint-ignore explicit-module-boundary-types no-explicit-any
     obj: any,
 ): obj is FkNodeYaml {
-    if (!obj || typeof obj !== "object") {
-        return false;
-    }
+    if (!obj || typeof obj !== "object") return false;
 
     if (
-        obj.divineProtection !== undefined &&
-        obj.divineProtection !== "*" &&
-        obj.divineProtection !== "disabled" &&
-        !(
-            Array.isArray(obj.divineProtection) &&
-            obj.divineProtection.every(
+        obj.divineProtection !== undefined
+        && obj.divineProtection !== "*"
+        && obj.divineProtection !== "disabled"
+        && !(
+            Array.isArray(obj.divineProtection)
+            && obj.divineProtection.every(
                 // deno-lint-ignore no-explicit-any
                 (item: any) => {
                     return ["updater", "cleaner", "linter", "prettifier", "destroyer"].includes(item);
@@ -275,16 +273,16 @@ export function ValidateFkNodeYaml(
 
     if (obj.destroy !== undefined) {
         if (
-            typeof obj.destroy !== "object" ||
-            !Array.isArray(obj.destroy.targets) ||
-            !obj.destroy.targets.every(
+            typeof obj.destroy !== "object"
+            || !Array.isArray(obj.destroy.targets)
+            || !obj.destroy.targets.every(
                 // deno-lint-ignore no-explicit-any
                 (target: any) => typeof target === "string",
-            ) ||
-            !(
-                obj.destroy.intensities === "*" ||
-                (Array.isArray(obj.destroy.intensities) &&
-                    obj.destroy.intensities.every(
+            )
+            || !(
+                obj.destroy.intensities === "*"
+                || (Array.isArray(obj.destroy.intensities)
+                    && obj.destroy.intensities.every(
                         // deno-lint-ignore no-explicit-any
                         (intensity: any) => {
                             return ["normal", "hard", "hard-only", "maxim", "maxim-only", "*"].includes(intensity);
@@ -296,52 +294,36 @@ export function ValidateFkNodeYaml(
         }
     }
 
-    if (obj.commitActions !== undefined && typeof obj.commitActions !== "boolean") {
-        return false;
-    }
+    if (obj.commitActions !== undefined && typeof obj.commitActions !== "boolean") return false;
 
     if (
-        obj.commitMessage !== undefined &&
-        typeof obj.commitMessage !== "string"
+        obj.commitMessage !== undefined
+        && typeof obj.commitMessage !== "string"
     ) {
         return false;
     }
 
     if (
-        obj.updateCmdOverride !== undefined &&
-        typeof obj.updateCmdOverride !== "string"
+        obj.updateCmdOverride !== undefined
+        && typeof obj.updateCmdOverride !== "string"
     ) {
         return false;
     }
 
     if (obj.flagless !== undefined) {
-        if (typeof obj.flagless !== "object" || obj.flagless === null) {
-            return false;
-        }
+        if (typeof obj.flagless !== "object" || obj.flagless === null) return false;
 
         const validKeys = ["flaglessUpdate", "flaglessDestroy", "flaglessLint", "flaglessPretty", "flaglessCommit"];
-        for (const [key, value] of Object.entries(obj.flagless)) {
-            if (!validKeys.includes(key) || typeof value !== "boolean") {
-                return false;
-            }
-        }
+        for (const [key, value] of Object.entries(obj.flagless)) if (!validKeys.includes(key) || typeof value !== "boolean") return false;
     }
 
-    if (obj.releaseCmd !== undefined && typeof obj.releaseCmd !== "string") {
-        return false;
-    }
+    if (obj.releaseCmd !== undefined && typeof obj.releaseCmd !== "string") return false;
 
-    if (obj.releaseAlwaysDry !== undefined && typeof obj.releaseAlwaysDry !== "boolean") {
-        return false;
-    }
+    if (obj.releaseAlwaysDry !== undefined && typeof obj.releaseAlwaysDry !== "boolean") return false;
 
-    if (obj.commitCmd !== undefined && typeof obj.commitCmd !== "string") {
-        return false;
-    }
+    if (obj.commitCmd !== undefined && typeof obj.commitCmd !== "string") return false;
 
-    if (obj.launchCmd !== undefined && typeof obj.launchCmd !== "string") {
-        return false;
-    }
+    if (obj.launchCmd !== undefined && typeof obj.launchCmd !== "string") return false;
 
     return true;
 }

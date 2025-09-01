@@ -58,19 +58,13 @@ export async function FreshSetup(repairSetts?: boolean): Promise<void> {
 
     await Promise.all([
         (async () => {
-            if (!(CheckForPath(basePath))) {
-                await Deno.mkdir(basePath, { recursive: true });
-            }
+            if (!(CheckForPath(basePath))) await Deno.mkdir(basePath, { recursive: true });
         })(),
         (async () => {
-            if (!(CheckForPath(projectPath))) {
-                await Deno.writeTextFile(projectPath, "", { create: true });
-            }
+            if (!(CheckForPath(projectPath))) await Deno.writeTextFile(projectPath, "", { create: true });
         })(),
         (async () => {
-            if (!(CheckForPath(errorLogsPath))) {
-                await Deno.writeTextFile(errorLogsPath, "", { create: true });
-            }
+            if (!(CheckForPath(errorLogsPath))) await Deno.writeTextFile(errorLogsPath, "", { create: true });
         })(),
         (async () => {
             if (!(CheckForPath(settingsPath)) || repairSetts === true) {
@@ -78,9 +72,7 @@ export async function FreshSetup(repairSetts?: boolean): Promise<void> {
             }
         })(),
         (async () => {
-            if (!(CheckForPath(schedulePath))) {
-                await Deno.writeTextFile(schedulePath, StringifyYaml(DEFAULT_SCHEDULE_FILE), { create: true });
-            }
+            if (!(CheckForPath(schedulePath))) await Deno.writeTextFile(schedulePath, StringifyYaml(DEFAULT_SCHEDULE_FILE), { create: true });
         })(),
     ]);
 
@@ -127,15 +119,11 @@ export function ChangeSetting(
         newSettings = { ...currentSettings, "default-manager": value };
     } else if (setting === "update-freq") {
         const freq = Math.ceil(Number(value));
-        if (!Number.isFinite(freq) || freq <= 0) {
-            return LogStuff(`${value} is not valid. Enter a valid number greater than 0.`);
-        }
+        if (!Number.isFinite(freq) || freq <= 0) return LogStuff(`${value} is not valid. Enter a valid number greater than 0.`);
         newSettings = { ...currentSettings, "update-freq": freq };
     } else if (setting === "notification-threshold-value") {
         const freq = Math.ceil(Number(value));
-        if (!Number.isFinite(freq) || freq <= 1000) {
-            return LogStuff(`${value} is not valid. Enter a valid number greater than 1000.`);
-        }
+        if (!Number.isFinite(freq) || freq <= 1000) return LogStuff(`${value} is not valid. Enter a valid number greater than 1000.`);
         newSettings = { ...currentSettings, "notification-threshold-value": freq };
     } else if (setting === "fav-editor") {
         if (!validateAgainst(value, ["vscode", "sublime", "emacs", "atom", "notepad++", "vscodium"])) {
@@ -144,27 +132,21 @@ export function ChangeSetting(
         newSettings = { ...currentSettings, "fav-editor": value };
     } else if (setting === "flush-freq") {
         const flush = Math.ceil(Number(value));
-        if (!Number.isFinite(flush) || flush <= 0) {
-            return LogStuff(`${value} is not valid. Enter a valid number greater than 0.`);
-        }
+        if (!Number.isFinite(flush) || flush <= 0) return LogStuff(`${value} is not valid. Enter a valid number greater than 0.`);
         newSettings = { ...currentSettings, "flush-freq": flush };
     } else if (setting === "notifications") {
-        if (!validateAgainst(value, ["true", "false"])) {
-            return LogStuff(`${value} is not valid. Enter either 'true' or 'false'.`);
-        }
+        if (!validateAgainst(value, ["true", "false"])) return LogStuff(`${value} is not valid. Enter either 'true' or 'false'.`);
         newSettings = { ...currentSettings, notifications: value === "true" };
     } else if (setting === "notification-threshold") {
-        if (!validateAgainst(value, ["true", "false"])) {
-            return LogStuff(`${value} is not valid. Enter either 'true' or 'false'.`);
-        }
+        if (!validateAgainst(value, ["true", "false"])) return LogStuff(`${value} is not valid. Enter either 'true' or 'false'.`);
         newSettings = { ...currentSettings, "notification-threshold": value === "true" };
     } else {
         if (!validateAgainst(value, ["npm", "pnpm", "yarn", "bun", "deno", "cargo", "go"])) {
             return LogStuff(`${value} is not valid. Enter a valid package manager (npm, pnpm, yarn, bun, deno, cargo, go).`);
         }
         if (
-            ["cargo", "go"].includes(value) &&
-            !Interrogate(
+            ["cargo", "go"].includes(value)
+            && !Interrogate(
                 `Are you sure? ${value} is a non-JS runtime and ${APP_NAME.CASED} is mainly a JS-related CLI; you'll be using JS projects more often.`,
             )
         ) return;
@@ -201,7 +183,7 @@ export function DisplaySettings(): void {
         `Auto-flush log file           | Every ${ColorString(settings["flush-freq"], "bright-green")} days. ${
             ColorString("flush-freq", "half-opaque", "italic")
         }`,
-        `Send system notifications     | ${ColorString(settings.notifications ? "Enabled" : "Disabled", "bright-green")}. ${
+        `Send system notifications     | ${ColorString(settings["notifications"] ? "Enabled" : "Disabled", "bright-green")}. ${
             ColorString("notifications", "half-opaque", "italic")
         }`,
         `Threshold notifications?      | ${ColorString(settings["notification-threshold"] ? "Enabled" : "Disabled", "bright-green")}. ${
@@ -248,8 +230,8 @@ export async function FlushConfigFiles(target: UnknownString, force: boolean, si
     const fileSize = (await Promise.all(file.map((item) => Deno.stat(item)))).reduce((acc, num) => acc + num.size, 0);
 
     if (
-        !force &&
-        !Interrogate(
+        !force
+        && !Interrogate(
             `Are you sure you want to clean your ${target} file? You'll recover ${format(fileSize)}.`,
         )
     ) return;

@@ -82,11 +82,8 @@ export function LogStuff(
         const finalMessage = emoji ? Emojify(message, emoji) : message;
 
         if (color) {
-            if (Array.isArray(color)) {
-                console.log(ColorString(finalMessage, ...color));
-            } else {
-                console.log(ColorString(finalMessage, color));
-            }
+            if (Array.isArray(color)) console.log(ColorString(finalMessage, ...color));
+            else console.log(ColorString(finalMessage, color));
         } else {
             console.log(finalMessage);
         }
@@ -146,7 +143,7 @@ export function StringifyYaml(content: unknown): string {
  */
 export function Notification(title: string, msg: string, elapsed: number): void {
     const settings = GetUserSettings();
-    if (!settings.notifications) return;
+    if (!settings["notifications"]) return;
     if (settings["notification-threshold"] && elapsed < settings["notification-threshold-value"]) return;
     // NOTE: we should show our logo
     // requires to bundle it / add it to the installer script
@@ -157,13 +154,13 @@ export function Notification(title: string, msg: string, elapsed: number): void 
             "powershell",
             [
                 "-Command",
-                `[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null; ` +
-                `$template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02); ` +
-                `$template.GetElementsByTagName("text").Item(0).AppendChild($template.CreateTextNode("${title}")) > $null; ` +
-                `$template.GetElementsByTagName("text").Item(1).AppendChild($template.CreateTextNode("${msg}")) > $null; ` +
-                `$notification = [Windows.UI.Notifications.ToastNotification]::new($template); ` +
-                `$notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("${APP_NAME.CASED}"); ` +
-                `$notifier.Show($notification);`,
+                `[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null; `
+                + `$template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02); `
+                + `$template.GetElementsByTagName("text").Item(0).AppendChild($template.CreateTextNode("${title}")) > $null; `
+                + `$template.GetElementsByTagName("text").Item(1).AppendChild($template.CreateTextNode("${msg}")) > $null; `
+                + `$notification = [Windows.UI.Notifications.ToastNotification]::new($template); `
+                + `$notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("${APP_NAME.CASED}"); `
+                + `$notifier.Show($notification);`,
             ],
         );
     } else if (LOCAL_PLATFORM.SYSTEM === "chad") {

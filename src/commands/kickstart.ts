@@ -99,13 +99,9 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
         "tick-clear",
     );
 
-    if (managerToUse === "go") {
-        FkNodeInterop.Installers.Golang(Deno.cwd());
-    } else if (managerToUse === "cargo") {
-        FkNodeInterop.Installers.Cargo(Deno.cwd());
-    } else {
-        FkNodeInterop.Installers.UniJs(Deno.cwd(), managerToUse);
-    }
+    if (managerToUse === "go") FkNodeInterop.Installers.Golang(Deno.cwd());
+    else if (managerToUse === "cargo") FkNodeInterop.Installers.Cargo(Deno.cwd());
+    else FkNodeInterop.Installers.UniJs(Deno.cwd(), managerToUse);
 
     LogStuff(`Great! ${await NameProject(Deno.cwd(), "name-ver")} is now setup. Enjoy!`, "tick-clear");
 

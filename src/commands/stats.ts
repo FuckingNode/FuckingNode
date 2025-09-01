@@ -42,9 +42,8 @@ export default async function TheStatistics(target: UnknownString): Promise<void
         )
         .join("\n");
 
-    if (!deps || deps.length === 0) {
-        LogStuff("No dependencies found (impressive).");
-    } else {
+    if (!deps || deps.length === 0) LogStuff("No dependencies found (impressive).");
+    else {
         LogStuff(`\nDepends on ${ColorString(realDeps.length, "bold")} ${FWORDS.MFS}:`);
         LogStuff(
             deps,

@@ -76,9 +76,7 @@ const ALL_COMMANDS = Object.entries(TARGETS).map(([key, [target, output]]: [stri
     };
 });
 
-for (const CMD of ALL_COMMANDS) {
-    CMD.compileCmd.outputSync();
-}
+for (const CMD of ALL_COMMANDS) CMD.compileCmd.outputSync();
 
 if (release) {
     const hashes: Record<

@@ -1,6 +1,6 @@
 {
     "name": "@zakahacecosas/fuckingnode",
-    "version": "5.0.0-dev",
+    "version": "5.0.0-dev.2",
     "exports": {
         ".": "./src/main.ts"
     },
@@ -11,7 +11,17 @@
         "singleQuote": false,
         "semiColons": true,
         "useTabs": false,
-        "exclude": ["src/commands/toolkit/setups/**"]
+        "exclude": ["src/commands/toolkit/setups/**"],
+        "useBraces": "whenNotSingleLine",
+        "typeLiteral.separatorKind": "semiColon",
+        "trailingCommas": "onlyMultiLine",
+        "spaceSurroundingProperties": true,
+        "spaceAround": false,
+        "singleBodyPosition": "sameLine",
+        "quoteProps": "consistent",
+        "operatorPosition": "nextLine",
+        "newLineKind": "lf",
+        "bracePosition": "sameLine"
     },
     "lint": {
         "include": ["src/"],

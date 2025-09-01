@@ -45,11 +45,8 @@ async function ListProjects(
         for (const entry of list) {
             const protection = (await GetProjectEnvironment(entry)).settings.divineProtection; // array
             let protectionString: string;
-            if (!(Array.isArray(protection))) {
-                protectionString = "ERROR: CANNOT READ SETTINGS, CHECK YOUR FKNODE.YAML!";
-            } else {
-                protectionString = protection.join(" and ");
-            }
+            if (!(Array.isArray(protection))) protectionString = "ERROR: CANNOT READ SETTINGS, CHECK YOUR FKNODE.YAML!";
+            else protectionString = protection.join(" and ");
 
             toPrint.push(
                 `${await NameProject(entry, "all")} (${
@@ -62,14 +59,10 @@ async function ListProjects(
         }
     } else if (ignore === "exclude") {
         message = `Here are the ${FWORDS.MFS} you added (and haven't ignored) so far:\n`;
-        for (const entry of list) {
-            toPrint.push(await NameProject(entry, "all"));
-        }
+        for (const entry of list) toPrint.push(await NameProject(entry, "all"));
     } else {
         message = `Here are the ${FWORDS.MFS} you added so far:\n`;
-        for (const entry of list) {
-            toPrint.push(await NameProject(entry, "all"));
-        }
+        for (const entry of list) toPrint.push(await NameProject(entry, "all"));
     }
 
     LogStuff(message, "bulb");
@@ -87,11 +80,8 @@ export default async function TheLister(arg: UnknownString): Promise<void> {
     }
 
     let ignoreParam: false | "limit" | "exclude" = false;
-    if (testFlag(arg, "ignored")) {
-        ignoreParam = "limit";
-    } else if (testFlag(arg, "alive")) {
-        ignoreParam = "exclude";
-    }
+    if (testFlag(arg, "ignored")) ignoreParam = "limit";
+    else if (testFlag(arg, "alive")) ignoreParam = "exclude";
     await ListProjects(
         ignoreParam,
     );

@@ -578,7 +578,9 @@ export default function TheHelper(params: TheHelperConstructedParams): void {
             LogStuff("Checks for updates. Takes no arguments.\nAs of now, updates need to be installed manually. Data won't be lost.");
             break;
         case "about":
-            LogStuff("Shows a simple (but cool looking!) about screen. Takes no arguments.\nIncludes a bunch of info, and a randomized quote.");
+            LogStuff(
+                "Shows a simple (but cool looking!) about screen. Takes no arguments.\nIncludes a bunch of info, and a randomized quote.",
+            );
             break;
         case "tip":
             LogStuff("Shows a randomized pro-tip related to the app.");
