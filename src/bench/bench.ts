@@ -11,6 +11,13 @@ Deno.bench("lister (ignored)", async () => {
     await TheLister("ignored");
 });
 
+Deno.bench("remover", async (b) => {
+    await AddProject(".");
+    b.start();
+    await RemoveProject(".");
+    b.end();
+});
+
 Deno.bench("adder", async (b) => {
     await RemoveProject(".");
     b.start();
@@ -18,21 +25,18 @@ Deno.bench("adder", async (b) => {
     b.end();
 });
 
-// TODO(@ZakaHaceCosas):
-// make it use projects in /tests/ so everyone can run it
-// make it not wipe your real project list
 Deno.bench("bulk adder", async (b) => {
-    Deno.writeTextFileSync(GetAppPath("MOTHERFKRS"), "");
-    b.start();
-    await AddProject("../proyectitos/*");
-    b.end();
-});
-
-Deno.bench("remover", async (b) => {
-    await AddProject(".");
-    b.start();
-    await RemoveProject(".");
-    b.end();
+    const path = GetAppPath("MOTHERFKRS");
+    const prev = Deno.readTextFileSync(path);
+    try {
+        Deno.writeTextFileSync(path, "");
+        b.start();
+        // TODO(@ZakaHaceCosas): add more test projects
+        await AddProject("./tests/environment/*");
+        b.end();
+    } finally {
+        Deno.writeTextFileSync(path, prev);
+    }
 });
 
 Deno.bench("git check for repo", () => {
