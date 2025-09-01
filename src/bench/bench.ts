@@ -1,60 +1,112 @@
+import type { RESULT } from "../commands/clean.ts";
 import TheLister from "../commands/list.ts";
+import { ShowReport } from "../commands/toolkit/cleaner.ts";
 import { GetAppPath } from "../functions/config.ts";
 import { GetBranches, GetLatestTag, IsRepo } from "../functions/git.ts";
 import { AddProject, GetProjectEnvironment, RemoveProject } from "../functions/projects.ts";
 
-Deno.bench("lister", async () => {
-    await TheLister(undefined);
+Deno.bench({
+    name: "lister",
+    warmup: 350,
+    fn: async () => {
+        await TheLister(undefined);
+    },
 });
 
-Deno.bench("lister (ignored)", async () => {
-    await TheLister("ignored");
+Deno.bench({
+    name: "lister (ignored)",
+    warmup: 350,
+    fn: async () => {
+        await TheLister("ignored");
+    },
 });
 
-Deno.bench("remover", async (b) => {
-    await AddProject(".");
-    b.start();
-    await RemoveProject(".");
-    b.end();
-});
-
-Deno.bench("adder", async (b) => {
-    await RemoveProject(".");
-    b.start();
-    await AddProject(".");
-    b.end();
-});
-
-Deno.bench("bulk adder", async (b) => {
-    const path = GetAppPath("MOTHERFKRS");
-    const prev = Deno.readTextFileSync(path);
-    try {
-        Deno.writeTextFileSync(path, "");
+Deno.bench({
+    name: "remover",
+    warmup: 350,
+    fn: async (b) => {
+        await AddProject(".");
         b.start();
-        // TODO(@ZakaHaceCosas): add more test projects
-        await AddProject("./tests/environment/*");
+        await RemoveProject(".");
         b.end();
-    } finally {
-        Deno.writeTextFileSync(path, prev);
-    }
+    },
 });
 
-Deno.bench("git check for repo", () => {
-    IsRepo(".");
+Deno.bench({
+    name: "adder",
+    warmup: 350,
+    fn: async (b) => {
+        await RemoveProject(".");
+        b.start();
+        await AddProject(".");
+        b.end();
+    },
 });
 
-Deno.bench("git get branches", () => {
-    GetBranches(".");
+Deno.bench({
+    name: "bulk adder",
+    warmup: 350,
+    fn: async (b) => {
+        const path = GetAppPath("MOTHERFKRS");
+        const prev = Deno.readTextFileSync(path);
+        try {
+            Deno.writeTextFileSync(path, "");
+            b.start();
+            await AddProject("./tests/environment/*");
+            b.end();
+        } finally {
+            Deno.writeTextFileSync(path, prev);
+        }
+    },
 });
 
-Deno.bench("git get latest tag", () => {
-    GetLatestTag(".");
+Deno.bench({
+    name: "git check for repo",
+    warmup: 350,
+    fn: () => {
+        IsRepo(".");
+    },
 });
 
-Deno.bench("git get branches", () => {
-    GetLatestTag(".");
+Deno.bench({
+    name: "git get branches",
+    warmup: 350,
+    fn: () => {
+        GetBranches(".");
+    },
 });
 
-Deno.bench("get project env", async () => {
-    await GetProjectEnvironment(".");
+Deno.bench({
+    name: "git get latest tag",
+    warmup: 350,
+    fn: () => {
+        GetLatestTag(".");
+    },
+});
+
+Deno.bench({
+    name: "get project env",
+    warmup: 350,
+    fn: async () => {
+        await GetProjectEnvironment(".");
+    },
+});
+
+Deno.bench({
+    name: "report",
+    warmup: 350,
+    fn: async (b) => {
+        const entries: RESULT[] = [];
+        for (let index = 0; index < 100; index++) {
+            entries.push({
+                path: ".",
+                status: "Success",
+                elapsedTime: "69",
+                extras: undefined,
+            });
+        }
+        b.start();
+        await ShowReport(entries);
+        b.end();
+    },
 });
