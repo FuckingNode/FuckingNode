@@ -563,11 +563,7 @@ export function ValidateIntensity(intensity: string): CleanerIntensity {
  */
 export async function ShowReport(results: RESULT[]): Promise<void> {
     LogStuff("Report:\n", "chart");
-    const report: string[] = [];
-    for (const result of results) {
-        const name = await NameProject(result.path, "name-ver");
-        const status = ColorString(result.status, "bold");
-        const elapsedTime = ColorString(result.elapsedTime, "italic");
+    const report: string[] = await Promise.all(results.map(async (result) => {
         const protection = result.extras?.ignored
             ? ColorString(
                 `\n--> The above ${ColorString("was divinely protected from", "blue", "bold", "italic")} ${
@@ -583,14 +579,13 @@ export async function ShowReport(results: RESULT[]): Promise<void> {
             )
             : "";
 
-        const theResult = `${name} -> ${status}, taking ${elapsedTime}${protection}${errors}`;
-        report.push(theResult);
-    }
-    const sortedReport = sortAlphabetically(report).join("\n");
+        return `${await NameProject(result.path, "name-ver")} -> ${ColorString(result.status, "bold")}, taking ${
+            ColorString(result.elapsedTime, "italic")
+        }${protection}${errors}`;
+    }));
     LogStuff(
-        `${sortedReport}\n\nCleaning completed at ${new Date().toLocaleString()}`,
+        `${sortAlphabetically(report).join("\n")}\n\n${ColorString(`Cleaning completed at ${new Date().toLocaleString()}`, "bright-green")}`,
         "tick",
-        "bright-green",
     );
 }
 
