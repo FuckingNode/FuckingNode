@@ -60,7 +60,7 @@ export default async function TheSurrenderer(params: TheSurrendererConstructedPa
             bareMessage.split("\n").map((s) => params.gfm ? `> ${s}` : s).join("\n")
         }\n${params.glfm ? ">>>\n" : ""}`
         : bareMessage;
-    console.log("");
+
     if (
         !Interrogate(
             `(IMPORTANT) Here's what we'll do:\n- Commit ALL UNCOMMITTED changes to the CURRENTLY SELECTED branch AND PUSH them\n- Add a note to your project's README (see below)\n- Once we're sure all your code is pushed, locally DELETE ALL THE PROJECT's FILES\n${

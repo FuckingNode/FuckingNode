@@ -156,7 +156,7 @@ export default async function TheReleaser(params: TheReleaserConstructedParams):
             "--dry-run",
         ],
     );
-    console.log("");
+
     const finalConfirmation = Interrogate(
         "Dry-run complete. Check that everything is alright.\nOnce you did, hit 'Y' so we continue, or 'N' so we abort.",
         "ask",

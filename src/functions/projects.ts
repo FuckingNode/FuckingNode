@@ -226,7 +226,7 @@ export async function RemoveProject(
     try {
         const workingEntry = await SpotProject(entry);
 
-        const list = GetAllProjects(false);
+        const list = GetAllProjects();
         const index = list.indexOf(workingEntry);
         const name = await NameProject(workingEntry, "name");
 

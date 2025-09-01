@@ -60,7 +60,6 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
         try {
             Deno.chdir(project);
 
-            console.log("");
             LogStuff(
                 `Cleaning the ${projectName} ${FWORDS.MF}...`,
                 "package",

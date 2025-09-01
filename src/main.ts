@@ -97,9 +97,9 @@ if (hasFlag("help", true)) {
 }
 
 if (hasFlag("version", true, true) && !flags[1]) {
-    console.log(FULL_NAME, "built for", Deno.build.target);
-    console.log("Deno JavaScript runtime", Deno.version.deno, "| TypeScript", Deno.version.typescript, "| V8 Engine", Deno.version.v8);
-    console.log("Run 'fuckingnode about' for details.");
+    console.log(
+        `${FULL_NAME} built for ${Deno.build.target}\nDeno JavaScript runtime ${Deno.version.deno} | TypeScript ${Deno.version.typescript} | V8 Engine ${Deno.version.v8}\nRun 'fuckingnode about' for details.`,
+    );
     Deno.exit(0);
 }
 
@@ -112,9 +112,7 @@ function isNotFlag(arg: UnknownString): arg is string {
 async function main(command: UnknownString): Promise<void> {
     // debug commands
     if (FKNODE_SHALL_WE_DEBUG || Deno.args[0]?.startsWith("FKNDBG")) {
-        console.log(ColorString("FKNDBG at " + GetDateNow(), "italic"));
-        console.log("FKNDBG Logs aren't stored into the .log file.");
-        console.log("-".repeat(37));
+        console.log(`${ColorString("FKNDBG at " + GetDateNow(), "italic")}\nFKNDBG Logs aren't stored into the .log file.\n${"-".repeat(37)}`);
     }
     if (Deno.args[0] === "FKNDBG_PROC") {
         console.log(
@@ -138,10 +136,7 @@ async function main(command: UnknownString): Promise<void> {
         return;
     }
     if (Deno.args[0] === "FKNDBG_WHERE") {
-        console.log("AT", Deno.cwd());
-        console.log("FROM", Deno.execPath());
-        console.log("CONCRETELY", import.meta.url);
-        console.log("MAIN?", import.meta.main);
+        console.log("AT", Deno.cwd(), "\nFROM", Deno.execPath(), "\nCONCRETELY", import.meta.url, "\nMAIN?", import.meta.main);
         return;
     }
     if (Deno.args[0] === "FKNDBG_MEM") {

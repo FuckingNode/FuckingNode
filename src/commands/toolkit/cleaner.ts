@@ -562,7 +562,6 @@ export function ValidateIntensity(intensity: string): CleanerIntensity {
  * @param {RESULT[]} results
  */
 export async function ShowReport(results: RESULT[]): Promise<void> {
-    console.log("");
     LogStuff("Report:\n", "chart");
     const report: string[] = [];
     for (const result of results) {
@@ -588,10 +587,8 @@ export async function ShowReport(results: RESULT[]): Promise<void> {
         report.push(theResult);
     }
     const sortedReport = sortAlphabetically(report).join("\n");
-    LogStuff(sortedReport);
-    console.log("");
     LogStuff(
-        `Cleaning completed at ${new Date().toLocaleString()}`,
+        `${sortedReport}\n\nCleaning completed at ${new Date().toLocaleString()}`,
         "tick",
         "bright-green",
     );
