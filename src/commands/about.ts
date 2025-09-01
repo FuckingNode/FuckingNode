@@ -6,6 +6,7 @@ import type { VALID_COLORS } from "../types/misc.ts";
 import { ASCII } from "../functions/ascii.ts";
 import { phrases } from "../functions/phrases.ts";
 import { APP_NAME } from "../constants/name.ts";
+import { reveal } from "@zakahacecosas/string-utils";
 
 function getRandomPhrase(): string {
     const randomIndex = Math.floor(Math.random() * phrases.length);
@@ -47,23 +48,31 @@ const phrase = getRandomPhrase();
 const index = phrases.indexOf(phrase) + 1;
 const dashLength = Math.min(phrase.length, 45);
 
-export default function TheAbouter(): void {
-    LogStuff(colorizeText(ASCII));
-    LogStuff(
-        `${"-".repeat(dashLength)}\n${ColorString(phrase, "bright-green", "italic")}\n${
-            ColorString(`(random quote/tip ${index}/${phrases.length})`, "half-opaque", "italic")
-        }\n`,
+export default async function TheAbouter(): Promise<void> {
+    await reveal(colorizeText(ASCII), 2);
+    LogStuff("-".repeat(dashLength));
+    await reveal(
+        ColorString(phrase, "bright-green", "italic"),
+        10,
     );
-    LogStuff(
+    await reveal(
+        ColorString(`(random quote/tip ${index}/${phrases.length})`, "half-opaque", "italic"),
+        5,
+    );
+    await reveal(
         `Running ${coolStrings.ver}. Written in ${coolStrings.ts}. Powered by ${coolStrings.deno}.\nDeveloped in ${coolStrings.spain} by ${coolStrings.zakaOne} (${coolStrings.zakaTwo} in spanish).\n`,
+        10,
     );
-    LogStuff(
+    await reveal(
         `Follow us and join our Discord at ${ColorString(`${APP_URLs.WEBSITE}follow-us`, "orange")}`,
+        2,
     );
-    LogStuff(
+    await reveal(
         `We all love freedom, right? This is open-source: ${coolStrings.gitUrl}\n`,
+        2,
     );
-    LogStuff(
+    await reveal(
         `${coolStrings.side}, born ${coolStrings.date} (a bit earlier but 'Initial commit' in the 1st repo was then)`,
+        3,
     );
 }

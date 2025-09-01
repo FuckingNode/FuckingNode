@@ -242,7 +242,7 @@ async function main(command: UnknownString): Promise<void> {
             await TheUpdater({ silent: false });
             break;
         case "about":
-            TheAbouter();
+            await TheAbouter();
             break;
         case "build":
             await TheBuilder({

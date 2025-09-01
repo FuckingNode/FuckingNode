@@ -37,6 +37,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Now Git errors should be much more properly handled and reported.
 - Now the error dump file should be more readable.
 - Now `surrender` templates will take your project's name and use it within the template.
+- Now the `about` command plays a typewriter animation.
 - Now overall performance was optimized.
   - Avoiding unnecessary checks for spotting project paths.
   - Remove duplicate calls to check for staged files via `commit`.
