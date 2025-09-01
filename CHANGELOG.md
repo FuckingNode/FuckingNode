@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Added an option to customize (in milliseconds) the threshold for notifications.
 - Added the option to use GLFM instead of GFM for `surrender` (via `--gitlab/-gl`).
 - Added `deprecate` and `nevermind` as aliases to `surrender`.
+- Added the ability for the CLI to update itself when running `update`. _Yes, it now properly works._
 - Added several changes to improve the CLI's performance.
   - FuckingNode runs some checks every time before actually running. _Just_ parallelizing them made the entire CLI much, MUCH faster.
   - Bulk adding projects (via glob patterns) was also parallelized. Made it 5% faster.

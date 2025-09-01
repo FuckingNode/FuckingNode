@@ -10,6 +10,8 @@ import { GetAppPath } from "../functions/config.ts";
 import type { CF_FKNODE_SCHEDULE } from "../types/config_files.ts";
 import * as DenoJson from "../../deno.json" with { type: "json" };
 import { ColorString } from "../functions/color.ts";
+import { LOCAL_PLATFORM } from "../constants/platform.ts";
+import { validate } from "@zakahacecosas/string-utils";
 
 async function CheckUpdates(): Promise<CF_FKNODE_SCHEDULE | "rl"> {
     const scheduleFilePath = GetAppPath("SCHEDULE");
@@ -39,7 +41,7 @@ async function CheckUpdates(): Promise<CF_FKNODE_SCHEDULE | "rl"> {
 }
 
 /**
- * Checks for updates.
+ * Checks for updates and updates the CLI if outdated.
  *
  * @async
  * @returns {void}
@@ -49,7 +51,7 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
 
     if (needsToUpdate === "rl") {
         LogStuff(
-            "Bro was rate-limited by GitHub (update provider). Try again in a few hours.",
+            "You were rate-limited by GitHub (from where we download updates), my bro. Try again in, at most, one hour.",
             "bruh",
             "bright-yellow",
         );
@@ -70,5 +72,27 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
         }, by the way.`,
         "bulb",
     );
+    if (params.silent) return;
+    LogStuff("Updating...", "package");
+    const suffix = LOCAL_PLATFORM.SYSTEM === "windows" ? ".ps1" : ".sh";
+    const res = await fetch(
+        `https://fuckingnode.github.io/install${suffix}`,
+    );
+    const path = Deno.makeTempFileSync({ suffix });
+    Deno.writeFileSync(
+        path,
+        await res.bytes(),
+    );
+    await new Deno.Command(
+        LOCAL_PLATFORM.SYSTEM === "windows" ? "powershell" : "bash",
+        {
+            args: [
+                LOCAL_PLATFORM.SYSTEM === "windows" ? "-File" : undefined,
+                path,
+                Deno.pid.toString(),
+            ].filter(validate),
+        },
+    ).spawn().output();
+    LogStuff(`You're now up to date! Congrats and welcome to ${ColorString(latestVer, "bright-green")}.`, "tick");
     return;
 }
