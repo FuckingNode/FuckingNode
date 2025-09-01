@@ -8,7 +8,7 @@
  */
 
 import { normalize, normalizeArray, validate, validateAgainst } from "@zakahacecosas/string-utils";
-import type { MANAGER_NODE } from "../../types/platform.ts";
+import { type MANAGER_NODE, TypeGuardForNodeBun } from "../../types/platform.ts";
 import { Interrogate, LogStuff } from "../../functions/io.ts";
 import type { FkNodeSecurityAudit, ParsedNodeReport } from "../../types/audit.ts";
 import { GetProjectEnvironment, NameProject } from "../../functions/projects.ts";
@@ -544,10 +544,8 @@ export function AuditProject(bareReport: ParsedNodeReport): FkNodeSecurityAudit 
 export async function PerformAuditing(project: string): Promise<FkNodeSecurityAudit | 0 | 1> {
     const env = await GetProjectEnvironment(project);
     const name = await NameProject(env.root, "name-ver");
-    // === "__UNSUPPORTED" already does the job, but typescript wants me to specify
     if (
-        env.commands.audit === "__UNSUPPORTED" || env.manager === "deno" || env.manager === "cargo"
-        || env.manager === "go"
+        !TypeGuardForNodeBun(env)
     ) {
         LogStuff(
             `Audit is unsupported for ${env.manager.toUpperCase()} (${project}).`,

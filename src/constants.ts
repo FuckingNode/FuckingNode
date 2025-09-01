@@ -2,7 +2,6 @@ import type { VALID_URL } from "./types/misc.ts";
 import type { CF_FKNODE_SCHEDULE, CF_FKNODE_SETTINGS, FullFkNodeYaml } from "./types/config_files.ts";
 import * as DenoJson from "../deno.json" with { type: "json" };
 import { GetDateNow } from "./functions/date.ts";
-import { normalize, type UnknownString } from "@zakahacecosas/string-utils";
 import { ManagerExists } from "./functions/cli.ts";
 import { APP_NAME } from "./constants/name.ts";
 
@@ -59,9 +58,9 @@ export const DEFAULT_SCHEDULE_FILE: CF_FKNODE_SCHEDULE = {
  * @type {FullFkNodeYaml}
  */
 export const DEFAULT_FKNODE_YAML: FullFkNodeYaml = {
-    divineProtection: "disabled",
-    lintCmd: "__USE_DEFAULT",
-    prettyCmd: "__USE_DEFAULT",
+    divineProtection: "*",
+    lintCmd: false,
+    prettyCmd: false,
     destroy: {
         intensities: ["maxim"],
         targets: [
@@ -70,9 +69,9 @@ export const DEFAULT_FKNODE_YAML: FullFkNodeYaml = {
         ],
     },
     commitActions: false,
-    commitMessage: "__USE_DEFAULT",
-    commitCmd: "__DISABLE",
-    updateCmdOverride: "__USE_DEFAULT",
+    commitMessage: false,
+    commitCmd: false,
+    updateCmdOverride: false,
     flagless: {
         flaglessUpdate: false,
         flaglessLint: false,
@@ -81,21 +80,11 @@ export const DEFAULT_FKNODE_YAML: FullFkNodeYaml = {
         flaglessCommit: false,
     },
     releaseAlwaysDry: false,
-    releaseCmd: "__DISABLE",
-    launchCmd: "__DISABLE",
-    launchFile: "__DISABLE",
+    releaseCmd: false,
+    launchCmd: false,
+    launchFile: false,
     launchWithUpdate: false,
-    projectEnvOverride: "__USE_DEFAULT",
-    buildCmd: "__DISABLE",
+    projectEnvOverride: false,
+    buildCmd: false,
     buildForRelease: false,
 };
-
-/** Checks if a given command is __USE_DEFAULT */
-export function isDef(str: UnknownString): str is "usedefault" {
-    return normalize(str ?? "", { strict: true, preserveCase: false, removeCliColors: true }) === "usedefault";
-}
-
-/** Checks if a given command is __DISABLE */
-export function isDis(str: UnknownString): str is "disable" {
-    return normalize(str ?? "", { strict: true, preserveCase: false, removeCliColors: true }) === "disable";
-}

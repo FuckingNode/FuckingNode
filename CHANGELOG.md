@@ -27,6 +27,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   - Removed some useless object mutations.
   - "Naming a project" (when we show its name with colors and stuff) is actually a somewhat expensive operation. We slightly optimized it + removed duplicate calls.
   - `settings flush` should now be a few milliseconds faster (removed useless array check + parallelized filesize recovery calculations).
+  - Avoided unnecessary checks for spotting project paths.
+  - Removed duplicate calls to check for staged files via `commit`.
+  - Removed `logs.log`, removing a ton of file writes.
+  - Parallelized reading cleanup results for showing you the final report, very slightly speeding it up.
+  - Removed unnecessary array conversions and operations for parsing a project's `divineProtection` setting, as well as avoiding parsing entirely if the setting is not defined.
+  - Differentiating certain frequently queried settings (like on what runtime a project runs, for compatibility) was actually done through somewhat expensive operation with "sentinel strings" (`#disable`(cmd), `__DISABLE`(cfg), `__USE_DEFAULT`(cfg), and other values you could actually set in your `fknode.yaml`). They were replaced with proper type guards + strings were replaced with booleans (primitives, more efficient), as such slightly improving performance.
+  - Update some strings so they don't "name the project", reducing operations.
+  - Parallelized workspace lookup when adding a project.
 - Added an `--export` option to `export`; if not provided the default behavior is to just show it in terminal instead of writing it.
 - Added a 3 second countdown to `surrender`, giving you time to rethink and quit the program.
 
@@ -39,10 +47,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Now the error dump file should be more readable.
 - Now `surrender` templates will take your project's name and use it within the template.
 - Now the `about` command plays a typewriter animation.
-- Now overall performance was optimized.
-  - Avoiding unnecessary checks for spotting project paths.
-  - Remove duplicate calls to check for staged files via `commit`.
-  - Remove `logs.log`, removing a ton of file writes.
 
 ### Fixed
 
@@ -51,6 +55,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Removed
 
+- (Breaking) Removed `"disabled"` option from `divineProtection` in `fknode.yaml`. Just don't declare it at all.
 - (Breaking) Removed the `logs.log` file, where _everything_ that happened in the CLI was logged. This meant writing to a file every time we wrote to the stdout, slowing the CLI down and taking up unneeded space. This change improves performance.
   - Errors still get logged to the `errors.log` file.
 - Removed emojis from `surrender` templates. They're not too professional, you know.

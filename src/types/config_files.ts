@@ -99,23 +99,23 @@ export type FkNodeYaml = Partial<FullFkNodeYaml>;
 
 export interface FullFkNodeYaml {
     /**
-     * Divine protection, basically to ignore stuff. Must always be an array.
+     * Divine protection, basically to ignore stuff. Must be an array of options, or `"*"`.
      *
-     * @type {(("updater" | "cleaner" | "linter" | "prettifier" | "destroyer")[] | "*" | "disabled")}
+     * @type {(("updater" | "cleaner" | "linter" | "prettifier" | "destroyer")[] | "*")}
      */
-    divineProtection: ("updater" | "cleaner" | "linter" | "prettifier" | "destroyer")[] | "*" | "disabled";
+    divineProtection: ("updater" | "cleaner" | "linter" | "prettifier" | "destroyer")[] | "*";
     /**
-     * If `--lint` is passed to `clean`, this script will be used to lint the project. It must be a runtime script (defined in `package.json` -> `scripts`), and must be a single word (no need for "npm run" prefix). `__USE_DEFAULT` overrides these rules (it's the default).
+     * If `--lint` is passed to `clean`, this script will be used to lint the project. It must be a runtime script (defined in `package.json` -> `scripts`), and must be a single word (no need for "npm run" prefix). `false` overrides these rules (it's the default).
      *
-     * @type {(string | "__USE_DEFAULT")}
+     * @type {(string | false)}
      */
-    lintCmd: string | "__USE_DEFAULT";
+    lintCmd: string | false;
     /**
-     * If `--pretty` is passed to `clean`, this script will be used to prettify the project. It must be a runtime script (defined in `package.json` -> `scripts`), and must be a single word (no need for "npm run" prefix). `__USE_DEFAULT` overrides these rules (it's the default).
+     * If `--pretty` is passed to `clean`, this script will be used to prettify the project. It must be a runtime script (defined in `package.json` -> `scripts`), and must be a single word (no need for "npm run" prefix). `false` overrides these rules (it's the default).
      *
-     * @type {(string | "__USE_DEFAULT")}
+     * @type {(string | false)}
      */
-    prettyCmd: string | "__USE_DEFAULT";
+    prettyCmd: string | false;
     /**
      * If provided, file paths in `targets` will be removed when `clean` is called with any of the `intensities`. If not provided defaults to `maxim` intensity and `node_modules` path. Specifying `targets` _without_ `node_modules` does not override it, meaning it'll always be cleaned.
      *
@@ -147,15 +147,15 @@ export interface FullFkNodeYaml {
     /**
      * If provided, if a commit is made (`commitActions`) this will be the commit message. If not provided a default message is used. `__USE_DEFAULT` indicates to use the default.
      *
-     * @type {(string | "__USE_DEFAULT")}
+     * @type {(string | false)}
      */
-    commitMessage: string | "__USE_DEFAULT";
+    commitMessage: string | false;
     /**
      * If provided, uses the provided runtime script command for the updating stage, overriding the default command. Like `lintCmd` or `prettyCmd`, it must be a runtime script.
      *
-     * @type {(string | "__USE_DEFAULT")}
+     * @type {(string | false)}
      */
-    updateCmdOverride: string | "__USE_DEFAULT";
+    updateCmdOverride: string | false;
     /**
      * Flagless features.
      *
@@ -177,9 +177,9 @@ export interface FullFkNodeYaml {
     /**
      * A task (run) to be executed upon running the release command.
      *
-     * @type {string}
+     * @type {string | false}
      */
-    releaseCmd: string;
+    releaseCmd: string | false;
     /**
      * If true, releases will always use `dry-run`.
      *
@@ -189,21 +189,21 @@ export interface FullFkNodeYaml {
     /**
      * A task (run) to be executed upon running the commit command.
      *
-     * @type {string}
+     * @type {string | false}
      */
-    commitCmd: string;
+    commitCmd: string | false;
     /**
      * A task (run) to be executed upon running the launch command.
      *
-     * @type {string}
+     * @type {string | false}
      */
-    launchCmd: string;
+    launchCmd: string | false;
     /**
      * A file to be executed when `launchCmd` is invoked. Only used for Deno, Cargo, and Golang.
      *
-     * @type {string}
+     * @type {string | false}
      */
-    launchFile: string;
+    launchFile: string | false;
     /**
      * If true, dependencies for a project will be updated upon using `fklaunch` with it.
      *
@@ -213,15 +213,15 @@ export interface FullFkNodeYaml {
     /**
      * If specified, this will override FkNode's project environment inference.
      *
-     * @type {MANAGER_GLOBAL | "__USE_DEFAULT"}
+     * @type {MANAGER_GLOBAL | false}
      */
-    projectEnvOverride: MANAGER_GLOBAL | "__USE_DEFAULT";
+    projectEnvOverride: MANAGER_GLOBAL | false;
     /**
      * Command(s) to be executed when running the `build` command.
      *
-     * @type {string | "__DISABLE"}
+     * @type {string | false}
      */
-    buildCmd: string | "__DISABLE";
+    buildCmd: string | false;
     /**
      * If true, `buildCmd` is invoked before releasing.
      *
@@ -245,12 +245,10 @@ export function ValidateFkNodeYaml(
     if (
         obj.divineProtection !== undefined
         && obj.divineProtection !== "*"
-        && obj.divineProtection !== "disabled"
         && !(
             Array.isArray(obj.divineProtection)
             && obj.divineProtection.every(
-                // deno-lint-ignore no-explicit-any
-                (item: any) => {
+                (item: string) => {
                     return ["updater", "cleaner", "linter", "prettifier", "destroyer"].includes(item);
                 },
             )

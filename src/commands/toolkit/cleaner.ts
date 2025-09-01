@@ -1,4 +1,4 @@
-import { FULL_NAME, isDef } from "../../constants.ts";
+import { FULL_NAME } from "../../constants.ts";
 import { Commander, ManagerExists } from "../../functions/cli.ts";
 import { GetUserSettings } from "../../functions/config.ts";
 import { BulkRemove, CheckForPath, JoinPaths, ParsePath } from "../../functions/filesystem.ts";
@@ -45,7 +45,7 @@ const ProjectCleaningFeatures = {
     ) => {
         Deno.chdir(env.root);
         const { commands } = env;
-        if (commands.clean === "__UNSUPPORTED") return;
+        if (!commands.clean) return;
         LogStuff(
             `Cleaning ${projectName}.`,
             "working",
@@ -167,7 +167,7 @@ const ProjectCleaningFeatures = {
         Deno.chdir(env.root);
         function getCommitMessage(): string {
             if (
-                validate(env.settings.commitMessage) && !(isDef(env.settings.commitMessage))
+                env.settings.commitMessage !== false && validate(env.settings.commitMessage)
             ) {
                 return env.settings.commitMessage;
             }
@@ -247,7 +247,7 @@ export async function PerformCleanup(
         commit: shouldCommit || (env.settings.flagless?.flaglessCommit === true),
     };
 
-    if (env.commands.clean === "__UNSUPPORTED" && Object.values(whatShouldWeDo).every((v) => v === false)) {
+    if (!env.commands.clean && Object.values(whatShouldWeDo).every((v) => v === false)) {
         LogStuff(
             `${projectName} will be skipped. ${
                 ColorString(env.manager, "bold")

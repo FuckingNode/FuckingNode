@@ -1,10 +1,8 @@
-import { validateAgainst } from "@zakahacecosas/string-utils";
 import { Commander } from "../../functions/cli.ts";
 import { LogStuff, Notification } from "../../functions/io.ts";
-import type { ProjectEnvironment } from "../../types/platform.ts";
+import { type ProjectEnvironment, TypeGuardForJS, TypeGuardForNodeBun } from "../../types/platform.ts";
 import { DebugFknErr, FknError } from "../../functions/error.ts";
 import { FkNodeInterop } from "./interop.ts";
-import { isDef, isDis } from "../../constants.ts";
 import { NameProject } from "../../functions/projects.ts";
 import { GetAppPath } from "../../functions/config.ts";
 
@@ -35,8 +33,8 @@ export const InteropedFeatures = {
     Lint: (env: ProjectEnvironment): boolean => {
         const script = env.settings.lintCmd;
 
-        if (validateAgainst(env.runtime, ["bun", "node"])) {
-            if (isDef(script)) {
+        if (TypeGuardForNodeBun(env)) {
+            if (script === false) {
                 if (FkNodeInterop.PackageFileUtils.SpotDependency("eslint", env.main.cpfContent.deps) === undefined) {
                     LogStuff(
                         "No linter was given (via fknode.yaml > lintCmd), hence defaulted to ESLint - but ESLint is not installed!",
@@ -100,8 +98,8 @@ export const InteropedFeatures = {
     Pretty: (env: ProjectEnvironment): boolean => {
         const script = env.settings.prettyCmd;
 
-        if (validateAgainst(env.runtime, ["bun", "node"])) {
-            if (isDef(script)) {
+        if (TypeGuardForNodeBun(env)) {
+            if (script === false) {
                 if (FkNodeInterop.PackageFileUtils.SpotDependency("prettier", env.main.cpfContent.deps) === undefined) {
                     LogStuff(
                         "No prettifier was given (via fknode.yaml > prettyCmd), hence defaulted to Prettier - but Prettier is not installed!",
@@ -149,7 +147,7 @@ export const InteropedFeatures = {
     Update: (env: ProjectEnvironment): boolean => {
         const script = env.settings.updateCmdOverride;
 
-        if (isDef(script)) {
+        if (script === false) {
             const output = Commander(
                 env.commands.base,
                 env.commands.update,
@@ -160,7 +158,7 @@ export const InteropedFeatures = {
             return true;
         }
 
-        if (validateAgainst(env.runtime, ["rust", "golang"])) {
+        if (!TypeGuardForJS(env)) {
             throw new FknError(
                 "Interop__JSRunUnable",
                 `${env.manager} does not support JavaScript-like "run" commands, however you've set updateCmdOverride in your fknode.yaml to ${script}. Since we don't know what you're doing, update task wont proceed for this project.`,
@@ -177,34 +175,26 @@ export const InteropedFeatures = {
         }
     },
     Launch: async (env: ProjectEnvironment): Promise<void> => {
-        const script = env.settings.launchCmd;
+        // TODO(@ZakaHaceCosas)
+        // this was actually so messy that i doubt it's bug less
+        // gotta test this
+        if (env.settings.launchCmd === false) return;
 
-        if (isDis(script)) return;
+        const needsFile = !TypeGuardForNodeBun(env);
 
-        if (isDef(script)) {
-            if (validateAgainst(env.manager, ["go", "deno", "cargo"]) && !env.settings.launchFile) {
-                throw new FknError(
-                    "Task__Launch",
-                    `You tried to launch project ${await NameProject(
-                        env.root,
-                        "name",
-                    )} without specifying a launchFile in your fknode.yaml. ${env.runtime} requires to specify what file to run.`,
-                );
-            }
-
-            const output = Commander(
-                env.commands.base,
-                validateAgainst(env.manager, ["go", "deno", "cargo"]) ? [env.commands.start, env.settings.launchFile] : [env.commands.start],
+        if (needsFile && !env.settings.launchFile) {
+            throw new FknError(
+                "Task__Launch",
+                `You tried to launch project ${await NameProject(
+                    env.root,
+                    "name",
+                )} without specifying a launchFile in your fknode.yaml. ${env.runtime} requires to specify what file to run.`,
             );
-
-            if (!output.success) HandleError("Task__Launch", output.stdout);
-
-            return;
         }
 
         const output = Commander(
-            env.commands.run[0],
-            [env.commands.run[1], script],
+            env.commands.base,
+            needsFile ? [env.commands.start, env.settings.launchFile as string] : [env.commands.run[1], env.settings.launchCmd],
         );
 
         if (!output.success) HandleError("Task__Launch", output.stdout);

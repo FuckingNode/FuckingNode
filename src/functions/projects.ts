@@ -42,7 +42,7 @@ export function GetAllProjects(ignored?: false | "limit" | "exclude"): string[] 
     for (const entry of list) {
         try {
             const protection = GetProjectSettings(entry).divineProtection;
-            if (!protection || protection === "disabled") {
+            if (!protection) {
                 if (ignored === "exclude") aliveReturn.push(entry);
                 continue;
             }
@@ -70,10 +70,11 @@ export async function AddProject(
     glob: boolean = false,
 ): Promise<void> {
     if (validate(entry) && isGlob(entry)) {
-        const arr = globSync(entry)
-            .filter((f) => Deno.statSync(f).isDirectory)
-            .map((p) => AddProject(p, true));
-        await Promise.all(arr);
+        await Promise.all(
+            globSync(entry)
+                .filter((f) => Deno.statSync(f).isDirectory)
+                .map((p) => AddProject(p, true)),
+        );
         return;
     }
 
@@ -102,7 +103,7 @@ export async function AddProject(
         const validation = await ValidateProject(workingEntry, false);
 
         if (validation !== true) {
-            if (validation === "IsDuplicate") LogStuff(`bruh, ${projectName} is already added! No need to re-add it.`, "bruh");
+            if (validation === "IsDuplicate") LogStuff(`${projectName} is already added! No need to re-add it.`, "bruh");
             else if (validation === "NoName") {
                 LogStuff(
                     `Error adding ${projectName}: no name!\nSee how the project's name is missing? We can't work with that, we need a name to identify the project.\nPlease set "name" in your package file to something valid.`,
@@ -127,16 +128,12 @@ export async function AddProject(
             return;
         }
 
-        const workspaces = env.workspaces;
-
-        if (!workspaces || workspaces.length === 0) {
+        if (env.workspaces.length === 0) {
             addTheEntry(projectName, env.runtime);
             return;
         }
 
-        const workspaceString: string[] = [];
-
-        for (const ws of workspaces) workspaceString.push(await NameProject(ws, "all"));
+        const workspaceString: string[] = await Promise.all(env.workspaces.map(async (ws) => await NameProject(ws, "all")));
 
         const addWorkspaces = Interrogate(
             `Hey! This looks like a ${FWORDS.FKN} monorepo. We've found these workspaces:\n\n${
@@ -151,7 +148,7 @@ export async function AddProject(
             return;
         }
 
-        const allEntries = [workingEntry, ...workspaces].join("\n") + "\n";
+        const allEntries = [workingEntry, ...env.workspaces].join("\n") + "\n";
         Deno.writeTextFileSync(GetAppPath("MOTHERFKRS"), allEntries, { append: true });
 
         LogStuff(
@@ -218,43 +215,38 @@ export async function RemoveProject(
     entry: UnknownString,
     showOutput: boolean = true,
 ): Promise<void> {
+    const workingEntry = await SpotProject(entry);
     try {
-        const workingEntry = await SpotProject(entry);
-
         const list = GetAllProjects();
-        const index = list.indexOf(workingEntry);
-        const name = await NameProject(workingEntry, "name");
-
         if (!list.includes(workingEntry)) {
             LogStuff(
-                `Bruh, that mf doesn't exist yet.\nAnother typo? We took: ${workingEntry}`,
+                `Bruh, that project doesn't exist yet.\nAnother typo? We took: ${workingEntry}`,
                 "error",
             );
             return;
         }
+        const index = list.indexOf(workingEntry);
 
         if (index !== -1) list.splice(index, 1);
         Deno.writeTextFileSync(GetAppPath("MOTHERFKRS"), list.join("\n") + "\n");
 
-        if (list.length > 0 && showOutput === true) {
+        if (!showOutput) return;
+        if (list.length > 0) {
             LogStuff(
-                `I guess ${name} was another "revolutionary cutting edge project" that's now gone, right?`,
+                `There goes another "revolutionary cutting edge project" gone. Life's ever changing, right?`,
                 "tick-clear",
             );
-            return;
         } else {
-            if (!showOutput) return;
             LogStuff(
-                `Removed ${name}. That was your last project, the list is now empty.`,
+                `Removed your last project, your list is now empty.`,
                 "moon-face",
             );
-            return;
         }
+        return;
     } catch (e) {
-        // TODO(@ZakaHaceCosas) this is duplicate above, check which one actually works
         if (e instanceof FknError && e.code === "External__Proj__NotFound") {
             LogStuff(
-                `Bruh, that mf doesn't exist yet.\nAnother typo? We took: ${entry} (=> ${entry ? ParsePath(entry) : "undefined?"})`,
+                `That project doesn't exist.\nAnother typo? We took: ${entry} (=> ${workingEntry})`,
                 "error",
             );
             Deno.exit(1);
@@ -359,7 +351,7 @@ function GetProjectSettings(path: string): FullFkNodeYaml {
     const content = Deno.readTextFileSync(pathToDivineFile);
     const divineContent = parseYaml(content);
 
-    if (!divineContent || typeof divineContent !== "object" || !ValidateFkNodeYaml(divineContent)) {
+    if (!ValidateFkNodeYaml(divineContent)) {
         DEBUG_LOG("FKN YAML / RESORTING TO DEFAULTS (invalid fknode.yaml)");
         if (!content.includes("UPON INTERACTING")) {
             Deno.writeTextFileSync(
@@ -391,11 +383,7 @@ export function UnderstandProjectProtection(settings: FkNodeYaml, options: {
     lint: boolean;
     destroy: boolean;
 }): UnderstoodProjectProtection {
-    const protection = normalizeArray(
-        Array.isArray(settings.divineProtection) ? settings.divineProtection : [settings.divineProtection],
-    );
-
-    if (!validate(protection[0]) || protection[0] === "disabled") {
+    if (!settings.divineProtection) {
         return {
             doClean: true,
             doUpdate: options.update,
@@ -403,7 +391,8 @@ export function UnderstandProjectProtection(settings: FkNodeYaml, options: {
             doLint: options.lint,
             doDestroy: options.destroy,
         };
-    } else if (protection[0] === "*") {
+    }
+    if (settings.divineProtection === "*") {
         return {
             doClean: false,
             doUpdate: false,
@@ -411,15 +400,17 @@ export function UnderstandProjectProtection(settings: FkNodeYaml, options: {
             doLint: false,
             doDestroy: false,
         };
-    } else {
-        return {
-            doClean: protection.includes("cleaner") ? false : true,
-            doUpdate: protection.includes("updater") ? false : options.update,
-            doPrettify: protection.includes("prettifier") ? false : options.prettify,
-            doLint: protection.includes("linter") ? false : options.lint,
-            doDestroy: protection.includes("destroyer") ? false : options.destroy,
-        };
     }
+
+    const protection = normalizeArray(settings.divineProtection);
+
+    return {
+        doClean: protection.includes("cleaner") ? false : true,
+        doUpdate: protection.includes("updater") ? false : options.update,
+        doPrettify: protection.includes("prettifier") ? false : options.prettify,
+        doLint: protection.includes("linter") ? false : options.lint,
+        doDestroy: protection.includes("destroyer") ? false : options.destroy,
+    };
 }
 
 /**
@@ -723,9 +714,9 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
                 exec: ["go", "run"],
                 update: ["get", "-u", "all"],
                 clean: [["clean"], ["mod", "tidy"]],
-                run: "__UNSUPPORTED",
-                audit: "__UNSUPPORTED", // i thought it was vet
-                publish: "__UNSUPPORTED", // ["test", "./..."]
+                run: false,
+                audit: false, // i thought it was vet
+                publish: false, // ["test", "./..."]
                 start: "run",
             },
             workspaces,
@@ -753,8 +744,8 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
                 exec: ["cargo", "run"],
                 update: ["update"],
                 clean: [["clean"]],
-                run: "__UNSUPPORTED",
-                audit: "__UNSUPPORTED", // ["audit"]
+                run: false,
+                audit: false, // ["audit"]
                 publish: ["publish"],
                 start: "run",
             },
@@ -783,9 +774,9 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
                 base: "deno",
                 exec: ["deno", "run"],
                 update: ["outdated", "--update"],
-                clean: "__UNSUPPORTED",
+                clean: false,
                 run: ["deno", "task"],
-                audit: "__UNSUPPORTED",
+                audit: false,
                 publish: ["publish", "--check=all"],
                 start: "run",
             },
@@ -815,7 +806,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
                 exec: ["bunx"],
                 update: ["update", "--save-text-lockfile"],
                 // ["install", "--analyze src/**/*.ts"]
-                clean: "__UNSUPPORTED",
+                clean: false,
                 run: ["bun", "run"],
                 audit: ["audit", "--json"],
                 publish: ["publish"],

@@ -33,9 +33,7 @@ export default async function TheReleaser(params: TheReleaserConstructedParams):
 
     Deno.chdir(env.root);
 
-    if (env.commands.publish === "__UNSUPPORTED") {
-        throw new FknError("Interop__PublishUnable", `Platform ${env.runtime} doesn't support publishing. Aborting.`);
-    }
+    if (!env.commands.publish) throw new FknError("Interop__PublishUnable", `Platform ${env.runtime} doesn't support publishing. Aborting.`);
 
     const releaseCmd = ValidateUserCmd(env, "releaseCmd");
     const buildCmd = ValidateUserCmd(env, "buildCmd");

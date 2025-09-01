@@ -2,7 +2,6 @@ import { normalize, validate, validateAgainst } from "@zakahacecosas/string-util
 import { FknError } from "./error.ts";
 import type { ProjectEnvironment } from "../types/platform.ts";
 import { Commander } from "./cli.ts";
-import { isDis } from "../constants.ts";
 import type { CF_FKNODE_SETTINGS } from "../types/config_files.ts";
 import { GetAppPath, GetUserSettings } from "./config.ts";
 import { ColorString } from "./color.ts";
@@ -13,16 +12,15 @@ import { NameProject } from "./projects.ts";
 export function ValidateUserCmd(env: ProjectEnvironment, key: "commitCmd" | "releaseCmd" | "buildCmd"): string | null {
     const command = env.settings[key];
 
-    const cmd = (validate(command) && !isDis(command)) ? normalize(command) : "#disable";
+    const cmd = (command && validate(command)) ? normalize(command) : null;
 
-    if (cmd !== "#disable" && env.commands.run === "__UNSUPPORTED") {
+    if (!cmd && !env.commands.run) {
         throw new FknError(
             "Interop__JSRunUnable",
             `Your fknode.yaml file has a ${key} key, but ${env.manager} doesn't support JS-like "run" tasks, so we can't execute that task. To avoid undesired behavior, we stopped execution. Please remove the commitCmd key from this fknode.yaml. Sorry!`,
         );
     }
 
-    if (cmd === "#disable") return null;
     return cmd;
 }
 
@@ -32,6 +30,7 @@ export async function RunUserCmd(params: { key: "commitCmd" | "releaseCmd"; env:
     const cmd = ValidateUserCmd(env, key);
 
     if (!cmd) return;
+    if (!env.commands.run) throw `ValidateUserCmd() is not stopping users from using RunUserCmd() where unsupported.`;
 
     LogStuff(
         `Running your ${key} | ${ColorString([env.commands.run[0], env.commands.run[1], cmd].join(" "), "half-opaque", "italic")}`,

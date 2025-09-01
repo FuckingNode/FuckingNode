@@ -184,9 +184,9 @@ interface GenericProjectEnvironment {
          */
         exec: ["deno", "run"] | ["bunx"] | ["npx"] | ["pnpm", "dlx"] | ["yarn", "dlx"] | ["go", "run"] | ["cargo", "run"];
         /**
-         * Run commands. `string[]` as it's always made of two parts. Includes base. Can be "__UNSUPPORTED" because of non-JS runtimes.
+         * Run commands. `string[]` as it's always made of two parts. Includes base. Can be false because of non-JS runtimes.
          */
-        run: ["deno", "task"] | ["npm", "run"] | ["bun", "run"] | ["pnpm", "run"] | ["yarn", "run"] | "__UNSUPPORTED";
+        run: ["deno", "task"] | ["npm", "run"] | ["bun", "run"] | ["pnpm", "run"] | ["yarn", "run"] | false;
         /**
          * Update commands.
          */
@@ -194,7 +194,7 @@ interface GenericProjectEnvironment {
         /**
          * Clean commands.
          */
-        clean: string[][] | "__UNSUPPORTED";
+        clean: string[][] | false;
         /**
          * Audit commands.
          */
@@ -203,11 +203,11 @@ interface GenericProjectEnvironment {
             | ["audit", "--ignore-registry-errors", "--json"]
             | ["audit", "--json"]
             | ["audit", "--recursive", "--all", "--json"]
-            | "__UNSUPPORTED";
+            | false;
         /**
          * Package publish commands.
          */
-        publish: ["publish"] | ["publish", "--non-interactive"] | ["publish", "--check=all"] | "__UNSUPPORTED";
+        publish: ["publish"] | ["publish", "--non-interactive"] | ["publish", "--check=all"] | false;
         /**
          * Project startup commands.
          */
@@ -233,13 +233,11 @@ interface NodeEnvironment extends GenericProjectEnvironment {
         clean:
             | [["dedupe"], ["prune"]]
             | [["clean"]]
-            | [["autoclean", "--force"]]
-            | "__UNSUPPORTED";
+            | [["autoclean", "--force"]];
         audit:
             | ["audit", "--ignore-registry-errors", "--json"]
             | ["audit", "--json"]
-            | ["audit", "--recursive", "--all", "--json"]
-            | "__UNSUPPORTED";
+            | ["audit", "--recursive", "--all", "--json"];
         publish: ["publish"] | ["publish", "--non-interactive"];
         start: "start";
     };
@@ -260,7 +258,7 @@ interface BunEnvironment extends GenericProjectEnvironment {
         exec: ["bunx"];
         run: ["bun", "run"];
         update: ["update", "--save-text-lockfile"];
-        clean: "__UNSUPPORTED";
+        clean: false;
         audit: ["audit", "--json"];
         publish: ["publish"];
         start: "start";
@@ -282,8 +280,8 @@ interface DenoEnvironment extends GenericProjectEnvironment {
         exec: ["deno", "run"];
         run: ["deno", "task"];
         update: ["outdated", "--update"];
-        clean: "__UNSUPPORTED";
-        audit: "__UNSUPPORTED";
+        clean: false;
+        audit: false;
         publish: ["publish", "--check=all"];
         start: "run";
     };
@@ -302,10 +300,10 @@ interface CargoEnvironment extends GenericProjectEnvironment {
     commands: {
         base: "cargo";
         exec: ["cargo", "run"];
-        run: "__UNSUPPORTED";
+        run: false;
         update: ["update"];
         clean: [["clean"]];
-        audit: "__UNSUPPORTED";
+        audit: false;
         publish: ["publish"];
         start: "run";
     };
@@ -318,11 +316,11 @@ interface GolangEnvironment extends GenericProjectEnvironment {
     commands: {
         base: "go";
         exec: ["go", "run"];
-        run: "__UNSUPPORTED";
+        run: false;
         update: ["get", "-u", "all"];
         clean: [["clean"], ["mod", "tidy"]];
-        audit: "__UNSUPPORTED";
-        publish: "__UNSUPPORTED";
+        audit: false;
+        publish: false;
         start: "run";
     };
 }
@@ -440,4 +438,14 @@ export interface FnCPF {
      * @type {string}
      */
     fknVer: string;
+}
+
+type AnyEnv = NodeEnvironment | BunEnvironment | DenoEnvironment | CargoEnvironment | GolangEnvironment;
+
+export function TypeGuardForNodeBun(env: AnyEnv): env is NodeEnvironment | BunEnvironment {
+    return (env.runtime === "node" || env.runtime === "bun");
+}
+
+export function TypeGuardForJS(env: AnyEnv): env is NodeEnvironment | BunEnvironment | DenoEnvironment {
+    return (env.runtime === "node" || env.runtime === "bun" || env.runtime === "deno");
 }
