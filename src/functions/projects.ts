@@ -286,18 +286,14 @@ export async function NameProject(
     const workingPath = ParsePath(path);
     const formattedPath = ColorString(workingPath, "italic", "half-opaque");
 
-    // if the path cannot be found, just return it, so the user sees it
-    if (!(CheckForPath(workingPath))) return formattedPath;
     try {
         const env = await GetProjectEnvironment(workingPath);
 
         const pkgFile = env.main.cpfContent;
 
-        if (!pkgFile.name) return formattedPath;
-
         const formattedName = ColorString(pkgFile.name, "bold", env.runtimeColor);
 
-        const formattedVersion = pkgFile.version ? `@${ColorString(pkgFile.version, "purple")}` : "";
+        const formattedVersion = `@${ColorString(pkgFile.version, "purple")}`;
 
         const formattedNameVer = `${formattedName}${formattedVersion}`;
 
@@ -309,7 +305,7 @@ export async function NameProject(
         else if (wanted === "name-colorless") return pkgFile.name;
         else return formattedNameVer;
     } catch {
-        // (needed to prevent crashes from invalid projects)
+        // (needed to prevent crashes from invalid projects or not found paths)
         return formattedPath;
     }
 }

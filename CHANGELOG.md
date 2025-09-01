@@ -21,6 +21,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
     - A string conversion needed for the project's list file happened whenever _any_ path was queried, now it only happens when we query that specific file.
     - All paths were initialized when querying any path, now only the base one (needed) is.
   - Removed useless file existence checks where we already know a file exists.
+  - Removed some useless object mutations.
+  - "Naming a project" (when we show its name with colors and stuff) is actually a somewhat expensive operation. We slightly optimized it + removed duplicate calls.
 - Added an `--export` option to `export`; if not provided the default behavior is to just show it in terminal instead of writing it.
 
 ### Changed
@@ -38,6 +40,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- Fixed the entire maxim cleanup process failing if just one project doesn't somehow have a `node_modules` DIR.
 - Fixed a typo in `export`'s help entry.
 
 ### Removed

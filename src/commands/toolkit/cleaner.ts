@@ -3,7 +3,7 @@ import { Commander, ManagerExists } from "../../functions/cli.ts";
 import { GetUserSettings } from "../../functions/config.ts";
 import { BulkRemove, CheckForPath, JoinPaths, ParsePath } from "../../functions/filesystem.ts";
 import { Interrogate, LogStuff } from "../../functions/io.ts";
-import { GetProjectEnvironment, NameProject, SpotProject, UnderstandProjectProtection } from "../../functions/projects.ts";
+import { GetProjectEnvironment, NameProject, UnderstandProjectProtection } from "../../functions/projects.ts";
 import type { CleanerIntensity } from "../../types/config_params.ts";
 import type { LOCKFILE_GLOBAL, MANAGER_GLOBAL, ProjectEnvironment } from "../../types/platform.ts";
 import { FknError } from "../../functions/error.ts";
@@ -145,7 +145,8 @@ const ProjectCleaningFeatures = {
             return;
         }
     },
-    Commit: async (
+    Commit: (
+        projectName: string,
         env: ProjectEnvironment,
         shouldUpdate: boolean,
         shouldLint: boolean,
@@ -182,7 +183,7 @@ const ProjectCleaningFeatures = {
         }
 
         Commit(ParsePath(env.root), getCommitMessage(), "all", []);
-        LogStuff(`Committed your changes to ${await NameProject(env.root, "name")}!`, "tick");
+        LogStuff(`Committed your changes to ${projectName}!`, "tick");
         return;
     },
 };
@@ -190,7 +191,7 @@ const ProjectCleaningFeatures = {
 /**
  * Cleans a project.
  *
- * @param {string} projectInQuestion
+ * @param {string} motherfuckerInQuestion
  * @param {boolean} shouldUpdate
  * @param {boolean} shouldLint
  * @param {boolean} shouldPrettify
@@ -200,7 +201,7 @@ const ProjectCleaningFeatures = {
  * @returns {Promise<{ protection: string | null; errors: string | null; }>}
  */
 export async function PerformCleanup(
-    projectInQuestion: string,
+    motherfuckerInQuestion: string,
     shouldUpdate: boolean,
     shouldLint: boolean,
     shouldPrettify: boolean,
@@ -211,9 +212,8 @@ export async function PerformCleanup(
     protection: string | null;
     errors: string | null;
 }> {
-    const motherfuckerInQuestion = ParsePath(projectInQuestion);
-    const projectName = ColorString(await NameProject(motherfuckerInQuestion, "name"), "bold");
     const env = await GetProjectEnvironment(motherfuckerInQuestion);
+    const projectName = ColorString(await NameProject(env.root, "name"), "bold");
 
     const protections: string[] = [];
     const errors: string[] = [];
@@ -289,6 +289,7 @@ export async function PerformCleanup(
     }
     if (whatShouldWeDo["commit"]) {
         ProjectCleaningFeatures.Commit(
+            projectName,
             env,
             whatShouldWeDo["update"],
             whatShouldWeDo["lint"],
@@ -485,24 +486,21 @@ export async function PerformMaximCleanup(projects: string[]): Promise<void> {
     const trash = [];
 
     for (const project of projects) {
-        const workingProject = await SpotProject(project);
-        const [name, env] = await Promise.all([
-            NameProject(workingProject, "name"),
-            GetProjectEnvironment(workingProject),
-        ]);
+        const env = await GetProjectEnvironment(project);
+        const projectName = await NameProject(env.root, "name");
 
         // TODO(@ZakaHaceCosas) add cargo target
         if (env.runtime === "rust" || env.runtime === "golang") continue;
 
         if (!(CheckForPath(env.hall_of_trash))) {
             LogStuff(
-                `Maxim pruning didn't find the node_modules DIR at ${name}. Skipping this ${FWORDS.MF}...`,
+                `Maxim pruning didn't find the node_modules DIR at ${projectName}. Skipping this ${FWORDS.MF}...`,
                 "bruh",
             );
-            return;
+            continue;
         }
         LogStuff(
-            `Will maxim prune for ${name}`,
+            `Will maxim prune for ${projectName}`,
             "trash",
         );
         // hall_of_trash path should be absolute

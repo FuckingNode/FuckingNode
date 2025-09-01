@@ -1,7 +1,6 @@
 import { FWORDS } from "../constants/fwords.ts";
-import { CheckForPath } from "../functions/filesystem.ts";
 import { LogStuff, Notification } from "../functions/io.ts";
-import { GetAllProjects, NameProject, SpotProject } from "../functions/projects.ts";
+import { GetAllProjects, NameProject } from "../functions/projects.ts";
 import type { TheCleanerConstructedParams } from "./constructors/command.ts";
 import { PerformCleanup, PerformHardCleanup, PerformMaximCleanup, ShowReport, ValidateIntensity } from "./toolkit/cleaner.ts";
 import type { CleanerIntensity } from "../types/config_params.ts";
@@ -12,8 +11,8 @@ export type RESULT = {
     status: "Not found" | "Success" | "Partial success" | "Failed";
     elapsedTime: string;
     extras: undefined | {
-        ignored?: string;
-        failed?: string;
+        ignored: string | null;
+        failed: string | null;
     };
 };
 
@@ -31,7 +30,7 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
     }
 
     // read all projects
-    const projects = project === 0 ? GetAllProjects() : [await SpotProject(project)];
+    const projects = project === 0 ? GetAllProjects() : [project];
 
     if (realIntensity === "maxim-only") {
         await PerformMaximCleanup(projects);
@@ -57,27 +56,13 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
     for (const project of projects) {
         // start time of each cleanup
         const startTime = new Date();
+        const projectName = await NameProject(project);
         try {
-            if (!(CheckForPath(project))) {
-                LogStuff(
-                    `Path not found: ${project}. You might want to update your list of ${FWORDS.MFS}.`,
-                    "error",
-                    "red",
-                );
-                results.push({
-                    path: project,
-                    status: "Not found",
-                    elapsedTime: GetElapsedTime(startTime),
-                    extras: undefined,
-                });
-                continue;
-            }
-
             Deno.chdir(project);
 
             console.log("");
             LogStuff(
-                `Cleaning the ${await NameProject(project)} ${FWORDS.MF}...`,
+                `Cleaning the ${projectName} ${FWORDS.MF}...`,
                 "package",
             );
             const res = await PerformCleanup(
@@ -94,25 +79,16 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
                 path: project,
                 status: res.errors !== null ? "Partial success" : "Success",
                 elapsedTime: GetElapsedTime(startTime),
-                extras: undefined,
-            };
-
-            if (res.protection !== null) {
-                result.extras = {
+                extras: {
                     ignored: res.protection,
-                };
-            }
-            if (res.errors !== null) {
-                result.extras = {
-                    ...result.extras,
                     failed: res.errors,
-                };
-            }
+                },
+            };
 
             results.push(result);
         } catch (e) {
             LogStuff(
-                `Error while working around with ${await NameProject(project, "name")}: ${e}`,
+                `Error while working around with ${projectName}: ${e}`,
                 "error",
                 "red",
             );
@@ -137,9 +113,9 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
     const elapsed = Date.now() - startup.getTime();
     Notification(
         projects.length > 1 ? `All your ${FWORDS.MFN} projects have been cleaned!` : `Your ${FWORDS.MFN} project has been cleaned!`,
-        `We did it! It took ${GetElapsedTime(startup)}. ${
+        `We did it! It took ${GetElapsedTime(startup)}.${
             results.some((r) => (r.extras && r.extras.failed && r.extras.failed.trim().length > 0))
-                ? "Errors happened, though. Check the report in your terminal session."
+                ? " Errors happened, though. Check the report in your terminal session."
                 : ""
         }`,
         elapsed,
