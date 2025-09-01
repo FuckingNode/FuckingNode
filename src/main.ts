@@ -310,8 +310,9 @@ async function main(command: UnknownString): Promise<void> {
         case "generate-cpf":
             await TheExporter({
                 project: (flags[1] ?? Deno.cwd()),
-                json: hasFlag("json", false),
+                jsonc: hasFlag("jsonc", false),
                 cli: hasFlag("cli", false),
+                export: hasFlag("export", false),
             });
             break;
         case "compat":

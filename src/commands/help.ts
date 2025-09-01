@@ -123,7 +123,7 @@ export default function TheHelper(params: TheHelperConstructedParams): void {
         ],
         [
             "export",
-            "[project] [--json] [--cli]",
+            "[project] [--jsonc] [--cli] [--export]",
             "Exports your project's CPF. Meant for debugging only.",
         ],
         [
@@ -534,14 +534,19 @@ export default function TheHelper(params: TheHelperConstructedParams): void {
                             "Project to show the CPF for. Defaults to the current working directory.",
                         ],
                         [
-                            "--json",
+                            "--jsonc",
                             null,
-                            "Default format is YAML, use --json to use JSONC format instead.",
+                            "Default format is YAML, use --jsonc to use JSONC format instead.",
                         ],
                         [
                             "--cli",
                             null,
-                            "If passed, the output (which is written to a file btw), wil also be shown in the terminal.",
+                            "If passed, the output will also be shown in the terminal. It's always shown if not exporting.",
+                        ],
+                        [
+                            "--export",
+                            null,
+                            "If passed, the output will be written to a file instead of being shown in the terminal.",
                         ],
                     ],
                 ),

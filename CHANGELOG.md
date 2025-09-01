@@ -21,10 +21,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
     - A string conversion needed for the project's list file happened whenever _any_ path was queried, now it only happens when we query that specific file.
     - All paths were initialized when querying any path, now only the base one (needed) is.
   - Removed useless file existence checks where we already know a file exists.
+- Added an `--export` option to `export`; if not provided the default behavior is to just show it in terminal instead of writing it.
 
 ### Changed
 
 - (Breaking) Now setting keys were changed and use dashes, much more common for CLIs (and also makes keys consistent with what you see when running `settings`).
+- (Breaking) Now `export` expects `--jsonc` and not `--json` to be passed, matching the output filetype.
 - Now, if installed, Bun will be the default package manager.
 - Now Git errors should be much more properly handled and reported.
 - Now the error dump file should be more readable.
@@ -33,6 +35,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   - Avoiding unnecessary checks for spotting project paths.
   - Remove duplicate calls to check for staged files via `commit`.
   - Remove `logs.log`, removing a ton of file writes.
+
+### Fixed
+
+- Fixed a typo in `export`'s help entry.
 
 ### Removed
 

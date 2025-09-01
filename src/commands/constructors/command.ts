@@ -190,17 +190,23 @@ export interface TheExporterConstructedParams {
      */
     project: UnknownString;
     /**
-     * Whether to use JSON or not. If not, YAML is used.
+     * Whether to use JSONC or not. If not, YAML is used.
      *
      * @type {boolean}
      */
-    json: boolean;
+    jsonc: boolean;
     /**
      * Whether to output the file to the CLI too.
      *
      * @type {boolean}
      */
     cli: boolean;
+    /**
+     * Whether to export the FnCPF to a file.
+     *
+     * @type {boolean}
+     */
+    export: boolean;
 }
 
 /**
