@@ -224,9 +224,9 @@ export function DisplaySettings(): void {
  * @param {boolean} [silent=false] If true no success message will be shown.
  */
 export async function FlushConfigFiles(target: UnknownString, force: boolean, silent: boolean = false): Promise<void> {
-    if (!validateAgainst(target, ["logs", "projects", "schedules", "errors", "all"])) {
+    if (!validateAgainst(target, ["projects", "schedules", "errors", "all"])) {
         LogStuff(
-            "Specify what to flush. Either 'logs', 'projects', 'schedules', 'errors', or 'all'.",
+            "Specify what to flush. Either 'projects', 'schedules', 'errors', or 'all'.",
             "warn",
         );
         return;
@@ -245,10 +245,7 @@ export async function FlushConfigFiles(target: UnknownString, force: boolean, si
         ];
     }
 
-    // TODO(@ZakaHaceCosas) parallelize
-    const fileSize = typeof file === "string"
-        ? Deno.statSync(file).size
-        : (file.map((item) => Deno.statSync(item).size)).reduce((acc, num) => acc + num, 0);
+    const fileSize = (await Promise.all(file.map((item) => Deno.stat(item)))).reduce((acc, num) => acc + num.size, 0);
 
     if (
         !force &&
