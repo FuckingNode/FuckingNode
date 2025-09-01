@@ -14,7 +14,7 @@ import type { PROJECT_ERROR_CODES } from "../types/errors.ts";
 import { FkNodeInterop } from "../commands/interop/interop.ts";
 import { GetLatestTag } from "../functions/git.ts";
 import { internalGolangRequireLikeStringParser } from "../commands/interop/parse-module.ts";
-import { normalize, normalizeArray, toUpperCaseFirst, type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
+import { normalize, normalizeArray, type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { ResolveLockfiles } from "../commands/toolkit/cleaner.ts";
 import { isGlob } from "@std/path/is-glob";
 import { joinGlobs, normalizeGlob } from "@std/path";
@@ -70,22 +70,27 @@ export async function AddProject(
     glob: boolean = false,
 ): Promise<void> {
     if (validate(entry) && isGlob(entry)) {
-        globSync(entry)
+        const arr = globSync(entry)
             .filter((f) => Deno.statSync(f).isDirectory)
-            .forEach(async (p) => await AddProject(p, true));
+            .map((p) => AddProject(p, true));
+        await Promise.all(arr);
         return;
     }
 
-    const workingEntry = ParsePath(validate(entry) ? entry : Deno.cwd());
+    const workingEntry = validate(entry) ? ParsePath(entry) : Deno.cwd();
 
     if (!(CheckForPath(workingEntry))) throw new FknError("Fs__Unreal", `Path "${workingEntry}" doesn't exist.`);
 
-    function addTheEntry(name: string): void {
+    function addTheEntry(name: string, rt: "node" | "deno" | "bun" | "golang" | "rust"): void {
         Deno.writeTextFileSync(GetAppPath("MOTHERFKRS"), `${workingEntry}\n`, {
             append: true,
         });
         LogStuff(
-            `Congrats! ${name} was added to your list. One mf less to care about!`,
+            `Congrats! ${name} was added to your list. One mf less to care about!${
+                validateAgainst(rt, ["node", "deno", "bun"])
+                    ? ""
+                    : `\nNote this project uses the ${rt} runtime. Keep in mind it's not fully supported.`
+            }`,
             "tick-clear",
         );
     }
@@ -123,18 +128,10 @@ export async function AddProject(
             return;
         }
 
-        if (!validateAgainst(env.runtime, ["node", "deno", "bun"])) {
-            LogStuff(
-                `This project uses the ${toUpperCaseFirst(env.runtime)} runtime. Keep in mind it's not fully supported.`,
-                "bruh",
-                "italic",
-            );
-        }
-
         const workspaces = env.workspaces;
 
         if (!workspaces || workspaces.length === 0) {
-            addTheEntry(projectName);
+            addTheEntry(projectName, env.runtime);
             return;
         }
 
@@ -153,7 +150,7 @@ export async function AddProject(
         );
 
         if (!addWorkspaces) {
-            addTheEntry(projectName);
+            addTheEntry(projectName, env.runtime);
             return;
         }
 
@@ -439,11 +436,10 @@ export function UnderstandProjectProtection(settings: FkNodeYaml, options: {
  * @returns {Promise<true | PROJECT_ERROR_CODES>} True if it's valid, a `PROJECT_ERROR_CODES` otherwise.
  */
 export async function ValidateProject(entry: string, existing: boolean): Promise<true | PROJECT_ERROR_CODES> {
-    const workingEntry = ParsePath(entry);
-    if (!(CheckForPath(workingEntry))) return "NotFound";
+    if (!CheckForPath(entry)) return "NotFound";
     // await GetProjectEnvironment() already does some validations by itself, so we can just use it here
     try {
-        const env = await GetProjectEnvironment(workingEntry);
+        const env = await GetProjectEnvironment(entry);
 
         if (!(CheckForPath(env.main.path))) return "NoPkgFile";
         if (!env.main.cpfContent.name) return "NoName";
@@ -454,7 +450,7 @@ export async function ValidateProject(entry: string, existing: boolean): Promise
     }
 
     const isDuplicate = (GetAllProjects()).filter(
-        (item) => normalize(item) === normalize(workingEntry),
+        (item) => normalize(item) === normalize(entry),
     ).length > (existing ? 1 : 0);
 
     if (isDuplicate) return "IsDuplicate";

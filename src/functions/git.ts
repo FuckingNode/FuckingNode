@@ -29,7 +29,7 @@ export function IsRepo(path: string): boolean {
         );
         if (
             !output.success ||
-            normalize(output.stdout ?? "", { strict: true, removeCliColors: true }) !== "true"
+            normalize(output.stdout, { strict: true, removeCliColors: true }) !== "true"
         ) return false; // anything unsuccessful means uncommitted changes
 
         return true;

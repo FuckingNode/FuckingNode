@@ -1,5 +1,6 @@
 import TheLister from "../commands/list.ts";
-import { GetBranches, IsRepo } from "../functions/git.ts";
+import { GetAppPath } from "../functions/config.ts";
+import { GetBranches, GetLatestTag, IsRepo } from "../functions/git.ts";
 import { AddProject, GetProjectEnvironment, RemoveProject } from "../functions/projects.ts";
 
 Deno.bench("lister", async () => {
@@ -17,6 +18,16 @@ Deno.bench("adder", async (b) => {
     b.end();
 });
 
+// TODO(@ZakaHaceCosas):
+// make it use projects in /tests/ so everyone can run it
+// make it not wipe your real project list
+Deno.bench("bulk adder", async (b) => {
+    Deno.writeTextFileSync(GetAppPath("MOTHERFKRS"), "");
+    b.start();
+    await AddProject("../proyectitos/*");
+    b.end();
+});
+
 Deno.bench("remover", async (b) => {
     await AddProject(".");
     b.start();
@@ -30,6 +41,14 @@ Deno.bench("git check for repo", () => {
 
 Deno.bench("git get branches", () => {
     GetBranches(".");
+});
+
+Deno.bench("git get latest tag", () => {
+    GetLatestTag(".");
+});
+
+Deno.bench("git get branches", () => {
+    GetLatestTag(".");
 });
 
 Deno.bench("get project env", async () => {

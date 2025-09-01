@@ -15,7 +15,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Added `deprecate` and `nevermind` as aliases to `surrender`.
 - Added several changes to improve the CLI's performance.
   - FuckingNode runs some checks every time before actually running. _Just_ parallelizing them made the entire CLI much, MUCH faster.
+  - Bulk adding projects (via glob patterns) was also parallelized. Made it 5% faster.
   - Git-related and project environment-related operations used to check for filepaths _twice_, this duplication was removed.
+    - For example, checking if a project has an active Git repo is now over 10 times faster.
   - Optimized config filepaths.
     - Removed a useless lowercasing call when getting any path.
     - A string conversion needed for the project's list file happened whenever _any_ path was queried, now it only happens when we query that specific file.
