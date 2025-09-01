@@ -588,7 +588,7 @@ export async function ShowReport(results: RESULT[]): Promise<void> {
         report.push(theResult);
     }
     const sortedReport = sortAlphabetically(report).join("\n");
-    LogStuff(sortedReport, undefined);
+    LogStuff(sortedReport);
     console.log("");
     LogStuff(
         `Cleaning completed at ${new Date().toLocaleString()}`,

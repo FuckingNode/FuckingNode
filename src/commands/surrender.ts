@@ -1,4 +1,4 @@
-import { normalize, type UnknownString, validate } from "@zakahacecosas/string-utils";
+import { normalize, reveal, type UnknownString, validate } from "@zakahacecosas/string-utils";
 import { GetProjectEnvironment, RemoveProject } from "../functions/projects.ts";
 import type { TheSurrendererConstructedParams } from "./constructors/command.ts";
 import { Interrogate, LogStuff } from "../functions/io.ts";
@@ -69,6 +69,8 @@ export default async function TheSurrenderer(params: TheSurrendererConstructedPa
             "heads-up",
         )
     ) return;
+
+    await reveal("3,2,1.", 500);
 
     Commit(
         env.root,

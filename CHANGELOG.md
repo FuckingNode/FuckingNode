@@ -28,6 +28,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   - "Naming a project" (when we show its name with colors and stuff) is actually a somewhat expensive operation. We slightly optimized it + removed duplicate calls.
   - `settings flush` should now be a few milliseconds faster (removed useless array check + parallelized filesize recovery calculations).
 - Added an `--export` option to `export`; if not provided the default behavior is to just show it in terminal instead of writing it.
+- Added a 3 second countdown to `surrender`, giving you time to rethink and quit the program.
 
 ### Changed
 
