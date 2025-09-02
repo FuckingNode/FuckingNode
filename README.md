@@ -21,15 +21,17 @@
 
 ### [Read the manual →](https://fuckingnode.github.io/manual)
 
-[Watch here our **official low budget action trailer** :) →](https://youtube.com/watch?v=_lppvGYUXNk)
+[Watch here our **official low budget action trailer** →](https://youtube.com/watch?v=J675ZcYBrHM)
 
-## What is FuckingNode?
+## What is "FuckingNode"?
 
-**FuckingNode is a CLI tool** (not a CLI-ish npm package) that automates and simplifies **cleaning**, **linting**, and **prettifying** JS or TS projects, **releasing** npm / jsr **packages**, **destroying generated artifacts & caches**, <!-- **understanding security audits**, --> and also gives you additional tools for better Git committing, project cloning, and more.
+FuckingNode is a CLI tool (not a CLI-ish npm package) that *automates* **cleaning**, **linting**, and **prettifying** JS or TS projects, *simplifies* **releasing** npm / jsr **packages**, **destroying generated artifacts & caches**, **(safely) making Git commits**, and *speeds up* **cloning** and **starting up** your projects.
 
-We may not be able to fix your bugs, but we are able to automate most headache-giving tasks across all of your NodeJS projects and give you a set of tools to make JS development great again. DenoJS, BunJS, and even Golang and Rust are also (partially) supported (_see [Cross-runtime support](https://fuckingnode.github.io/cross-platform/) for more info._).
+We may not be able to fix your bugs, but we are able to automate most headache-giving tasks across all of your NodeJS projects and give you a set of tools to make JS development great again. DenoJS, BunJS, and even Golang and Rust are also (partially) supported (*see [Cross-runtime support](https://fuckingnode.github.io/cross-platform/) for more info.*).
 
-It's not magic, it's FuckingNode—and that name is shipping to production.
+So, TL;DR, it helps recover storage, reduce the risk of mistakes, and make your life easier.
+
+It's not magic, it's **FuckingNode**—and yes, we're shipping *that* name to production.
 
 ### Usage
 
@@ -42,9 +44,10 @@ fkn commit < message >    # make a commit, safely
 fkn kickstart < git-url > # clones it, installs deps, and launches your IDE
 fkn launch < project >    # runs "npm run dev" and opens your IDE
 # more commands exist!
+fkn help                  # show it all
 ```
 
-`fkn` and `fknode` aliases are auto-added when downloading via an `.sh` or `.ps1` installer. The standard command is `fuckingnode`, though. Command-specific aliases like `fkclean`, `fkadd`, `fkstart`, etc... do exist.
+The standard command is `fuckingnode`, though `fkn` and `fknode` aliases are auto-added when downloading via a script installer. Command-specific aliases like `fkclean`, `fkadd`, `fkstart`, etc... do exist.
 
 Refer to our [documentation](https://fuckingnode.github.io/) to learn about our motivation, all our features, and more.
 
@@ -71,7 +74,7 @@ curl -fsSL fuckingnode.github.io/install.sh | bash
 ### Nix/NixOS
 
 > [!NOTE]
-> `x86_64-darwin` and `aarch64-darwin` support is available, but NOT tested! There is a possibility of it working, but there is no confirmation.
+> `x86_64-darwin` and `aarch64-darwin` support is available, but not tested. There is a possibility of it working, but there is no confirmation.
 
 Add the repo to your `flake.nix`.
 
@@ -91,20 +94,11 @@ inputs.fuckingnode.packages."${pkgs.system}".default;
 
 ### Compile from source
 
-1. Install [Deno 2](https://docs.deno.com/runtime/).
-2. Open this project from the root.
-
-You can now either:
-
-- Run `deno task compile` and get the output executable from `dist/`.
-- Run `deno -A src/main.ts [...commands]` from the root.
-
-> [!NOTE]
-> After compiling, some tasks will run that likely won't work for you (Konbini hashing and GPG signing). Just ignore them, the executables will work fine without these tasks being fulfilled.
+Install [Deno 2](https://docs.deno.com/runtime/) and open this project from the root. You can now either run `deno task compile` and get the output executable from `dist/`, or run `deno -A src/main.ts [...commands]` from the root to test the CLI directly.
 
 ## Updates
 
-Run `fkn upgrade` to check for updates. As of now, you need to re-run the shell command to reinstall the CLI, it's not self-updateabe. Data won't be lost.
+Run `fkn upgrade` to check for updates; the CLI will immediately update itself if a newer version exists.
 
 ## Documentation
 
@@ -112,6 +106,8 @@ Refer to our [user manual](https://fuckingnode.github.io/manual) to learn everyt
 
 ---
 
-We hope those motherf\*ckers don't annoy you again. If you find any issue with the CLI, open an issue, or make a PR (which would be awesome :smile:).
+We hope your motherf\*cking projects don't give you that much headache.
 
-Cya!
+If you find any issue with the CLI, raise an issue (or make a PR which would be awesome :smile:).
+
+Download F\*ckingNode now and go write some F\*ckingCool code.
