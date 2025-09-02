@@ -46,6 +46,7 @@ export const INTEROP_ERRORS = [
     "Interop__PublishUnable",
     "Interop__MigrateUnable",
     "Interop__JSRunUnable",
+    "Interop__ReqParamLost",
 ] as const;
 export const INTERNAL_ERRORS = [
     "Internal__NonexistentAppPath",

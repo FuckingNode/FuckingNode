@@ -1,6 +1,6 @@
 import { FknError } from "../../functions/error.ts";
 import { deepMerge } from "../../functions/projects.ts";
-import type { CargoDependency, CargoPkgFile, DenoPkgFile, FnCPF, NodePkgFile } from "../../types/platform.ts";
+import type { CargoDependency, CargoPkgFile, DenoPkgFile, FnCPF, GolangPkgFile, NodePkgFile } from "../../types/platform.ts";
 
 const getNodeBunDeps = (cpf: FnCPF, desiredRel: FnCPF["deps"][0]["rel"]) => {
     return Object.fromEntries(
@@ -39,13 +39,11 @@ type ExtraProps<T> = T & Record<string, unknown>;
 
 /**
  * Generates standard package files from a FnCPF.
- *
- * TODO - Golang
  */
 export const Generators: {
     NodeBun: (cpf: FnCPF, additionalParams?: object) => ExtraProps<NodePkgFile>;
     Deno: (cpf: FnCPF, additionalParams?: object) => ExtraProps<DenoPkgFile>;
-    Golang: () => never;
+    Golang: (cpf: FnCPF) => GolangPkgFile;
     Cargo: (cpf: FnCPF, additionalParams?: object) => ExtraProps<CargoPkgFile>;
 } = {
     /** Generates a `package.json` from a FnCPF. */
@@ -72,20 +70,35 @@ export const Generators: {
 
         return deepMerge(generatedPkgFile, additionalParams);
     },
-    Golang: () => {
-        throw new FknError(
-            "Internal__Lazy",
-            "Not done yet! (interop/pkg-gen/golang)",
-        );
+    Golang: (cpf: FnCPF): GolangPkgFile => {
+        if (!cpf.plat.edt) {
+            throw new FknError(
+                "Interop__ReqParamLost",
+                `Required parameter 'go 1.X.X' (CPF equiv: 'plat.edt') not present in FnCPF. Attempt to generate GolangPkgFile failed.`,
+            );
+        }
+
+        return {
+            module: cpf.name,
+            go: cpf.plat.edt,
+            require: Object.fromEntries(cpf.deps.map((d) => {
+                if (d.src !== "pkg.go.dev" && d.src !== "github") throw `Invalid src for Go dep ${d}`;
+                return [d.name, {
+                    version: d.ver,
+                    indirect: d.rel === "go:ind",
+                    src: d.src,
+                }];
+            })),
+        };
     },
     /** Generates a `Cargo.toml` from a FnCPF. */
     Cargo: (cpf: FnCPF, additionalParams?: object): ExtraProps<CargoPkgFile> => {
         const generatedPkgFile: ExtraProps<CargoPkgFile> = {
-            "package": cpf.perPlatProps.cargo_edt
+            "package": cpf.plat.edt
                 ? {
                     name: cpf.name,
                     version: cpf.version,
-                    edition: cpf.perPlatProps.cargo_edt,
+                    edition: cpf.plat.edt,
                 }
                 : {
                     name: cpf.name,

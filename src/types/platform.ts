@@ -90,7 +90,7 @@ export interface GolangPkgFile {
     go: string;
     /** Equivalent to dependencies. For each module, key is the name and the source (github.com, pkg.go.dev...) at the same time. */
     require?: {
-        [moduleName: string]: { version: string; indirect?: boolean };
+        [moduleName: string]: { version: string; src?: "pkg.go.dev" | "github"; indirect?: boolean };
     };
 }
 
@@ -375,10 +375,8 @@ interface FnCPFDependency {
     rel: "univ:dep" | "univ:devD" | "go:ind" | "js:peer" | "rst:buildD";
     /**
      * Package source.
-     *
-     * @type {("npm" | "jsr" | "pkg.go.dev" | "crates.io")}
      */
-    src: "npm" | "jsr" | "pkg.go.dev" | "crates.io";
+    src: "npm" | "jsr" | "pkg.go.dev" | "crates.io" | "github";
 }
 
 /**
@@ -403,21 +401,15 @@ export interface FnCPF {
     /**
      * Runtime/Manager.
      *
-     * @type {("npm" | "pnpm" | "yarn" | "deno" | "bun" | "cargo" | "golang")}
+     * @type {("npm" | "pnpm" | "yarn" | "deno" | "bun" | "cargo" | "go")}
      */
-    rm: "npm" | "pnpm" | "yarn" | "deno" | "bun" | "cargo" | "golang";
+    rm: "npm" | "pnpm" | "yarn" | "deno" | "bun" | "cargo" | "go";
     /**
-     * Per platform props.
-     *
-     * @type {{
-     *         cargo: {
-     *             edition: string;
-     *         };
-     *     }}
+     * Platform props.
      */
-    perPlatProps: {
-        /** Rust edition. "__NTP" (Not This Platform) on other runtimes. */
-        cargo_edt: string | undefined | "__NTP";
+    plat: {
+        /** Rust edition in Cargo and Go version in Golang. `null` for other runtimes. */
+        edt: string | null;
     };
     /**
      * Dependencies.

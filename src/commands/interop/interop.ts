@@ -1,5 +1,5 @@
 import { InteropedFeatures } from "./feature-module.ts";
-import { dedupeDependencies, findDependency, Parsers } from "./parse-module.ts";
+import { dedupeDependencies, findDependency, PackageFileParsers } from "./parse-module.ts";
 import { Installers } from "./installer-module.ts";
 import { Generators } from "./pkggen-module.ts";
 import { BareValidators } from "./validate-module.ts";
@@ -9,12 +9,7 @@ import { BareValidators } from "./validate-module.ts";
  * @author ZakaHaceCosas
  */
 export const FkNodeInterop = {
-    PackageFileParsers: {
-        Golang: Parsers.Golang,
-        Cargo: Parsers.Cargo,
-        Deno: Parsers.Deno,
-        NodeBun: Parsers.NodeBun,
-    },
+    PackageFileParsers,
     BareValidators,
     PackageFileUtils: {
         SpotDependency: findDependency,

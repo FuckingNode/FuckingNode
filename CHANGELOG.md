@@ -42,6 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - (Breaking) Now setting keys were changed and use dashes, much more common for CLIs (and also makes keys consistent with what you see when running `settings`).
 - (Breaking) Now `export` expects `--jsonc` and not `--json` to be passed, matching the output filetype.
+- (Breaking) FnCPF spec slightly changed. Starting with V5 this spec will be publicly documented.
 - Now, if installed, Bun will be the default package manager.
 - Now Git errors should be much more properly handled and reported.
 - Now the error dump file should be more readable.
@@ -50,6 +51,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- Fixed compatibility with Golang projects; now Golang version and dependencies are correctly read (it previously failed to get Golang version, skipped indirect dependencies, and didn't differentiate `github.com` from `pkg.go.dev` dependencies; now it does).
 - Fixed the entire maxim cleanup process failing if just one project doesn't somehow have a `node_modules` DIR.
 - Fixed a typo in `export`'s help entry.
 

@@ -54,56 +54,47 @@ export function internalGolangRequireLikeStringParser(content: string[], kw: str
 // * ###
 const internalParsers = {
     GolangPkgFile: (content: string): GolangPkgFile => {
-        const lines = content.trim().split("\n");
-        let module: UnknownString = "";
-        let go: UnknownString = "";
+        const lines = content.split("\n").map((s) => s.trim());
+        const module: UnknownString = lines.find((l) => l.startsWith("module"))?.split(" ")[1];
+        const go: UnknownString = lines.find((l) => l.startsWith("go"))?.split(" ")[1];
         const require: GolangPkgFile["require"] = {};
 
-        const parsedLines = internalGolangRequireLikeStringParser(lines, "require").filter((line) => line.trim() !== "");
-
-        for (const line of parsedLines) {
-            // ?? we assume that module & go version are defined
-            if (line.trim().startsWith("module")) {
-                module = line.split(" ")[1]?.trim();
-                // ?? "__NO_GOLANG_MODULE";
-            } else if (line.trim().startsWith("go")) {
-                const match = line.trim().match(/go\s+(\d+\.\d+)/);
-                // not mine
-                go = match ? match[0] : "__NO_GOLANG_VERSION";
-                // ?? "__NO_GOLANG_MODULE";
-            } else if (line.trim().startsWith("require")) {
+        for (const line of lines) {
+            if (line.startsWith("require")) {
                 // Process the `require` line by checking for multiple strings in one line or across multiple lines
 
                 // If there's more than one part (URL + version)
                 // If it's broken across multiple lines (next line might contain the version), concatenate
-                const index = parsedLines.indexOf(line);
-                let newIndex = index + 1;
+                const startIndex = lines.indexOf(line);
+                let newIndex = startIndex + 1;
 
-                while (newIndex < parsedLines.length) {
-                    const nextLine = parsedLines[newIndex]?.trim();
-
+                while (newIndex < lines.length) {
+                    const nextLine = lines[newIndex];
                     if (nextLine === undefined) break; // break if the line is invalid
-
-                    const nextParts = nextLine.split(/\s+/);
+                    const nextParts = nextLine.split(" ");
 
                     if (nextParts[0] === undefined || nextParts[1] === undefined) break; // break if invalid
 
-                    const moduleName = nextParts[0].trim();
-                    const version = nextParts[1].trim();
-                    const isIndirect = (nextParts[2] ?? "").includes("indirect") || (nextParts[3] ?? "").includes("indirect");
+                    const moduleName = nextParts[0];
+                    const version = nextParts[1];
+                    // double checks bc since we split by spaces, "//indirect" won't be in same position as "// indirect"
+                    const isIndirect = (nextParts[2] || "").includes("indirect") || (nextParts[3] || "").includes("indirect");
                     require[moduleName] = {
                         version: version,
                         indirect: isIndirect,
+                        // running on assumptions is not great
+                        // but eh i THINK these are the only go dep sources
+                        src: moduleName.includes("golang.org") ? "pkg.go.dev" : "github",
                     };
 
                     newIndex++; // Move to the next line after processing
                 }
+                lines[startIndex] = "";
             }
         }
 
-        if (!validate(module) || !validate(go)) {
-            throw new FknError("Env__PkgFileUnparsable", `Given go.mod contents are unparsable.\n${content}`);
-        }
+        if (!validate(module)) throw new FknError("Env__PkgFileUnparsable", `Given go.mod lacks module.\n${content}`);
+        if (!validate(go)) throw new FknError("Env__PkgFileUnparsable", `Given go.mod lacks go version.\n${content}`);
 
         const toReturn: GolangPkgFile = {
             module,
@@ -161,7 +152,7 @@ export const findDependency = (target: string, deps: FnCPF["deps"]): FnCPF["deps
 // * "END" THIS CODE SUCKS
 // * ###
 
-export const Parsers = {
+export const PackageFileParsers = {
     Golang: {
         STD: internalParsers.GolangPkgFile,
         CPF: (content: string, version: string | undefined, ws: string[]): FnCPF => {
@@ -171,12 +162,13 @@ export const Parsers = {
 
             Object.entries(parsedContent.require ?? []).map(
                 ([k, v]) => {
+                    if (!v.src) throw `No src for Golang dep ${v}`;
                     deps.push(
                         {
                             name: k,
                             ver: v.version,
                             rel: v.indirect === true ? "go:ind" : "univ:dep",
-                            src: "pkg.go.dev",
+                            src: v.src,
                         },
                     );
                 },
@@ -185,9 +177,9 @@ export const Parsers = {
             return {
                 name: parsedContent.module,
                 version: version === undefined ? "Unknown" : version,
-                rm: "golang",
-                perPlatProps: {
-                    cargo_edt: "__NTP",
+                rm: "go",
+                plat: {
+                    edt: parsedContent.go,
                 },
                 ws,
                 deps: dedupeDependencies(deps),
@@ -235,20 +227,20 @@ export const Parsers = {
                     ? parsedContent.workspace?.package?.version
                     : "unknown-ver")
                     ?? "unknown-ver";
-            const cargo_edt =
+            const edt =
                 (typeof parsedContent.package?.edition === "string"
                     ? parsedContent.package?.edition
                     : parsedContent.package?.edition?.workspace === true
                     ? parsedContent.workspace?.package?.edition
-                    : "unknown-edt")
-                    ?? "unknown-edt";
+                    : null)
+                    ?? null;
 
             return {
                 name,
                 version,
                 rm: "cargo",
-                perPlatProps: {
-                    cargo_edt,
+                plat: {
+                    edt,
                 },
                 deps: dedupeDependencies(deps),
                 ws,
@@ -286,8 +278,8 @@ export const Parsers = {
                 name: parsedContent.name,
                 version: parsedContent.version ?? "Unknown",
                 rm: rt,
-                perPlatProps: {
-                    cargo_edt: "__NTP",
+                plat: {
+                    edt: null,
                 },
                 deps: dedupeDependencies(deps),
                 ws,
@@ -324,8 +316,8 @@ export const Parsers = {
                 name: parsedContent.name ?? "__ERROR_NOT_PROVIDED",
                 version: parsedContent.version ?? "Unknown",
                 rm: "deno",
-                perPlatProps: {
-                    cargo_edt: "__NTP",
+                plat: {
+                    edt: null,
                 },
                 deps: dedupeDependencies(deps),
                 ws,

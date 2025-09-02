@@ -41,7 +41,7 @@ const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
                 name: "uwu.js",
                 version: "1.0.0",
                 rm: "npm",
-                perPlatProps: { cargo_edt: "__NTP" },
+                plat: { edt: null },
                 deps: [
                     {
                         name: "tslib",
