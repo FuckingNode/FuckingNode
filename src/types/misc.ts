@@ -89,3 +89,6 @@ export type VALID_COLORS =
  * Git file codes.
  */
 export type GIT_FILES = UnknownString[] | "A" | "!A" | "S";
+
+/** typescript just shut the hell up */
+export type NonEmptyArray<T> = [T, ...T[]];

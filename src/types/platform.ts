@@ -50,6 +50,8 @@ export interface NodePkgFile extends GenericJsPkgFile {
 export interface DenoPkgFile extends GenericJsPkgFile {
     imports?: Record<string, string>;
     workspaces?: string[];
+    exports?: Record<string, string>;
+    fmt?: Record<string, string | number | boolean | string[]>;
 }
 
 /**
@@ -180,13 +182,17 @@ interface GenericProjectEnvironment {
          */
         base: MANAGER_GLOBAL;
         /**
-         * Exec command(s). `string[]` because it can be, e.g., `pnpm dlx`. Includes base.
+         * DLX execution commands. `string[]` because they can be like `pnpm dlx`, includes base. False for non-JS runtimes.
          */
-        exec: ["deno", "run"] | ["bunx"] | ["npx"] | ["pnpm", "dlx"] | ["yarn", "dlx"] | ["go", "run"] | ["cargo", "run"];
+        dlx: ["deno", "run"] | ["bunx"] | ["npx"] | ["pnpm", "dlx"] | ["yarn", "dlx"] | false;
         /**
-         * Run commands. `string[]` as it's always made of two parts. Includes base. Can be false because of non-JS runtimes.
+         * File exec commands. `string[]`, includes base.
          */
-        run: ["deno", "task"] | ["npm", "run"] | ["bun", "run"] | ["pnpm", "run"] | ["yarn", "run"] | false;
+        file: ["deno", "run"] | ["bun"] | ["node"] | ["go", "run"] | ["cargo", "run"];
+        /**
+         * Script run commands. `string[]`, includes base. False for non-JS runtimes.
+         */
+        script: ["deno", "task"] | ["npm", "run"] | ["bun", "run"] | ["pnpm", "run"] | ["yarn", "run"] | false;
         /**
          * Update commands.
          */
@@ -227,8 +233,9 @@ interface NodeEnvironment extends GenericProjectEnvironment {
     main: GenericProjectEnvironment["main"] & { name: "package.json" };
     commands: {
         base: "npm" | "pnpm" | "yarn";
-        exec: ["npx"] | ["pnpm", "dlx"] | ["yarn", "dlx"];
-        run: ["npm", "run"] | ["pnpm", "run"] | ["yarn", "run"];
+        dlx: ["npx"] | ["pnpm", "dlx"] | ["yarn", "dlx"];
+        file: ["node"];
+        script: ["npm", "run"] | ["pnpm", "run"] | ["yarn", "run"];
         update: ["update"] | ["upgrade"];
         clean:
             | [["dedupe"], ["prune"]]
@@ -255,8 +262,9 @@ interface BunEnvironment extends GenericProjectEnvironment {
     main: GenericProjectEnvironment["main"] & { name: "package.json" };
     commands: {
         base: "bun";
-        exec: ["bunx"];
-        run: ["bun", "run"];
+        dlx: ["bunx"];
+        file: ["bun"];
+        script: ["bun", "run"];
         update: ["update", "--save-text-lockfile"];
         clean: false;
         audit: ["audit", "--json"];
@@ -277,8 +285,9 @@ interface DenoEnvironment extends GenericProjectEnvironment {
     main: GenericProjectEnvironment["main"] & { name: "deno.json" | "deno.jsonc" };
     commands: {
         base: "deno";
-        exec: ["deno", "run"];
-        run: ["deno", "task"];
+        dlx: ["deno", "run"];
+        file: ["deno", "run"];
+        script: ["deno", "task"];
         update: ["outdated", "--update"];
         clean: false;
         audit: false;
@@ -299,8 +308,9 @@ interface CargoEnvironment extends GenericProjectEnvironment {
     main: GenericProjectEnvironment["main"] & { name: "Cargo.toml" };
     commands: {
         base: "cargo";
-        exec: ["cargo", "run"];
-        run: false;
+        dlx: false;
+        file: ["cargo", "run"];
+        script: false;
         update: ["update"];
         clean: [["clean"]];
         audit: false;
@@ -315,8 +325,9 @@ interface GolangEnvironment extends GenericProjectEnvironment {
     main: GenericProjectEnvironment["main"] & { name: "go.mod" };
     commands: {
         base: "go";
-        exec: ["go", "run"];
-        run: false;
+        dlx: false;
+        file: ["go", "run"];
+        script: false;
         update: ["get", "-u", "all"];
         clean: [["clean"], ["mod", "tidy"]];
         audit: false;

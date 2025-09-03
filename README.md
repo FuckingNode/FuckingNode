@@ -25,13 +25,13 @@
 
 ## What is "FuckingNode"?
 
-FuckingNode is a CLI tool (not a CLI-ish npm package) that *automates* **cleaning**, **linting**, and **prettifying** JS or TS projects, *simplifies* **releasing** npm / jsr **packages**, **destroying generated artifacts & caches**, **(safely) making Git commits**, and *speeds up* **cloning** and **starting up** your projects.
+FuckingNode is a CLI tool (not a CLI-ish npm package) that _automates_ **cleaning**, **linting**, and **prettifying** JS or TS projects, _simplifies_ **releasing** npm / jsr **packages**, **destroying generated artifacts & caches**, **(safely) making Git commits**, and _speeds up_ **cloning** and **starting up** your projects.
 
-We may not be able to fix your bugs, but we are able to automate most headache-giving tasks across all of your NodeJS projects and give you a set of tools to make JS development great again. DenoJS, BunJS, and even Golang and Rust are also (partially) supported (*see [Cross-runtime support](https://fuckingnode.github.io/cross-platform/) for more info.*).
+We may not be able to fix your bugs, but we are able to automate most headache-giving tasks across all of your NodeJS projects and give you a set of tools to make JS development great again. DenoJS, BunJS, and even Golang and Rust are also (partially) supported (_see [Cross-runtime support](https://fuckingnode.github.io/cross-platform/) for more info._).
 
 So, TL;DR, it helps recover storage, reduce the risk of mistakes, and make your life easier.
 
-It's not magic, it's **FuckingNode**—and yes, we're shipping *that* name to production.
+It's not magic, it's **FuckingNode**—and yes, we're shipping _that_ name to production.
 
 ### Usage
 

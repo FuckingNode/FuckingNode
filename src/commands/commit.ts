@@ -3,11 +3,11 @@ import { GetProjectEnvironment, NameProject } from "../functions/projects.ts";
 import type { TheCommitterConstructedParams } from "./constructors/command.ts";
 import { CanCommit, Commit, GetBranches, GetCommittableFiles, GetStagedFiles, IsRepo, Push, StageFiles } from "../functions/git.ts";
 import { normalize, pluralOrNot, testFlag, validate } from "@zakahacecosas/string-utils";
-import { RunUserCmd, ValidateUserCmd } from "../functions/user.ts";
 import type { GIT_FILES } from "../types/misc.ts";
 import { CheckForPath } from "../functions/filesystem.ts";
 import { FknError } from "../functions/error.ts";
 import { ColorString } from "../functions/color.ts";
+import { RunCmdSet, ValidateCmdSet } from "../functions/cmd-set.ts";
 
 const NOT_COMMITTABLE = [".env", ".env.local", ".sqlite", ".db", "node_modules", ".bak"];
 
@@ -103,18 +103,18 @@ export default async function TheCommitter(params: TheCommitterConstructedParams
         ["bold", "bright-green"],
     );
 
-    const commitCmd = ValidateUserCmd(env, "commitCmd");
+    const commitCmd = ValidateCmdSet({ env, key: "commitCmd" });
 
     const branches = GetBranches(project);
 
     const gitProps = {
         fileCount: staged.length,
         branch: (params.branch && !testFlag(params.branch, "push", { allowQuickFlag: true, allowSingleDash: true }))
-            ? branches.all.includes(normalize(params.branch)) ? params.branch : "__ERROR"
+            ? branches.all.includes(normalize(params.branch)) ? params.branch : false
             : branches.current,
     };
 
-    if (!validate(gitProps.branch) || gitProps.branch === "__ERROR") {
+    if (!gitProps.branch || !validate(gitProps.branch)) {
         throw new FknError(
             params.branch ? "Git__NoBranch" : "Git__NoBranchAA",
             params.branch
@@ -128,16 +128,8 @@ export default async function TheCommitter(params: TheCommitterConstructedParams
     const actions: string[] = [];
 
     if (commitCmd !== null) {
-        // otherwise TS shows TypeError for whatever reason
-        const typed: string[] = env.commands.run as string[];
-
         actions.push(
-            `Run ${
-                ColorString(
-                    `${typed.join(" ")} ${commitCmd}`,
-                    "bold",
-                )
-            }`,
+            `Run your 'commitCmd' (${commitCmd.length} cmds)`,
         );
     }
 
@@ -177,7 +169,7 @@ export default async function TheCommitter(params: TheCommitterConstructedParams
 
     // 2. run their commitCmd over UNSTAGED, MODIFIABLE files
     try {
-        await RunUserCmd({
+        await RunCmdSet({
             key: "commitCmd",
             env,
         });

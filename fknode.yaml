@@ -5,6 +5,11 @@ destroy:
     targets:
         - "dist"
 commitActions: false
-commitCmd: "precommit"
-prettyCmd: "good"
-buildCmd: "cmd ls^cmd tree^sodapda"
+prettyScript: "good"
+buildCmd:
+    # this is for testing, we don't really build with this
+    - { msft: ~echo 'Running from Windows!', posix: ~"echo 'Running from Linux!'" }
+    - ~echo 'test'
+    - ~"echo ''"
+    - ~ls
+    - ="src/types/misc.ts --args"

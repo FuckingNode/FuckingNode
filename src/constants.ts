@@ -59,8 +59,8 @@ export const DEFAULT_SCHEDULE_FILE: CF_FKNODE_SCHEDULE = {
  */
 export const DEFAULT_FKNODE_YAML: FullFkNodeYaml = {
     divineProtection: "*",
-    lintCmd: false,
-    prettyCmd: false,
+    lintScript: false,
+    prettyScript: false,
     destroy: {
         intensities: ["maxim"],
         targets: [
@@ -71,7 +71,7 @@ export const DEFAULT_FKNODE_YAML: FullFkNodeYaml = {
     commitActions: false,
     commitMessage: false,
     commitCmd: false,
-    updateCmdOverride: false,
+    updaterOverride: false,
     flagless: {
         flaglessUpdate: false,
         flaglessLint: false,
@@ -82,8 +82,6 @@ export const DEFAULT_FKNODE_YAML: FullFkNodeYaml = {
     releaseAlwaysDry: false,
     releaseCmd: false,
     launchCmd: false,
-    launchFile: false,
-    launchWithUpdate: false,
     projectEnvOverride: false,
     buildCmd: false,
     buildForRelease: false,

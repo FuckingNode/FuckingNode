@@ -1,5 +1,6 @@
 export const OS_ERRORS = ["Os__NoAppdataNoHome", "Os__NoEntity"] as const;
 export const FS_ERRORS = ["Fs__Unreal", "Fs__UnparsablePath", "Fs__DemandsEmptying", "Fs__DemandsDIR"] as const;
+export const CFG_ERRORS = ["Cfg__InvalidCmdK"] as const;
 export const GIT_ERRORS = [
     "Git__GCommittable",
     "Git__CanCommit",
@@ -58,6 +59,7 @@ export const EXTERNAL_ERRORS = ["External__Publish", "External__Setting__FavIde"
 
 type OS_ERROR_CODES = typeof OS_ERRORS[number];
 type FS_ERROR_CODES = typeof FS_ERRORS[number];
+type CFG_ERROR_CODES = typeof CFG_ERRORS[number];
 type GIT_ERROR_CODES = typeof GIT_ERRORS[number];
 type ENV_ERROR_CODES = typeof ENV_ERRORS[number];
 type TASK_ERROR_CODES = typeof TASK_ERRORS[number];
@@ -72,6 +74,7 @@ type EXTERNAL_ERROR_CODES = typeof EXTERNAL_ERRORS[number];
 export type GLOBAL_ERROR_CODES =
     | OS_ERROR_CODES
     | FS_ERROR_CODES
+    | CFG_ERROR_CODES
     | GIT_ERROR_CODES
     | ENV_ERROR_CODES
     | TASK_ERROR_CODES

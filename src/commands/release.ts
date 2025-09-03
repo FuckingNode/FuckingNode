@@ -5,14 +5,13 @@ import type { TheReleaserConstructedParams } from "./constructors/command.ts";
 import type { CargoPkgFile } from "../types/platform.ts";
 import { Commander } from "../functions/cli.ts";
 import { AddToGitIgnore, Commit, IsRepo, Push, Tag } from "../functions/git.ts";
-import { RunUserCmd, ValidateUserCmd } from "../functions/user.ts";
 import { validate } from "@zakahacecosas/string-utils";
 import { APP_NAME } from "../constants/name.ts";
 import { FknError } from "../functions/error.ts";
 import { stringify as stringifyToml } from "@std/toml/stringify";
 import { GetTextIndentSize } from "../functions/filesystem.ts";
-import { RunBuildCmds } from "../functions/build.ts";
 import { ColorString } from "../functions/color.ts";
+import { RunCmdSet, ValidateCmdSet } from "../functions/cmd-set.ts";
 
 export default async function TheReleaser(params: TheReleaserConstructedParams): Promise<void> {
     if (!validate(params.version)) throw new FknError("Param__VerInvalid", "No version specified!");
@@ -35,33 +34,21 @@ export default async function TheReleaser(params: TheReleaserConstructedParams):
 
     if (!env.commands.publish) throw new FknError("Interop__PublishUnable", `Platform ${env.runtime} doesn't support publishing. Aborting.`);
 
-    const releaseCmd = ValidateUserCmd(env, "releaseCmd");
-    const buildCmd = ValidateUserCmd(env, "buildCmd");
-    const shouldBuild = env.settings.buildForRelease;
+    const releaseCmd = ValidateCmdSet({ env, key: "releaseCmd" });
+    const buildCmd = ValidateCmdSet({ env, key: "buildCmd" });
 
     const actions: string[] = [
         `${ColorString(`Update your ${ColorString(env.main.name, "bold")}'s`, "white")} "version" field`,
         `Create a ${ColorString(`${env.main.name}.bak`, "bold")} file, and add it to .gitignore`,
     ];
-    if (buildCmd && shouldBuild) {
+    if (buildCmd && env.settings.buildForRelease) {
         actions.push(
-            `Run your 'buildCmd' (${buildCmd}).`,
+            `Run your 'buildCmd' set (${buildCmd.length} cmds).`,
         );
     }
     if (releaseCmd) {
-        if (env.runtime === "rust") {
-            throw new FknError(
-                "Task__Release",
-                `Cargo does not support JS-like run, however your fknode.yaml file has the releaseCmd set to "${env.settings.releaseCmd}". To avoid unexpected behavior, we stopped execution. Please, remove the "releaseCmd" key from your config file.`,
-            );
-        }
         actions.push(
-            `Run ${
-                ColorString(
-                    `${env.commands.run.join(" ")} ${releaseCmd}`,
-                    "bold",
-                )
-            }`,
+            `Run your 'releaseCmd' set (${releaseCmd.length} cmds).`,
         );
     }
     if (canUseGit) {
@@ -117,14 +104,14 @@ export default async function TheReleaser(params: TheReleaserConstructedParams):
     }
 
     // build
-    if (shouldBuild) {
-        if (!buildCmd) LogStuff("No build command(s) specified!", "warn", "bright-yellow");
-        else RunBuildCmds(buildCmd.split("^"));
+    if (env.settings.buildForRelease) {
+        if (!buildCmd) LogStuff("You enabled buildForRelease, but no buildCmd was specified!", "warn", "bright-yellow");
+        else RunCmdSet({ env, key: "buildCmd" });
     }
 
     // run their releaseCmd
     if (releaseCmd) {
-        await RunUserCmd({
+        await RunCmdSet({
             key: "releaseCmd",
             env,
         });

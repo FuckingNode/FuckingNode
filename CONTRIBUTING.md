@@ -82,8 +82,7 @@ Both single and multiline comments are valid. Our only rule is:
 // this works
 const hi = "hi, CONTRIBUTING.md reader!";
 
-const bye = "bye, CONTRIBUTING.md reader!"; // THIS DOES NOT!
-// NOT EVERYONE HAS A 4K MONITOR TO READ THIS COMMENT WITHOUT SCROLLING OR ENABLING LINE WRAP!
+const bye = "bye, CONTRIBUTING.md reader!"; // THIS DOES NOT! NOT EVERYONE HAS A 4K MONITOR TO READ THIS COMMENT WITHOUT SCROLLING OR ENABLING LINE WRAP!
 ```
 
 ### Avoid nesting

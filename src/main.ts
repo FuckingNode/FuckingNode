@@ -120,7 +120,7 @@ async function main(command: UnknownString): Promise<void> {
         console.log(
             "PROC NAME",
             new TextDecoder().decode(
-                LOCAL_PLATFORM.SYSTEM === "windows"
+                LOCAL_PLATFORM.SYSTEM === "msft"
                     ? new Deno.Command("powershell", {
                         args: ["Get-Process", "-Id", Deno.pid.toString()],
                     }).outputSync().stdout

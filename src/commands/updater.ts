@@ -74,7 +74,7 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
     );
     if (params.silent) return;
     LogStuff("Updating...", "package");
-    const suffix = LOCAL_PLATFORM.SYSTEM === "windows" ? ".ps1" : ".sh";
+    const suffix = LOCAL_PLATFORM.SYSTEM === "msft" ? ".ps1" : ".sh";
     const res = await fetch(
         `https://fuckingnode.github.io/install${suffix}`,
     );
@@ -84,10 +84,10 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
         await res.bytes(),
     );
     await new Deno.Command(
-        LOCAL_PLATFORM.SYSTEM === "windows" ? "powershell" : "bash",
+        LOCAL_PLATFORM.SYSTEM === "msft" ? "powershell" : "bash",
         {
             args: [
-                LOCAL_PLATFORM.SYSTEM === "windows" ? "-File" : undefined,
+                LOCAL_PLATFORM.SYSTEM === "msft" ? "-File" : undefined,
                 path,
                 Deno.pid.toString(),
             ].filter(validate),

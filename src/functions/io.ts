@@ -141,15 +141,15 @@ export function StringifyYaml(content: unknown): string {
  * @param {string} msg Main text.
  * @param {number} elapsed Elapsed time, for checking the threshold.
  */
-export function Notification(title: string, msg: string, elapsed: number): void {
+export function Notification(title: string, msg: string, elapsed?: number): void {
     const settings = GetUserSettings();
     if (!settings["notifications"]) return;
-    if (settings["notification-threshold"] && elapsed < settings["notification-threshold-value"]) return;
+    if ((elapsed && settings["notification-threshold"]) && elapsed < settings["notification-threshold-value"]) return;
     // NOTE: we should show our logo
     // requires to bundle it / add it to the installer script
     // on Windows, to write XML inside of the damn script :sob:
     // on macOS and Linux, idk what does it require, we'll find out
-    if (LOCAL_PLATFORM.SYSTEM === "windows") {
+    if (LOCAL_PLATFORM.SYSTEM === "msft") {
         Commander(
             "powershell",
             [
@@ -163,7 +163,7 @@ export function Notification(title: string, msg: string, elapsed: number): void 
                 + `$notifier.Show($notification);`,
             ],
         );
-    } else if (LOCAL_PLATFORM.SYSTEM === "chad") {
+    } else if (LOCAL_PLATFORM.SYSTEM === "posix") {
         if (Deno.build.os === "darwin") {
             Commander(
                 "osascript",

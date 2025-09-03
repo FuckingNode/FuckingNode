@@ -1,4 +1,6 @@
+import { validate } from "@zakahacecosas/string-utils";
 import type { CleanerIntensity } from "./config_params.ts";
+import type { NonEmptyArray } from "./misc.ts";
 import type { MANAGER_GLOBAL } from "./platform.ts";
 
 /**
@@ -92,6 +94,20 @@ export interface CF_FKNODE_SCHEDULE {
     };
 }
 
+/** A single `CmdSet` instruction. */
+export type CmdInstruction = `\$${string}` | `~${string}` | `=${string}`;
+export type ParsedCmdInstruction = { type: "<" | "~" | "$" | "="; cmd: NonEmptyArray<string> };
+export type CrossPlatformParsedCmdInstruction = {
+    msft: ParsedCmdInstruction | null;
+    posix: ParsedCmdInstruction | null;
+};
+// deno-lint-ignore explicit-module-boundary-types no-explicit-any
+export function IsCPCmdInstruction(a: any): a is CrossPlatformParsedCmdInstruction {
+    if (!a.msft && !a.posix) return false;
+    return ((typeof a.msft.type === "string" && validate(a.msft.type)) || (typeof a.posix.type === "string" && validate(a.posix.type)));
+}
+export type CmdSet = (CmdInstruction | { posix: CmdInstruction; msft: CmdInstruction })[];
+
 /**
  * An `fknode.yaml` file for configuring individual projects
  */
@@ -109,13 +125,13 @@ export interface FullFkNodeYaml {
      *
      * @type {(string | false)}
      */
-    lintCmd: string | false;
+    lintScript: string | false;
     /**
      * If `--pretty` is passed to `clean`, this script will be used to prettify the project. It must be a runtime script (defined in `package.json` -> `scripts`), and must be a single word (no need for "npm run" prefix). `false` overrides these rules (it's the default).
      *
      * @type {(string | false)}
      */
-    prettyCmd: string | false;
+    prettyScript: string | false;
     /**
      * If provided, file paths in `targets` will be removed when `clean` is called with any of the `intensities`. If not provided defaults to `maxim` intensity and `node_modules` path. Specifying `targets` _without_ `node_modules` does not override it, meaning it'll always be cleaned.
      *
@@ -145,17 +161,17 @@ export interface FullFkNodeYaml {
      */
     commitActions: boolean;
     /**
-     * If provided, if a commit is made (`commitActions`) this will be the commit message. If not provided a default message is used. `__USE_DEFAULT` indicates to use the default.
+     * If provided, if a commit is made (`commitActions`) this will be the commit message. If not provided a default message is used.
      *
      * @type {(string | false)}
      */
     commitMessage: string | false;
     /**
-     * If provided, uses the provided runtime script command for the updating stage, overriding the default command. Like `lintCmd` or `prettyCmd`, it must be a runtime script.
+     * If provided, uses the provided runtime script command for the updating stage, overriding the default command. Like `lintScript` or `prettyScript`, it must be a runtime script.
      *
      * @type {(string | false)}
      */
-    updateCmdOverride: string | false;
+    updaterOverride: string | false;
     /**
      * Flagless features.
      *
@@ -177,9 +193,9 @@ export interface FullFkNodeYaml {
     /**
      * A task (run) to be executed upon running the release command.
      *
-     * @type {string | false}
+     * @type {CmdSet | false}
      */
-    releaseCmd: string | false;
+    releaseCmd: CmdSet | false;
     /**
      * If true, releases will always use `dry-run`.
      *
@@ -187,29 +203,17 @@ export interface FullFkNodeYaml {
      */
     releaseAlwaysDry: boolean;
     /**
-     * A task (run) to be executed upon running the commit command.
+     * A CmdSet to be executed upon running the commit command.
      *
-     * @type {string | false}
+     * @type {CmdSet | false}
      */
-    commitCmd: string | false;
+    commitCmd: CmdSet | false;
     /**
-     * A task (run) to be executed upon running the launch command.
+     * A CmdSet to be executed upon running the launch command.
      *
-     * @type {string | false}
+     * @type {CmdSet | false}
      */
-    launchCmd: string | false;
-    /**
-     * A file to be executed when `launchCmd` is invoked. Only used for Deno, Cargo, and Golang.
-     *
-     * @type {string | false}
-     */
-    launchFile: string | false;
-    /**
-     * If true, dependencies for a project will be updated upon using `fklaunch` with it.
-     *
-     * @type {boolean}
-     */
-    launchWithUpdate: boolean;
+    launchCmd: CmdSet | false;
     /**
      * If specified, this will override FkNode's project environment inference.
      *
@@ -219,9 +223,9 @@ export interface FullFkNodeYaml {
     /**
      * Command(s) to be executed when running the `build` command.
      *
-     * @type {string | false}
+     * @type {CmdSet | false}
      */
-    buildCmd: string | false;
+    buildCmd: CmdSet | false;
     /**
      * If true, `buildCmd` is invoked before releasing.
      *
@@ -258,13 +262,13 @@ export function ValidateFkNodeYaml(
     }
 
     if (
-        obj.lintCmd !== undefined && typeof obj.lintCmd !== "string"
+        obj.lintScript !== undefined && typeof obj.lintScript !== "string"
     ) {
         return false;
     }
 
     if (
-        obj.prettyCmd !== undefined && typeof obj.prettyCmd !== "string"
+        obj.prettyScript !== undefined && typeof obj.prettyScript !== "string"
     ) {
         return false;
     }
@@ -302,8 +306,8 @@ export function ValidateFkNodeYaml(
     }
 
     if (
-        obj.updateCmdOverride !== undefined
-        && typeof obj.updateCmdOverride !== "string"
+        obj.updaterOverride !== undefined
+        && typeof obj.updaterOverride !== "string"
     ) {
         return false;
     }
@@ -315,13 +319,15 @@ export function ValidateFkNodeYaml(
         for (const [key, value] of Object.entries(obj.flagless)) if (!validKeys.includes(key) || typeof value !== "boolean") return false;
     }
 
-    if (obj.releaseCmd !== undefined && typeof obj.releaseCmd !== "string") return false;
+    if (obj.commitCmd !== undefined && !Array.isArray(obj.commitCmd)) return false;
+
+    if (obj.releaseCmd !== undefined && !Array.isArray(obj.releaseCmd)) return false;
+
+    if (obj.buildCmd !== undefined && !Array.isArray(obj.buildCmd)) return false;
+
+    if (obj.launchCmd !== undefined && !Array.isArray(obj.launchCmd)) return false;
 
     if (obj.releaseAlwaysDry !== undefined && typeof obj.releaseAlwaysDry !== "boolean") return false;
-
-    if (obj.commitCmd !== undefined && typeof obj.commitCmd !== "string") return false;
-
-    if (obj.launchCmd !== undefined && typeof obj.launchCmd !== "string") return false;
 
     return true;
 }

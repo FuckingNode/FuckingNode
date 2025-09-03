@@ -58,6 +58,7 @@ const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
         },
         commands: {
             base: "npm",
+            dlx: ["npx"],
             clean: [
                 [
                     "dedupe",
@@ -66,9 +67,6 @@ const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
                     "prune",
                 ],
             ],
-            exec: [
-                "npx",
-            ],
             update: [
                 "update",
             ],
@@ -76,7 +74,8 @@ const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
                 "audit",
                 "--json",
             ],
-            run: ["npm", "run"],
+            file: ["node"],
+            script: ["npm", "run"],
             publish: ["publish"],
             start: "start",
         },

@@ -25,7 +25,7 @@ export function GetAppPath(
         throw new FknError(
             "Os__NoAppdataNoHome",
             `We searched for ${
-                LOCAL_PLATFORM.SYSTEM === "windows" ? "APPDATA" : "XDG_CONFIG_HOME and HOME"
+                LOCAL_PLATFORM.SYSTEM === "msft" ? "APPDATA" : "XDG_CONFIG_HOME and HOME"
             } in your environment variables, but nothing was found.\nThis breaks the entire CLI, please report this on GitHub.`,
         );
     }

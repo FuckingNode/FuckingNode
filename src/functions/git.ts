@@ -284,7 +284,7 @@ export function GetCommittableFiles(path: string): string[] {
  * @param project Project path. **Assumes it's parsed & spotted.**
  * @returns An object with the current branch and an array with all branch names.
  */
-export function GetBranches(project: string): { current: string; all: string[] } {
+export function GetBranches(project: string): { current: string | false; all: string[] } {
     try {
         const getBranchesOutput = g(
             project,
@@ -318,7 +318,7 @@ export function GetBranches(project: string): { current: string; all: string[] }
         };
     } catch (e) {
         new FknError("Git__GBranches", `Couldn't get branches at ${ColorString(project, "bold")}.`).debug(String(e), true);
-        return { current: "__ERROR", all: [] };
+        return { current: false, all: [] };
     }
 }
 export function Clone(repoUrl: string, clonePath: string): void {

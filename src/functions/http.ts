@@ -15,7 +15,7 @@ export async function FetchGitHub(url: VALID_URL): Promise<Response> {
 }
 
 export function LaunchWebsite(url: VALID_URL): void {
-    const base = LOCAL_PLATFORM.SYSTEM === "windows" ? "start" : "open";
+    const base = LOCAL_PLATFORM.SYSTEM === "msft" ? "start" : "open";
 
     Commander(
         base,

@@ -22,8 +22,8 @@ Deno.test({
 Deno.test({
     name: "commander returns output",
     fn: () => {
-        const command = LOCAL_PLATFORM.SYSTEM === "windows" ? "powershell" : "echo";
-        const args = LOCAL_PLATFORM.SYSTEM === "windows" ? ["echo", "hi"] : ["hi"];
+        const command = LOCAL_PLATFORM.SYSTEM === "msft" ? "powershell" : "echo";
+        const args = LOCAL_PLATFORM.SYSTEM === "msft" ? ["echo", "hi"] : ["hi"];
 
         const out = Commander(command, args);
         assertEquals(out, { success: true, stdout: "hi" });

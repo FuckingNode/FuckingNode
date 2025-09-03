@@ -1,5 +1,6 @@
 # stuff i don't want to commit
 **.ignore.*
+experiments/**
 # compiled executable
 dist/**
 # NixOS builds

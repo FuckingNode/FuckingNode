@@ -256,7 +256,7 @@ export const PackageFileParsers = {
             if (!parsedContent.name) {
                 throw new FknError(
                     "Env__PkgFileUnparsable",
-                    "Invalid package.json file",
+                    "Invalid package.json file. Your project doesn't have the 'name' field.",
                 );
             }
 
@@ -292,6 +292,13 @@ export const PackageFileParsers = {
         CPF: (content: string, ws: string[]): FnCPF => {
             const parsedContent = internalParsers.DenoPkgFile(content);
 
+            if (!parsedContent.name) {
+                throw new FknError(
+                    "Env__PkgFileUnparsable",
+                    "Invalid package.json file. Your project doesn't have the 'name' field.",
+                );
+            }
+
             const denoImportRegex = /^(?<source>[a-z]+):(?<package>@[a-zA-Z0-9_\-/]+)@(?<version>[~^<>=]*\d+\.\d+\.\d+)$/;
             // regex not mine. deno uses platform:@scope/package@version imports so we gotta do that.
 
@@ -313,7 +320,7 @@ export const PackageFileParsers = {
             });
 
             return {
-                name: parsedContent.name ?? "__ERROR_NOT_PROVIDED",
+                name: parsedContent.name,
                 version: parsedContent.version ?? "Unknown",
                 rm: "deno",
                 plat: {

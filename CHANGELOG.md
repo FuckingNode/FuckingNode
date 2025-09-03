@@ -10,10 +10,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added a new, common interface for command automation (`commitCmd`, `launchCmd`, etc...). Now everything runs the on `CmdSets`, which are much more powerful + are also consistent across cmds.
 - Added an option to customize (in milliseconds) the threshold for notifications.
 - Added the option to use GLFM instead of GFM for `surrender` (via `--gitlab/-gl`).
 - Added `deprecate` and `nevermind` as aliases to `surrender`.
 - Added the ability for the CLI to update itself when running `update`. _Yes, it now properly works._
+- Added an `--export` option to `export`; if not provided the default behavior is to just show it in terminal instead of writing it.
+- Added a 3 second countdown to `surrender`, giving you time to rethink and quit the program.
 - Added several changes to improve the CLI's performance.
   - FuckingNode runs some checks every time before actually running. _Just_ parallelizing them made the entire CLI much, MUCH faster.
   - Bulk adding projects (via glob patterns) was also parallelized. Made it 5% faster.
@@ -35,11 +38,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   - Differentiating certain frequently queried settings (like on what runtime a project runs, for compatibility) was actually done through somewhat expensive operation with "sentinel strings" (`#disable`(cmd), `__DISABLE`(cfg), `__USE_DEFAULT`(cfg), and other values you could actually set in your `fknode.yaml`). They were replaced with proper type guards + strings were replaced with booleans (primitives, more efficient), as such slightly improving performance.
   - Update some strings so they don't "name the project", reducing operations.
   - Parallelized workspace lookup when adding a project.
-- Added an `--export` option to `export`; if not provided the default behavior is to just show it in terminal instead of writing it.
-- Added a 3 second countdown to `surrender`, giving you time to rethink and quit the program.
 
 ### Changed
 
+- (Breaking) Renamed `prettyCmd` and `lintCmd` to `prettyScript` and `lintScript`.
+- (Breaking) All `fknode.yaml` keys ending in `Cmd` have been updated to a whole different syntax (more verbose, but much more powerful). See documentation for info.
 - (Breaking) Now setting keys were changed and use dashes, much more common for CLIs (and also makes keys consistent with what you see when running `settings`).
 - (Breaking) Now `export` expects `--jsonc` and not `--json` to be passed, matching the output filetype.
 - (Breaking) FnCPF spec slightly changed. Starting with V5 this spec will be publicly documented.
@@ -57,6 +60,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Removed
 
+- (Breaking) Removed `launchWithUpdate` from `fknode.yaml`. Your `launchCmd` now can contain several instructions, so you an move your update command there.
+- (Breaking) Removed `launchFile` from `fknode.yaml`. Your `launchCmd` now can have its behavior customized, you directly declare wether a script, a file, both, or none, should run.
 - (Breaking) Removed `"disabled"` option from `divineProtection` in `fknode.yaml`. Just don't declare it at all.
 - (Breaking) Removed the `logs.log` file, where _everything_ that happened in the CLI was logged. This meant writing to a file every time we wrote to the stdout, slowing the CLI down and taking up unneeded space. This change improves performance.
   - Errors still get logged to the `errors.log` file.

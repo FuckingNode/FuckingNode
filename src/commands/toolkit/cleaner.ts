@@ -152,12 +152,12 @@ const ProjectCleaningFeatures = {
         shouldLint: boolean,
         shouldPrettify: boolean,
     ) => {
-        if (!shouldUpdate && !shouldLint && !shouldPrettify) {
-            LogStuff("No actions to be committed.", "bruh");
-            return;
-        }
         if (env.settings.commitActions === false) {
             LogStuff("No committing allowed.", "bruh");
+            return;
+        }
+        if (!shouldUpdate && !shouldLint && !shouldPrettify) {
+            LogStuff("No actions to be committed.", "bruh");
             return;
         }
         if (!CanCommit(env.root)) {
@@ -445,7 +445,7 @@ export function PerformHardCleanup(): void {
     if (ManagerExists("cargo")) {
         try {
             let path: string;
-            if (LOCAL_PLATFORM.SYSTEM === "windows") {
+            if (LOCAL_PLATFORM.SYSTEM === "msft") {
                 const envPath = Deno.env.get("USERPROFILE");
                 if (!envPath) throw "USERPROFILE is not defined in your environment variable set. Cannot clear caches.";
                 path = JoinPaths(envPath, ".cargo/registry");

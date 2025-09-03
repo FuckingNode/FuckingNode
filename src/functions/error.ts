@@ -36,12 +36,16 @@ export class FknError extends Error {
                 this.hint =
                     "Valid intensity levels are 'normal', 'hard', 'hard-only', 'maxim', and 'maxim-only'.\nIf you want to use flags without providing an intensity (e.g. 'clean --pretty'), prepend '-- --' to the command ('clean -- -- -pretty'). Run 'help clean' for more info onto what does each level do.";
                 break;
+            case "Cfg__InvalidCmdK":
+                this.hint =
+                    'Every command within a Cmd set needs to start with either "~" (SHELL SCRIPT), "$" (PROJECT SCRIPT), "=" (PROJECT FILE), or "<" (RAW EXEC).';
+                break;
             case "Env__CannotDetermine":
                 this.hint =
                     "To (manually) fix this, manually specify the package manager you use via the 'fknode.yaml' file, by adding the 'projectEnvOverride' field with the value of 'npm', 'pnpm', 'bun', 'deno', 'golang', or 'rust'.";
                 break;
             case "Os__NoEntity":
-                if (LOCAL_PLATFORM.SYSTEM === "windows") {
+                if (LOCAL_PLATFORM.SYSTEM === "msft") {
                     this.hint =
                         `Just in case it's a shell command (like 'echo' or 'ls') and you input it somewhere like 'buildCmd': it has to be preceded with 'powershell', as its passed as an argument to this executable.`;
                 }
@@ -53,7 +57,7 @@ export class FknError extends Error {
             case "Os__NoAppdataNoHome":
                 this.hint = `We tried to find ${
                     ColorString(
-                        LOCAL_PLATFORM.SYSTEM === "windows" ? "APPDATA env variable" : "XDG_CONFIG_HOME and HOME env variables",
+                        LOCAL_PLATFORM.SYSTEM === "msft" ? "APPDATA env variable" : "XDG_CONFIG_HOME and HOME env variables",
                         "bold",
                     )
                 } but failed, meaning config files cannot be created and the CLI can't work. Something seriously went ${FWORDS.MFLY} wrong. If these aren't the right environment variables for your system's config path (currently using APPDATA on Windows, /home/user/.config on macOS and Linux), please raise an issue on GitHub.`;
@@ -75,7 +79,7 @@ export class FknError extends Error {
                 break;
             case "Fs__UnparsablePath":
                 this.hint = `The given path was not found. Check for typos${
-                    LOCAL_PLATFORM.SYSTEM === "windows" ? "." : " or casing mistakes (you're on Linux mate, paths are case-sensitive)."
+                    LOCAL_PLATFORM.SYSTEM === "msft" ? "." : " or casing mistakes (you're on Linux mate, paths are case-sensitive)."
                 }`;
                 break;
             case "Env__SchrodingerLockfile":

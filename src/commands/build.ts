@@ -1,10 +1,9 @@
 import { GetProjectEnvironment, NameProject } from "../functions/projects.ts";
 import type { TheBuilderConstructedParams } from "./constructors/command.ts";
-import { ValidateUserCmd } from "../functions/user.ts";
 import { LogStuff, Notification } from "../functions/io.ts";
-import { RunBuildCmds } from "../functions/build.ts";
 import { stripAnsiCode } from "@std/fmt/colors";
 import { GetElapsedTime } from "../functions/date.ts";
+import { RunCmdSet, ValidateCmdSet } from "../functions/cmd-set.ts";
 
 export default async function TheBuilder(params: TheBuilderConstructedParams): Promise<void> {
     const env = await GetProjectEnvironment(params.project);
@@ -12,7 +11,7 @@ export default async function TheBuilder(params: TheBuilderConstructedParams): P
 
     Deno.chdir(env.root);
 
-    const buildCmd = ValidateUserCmd(env, "buildCmd");
+    const buildCmd = ValidateCmdSet({ env, key: "buildCmd" });
 
     if (!buildCmd) {
         LogStuff("No build command(s) specified!", "warn", "bright-yellow");
@@ -23,7 +22,7 @@ export default async function TheBuilder(params: TheBuilderConstructedParams): P
 
     LogStuff(`There we go, time to build ${projectName}`, "tick-clear", "green");
 
-    RunBuildCmds(buildCmd.split("^"));
+    RunCmdSet({ env, key: "buildCmd" });
 
     LogStuff(`That worked out! ${projectName} should be built now.`, "tick", ["bold", "bright-green"]);
 
