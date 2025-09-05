@@ -3,7 +3,7 @@ import { Commander, ManagerExists } from "../../functions/cli.ts";
 import { GetUserSettings } from "../../functions/config.ts";
 import { BulkRemove, CheckForPath, JoinPaths, ParsePath } from "../../functions/filesystem.ts";
 import { Interrogate, LogStuff } from "../../functions/io.ts";
-import { GetProjectEnvironment, NameProject, UnderstandProjectProtection } from "../../functions/projects.ts";
+import { GetProjectEnvironment, UnderstandProjectProtection } from "../../functions/projects.ts";
 import type { CleanerIntensity } from "../../types/config_params.ts";
 import type { LOCKFILE_GLOBAL, MANAGER_GLOBAL, ProjectEnvironment } from "../../types/platform.ts";
 import { FknError } from "../../functions/error.ts";
@@ -489,20 +489,19 @@ export async function PerformMaximCleanup(projects: string[]): Promise<void> {
 
     for (const project of projects) {
         const env = await GetProjectEnvironment(project);
-        const projectName = await NameProject(env.root, "name");
 
         // TODO(@ZakaHaceCosas) add cargo target
         if (env.runtime === "rust" || env.runtime === "golang") continue;
 
         if (!(CheckForPath(env.hall_of_trash))) {
             LogStuff(
-                `Maxim pruning didn't find the node_modules DIR at ${projectName}. Skipping this ${FWORDS.MF}...`,
+                `Maxim pruning didn't find the node_modules DIR at ${env.names.name}. Skipping this ${FWORDS.MF}...`,
                 "bruh",
             );
             continue;
         }
         LogStuff(
-            `Will maxim prune for ${projectName}`,
+            `Maxim pruning for ${env.names.name}!!`,
             "trash",
         );
         // hall_of_trash path should be absolute

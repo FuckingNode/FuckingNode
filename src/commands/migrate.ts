@@ -1,7 +1,7 @@
 import { normalize, validate } from "@zakahacecosas/string-utils";
 import { FULL_NAME } from "../constants.ts";
 import { GetDateNow, GetElapsedTime } from "../functions/date.ts";
-import { CheckForPath, JoinPaths } from "../functions/filesystem.ts";
+import { JoinPaths } from "../functions/filesystem.ts";
 import { LogStuff, Notification } from "../functions/io.ts";
 import { GetProjectEnvironment } from "../functions/projects.ts";
 import type { MANAGER_JS, ProjectEnvironment } from "../types/platform.ts";
@@ -73,20 +73,7 @@ function handler(
 
         LogStuff("Making a backup of your previous lockfile (4/6)...", "working");
         if (env.lockfile.path) {
-            if (env.lockfile.name === "bun.lockb" && CheckForPath(JoinPaths(env.root, "bun.lock"))) {
-                // handle case where bun.lockb was replaced with bun.lock
-                Deno.renameSync(env.lockfile.path, JoinPaths(env.root, "bun.lockb.bak"));
-                LogStuff(
-                    "Your bun.lockb file will be backed up and replaced with a text-based lockfile (bun.lock).",
-                    "bruh",
-                );
-            } else {
-                Deno.writeTextFileSync(
-                    JoinPaths(env.root, `${env.lockfile.name}.bak`),
-                    Deno.readTextFileSync(env.lockfile.path),
-                );
-            }
-            Deno.removeSync(env.lockfile.path);
+            Deno.renameSync(env.lockfile.path, JoinPaths(env.root, `${env.lockfile.name}.bak`));
         } else {
             LogStuff("No lockfile found, skipping backup.", "warn");
         }
@@ -128,16 +115,6 @@ export default async function TheMigrator(params: TheMigratorConstructedParams):
         throw new FknError(
             "Interop__MigrateUnable",
             `${workingEnv.manager} is not a runtime we can migrate from. Only JS environments (NodeJS, Deno, Bun) support migrate.`,
-        );
-    }
-
-    // TODO(@ZakaHaceCosas): does GPE even validate this
-    // if it does, remove this
-    // if it doesn't, make it do, then remove this
-    if (!(CheckForPath(workingEnv.main.path))) {
-        throw new FknError(
-            "Env__NoPkgFile",
-            "No package.json/deno.json(c) file found, cannot migrate. How will we install your modules without that file?",
         );
     }
 

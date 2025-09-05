@@ -41,8 +41,6 @@ Deno.test({
 Deno.test({
     name: "validates projects",
     fn: async () => {
-        // had to test this, @zakahacecosas/fuckingnode sometimes disappears from my list?
-        // TODO further investigate that
         assertEquals(await ValidateProject(".", true), true);
     },
 });

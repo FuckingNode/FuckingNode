@@ -39,6 +39,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   - Differentiating certain frequently queried settings (like on what runtime a project runs, for compatibility) was actually done through somewhat expensive operation with "sentinel strings" (`#disable`(cmd), `__DISABLE`(cfg), `__USE_DEFAULT`(cfg), and other values you could actually set in your `fknode.yaml`). They were replaced with proper type guards + strings were replaced with booleans (primitives, more efficient), as such slightly improving performance.
   - Update some strings so they don't "name the project", reducing operations.
   - Parallelized workspace lookup when adding a project.
+  - Optimized I/O, there were operations making several calls to `console.log`, when a single call (with `\n`s) is more efficient.
+  - Also removed useless `String.trim()` calls.
 
 ### Changed
 

@@ -429,7 +429,6 @@ export async function ValidateProject(entry: string, existing: boolean): Promise
     try {
         const env = await GetProjectEnvironment(entry);
 
-        if (!(CheckForPath(env.main.path))) return "NoPkgFile";
         if (!env.main.cpf.name) return "NoName";
         if (!env.main.cpf.version) return "NoVersion";
     } catch (error) {
@@ -437,8 +436,10 @@ export async function ValidateProject(entry: string, existing: boolean): Promise
         else return "CantGetProjectEnv";
     }
 
+    const cleanEntry = normalize(entry);
+
     const isDuplicate = (GetAllProjects()).filter(
-        (item) => normalize(item) === normalize(entry),
+        (item) => normalize(item) === cleanEntry,
     ).length > (existing ? 1 : 0);
 
     if (isDuplicate) return "IsDuplicate";
@@ -1017,7 +1018,7 @@ export async function SpotProject(name: UnknownString): Promise<string> {
         if (toSpot === projectName) return project;
     }
 
-    throw new FknError("External__Proj__NotFound", `'${name!.trim()}' (=> '${workingProject}') does not exist.`);
+    throw new FknError("External__Proj__NotFound", `'${workingProject}' does not exist.`);
 }
 
 /**
@@ -1043,9 +1044,6 @@ export async function CleanupProjects(): Promise<void> {
 
     Deno.writeTextFileSync(
         GetAppPath("MOTHERFKRS"),
-        // removed Array.from(new Set()) to test if "IsDuplicate" is reliable enough
-        // removing that should yield better performance
-        // TODO(@ZakaHaceCosas) properly test
         (GetAllProjects()).join("\n") + "\n",
     );
 
