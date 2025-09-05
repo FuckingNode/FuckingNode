@@ -95,18 +95,18 @@ Deno.bench({
 Deno.bench({
     name: "report",
     warmup: 350,
-    fn: async (b) => {
+    fn: (b) => {
         const entries: RESULT[] = [];
         for (let index = 0; index < 100; index++) {
             entries.push({
-                path: ".",
+                name: "some-name",
                 status: "Success",
                 elapsedTime: "69",
                 extras: undefined,
             });
         }
         b.start();
-        await ShowReport(entries);
+        ShowReport(entries);
         b.end();
     },
 });

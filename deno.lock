@@ -13,7 +13,7 @@
     "jsr:@std/path@^1.1.1": "1.1.2",
     "jsr:@std/path@^1.1.2": "1.1.2",
     "jsr:@std/semver@1.0.5": "1.0.5",
-    "jsr:@std/toml@^1.0.9": "1.0.9",
+    "jsr:@std/toml@^1.0.10": "1.0.10",
     "jsr:@std/yaml@1.0.9": "1.0.9",
     "jsr:@zakahacecosas/string-utils@^3.4.0": "3.4.0",
     "npm:@types/node@*": "22.15.3",
@@ -75,8 +75,8 @@
     "@std/semver@1.0.5": {
       "integrity": "529f79e83705714c105ad0ba55bec0f9da0f24d2f726b6cc1c15e505cc2c0624"
     },
-    "@std/toml@1.0.9": {
-      "integrity": "1629147c2edbffd71be6ab66cf90d3b27e59ca314067e58649e0626979383b83",
+    "@std/toml@1.0.10": {
+      "integrity": "87b2b7ff95afe7209a868732eb013a2707be29a15229f5b57bb13eededff4655",
       "dependencies": [
         "jsr:@std/collections"
       ]
@@ -112,7 +112,7 @@
       "jsr:@std/jsonc@^1.0.2",
       "jsr:@std/path@^1.1.2",
       "jsr:@std/semver@1.0.5",
-      "jsr:@std/toml@^1.0.9",
+      "jsr:@std/toml@^1.0.10",
       "jsr:@std/yaml@1.0.9",
       "jsr:@zakahacecosas/string-utils@^3.4.0",
       "npm:typescript@^5.9.2"

@@ -7,7 +7,7 @@ import type { CleanerIntensity } from "../types/config_params.ts";
 import { GetElapsedTime } from "../functions/date.ts";
 
 export type RESULT = {
-    path: string;
+    name: string;
     status: "Not found" | "Success" | "Partial success" | "Failed";
     elapsedTime: string;
     extras: undefined | {
@@ -56,7 +56,7 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
     for (const project of projects) {
         // start time of each cleanup
         const startTime = new Date();
-        const projectName = await NameProject(project);
+        const projectName = await NameProject(project, "name-ver");
         try {
             Deno.chdir(project);
 
@@ -75,7 +75,7 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
             );
 
             const result: RESULT = {
-                path: project,
+                name: projectName,
                 status: res.errors !== null ? "Partial success" : "Success",
                 elapsedTime: GetElapsedTime(startTime),
                 extras: {
@@ -92,7 +92,7 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
                 "red",
             );
             results.push({
-                path: project,
+                name: projectName,
                 status: "Failed",
                 elapsedTime: GetElapsedTime(startTime),
                 extras: undefined,
@@ -119,6 +119,6 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
         }`,
         elapsed,
     );
-    await ShowReport(results);
+    ShowReport(results);
     return;
 }
