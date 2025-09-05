@@ -29,6 +29,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   - Removed useless file existence checks where we already know a file exists.
   - Removed some useless object mutations.
   - "Naming a project" (when we show its name with colors and stuff) is actually a somewhat expensive operation. We slightly optimized it + removed duplicate calls.
+    - Where possible, the overhead was moved to getting a project's environment (as otherwise this is done duplicatedly from the naming flow), reducing workload. Not everywhere we can do this, though.
   - `settings flush` should now be a few milliseconds faster (removed useless array check + parallelized filesize recovery calculations).
   - Avoided unnecessary checks for spotting project paths.
   - Removed duplicate calls to check for staged files via `commit`.
@@ -54,8 +55,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
-- Fixed compatibility with Golang projects; now Golang version and dependencies are correctly read (it previously failed to get Golang version, skipped indirect dependencies, and didn't differentiate `github.com` from `pkg.go.dev` dependencies; now it does).
+- Fixed `projectEnvOverride` potentially not working if FuckingNode's inference short-circuits the process first.
 - Fixed the entire maxim cleanup process failing if just one project doesn't somehow have a `node_modules` DIR.
+- Fixed compatibility with Golang projects; now Golang version and dependencies are correctly read (it previously failed to get Golang version, skipped indirect dependencies, and didn't differentiate `github.com` from `pkg.go.dev` dependencies; now it does).
 - Fixed a typo in `export`'s help entry.
 
 ### Removed

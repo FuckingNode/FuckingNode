@@ -2,7 +2,6 @@ import { normalize, reveal, type UnknownString, validate } from "@zakahacecosas/
 import { GetProjectEnvironment, RemoveProject } from "../functions/projects.ts";
 import type { TheSurrendererConstructedParams } from "./constructors/command.ts";
 import { Interrogate, LogStuff } from "../functions/io.ts";
-import { NameProject } from "../functions/projects.ts";
 import { APP_URLs, FULL_NAME } from "../constants.ts";
 import { Commit, GetBranches, Push } from "../functions/git.ts";
 import { CheckForPath, JoinPaths } from "../functions/filesystem.ts";
@@ -29,9 +28,7 @@ export default async function TheSurrenderer(params: TheSurrendererConstructedPa
 
     if (
         !Interrogate(
-            `Are you 100% sure that ${await NameProject(env.root, "all")} ${
-                ColorString("should be deprecated?\nThis is not something you can undo!", "orange")
-            }`,
+            `Are you 100% sure that ${env.names.full} ${ColorString("should be deprecated?\nThis is not something you can undo!", "orange")}`,
             "warn",
         )
     ) return;
@@ -47,9 +44,9 @@ export default async function TheSurrenderer(params: TheSurrendererConstructedPa
     const alternatives = valid(params.alternative) ? `\n\nThe following alternative(s) are recommended: ${params.alternative.trim()}` : "";
     const note = valid(params.message) ? `\n\nThis note was left by the maintainer of this repository: ${params.message.trim()}` : "";
     const learnMore = valid(params.learnMoreUrl)
-        ? `\n\nYou may find here additional information regarding **${env.main.cpfContent.name}**'s deprecation: ${params.learnMoreUrl.trim()}`
+        ? `\n\nYou may find here additional information regarding **${env.main.cpf.name}**'s deprecation: ${params.learnMoreUrl.trim()}`
         : "";
-    const bareMessage = shuffle(deprecationNotices)(env.main.cpfContent.name) + note
+    const bareMessage = shuffle(deprecationNotices)(env.main.cpf.name) + note
         + alternatives
         + learnMore
         + `\n\n###### This project was _automatically deprecated_ using the ${FULL_NAME} CLI utility (found at [this repo](${APP_URLs.REPO})), and this message was generated from a template. If something feels off, it might be because of that. Below proceeds the old README from this project, unedited.\n${

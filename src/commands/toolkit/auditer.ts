@@ -11,7 +11,7 @@ import { normalize, normalizeArray, validate, validateAgainst } from "@zakahacec
 import { type MANAGER_NODE, TypeGuardForNodeBun } from "../../types/platform.ts";
 import { Interrogate, LogStuff } from "../../functions/io.ts";
 import type { FkNodeSecurityAudit, ParsedNodeReport } from "../../types/audit.ts";
-import { GetProjectEnvironment, NameProject } from "../../functions/projects.ts";
+import { GetProjectEnvironment } from "../../functions/projects.ts";
 import { Commander } from "../../functions/cli.ts";
 import { APP_NAME } from "../../constants/name.ts";
 import { DEBUG_LOG } from "../../functions/error.ts";
@@ -337,7 +337,7 @@ function askQuestion(
  * @param {string[]} questions Base questions.
  * @returns {FkNodeSecurityAudit}
  */
-export function InterrogateVulnerableProject(questions: string[]): Omit<
+function InterrogateVulnerableProject(questions: string[]): Omit<
     FkNodeSecurityAudit,
     "percentage"
 > {
@@ -501,7 +501,7 @@ function DisplayAudit(percentage: number): void {
  * @param {ParsedNodeReport} bareReport Parsed npm audit.
  * @returns {FkNodeSecurityAudit}
  */
-export function AuditProject(bareReport: ParsedNodeReport): FkNodeSecurityAudit {
+function AuditProject(bareReport: ParsedNodeReport): FkNodeSecurityAudit {
     const { advisories, questions, severity } = bareReport;
 
     const totalAdvisories: number = advisories.length;
@@ -543,7 +543,6 @@ export function AuditProject(bareReport: ParsedNodeReport): FkNodeSecurityAudit 
  */
 export async function PerformAuditing(project: string): Promise<FkNodeSecurityAudit | 0 | 1> {
     const env = await GetProjectEnvironment(project);
-    const name = await NameProject(env.root, "name-ver");
     if (
         !TypeGuardForNodeBun(env)
     ) {
@@ -556,7 +555,7 @@ export async function PerformAuditing(project: string): Promise<FkNodeSecurityAu
 
     Deno.chdir(env.root);
 
-    LogStuff(`Auditing ${name} [${ColorString(env.commands.audit.join(" "), "italic", "half-opaque")}]`, "working");
+    LogStuff(`Auditing ${env.names.nameVer} [${ColorString(env.commands.audit.join(" "), "italic", "half-opaque")}]`, "working");
     const res = Commander(
         env.commands.base,
         env.commands.audit,
@@ -564,7 +563,7 @@ export async function PerformAuditing(project: string): Promise<FkNodeSecurityAu
 
     if (res.success) {
         LogStuff(
-            `Clear! There aren't any known vulnerabilities affecting ${name}.`,
+            `Clear! There aren't any known vulnerabilities affecting ${env.names.nameVer}.`,
             "tick",
         );
         return 0;
@@ -572,7 +571,7 @@ export async function PerformAuditing(project: string): Promise<FkNodeSecurityAu
 
     if (!validate(res.stdout)) {
         LogStuff(
-            `An error occurred at ${name} and we weren't able to get the stdout. Unable to audit.`,
+            `An error occurred at ${env.names.nameVer} and we weren't able to get the stdout. Unable to audit.`,
             "error",
         );
         return 1;
@@ -580,5 +579,8 @@ export async function PerformAuditing(project: string): Promise<FkNodeSecurityAu
 
     const audit = AuditProject(ParseNodeBunReport(res.stdout, env.manager));
 
-    return audit;
+    return {
+        ...audit,
+        name: env.names.nameVer,
+    };
 }

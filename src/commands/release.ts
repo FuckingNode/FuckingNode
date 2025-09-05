@@ -1,6 +1,6 @@
 import { format, parse } from "@std/semver";
 import { Interrogate, LogStuff } from "../functions/io.ts";
-import { GetProjectEnvironment, NameProject } from "../functions/projects.ts";
+import { GetProjectEnvironment } from "../functions/projects.ts";
 import type { TheReleaserConstructedParams } from "./constructors/command.ts";
 import type { CargoPkgFile } from "../types/platform.ts";
 import { Commander } from "../functions/cli.ts";
@@ -74,10 +74,7 @@ export default async function TheReleaser(params: TheReleaserConstructedParams):
         );
     }
     const confirmation = Interrogate(
-        `Heads up! We're about to take the following actions:\n${actions.join("\n")}\n\n- all of this at ${await NameProject(
-            env.root,
-            "all",
-        )}`,
+        `Heads up! We're about to take the following actions:\n${actions.join("\n")}\n\n- all of this at ${env.names.full}`,
         "heads-up",
     );
 
@@ -87,16 +84,16 @@ export default async function TheReleaser(params: TheReleaserConstructedParams):
     Deno.copyFileSync(env.main.path, `${env.main.path}.bak`); // Backup original
     if (env.runtime === "rust") {
         const newPackageFile = {
-            ...(env.main.stdContent),
+            ...(env.main.std),
             package: {
-                ...(env.main.stdContent as CargoPkgFile).package,
+                ...(env.main.std as CargoPkgFile).package,
                 version: format(parsedVersion),
             },
         };
         Deno.writeTextFileSync(env.main.path, stringifyToml(newPackageFile));
     } else {
         const newPackageFile = {
-            ...env.main.stdContent,
+            ...env.main.std,
             version: format(parsedVersion),
         };
         const indent = GetTextIndentSize(Deno.readTextFileSync(env.main.path));

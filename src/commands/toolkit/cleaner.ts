@@ -213,7 +213,6 @@ export async function PerformCleanup(
     errors: string | null;
 }> {
     const env = await GetProjectEnvironment(motherfuckerInQuestion);
-    const projectName = ColorString(await NameProject(env.root, "name"), "bold");
 
     const protections: string[] = [];
     const errors: string[] = [];
@@ -249,7 +248,7 @@ export async function PerformCleanup(
 
     if (!env.commands.clean && Object.values(whatShouldWeDo).every((v) => v === false)) {
         LogStuff(
-            `${projectName} will be skipped. ${
+            `${env.names.name} will be skipped. ${
                 ColorString(env.manager, "bold")
             } has no cleanup commands and no other feature is being used here.`,
         );
@@ -257,34 +256,34 @@ export async function PerformCleanup(
 
     if (doClean) {
         ProjectCleaningFeatures.Clean(
-            projectName,
+            env.names.name,
             env,
         );
     }
     if (whatShouldWeDo["update"]) {
         ProjectCleaningFeatures.Update(
-            projectName,
+            env.names.name,
             env,
             errors,
         );
     }
     if (whatShouldWeDo["lint"]) {
         ProjectCleaningFeatures.Lint(
-            projectName,
+            env.names.name,
             env,
             errors,
         );
     }
     if (whatShouldWeDo["pretty"]) {
         ProjectCleaningFeatures.Pretty(
-            projectName,
+            env.names.name,
             env,
             errors,
         );
     }
     if (whatShouldWeDo["destroy"]) {
         ProjectCleaningFeatures.Destroy(
-            projectName,
+            env.names.name,
             env,
             intensity,
             errors,
@@ -292,7 +291,7 @@ export async function PerformCleanup(
     }
     if (whatShouldWeDo["commit"]) {
         ProjectCleaningFeatures.Commit(
-            projectName,
+            env.names.name,
             env,
             whatShouldWeDo["update"],
             whatShouldWeDo["lint"],

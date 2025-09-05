@@ -1,7 +1,7 @@
 import { ManagerExists } from "../functions/cli.ts";
 import { CheckForDir, JoinPaths, ParsePath } from "../functions/filesystem.ts";
 import { LogStuff, Notification } from "../functions/io.ts";
-import { AddProject, GetProjectEnvironment, NameProject } from "../functions/projects.ts";
+import { AddProject, GetProjectEnvironment } from "../functions/projects.ts";
 import type { TheKickstarterConstructedParams } from "./constructors/command.ts";
 import { FkNodeInterop } from "./interop/interop.ts";
 import { NameLockfile, ResolveLockfiles } from "./toolkit/cleaner.ts";
@@ -103,7 +103,7 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
     else if (managerToUse === "cargo") FkNodeInterop.Installers.Cargo(Deno.cwd());
     else FkNodeInterop.Installers.UniJs(Deno.cwd(), managerToUse);
 
-    LogStuff(`Great! ${await NameProject(Deno.cwd(), "name-ver")} is now setup. Enjoy!`, "tick-clear");
+    LogStuff(`Great! ${env.names.nameVer} is now setup. Enjoy!`, "tick-clear");
 
     LaunchUserIDE();
 

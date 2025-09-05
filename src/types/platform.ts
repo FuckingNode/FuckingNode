@@ -130,13 +130,24 @@ interface GenericProjectEnvironment {
          *
          * @type {(NodePkgFile | DenoPkgFile | CargoPkgFile | GolangPkgFile)}
          */
-        stdContent: NodePkgFile | DenoPkgFile | CargoPkgFile | GolangPkgFile;
+        std: NodePkgFile | DenoPkgFile | CargoPkgFile | GolangPkgFile;
         /**
          * Contents of the main file (**FnCPF format**).
          *
          * @type {FnCPF}
          */
-        cpfContent: FnCPF;
+        cpf: FnCPF;
+    };
+    /** Names this project can be represented with. */
+    names: {
+        /** Path to the project, with colors and stuff. */
+        path: string;
+        /** Project's name as in `name` in `package.json` (or equiv). */
+        name: string;
+        /** Project's name as in `name` in `package.json` (or equiv) + package version as in `version`. */
+        nameVer: string;
+        /** `nameVer` + `path`. */
+        full: string;
     };
     /**
      * Project's lockfile

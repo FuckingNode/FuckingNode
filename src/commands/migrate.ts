@@ -3,7 +3,7 @@ import { FULL_NAME } from "../constants.ts";
 import { GetDateNow, GetElapsedTime } from "../functions/date.ts";
 import { CheckForPath, JoinPaths } from "../functions/filesystem.ts";
 import { LogStuff, Notification } from "../functions/io.ts";
-import { GetProjectEnvironment, NameProject } from "../functions/projects.ts";
+import { GetProjectEnvironment } from "../functions/projects.ts";
 import type { MANAGER_JS, ProjectEnvironment } from "../types/platform.ts";
 import type { TheMigratorConstructedParams } from "./constructors/command.ts";
 import { FkNodeInterop } from "./interop/interop.ts";
@@ -53,17 +53,17 @@ function handler(
         }
         const newPackageFile = from === "deno"
             ? FkNodeInterop.Generators.Deno(
-                env.main.cpfContent,
-                env.main.stdContent,
+                env.main.cpf,
+                env.main.std,
             )
             : FkNodeInterop.Generators.NodeBun(
-                env.main.cpfContent,
-                env.main.stdContent,
+                env.main.cpf,
+                env.main.std,
             );
         Deno.writeTextFileSync(
             JoinPaths(env.root, `${env.main.name}.jsonc.bak`),
             `// This is a backup of your previous project file. We (${FULL_NAME}) overwrote it at ${GetDateNow()}.\n${
-                JSON.stringify(env.main.stdContent)
+                JSON.stringify(env.main.std)
             }`,
         );
         Deno.writeTextFileSync(
@@ -141,10 +141,8 @@ export default async function TheMigrator(params: TheMigratorConstructedParams):
         );
     }
 
-    const projectName = await NameProject(workingEnv.root, "all");
-
     LogStuff(
-        `Migrating ${projectName} to ${desiredManager} has a chance of messing your versions up.\nYour lockfile will be backed up and synced to ensure coherence.`,
+        `Migrating ${workingEnv.names.full} to ${desiredManager} has a chance of messing your versions up.\nYour lockfile will be backed up and synced to ensure coherence.`,
         "warn",
     );
 
@@ -154,7 +152,7 @@ export default async function TheMigrator(params: TheMigratorConstructedParams):
         workingEnv,
     );
 
-    LogStuff(`That worked out! Enjoy using ${desiredManager} for ${projectName}`);
+    LogStuff(`That worked out! Enjoy using ${desiredManager} for ${workingEnv.names.full}`);
     const elapsed = Date.now() - startup.getTime();
     Notification(
         `Your project was migrated!`,

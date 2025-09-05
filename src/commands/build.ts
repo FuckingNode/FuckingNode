@@ -1,13 +1,11 @@
-import { GetProjectEnvironment, NameProject } from "../functions/projects.ts";
+import { GetProjectEnvironment } from "../functions/projects.ts";
 import type { TheBuilderConstructedParams } from "./constructors/command.ts";
 import { LogStuff, Notification } from "../functions/io.ts";
-import { stripAnsiCode } from "@std/fmt/colors";
 import { GetElapsedTime } from "../functions/date.ts";
 import { RunCmdSet, ValidateCmdSet } from "../functions/cmd-set.ts";
 
 export default async function TheBuilder(params: TheBuilderConstructedParams): Promise<void> {
     const env = await GetProjectEnvironment(params.project);
-    const projectName = await NameProject(env.root, "name");
 
     Deno.chdir(env.root);
 
@@ -20,17 +18,17 @@ export default async function TheBuilder(params: TheBuilderConstructedParams): P
 
     const startup = new Date();
 
-    LogStuff(`There we go, time to build ${projectName}`, "tick-clear", "green");
+    LogStuff(`There we go, time to build ${env.names.name}`, "tick-clear", "green");
 
     RunCmdSet({ env, key: "buildCmd" });
 
-    LogStuff(`That worked out! ${projectName} should be built now.`, "tick", ["bold", "bright-green"]);
+    LogStuff(`That worked out! ${env.names.name} should be built now.`, "tick", ["bold", "bright-green"]);
 
     const elapsed = Date.now() - startup.getTime();
 
     Notification(
         "Build completed!",
-        `Your build of ${stripAnsiCode(projectName)} succeeded! Elapsed ${GetElapsedTime(startup)}.`,
+        `Your build of ${env.main.cpf.name} succeeded! Elapsed ${GetElapsedTime(startup)}.`,
         elapsed,
     );
 

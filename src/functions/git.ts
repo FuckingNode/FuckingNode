@@ -125,7 +125,7 @@ export function Commit(path: string, message: string, add: string[] | "all" | "n
 }
 export function Push(path: string, branch: string | false): void {
     try {
-        const pushToBranch = branch === false ? [] : ["origin", branch.trim()];
+        const pushToBranch = branch === false ? [] : ["origin", branch];
 
         const pushOutput = g(
             path,

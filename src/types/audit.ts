@@ -20,6 +20,12 @@ export type FkNodeSecurityAudit = {
      * @type {number}
      */
     percentage: number;
+    /**
+     * Name of the audited project. For reporting purposes.
+     *
+     * @type {?string}
+     */
+    name?: string;
 };
 
 /**

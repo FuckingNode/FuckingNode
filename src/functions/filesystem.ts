@@ -56,10 +56,10 @@ export function ParsePath(target: UnknownString): string {
         let workingTarget: string;
 
         try {
-            workingTarget = Deno.realPathSync(target.trim());
+            workingTarget = Deno.realPathSync(target);
         } catch {
             // fallback
-            workingTarget = target.trim();
+            workingTarget = target;
         }
 
         const cleanEntry = normalize(workingTarget);
@@ -99,7 +99,7 @@ export function ParsePathList(target: UnknownString): string[] {
 export function JoinPaths(pathA: string, pathB: string): string {
     try {
         const firstPart = ParsePath(pathA);
-        const secondPath = pathB.trim();
+        const secondPath = pathB;
         return join(firstPart, secondPath);
     } catch {
         return join(pathA, pathB);

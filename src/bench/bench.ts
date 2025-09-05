@@ -110,3 +110,13 @@ Deno.bench({
         b.end();
     },
 });
+
+/* (does not work bc it requires user input) Deno.bench({
+    name: "audit",
+    warmup: 350,
+    fn: async () => {
+        await TheAuditer({
+            project: "./tests/environment/test-one",
+        });
+    },
+}); */

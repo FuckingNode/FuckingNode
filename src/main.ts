@@ -64,7 +64,7 @@ if (normalize(Deno.args[0] ?? "") === "something-fucked-up") {
 async function init(): Promise<void> {
     FreshSetup();
     await RunScheduledTasks();
-    CleanupProjects();
+    await CleanupProjects();
 }
 
 /** Normalized Deno.args */

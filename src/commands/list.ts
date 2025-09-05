@@ -43,13 +43,13 @@ async function ListProjects(
     if (ignore === "limit") {
         message = `Here are the ${FWORDS.MFS} you added (and ignored) so far:\n`;
         for (const entry of list) {
-            const protection = (await GetProjectEnvironment(entry)).settings.divineProtection; // array
+            const env = await GetProjectEnvironment(entry);
             let protectionString: string;
-            if (!(Array.isArray(protection))) protectionString = "ERROR: CANNOT READ SETTINGS, CHECK YOUR FKNODE.YAML!";
-            else protectionString = protection.join(" and ");
+            if (!(Array.isArray(env.settings.divineProtection))) protectionString = "ERROR: CANNOT READ SETTINGS, CHECK YOUR FKNODE.YAML!";
+            else protectionString = env.settings.divineProtection.join(" and ");
 
             toPrint.push(
-                `${await NameProject(entry, "all")} (${
+                `${env.names.full} (${
                     ColorString(
                         protectionString,
                         "bold",
@@ -66,7 +66,7 @@ async function ListProjects(
     }
 
     LogStuff(message, "bulb");
-    for (const entry of sortAlphabetically(toPrint)) LogStuff(entry);
+    LogStuff(sortAlphabetically(toPrint).join("\n"));
 
     return;
 }

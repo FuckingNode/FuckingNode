@@ -14,6 +14,13 @@ export const CONSTANTS = {
 const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
     ONE: {
         root: ParsePath(`${CONSTANTS.ENV_PATH}/test-one`),
+        names: {
+            full:
+                "\x1b[92m\x1b[1muwu.js\x1b[22m\x1b[39m@\x1b[35m1.0.0\x1b[39m \x1b[2m\x1b[3mC:\\Users\\Zaka\\proyectitos\\FuckingNode\\tests\\environment\\test-one\x1b[23m\x1b[22m",
+            name: "\x1b[92m\x1b[1muwu.js\x1b[22m\x1b[39m",
+            nameVer: "\x1b[92m\x1b[1muwu.js\x1b[22m\x1b[39m@\x1b[35m1.0.0\x1b[39m",
+            path: "\x1b[2m\x1b[3mC:\\Users\\Zaka\\proyectitos\\FuckingNode\\tests\\environment\\test-one\x1b[23m\x1b[22m",
+        },
         settings: {
             ...DEFAULT_FKNODE_YAML,
             destroy: {
@@ -36,8 +43,8 @@ const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
         main: {
             path: ParsePath(`${CONSTANTS.ENV_PATH}/test-one/package.json`),
             name: "package.json",
-            stdContent: JSON.parse(Deno.readTextFileSync(ParsePath(`${CONSTANTS.ENV_PATH}/test-one/package.json`))),
-            cpfContent: {
+            std: JSON.parse(Deno.readTextFileSync(ParsePath(`${CONSTANTS.ENV_PATH}/test-one/package.json`))),
+            cpf: {
                 name: "uwu.js",
                 version: "1.0.0",
                 rm: "npm",

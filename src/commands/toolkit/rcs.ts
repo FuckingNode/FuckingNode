@@ -6,7 +6,7 @@ import { ColorString } from "../../functions/color.ts";
 
 export function RecommendedCommunityStandards(env: ProjectEnvironment): void {
     // deno-lint-ignore no-explicit-any
-    const content = env.main.stdContent as any;
+    const content = env.main.std as any;
 
     const isNodeJs = validateAgainst(env.runtime, ["node", "bun"]);
     const isDenoJs = env.runtime === "deno";

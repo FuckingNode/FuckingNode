@@ -1,6 +1,6 @@
 import { APP_NAME } from "../constants/name.ts";
 import { LogStuff } from "../functions/io.ts";
-import { GetAllProjects, NameProject } from "../functions/projects.ts";
+import { GetAllProjects } from "../functions/projects.ts";
 import { PerformAuditing } from "./toolkit/auditer.ts";
 import type { FkNodeSecurityAudit } from "../types/audit.ts";
 import type { TheAuditerConstructedParams } from "./constructors/command.ts";
@@ -33,9 +33,8 @@ export default async function TheAuditer(params: TheAuditerConstructedParams): P
             });
         }
 
-        const reportDetails = report.map(async (item) => {
-            const name = await NameProject(item.project, "name-ver");
-            const string = `${name} # ${ColorString(`${item.audit.percentage.toFixed(2)}%`, "bold")} risk factor`;
+        const reportDetails = report.map((item) => {
+            const string = `${item.audit.name} # ${ColorString(`${item.audit.percentage.toFixed(2)}%`, "bold")} risk factor`;
             return string;
         });
         if (reportDetails.length === 0) {
