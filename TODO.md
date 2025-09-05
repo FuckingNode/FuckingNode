@@ -19,30 +19,15 @@ from_git = { git = "https://github.com/FuckingNode/FuckingRust.git", branch = "d
 from_tarball = { url = "https://somewhere.com/some_crate-1.0.0.tar.gz" }
 ```
 
-### Golang
-
-- [x] `pkggen` is still missing.
-
 ## Features
 
 - [ ] Dual release, so that the same package is released to both npm and jsr. Requires expanding the FnCPF spec.
 
 ## Better UX
 
-- [x] Use the same default threshold for all notifications, and lower it
-- [x] New settings
-  - [x] Enable/disable notifications
-  - [x] Customizable thresholds
-- [ ] Allow to use caret separation in every `Cmd` type of key, to run several commands.
-- [ ] Use a character (idk, maybe `*` or `+`) to specify that a command is a _script_ and runs via `npm run (x)` or equivalent. Without it, default to running a shell command. (Or maybe vice versa, use the character to indicate a shell command. Will think about it.)
 - [ ] Allow for spread commands, using --flags instead of plaintext for specific arguments, e.g. `fkn add path1 path2 path3` or `fkclean project1 project2 project3 --intensity=normal`.
 - [x] Proper self-updating.
   - [ ] Disable this feature if installed via a package manager.
-
-## Proper error fixing
-
-- [ ] ReferenceError.
-  - This is code-related. Now that I am adding a few tests I'm stumbling across ReferenceErrors because of problems with variable initialization? Maybe I'm stupid and am doing something very wrong (possibly) but for what I've seen, I have many circular imports leading to use of variables before Deno initializes them. If whenever I get one I move whatever export is not initialized to an individual file, it fixes. So if a commit randomly moves an export and changes 20 files because of it it's because of this.
 
 ## Chores & development
 
