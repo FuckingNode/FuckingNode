@@ -6,7 +6,6 @@ import { parse as parseYaml } from "@std/yaml";
 import { Interrogate, LogStuff, StringifyYaml } from "./io.ts";
 import { type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { format } from "@std/fmt/bytes";
-import { FWORDS } from "../constants/fwords.ts";
 import { LOCAL_PLATFORM } from "../constants/platform.ts";
 import { APP_NAME } from "../constants/name.ts";
 import { ColorString } from "./color.ts";
@@ -37,7 +36,7 @@ export function GetAppPath(
     }
 
     if (path === "BASE") return BASE_DIR;
-    if (path === "MOTHERFKRS") return formatDir(`${FWORDS.MFS.replace("*", "o").replace("*", "u")}.txt`);
+    if (path === "MOTHERFKRS") return formatDir("motherfuckers.txt");
     if (path === "SCHEDULE") return formatDir("schedule.yaml");
     if (path === "SETTINGS") return formatDir("settings.yaml");
     if (path === "ERRORS") return formatDir("errors.log");

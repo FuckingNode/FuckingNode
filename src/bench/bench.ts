@@ -43,6 +43,7 @@ Deno.bench({
     },
 });
 
+// TODO(@ZakaHaceCosas) this kinda fucks the project file up
 Deno.bench({
     name: "bulk adder",
     warmup: 350,

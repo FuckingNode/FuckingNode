@@ -84,8 +84,6 @@ export function ParsePathList(target: UnknownString): string[] {
     return StringArray.fromKominator(target, "\n")
         .sortAlphabetically()
         .arr()
-        .map((line) => line.trim().replace(/,$/, ""))
-        .filter((line) => line.length > 0)
         .map(ParsePath);
 }
 
