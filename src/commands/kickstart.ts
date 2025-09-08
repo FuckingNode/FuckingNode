@@ -13,7 +13,6 @@ import { GenerateGitUrl } from "./toolkit/git-url.ts";
 import { Clone } from "../functions/git.ts";
 import { validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { GetElapsedTime } from "../functions/date.ts";
-import { FWORDS } from "../constants/fwords.ts";
 import { ColorString } from "../functions/color.ts";
 
 export default async function TheKickstarter(params: TheKickstarterConstructedParams): Promise<void> {
@@ -110,7 +109,7 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
     const elapsed = Date.now() - startup.getTime();
     Notification(
         `Kickstart successful!`,
-        `Your project is ready. It took ${GetElapsedTime(startup)}. Go write some ${FWORDS.FKN} good code!`,
+        `Your project is ready. It took ${GetElapsedTime(startup)}. Go write some fucking good code!`,
         elapsed,
     );
 

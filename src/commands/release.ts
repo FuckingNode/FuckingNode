@@ -6,7 +6,6 @@ import type { CargoPkgFile } from "../types/platform.ts";
 import { Commander } from "../functions/cli.ts";
 import { AddToGitIgnore, Commit, IsRepo, Push, Tag } from "../functions/git.ts";
 import { validate } from "@zakahacecosas/string-utils";
-import { APP_NAME } from "../constants/name.ts";
 import { FknError } from "../functions/error.ts";
 import { stringify as stringifyToml } from "@std/toml/stringify";
 import { GetTextIndentSize } from "../functions/filesystem.ts";
@@ -116,7 +115,7 @@ export default async function TheReleaser(params: TheReleaserConstructedParams):
 
     if (params.dry === true || env.settings.releaseAlwaysDry === true) {
         LogStuff(
-            `Aborted committing, publishing, and whatever else, because either the command you executed or this project's fknode.yaml instructed ${APP_NAME.CASED} to make a "dry-run".\nYour 'releaseCmd' did execute.`,
+            "Aborted committing, publishing, and whatever else, because either the command you executed or this project's fknode.yaml instructed FuckingNode to make a \"dry-run\".\nYour 'releaseCmd' did execute.",
             "warn",
             "bright-yellow",
         );

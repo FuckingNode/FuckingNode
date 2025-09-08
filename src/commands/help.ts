@@ -1,5 +1,4 @@
 import { normalize, spaceString } from "@zakahacecosas/string-utils";
-import { APP_NAME } from "../constants/name.ts";
 import { LogStuff } from "../functions/io.ts";
 import type { TheHelperConstructedParams } from "./constructors/command.ts";
 import { ColorString } from "../functions/color.ts";
@@ -48,7 +47,7 @@ export default function TheHelper(params: TheHelperConstructedParams): void {
     const USAGE = formatCmd([
         [
             ">>>",
-            `The ${APP_NAME.CASED} experience...`,
+            "The FuckingNode experience...",
             "Base commands:",
         ],
         [
@@ -74,7 +73,7 @@ export default function TheHelper(params: TheHelperConstructedParams): void {
         [
             "kickstart",
             "<git-url> [path] [npm | pnpm | yarn | deno | bun]",
-            `Quickly clones a repo inside [path], installs deps, setups ${APP_NAME.CASED}, and launches your code editor.`,
+            "Quickly clones a repo inside [path], installs deps, setups FuckingNode, and launches your code editor.",
         ],
         [
             "commit",
@@ -149,7 +148,7 @@ export default function TheHelper(params: TheHelperConstructedParams): void {
         [
             "about",
             null,
-            `Shows info about ${APP_NAME.CASED}.`,
+            "Shows info about FuckingNode.",
         ],
         [
             "tip",
@@ -174,7 +173,7 @@ export default function TheHelper(params: TheHelperConstructedParams): void {
             LogStuff(
                 formatCmdWithTitle(
                     "'clean' will clean, lint, prettify,... all your projects.",
-                    `Recursively runs a set of tasks across all of your projects, depending on given flags and project configuration (via fknode.yaml).\nIt's our main feature, base for ${APP_NAME.CASED} saving you time.`,
+                    "Recursively runs a set of tasks across all of your projects, depending on given flags and project configuration (via fknode.yaml).\nIt's our main feature, base for FuckingNode saving you time.",
                     [
                         [
                             "<project | -->",
@@ -209,7 +208,7 @@ export default function TheHelper(params: TheHelperConstructedParams): void {
                         [
                             "--commit, -c",
                             null,
-                            `Commit any changes made (via, e.g., --pretty or --update) only if all of these are true:\n- "commitActions" is set to true in your fknode.yaml.\n- Local working tree was clean before ${APP_NAME.CASED} touched it.\n- Local repo is not behind upstream.\nIt uses a default commit message; override it by setting "commitMessage" in your fknode.yaml.`,
+                            'Commit any changes made (via, e.g., --pretty or --update) only if all of these are true:\n- "commitActions" is set to true in your fknode.yaml.\n- Local working tree was clean before FuckingNode touched it.\n- Local repo is not behind upstream.\nIt uses a default commit message; override it by setting "commitMessage" in your fknode.yaml.',
                         ],
                     ],
                 ),
@@ -526,7 +525,7 @@ export default function TheHelper(params: TheHelperConstructedParams): void {
             LogStuff(
                 formatCmdWithTitle(
                     "'export' lets you see your project's CPF, meant for debug",
-                    `The ${APP_NAME.CASED} Common Package File (FnCPF) is a fancy name for a common structure we convert all package files into.\nIt's useful to debug - as if this file shows content differences with your package file, there's likely a bug in our source code.`,
+                    "The FuckingNode Common Package File (FnCPF) is a fancy name for a common structure we convert all package files into.\nIt's useful to debug - as if this file shows content differences with your package file, there's likely a bug in our source code.",
                     [
                         [
                             "<project>",
@@ -587,12 +586,12 @@ export default function TheHelper(params: TheHelperConstructedParams): void {
             break;
         case "help":
             LogStuff(
-                `Usage: ${ColorString(APP_NAME.CLI, "bright-green")} <command> [params...]\n\n${USAGE}`,
+                `Usage: ${ColorString("fuckingnode", "bright-green")} <command> [params...]\n\n${USAGE}`,
             );
             break;
         default:
             LogStuff(
-                `Usage: ${ColorString(APP_NAME.CLI, "bright-green")} <command> [params...]\n\n${USAGE}\n`,
+                `Usage: ${ColorString("fuckingnode", "bright-green")} <command> [params...]\n\n${USAGE}\n`,
             );
             LogStuff(
                 "Run 'help <command-name>' to get help with a specific command.",

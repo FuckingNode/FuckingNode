@@ -2,7 +2,7 @@ import { parse as parseYaml } from "@std/yaml";
 import { parse as parseToml } from "@std/toml";
 import { parse as parseJsonc } from "@std/jsonc";
 import { expandGlobSync } from "@std/fs";
-import { APP_URLs, DEFAULT_FKNODE_YAML } from "../constants.ts";
+import { DEFAULT_FKNODE_YAML, WEBSITE } from "../constants.ts";
 import type { CargoPkgFile, NodePkgFile, ProjectEnvironment, UnderstoodProjectProtection } from "../types/platform.ts";
 import { CheckForPath, JoinPaths, ParsePath, ParsePathList } from "./filesystem.ts";
 import { Interrogate, LogStuff } from "./io.ts";
@@ -19,8 +19,6 @@ import { ResolveLockfiles } from "../commands/toolkit/cleaner.ts";
 import { isGlob } from "@std/path/is-glob";
 import { joinGlobs, normalizeGlob } from "@std/path";
 import { globSync } from "node:fs";
-import { FWORDS } from "../constants/fwords.ts";
-import { APP_NAME } from "../constants/name.ts";
 import { ColorString } from "./color.ts";
 
 /**
@@ -87,7 +85,7 @@ export async function AddProject(
             append: true,
         });
         LogStuff(
-            `Congrats! ${name} was added to your list. One mf less to care about!${
+            `Congrats! ${name} was added to your list. One motherfucker less to care about!${
                 validateAgainst(rt, ["node", "deno", "bun"])
                     ? ""
                     : `\nNote this project uses the ${rt} runtime. Keep in mind it's not fully supported.`
@@ -135,7 +133,7 @@ export async function AddProject(
         const workspaceString: string[] = await Promise.all(env.main.cpf.ws.map(async (ws) => await NameProject(ws, "all")));
 
         const addWorkspaces = Interrogate(
-            `Hey! This looks like a ${FWORDS.FKN} monorepo. We've found these workspaces:\n\n${
+            `Hey! This looks like a fucking monorepo. We've found these workspaces:\n\n${
                 workspaceString.join("\n")
             }.\n\nShould we add them to your list as well?\nWe recommend this to keep all your code clean - ${
                 ColorString("HOWEVER", "bold")
@@ -151,7 +149,7 @@ export async function AddProject(
         Deno.writeTextFileSync(GetAppPath("MOTHERFKRS"), allEntries, { append: true });
 
         LogStuff(
-            `Added all of your projects. Many mfs less to care about!`,
+            `Added all of your projects. Many motherfuckers less to care about!`,
             "tick-clear",
         );
         return;
@@ -187,7 +185,7 @@ export async function AddProject(
         }
 
         const addWorkspaces = Interrogate(
-            `Hey! This looks like a ${FWORDS.FKN} rootless monorepo. We've found these workspaces:\n\n${
+            `Hey! This looks like a rootless monorepo. We've found these workspaces:\n\n${
                 workspaces.join("\n")
             }.\n\nShould we add them to your list so they're all cleaned?`,
         );
@@ -198,7 +196,7 @@ export async function AddProject(
         Deno.writeTextFileSync(GetAppPath("MOTHERFKRS"), allEntries, { append: true });
 
         LogStuff(
-            `Added all of your projects. Many mfs less to care about!`,
+            `Added all of your projects. Many motherfuckers less to care about!`,
             "tick-clear",
         );
     }
@@ -358,7 +356,7 @@ function GetProjectSettings(path: string): FullFkNodeYaml {
         if (!content.includes("UPON INTERACTING")) {
             Deno.writeTextFileSync(
                 pathToDivineFile,
-                `\n# [NOTE (${GetDateNow()}): Invalid config file! (Auto-added by ${APP_NAME.CASED}). DEFAULT SETTINGS WILL BE USED UPON INTERACTING WITH THIS ${FWORDS.MF.toUpperCase()} UNTIL YOU FIX THIS FILE! Refer to ${APP_URLs.WEBSITE} to learn about how fknode.yaml works.]\n`,
+                `\n# [NOTE (${GetDateNow()}): Invalid config file! (Auto-added by FuckingNode). DEFAULT SETTINGS WILL BE USED UPON INTERACTING WITH THIS MOTHERFUCKER UNTIL YOU FIX THIS FILE! Refer to ${WEBSITE} to learn about how fknode.yaml works.]\n`,
                 {
                     append: true,
                 },
@@ -979,7 +977,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
 
     throw new FknError(
         "Env__CannotDetermine",
-        `Failed to determine the environment of '${root}'. We attempt to infer by all means possible the pkg manager of a project but sometimes fail. We kindly ask you to report this as an issue at ${APP_URLs.REPO} so we can fix it.`,
+        `Failed to determine the environment of '${root}'. We attempt to infer by all means possible the pkg manager of a project but sometimes fail. We kindly ask you to report this as an issue at https://github.com/FuckingNode/FuckingNode/ so we can fix it.`,
     );
 }
 

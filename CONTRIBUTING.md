@@ -20,7 +20,7 @@ You already know how this works.
 
 ## Following our guidelines
 
-We at F\*ckingNode want our code NOT to be F\*ckingUnreadable, hence we enforce some code style guidelines.
+We at FuckingNode want our code NOT to be FuckingUnreadable, hence we enforce some code style guidelines.
 
 ### Use these naming patterns
 
@@ -68,7 +68,7 @@ Another case where you can't choose is function objects, like the `FkNodeInterop
 
 ### Error handling
 
-F\*ckingNode is wrapped in an error boundary (`ErrorHandler()`) that automatically stops execution and handles the error, so no need to try/catch every function. When throwing an error, you'll see we sometimes use `FknError` instead of `Error`. It's a superset of `Error` with searchable error codes and hints for our users. Attempt to add an error code and throwing a `FknError` instead of just throwing JS errors.
+FuckingNode is wrapped in an error boundary (`ErrorHandler()`) that automatically stops execution and handles the error, so no need to try/catch every function. When throwing an error, you'll see we sometimes use `FknError` instead of `Error`. It's a superset of `Error` with searchable error codes and hints for our users. Attempt to add an error code and throwing a `FknError` instead of just throwing JS errors.
 
 ### Comment in a readable manner
 

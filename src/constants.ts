@@ -1,25 +1,20 @@
-import type { VALID_URL } from "./types/misc.ts";
 import type { CF_FKNODE_SCHEDULE, CF_FKNODE_SETTINGS, FullFkNodeYaml } from "./types/config_files.ts";
 import * as DenoJson from "../deno.json" with { type: "json" };
 import { GetDateNow } from "./functions/date.ts";
 import { ManagerExists } from "./functions/cli.ts";
-import { APP_NAME } from "./constants/name.ts";
 
 /** Full, cased name of the app in NAME vVERSION format. */
-export const FULL_NAME: string = `${APP_NAME.CASED} v${DenoJson.default.version}`;
+export const FULL_NAME: string = `FuckingNode v${DenoJson.default.version}`;
 
-/** URLs have trailing slash (`url.com/`) */
-export const APP_URLs: { REPO: VALID_URL; WEBSITE: VALID_URL } = {
-    REPO: "https://github.com/FuckingNode/FuckingNode/",
-    WEBSITE: "https://fuckingnode.github.io/",
-};
+/** Website URL with trailing dash. */
+export const WEBSITE: string = "https://fuckingnode.github.io/";
 
 /**
  * GitHub REST API URL from where releases are obtained.
  *
- * @type {VALID_URL}
+ * @type {string}
  */
-export const RELEASE_URL: VALID_URL = `https://api.github.com/repos/ZakaHaceCosas/${APP_NAME.CASED}/releases/latest`;
+export const RELEASE_URL: string = `https://api.github.com/repos/FuckingNode/FuckingNode/releases/latest`;
 
 /**
  * Default app settings.

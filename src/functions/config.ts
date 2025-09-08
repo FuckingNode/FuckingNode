@@ -7,7 +7,6 @@ import { Interrogate, LogStuff, StringifyYaml } from "./io.ts";
 import { type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { format } from "@std/fmt/bytes";
 import { LOCAL_PLATFORM } from "../constants/platform.ts";
-import { APP_NAME } from "../constants/name.ts";
 import { ColorString } from "./color.ts";
 
 /**
@@ -29,17 +28,13 @@ export function GetAppPath(
         );
     }
 
-    const BASE_DIR = JoinPaths(LOCAL_PLATFORM.APPDATA, APP_NAME.CLI);
+    const BASE_DIR = JoinPaths(LOCAL_PLATFORM.APPDATA, "fuckingnode");
 
-    function formatDir(name: string): string {
-        return JoinPaths(BASE_DIR, `${APP_NAME.CLI}-${name}`);
-    }
-
-    if (path === "MOTHERFKRS") return formatDir("motherfuckers.txt");
-    if (path === "SCHEDULE") return formatDir("schedule.yaml");
-    if (path === "SETTINGS") return formatDir("settings.yaml");
-    if (path === "ERRORS") return formatDir("errors.log");
-    if (path === "NODES") return formatDir("nodes");
+    if (path === "MOTHERFKRS") return JoinPaths(BASE_DIR, "fuckingnode-motherfuckers.txt");
+    if (path === "SCHEDULE") return JoinPaths(BASE_DIR, "fuckingnode-schedule.yaml");
+    if (path === "SETTINGS") return JoinPaths(BASE_DIR, "fuckingnode-settings.yaml");
+    if (path === "ERRORS") return JoinPaths(BASE_DIR, "fuckingnode-errors.log");
+    if (path === "NODES") return JoinPaths(BASE_DIR, "fuckingnode-nodes/");
     else return BASE_DIR;
 }
 
@@ -146,7 +141,7 @@ export function ChangeSetting(
         if (
             ["cargo", "go"].includes(value)
             && !Interrogate(
-                `Are you sure? ${value} is a non-JS runtime and ${APP_NAME.CASED} is mainly a JS-related CLI; you'll be using JS projects more often.`,
+                `Are you sure? ${value} is a non-JS runtime and FuckingNode is mainly a JS-related CLI; you'll be using JS projects more often.`,
             )
         ) return;
         newSettings = { ...currentSettings, "default-manager": value };

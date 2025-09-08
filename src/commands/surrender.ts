@@ -2,7 +2,7 @@ import { normalize, reveal, type UnknownString, validate } from "@zakahacecosas/
 import { GetProjectEnvironment, RemoveProject } from "../functions/projects.ts";
 import type { TheSurrendererConstructedParams } from "./constructors/command.ts";
 import { Interrogate, LogStuff } from "../functions/io.ts";
-import { APP_URLs, FULL_NAME } from "../constants.ts";
+import { FULL_NAME } from "../constants.ts";
 import { Commit, GetBranches, Push } from "../functions/git.ts";
 import { CheckForPath, JoinPaths } from "../functions/filesystem.ts";
 import { FkNodeInterop } from "./interop/interop.ts";
@@ -49,7 +49,7 @@ export default async function TheSurrenderer(params: TheSurrendererConstructedPa
     const bareMessage = shuffle(deprecationNotices)(env.main.cpf.name) + note
         + alternatives
         + learnMore
-        + `\n\n###### This project was _automatically deprecated_ using the ${FULL_NAME} CLI utility (found at [this repo](${APP_URLs.REPO})), and this message was generated from a template. If something feels off, it might be because of that. Below proceeds the old README from this project, unedited.\n${
+        + `\n\n###### This project was _automatically deprecated_ using the ${FULL_NAME} CLI utility (found at [this repo](https://github.com/FuckingNode/FuckingNode/)), and this message was generated from a template. If something feels off, it might be because of that. Below proceeds the old README from this project, unedited.\n${
             "-".repeat(30)
         }`;
     const message = (params.gfm || params.glfm)

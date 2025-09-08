@@ -1,5 +1,4 @@
 import type { UnknownString } from "@zakahacecosas/string-utils";
-import { FWORDS } from "../constants/fwords.ts";
 import { LogStuff } from "../functions/io.ts";
 import { GetProjectEnvironment } from "../functions/projects.ts";
 import { NameProject } from "../functions/projects.ts";
@@ -44,7 +43,7 @@ export default async function TheStatistics(target: UnknownString): Promise<void
 
     if (!deps || deps.length === 0) LogStuff("No dependencies found (impressive).");
     else {
-        LogStuff(`\nDepends on ${ColorString(realDeps.length, "bold")} ${FWORDS.MFS}:`);
+        LogStuff(`\nDepends on ${ColorString(realDeps.length, "bold")} motherfuckers:`);
         LogStuff(
             deps,
         );

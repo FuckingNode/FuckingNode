@@ -1,11 +1,9 @@
 import { join } from "@std/path/join";
-import { APP_NAME } from "../constants/name.ts";
 import { ColorString } from "./color.ts";
 import type { GLOBAL_ERROR_CODES } from "../types/errors.ts";
 import { GetDateNow } from "./date.ts";
 import { type UnknownString, validate } from "@zakahacecosas/string-utils";
 import { FKNODE_SHALL_WE_DEBUG } from "../main.ts";
-import { FWORDS } from "../constants/fwords.ts";
 import { LOCAL_PLATFORM } from "../constants/platform.ts";
 import { stripAnsiCode } from "@std/fmt/colors";
 import { ALIASES } from "../commands/toolkit/git-url.ts";
@@ -60,7 +58,7 @@ export class FknError extends Error {
                         LOCAL_PLATFORM.SYSTEM === "msft" ? "APPDATA env variable" : "XDG_CONFIG_HOME and HOME env variables",
                         "bold",
                     )
-                } but failed, meaning config files cannot be created and the CLI can't work. Something seriously went ${FWORDS.MFLY} wrong. If these aren't the right environment variables for your system's config path (currently using APPDATA on Windows, /home/user/.config on macOS and Linux), please raise an issue on GitHub.`;
+                } but failed, meaning config files cannot be created and the CLI can't work. Something seriously went motherfuckingly wrong. If these aren't the right environment variables for your system's config path (currently using APPDATA on Windows, /home/user/.config on macOS and Linux), please raise an issue on GitHub.`;
                 break;
             case "External__Proj__NotFound":
                 this.hint = `Check for typos or a wrong name. Given input (either a project's name or a file path) wasn't found.`;
@@ -142,7 +140,8 @@ export class FknError extends Error {
     public debug(debuggableContent: UnknownString, showWarn: boolean = true): void {
         // APPDATA! because if we're already debugging stuff we assume the CLI got to run
         // meaning that path does exist
-        const debugPath = join(LOCAL_PLATFORM.APPDATA!, APP_NAME.CLI, `${APP_NAME.CLI}-errors.log`);
+        // doesn't use GetAppPath just in case that's the thing erroring, you know
+        const debugPath = join(LOCAL_PLATFORM.APPDATA!, "fuckingnode", "fuckingnode-errors.log");
         const debuggableError = `\n
 ---
 # BEGIN FknERROR ${this.code} @ ${new Date().toISOString()}
@@ -197,7 +196,7 @@ export function ErrorHandler(e: unknown): never {
         e.exit();
         Deno.exit(1); // (never reached, but without this line typescript doesn't shut up)
     }
-    const fk = ColorString(FWORDS.FK, "red", "bold");
+    const fk = ColorString("f*ck", "red", "bold");
     if (Error.isError(e)) {
         console.error(`${fk}! Something happened: ${e.message} (${e.cause})\n${e.stack}`);
         Deno.exit(1);

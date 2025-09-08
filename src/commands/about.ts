@@ -1,11 +1,10 @@
 import * as DenoJson from "../../deno.json" with { type: "json" };
-import { APP_URLs } from "../constants.ts";
+import { WEBSITE } from "../constants.ts";
 import { ColorString } from "../functions/color.ts";
 import { LogStuff } from "../functions/io.ts";
 import type { VALID_COLORS } from "../types/misc.ts";
 import { ASCII } from "../functions/ascii.ts";
 import { phrases } from "../functions/phrases.ts";
-import { APP_NAME } from "../constants/name.ts";
 import { reveal } from "@zakahacecosas/string-utils";
 
 function getRandomPhrase(): string {
@@ -33,13 +32,13 @@ function colorizeText(text: string): string {
 }
 
 const coolStrings = {
-    ver: ColorString(`${APP_NAME.CASED} ${DenoJson.default.version}`, "bold", "red"),
+    ver: ColorString(`FuckingNode ${DenoJson.default.version}`, "bold", "red"),
     ts: ColorString(`TypeScript ${Deno.version.typescript}`, "bright-blue"),
     deno: ColorString(`Deno ${Deno.version.deno}`, "bright-yellow"),
     spain: ColorString("Spain", "red"),
     zakaOne: ColorString("ZakaHaceCosas", "bright-green"),
     zakaTwo: ColorString('"ZakaMakesStuff"', "italic"),
-    gitUrl: ColorString(`https://github.com/${APP_NAME.CASED}/${APP_NAME.CASED}`, "orange"),
+    gitUrl: ColorString("https://github.com/FuckingNode/FuckingNode", "orange"),
     side: ColorString("Another side project", "italic"),
     date: ColorString("September 28, 2024", "cyan"),
 };
@@ -64,7 +63,7 @@ export default async function TheAbouter(): Promise<void> {
         10,
     );
     await reveal(
-        `Follow us and join our Discord at ${ColorString(`${APP_URLs.WEBSITE}follow-us`, "orange")}`,
+        `Follow us and join our Discord at ${ColorString(`${WEBSITE}follow-us`, "orange")}`,
         2,
     );
     await reveal(

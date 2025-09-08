@@ -1,6 +1,6 @@
 <!-- markdownlint-disable MD024 -->
 
-# F\*ckingNode Changelog
+# FuckingNode Changelog
 
 All notable changes will be documented in this file.
 
@@ -303,7 +303,7 @@ _Sort of_ breaking, but nothing important so I won't make a major release.
 - Added the ability to run a script/file when launching a project.
 - Added `fklist` alias to `fuckingnode manager list`.
 - Added two new setups to `fkn setup`
-- Added `fkn hint` to randomly show one of the hints / _F\*ckingProTips_ shown in the about page. A few more hints were added as well.
+- Added `fkn hint` to randomly show one of the hints / _FuckingProTips_ shown in the about page. A few more hints were added as well.
 
 ### Changed
 
@@ -567,7 +567,7 @@ Happy new year btw
 
 - This release SHOULD have fixed macOS and Linux compatibility. Report any issues you find, please. Thank you.
 
-## [2.0.0] 25-12-2024 <!-- 2.0.0 - major release, even tho there aren't "breaking" changes (well, adding runtimes that aren't Node to the "F*ckingNODE" project is kinda "breaking") -->
+## [2.0.0] 25-12-2024 <!-- 2.0.0 - major release, even tho there aren't "breaking" changes (well, adding runtimes that aren't Node to the "FuckingNODE" project is kinda "breaking") -->
 
 ### Breaking changes
 
@@ -644,7 +644,7 @@ Happy new year btw
 
 ### Added
 
-- Added `settings schedule <hour> <day>` to schedule F\*ckingNode, so your projects are automatically cleaned.
+- Added `settings schedule <hour> <day>` to schedule FuckingNode, so your projects are automatically cleaned.
 
 ### Fixed
 
@@ -661,7 +661,7 @@ Happy new year btw
 
 ### Added
 
-- Added support for monorepos / Node workspaces. When adding a project, now F\*ckingNode will look through the `package.json`. If `workspaces` are found, it will prompt to add them as separate projects so they get their own cleanup as well.
+- Added support for monorepos / Node workspaces. When adding a project, now FuckingNode will look through the `package.json`. If `workspaces` are found, it will prompt to add them as separate projects so they get their own cleanup as well.
 - Added cleaning levels, adding a new `hard` level and replacing the `--maxim` flag. Now `clean` takes a level, either `clean normal`, `clean hard`, or `clean maxim` (if no level, "normal" will be used as default).
   - `normal` will do the easy: recursively run cleaning commands.
   - `hard` will do what default used to do (clean + dedupe) + it will also clean cache.
@@ -752,11 +752,11 @@ Happy new year btw
 ### Added
 
 - Added `stats` command. Shows stats, AKA how much storage your projects are taking up. By default only counts the size of `node_modules/`, but you can pass the `--full` flag to it so it also includes your code.
-- Added `manager ignore` command. Creates a `.fknodeignore` file at the root of the project, so F\*ckingNode simply ignores it whenever a cleanup is made.
+- Added `manager ignore` command. Creates a `.fknodeignore` file at the root of the project, so FuckingNode simply ignores it whenever a cleanup is made.
 
 ### Changed
 
-- Replaced the actual f-word with an asterisk-included version (f\*cking) app-wide. Also made an effort to rename variables and all that kind of stuff. ~~I don't want to get banned~~.
+- Replaced the actual f-word with an asterisk-included version (fucking) app-wide. Also made an effort to rename variables and all that kind of stuff. ~~I don't want to get banned~~.
 - Now "unknown errors" when pruning a project actually show the command's `stderr`.
 
 ### Fixed

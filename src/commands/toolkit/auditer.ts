@@ -13,10 +13,8 @@ import { Interrogate, LogStuff } from "../../functions/io.ts";
 import type { FkNodeSecurityAudit, ParsedNodeReport } from "../../types/audit.ts";
 import { GetProjectEnvironment } from "../../functions/projects.ts";
 import { Commander } from "../../functions/cli.ts";
-import { APP_NAME } from "../../constants/name.ts";
 import { DEBUG_LOG } from "../../functions/error.ts";
 import { VULNERABILITY_VECTORS } from "./vectors.ts";
-import { FWORDS } from "../../constants/fwords.ts";
 import { stripAnsiCode } from "@std/fmt/colors";
 import { ColorString } from "../../functions/color.ts";
 
@@ -470,7 +468,7 @@ function DisplayAudit(percentage: number): void {
     if (percentage < 20) {
         color = "bright-green";
         message =
-            `Seems like we're okay, one ${FWORDS.MFN} project less to take care of!\nNever forget the best risk is no risk - we still encourage you to fix the vulnerabilities if you can.`;
+            "Seems like we're okay, one fucking project less to take care of!\nNever forget the best risk is no risk - we still encourage you to fix the vulnerabilities if you can.";
     } else if (percentage >= 20 && percentage < 50) {
         color = "bright-yellow";
         message = `${ColorString("There is a potential risk", "bold")} of these vulnerabilities causing you a headache.\nWhile you ${
@@ -479,7 +477,7 @@ function DisplayAudit(percentage: number): void {
     } else {
         color = "red";
         message = `${
-            ColorString(`Oh ${FWORDS.FK}`, "bold")
+            ColorString(`Oh fuck`, "bold")
         }. This project really should get all vulnerabilities fixed.\nBreaking changes can hurt, but your app security's breaking hurts a lot more. ${
             ColorString("Please, fix this issue.", "bold")
         }`;
@@ -509,7 +507,7 @@ function AuditProject(bareReport: ParsedNodeReport): FkNodeSecurityAudit {
     LogStuff(
         `\n===        FOUND VULNERABILITIES (${totalAdvisories.toString().padStart(3, "0")})        ===\n${
             ColorString(advisories.join(" & "), "bold")
-        }\n===    STARTING ${APP_NAME.CASED} SECURITY AUDIT    ===\n`,
+        }\n===    STARTING FUCKINGNODE SECURITY AUDIT    ===\n`,
     );
 
     LogStuff("Please answer these questions. We'll use your responses to evaluate this vulnerability:\n", "bulb");

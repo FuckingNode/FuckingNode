@@ -12,7 +12,6 @@ import type { RESULT } from "../clean.ts";
 import { sortAlphabetically, validate } from "@zakahacecosas/string-utils";
 import { FkNodeInterop } from "../interop/interop.ts";
 import { LOCAL_PLATFORM } from "../../constants/platform.ts";
-import { FWORDS } from "../../constants/fwords.ts";
 import { ColorString } from "../../functions/color.ts";
 
 /**
@@ -495,7 +494,7 @@ export async function PerformMaximCleanup(projects: string[]): Promise<void> {
 
         if (!(CheckForPath(env.hall_of_trash))) {
             LogStuff(
-                `Maxim pruning didn't find the node_modules DIR at ${env.names.name}. Skipping this ${FWORDS.MF}...`,
+                `No node_modules DIR found at ${env.names.name}. Skipping this motherfucker...`,
                 "bruh",
             );
             continue;

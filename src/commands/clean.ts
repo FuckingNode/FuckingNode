@@ -1,4 +1,3 @@
-import { FWORDS } from "../constants/fwords.ts";
 import { LogStuff, Notification } from "../functions/io.ts";
 import { GetAllProjects, NameProject } from "../functions/projects.ts";
 import type { TheCleanerConstructedParams } from "./constructors/command.ts";
@@ -39,7 +38,7 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
 
     if (projects.length === 0) {
         LogStuff(
-            `There isn't any ${FWORDS.MF} over here... yet...`,
+            "There isn't any motherfucker over here... yet...",
             "moon-face",
         );
         return;
@@ -61,7 +60,7 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
             Deno.chdir(project);
 
             LogStuff(
-                `Cleaning the ${projectName} ${FWORDS.MF}...`,
+                `Cleaning the ${projectName} motherfucker...`,
                 "package",
             );
             const res = await PerformCleanup(
@@ -105,13 +104,13 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
     if (realIntensity === "maxim") await PerformMaximCleanup(projects);
 
     LogStuff(
-        projects.length > 1 ? `All your ${FWORDS.MFN} projects have been cleaned!` : `Your ${FWORDS.MFN} project has been cleaned!`,
+        projects.length > 1 ? `All your motherfucking projects have been cleaned!` : `Your motherfucking project has been cleaned!`,
         "tick",
         "bright-green",
     );
     const elapsed = Date.now() - startup.getTime();
     Notification(
-        projects.length > 1 ? `All your ${FWORDS.MFN} projects have been cleaned!` : `Your ${FWORDS.MFN} project has been cleaned!`,
+        projects.length > 1 ? `All your motherfucking projects have been cleaned!` : `Your motherfucking project has been cleaned!`,
         `We did it! It took ${GetElapsedTime(startup)}.${
             results.some((r) => (r.extras && r.extras.failed && r.extras.failed.trim().length > 0))
                 ? " Errors happened, though. Check the report in your terminal session."

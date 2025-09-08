@@ -1,4 +1,3 @@
-import { APP_NAME } from "../src/constants/name.ts";
 import { stringify as stringifyYaml } from "@std/yaml";
 
 const release = Deno.args.includes("--release");
@@ -33,7 +32,7 @@ const ALL_COMMANDS = Object.entries(TARGETS).map(([key, [target, output]]: [stri
     hashCmd: Deno.Command;
     signCmd: Deno.Command;
 } => {
-    const compiledName = `${APP_NAME.CLI}-${output}${key === "win64" ? ".exe" : ""}`;
+    const compiledName = `fuckingnode-${output}${key === "win64" ? ".exe" : ""}`;
 
     const compilerArguments = [
         "compile",

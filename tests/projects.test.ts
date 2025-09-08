@@ -4,7 +4,6 @@ import { TEST_ONE } from "./constants.ts";
 import { DEFAULT_FKNODE_YAML } from "../src/constants.ts";
 import { parse as parseYaml } from "@std/yaml";
 import { JoinPaths } from "../src/functions/filesystem.ts";
-import { APP_NAME } from "../src/constants/name.ts";
 
 // ACTUAL TESTS
 Deno.test({
@@ -18,11 +17,11 @@ Deno.test({
 Deno.test({
     name: "names projects accordingly",
     fn: async () => {
-        const toName = await SpotProject(APP_NAME.SCOPE);
+        const toName = await SpotProject("@zakahacecosas/fuckingnode");
 
         assertEquals(
             await NameProject(toName, "name-colorless"),
-            APP_NAME.SCOPE,
+            "@zakahacecosas/fuckingnode",
         );
     },
 });

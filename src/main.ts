@@ -18,7 +18,7 @@ import TheSetuper from "./commands/setup.ts";
 import TheLauncher from "./commands/launch.ts";
 import TheBuilder from "./commands/build.ts";
 // other things
-import { APP_URLs, FULL_NAME } from "./constants.ts";
+import { FULL_NAME, WEBSITE } from "./constants.ts";
 import { LogStuff } from "./functions/io.ts";
 import { FreshSetup, GetAppPath, GetUserSettings } from "./functions/config.ts";
 import { DEBUG_LOG, ErrorHandler } from "./functions/error.ts";
@@ -29,8 +29,6 @@ import { AddProject, CleanupProjects, RemoveProject } from "./functions/projects
 import { LaunchWebsite } from "./functions/http.ts";
 import { HINTS } from "./functions/phrases.ts";
 import { GetDateNow, GetElapsedTime } from "./functions/date.ts";
-import { FWORDS } from "./constants/fwords.ts";
-import { APP_NAME } from "./constants/name.ts";
 import { ColorString } from "./functions/color.ts";
 import { LOCAL_PLATFORM } from "./constants/platform.ts";
 import { BulkRemove } from "./functions/filesystem.ts";
@@ -42,7 +40,7 @@ import { BulkRemove } from "./functions/filesystem.ts";
 // ps. i don't use LogStuff because if something broke, well, it might not work
 if (normalize(Deno.args[0] ?? "") === "something-fucked-up") {
     console.log(
-        `This command will reset ${APP_NAME.CASED}'s settings, logs, and configs ENTIRELY (except for project list). Are you sure things ${FWORDS.FK}ed up that much?`,
+        `This command will reset FuckingNode's settings, logs, and configs ENTIRELY (except for project list). Are you sure things fucked up that much?`,
     );
     const c = confirm("Confirm reset?");
     if (c === true) {
@@ -54,9 +52,9 @@ if (normalize(Deno.args[0] ?? "") === "something-fucked-up") {
             ],
         );
 
-        console.log(`Done. Don't ${FWORDS.FK} up again this time.`);
+        console.log(`Done. Don't fuck up again this time.`);
     } else {
-        console.log(`I knew it wasn't that ${FWORDS.FK}ed up...`);
+        console.log(`I knew it wasn't that fucked up...`);
     }
     Deno.exit(0);
 }
@@ -323,8 +321,8 @@ async function main(command: UnknownString): Promise<void> {
         case "docs":
         case "web":
         case "website":
-            LogStuff(`Best documentation website for best CLI, live at ${APP_URLs.WEBSITE}`, "bulb");
-            LaunchWebsite(APP_URLs.WEBSITE);
+            LogStuff(`Best documentation website for best CLI, live at ${WEBSITE}`, "bulb");
+            LaunchWebsite(WEBSITE);
             break;
         case "github":
         case "repo":
@@ -332,10 +330,10 @@ async function main(command: UnknownString): Promise<void> {
         case "oss":
         case "gh":
             LogStuff(
-                `Free and open source, and free as in freedom, live at ${APP_URLs.WEBSITE}repo\n(The above URL is a redirect to GitHub.)`,
+                `Free and open source, and free as in freedom, live at ${WEBSITE}repo\n(The above URL is a redirect to GitHub.)`,
                 "bulb",
             );
-            LaunchWebsite(`${APP_URLs.WEBSITE}repo`);
+            LaunchWebsite(`${WEBSITE}repo`);
             break;
         case "audit":
             await TheAuditer({

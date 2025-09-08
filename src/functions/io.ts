@@ -2,7 +2,6 @@ import type { VALID_COLORS, VALID_EMOJIS } from "../types/misc.ts";
 import { GetUserSettings } from "./config.ts";
 import { stringify as stringifyYaml } from "@std/yaml";
 import { Commander } from "./cli.ts";
-import { APP_NAME } from "../constants/name.ts";
 import { LOCAL_PLATFORM } from "../constants/platform.ts";
 import { ColorString } from "./color.ts";
 
@@ -159,7 +158,7 @@ export function Notification(title: string, msg: string, elapsed?: number): void
                 + `$template.GetElementsByTagName("text").Item(0).AppendChild($template.CreateTextNode("${title}")) > $null; `
                 + `$template.GetElementsByTagName("text").Item(1).AppendChild($template.CreateTextNode("${msg}")) > $null; `
                 + `$notification = [Windows.UI.Notifications.ToastNotification]::new($template); `
-                + `$notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("${APP_NAME.CASED}"); `
+                + `$notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("FuckingNode"); `
                 + `$notifier.Show($notification);`,
             ],
         );

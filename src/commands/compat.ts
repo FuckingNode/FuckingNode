@@ -1,7 +1,7 @@
 import { normalize, table, validate } from "@zakahacecosas/string-utils";
 import { LogStuff } from "../functions/io.ts";
 import type { TheCompaterConstructedParams } from "./constructors/command.ts";
-import { APP_URLs } from "../constants.ts";
+import { WEBSITE } from "../constants.ts";
 import { ColorString } from "../functions/color.ts";
 
 const labels = {
@@ -73,7 +73,7 @@ export default function TheCompater(params: TheCompaterConstructedParams): void 
     LogStuff(
         `${
             ColorString("This table shows feature compatibility across environments.", "bold")
-        }\nMore details available at ${APP_URLs.WEBSITE}crossruntime`,
+        }\nMore details available at ${WEBSITE}crossruntime`,
         "bulb",
     );
 

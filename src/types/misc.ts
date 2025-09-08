@@ -61,11 +61,6 @@ export interface GITHUB_RELEASE {
 }
 
 /**
- * A string preceded with "https://"
- */
-export type VALID_URL = `https://${string}`;
-
-/**
  * Colors that can be used to spice up the CLI's stdout.
  */
 export type VALID_COLORS =

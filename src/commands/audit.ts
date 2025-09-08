@@ -1,4 +1,3 @@
-import { APP_NAME } from "../constants/name.ts";
 import { LogStuff } from "../functions/io.ts";
 import { GetAllProjects } from "../functions/projects.ts";
 import { PerformAuditing } from "./toolkit/auditer.ts";
@@ -17,7 +16,7 @@ export default async function TheAuditer(params: TheAuditerConstructedParams): P
     if (shouldAuditAll) {
         const projects = GetAllProjects();
         LogStuff(
-            `${APP_NAME.CASED} Audit is only supported for NodeJS projects as of now.`,
+            "Audit is only supported for NodeJS and BunJS projects as of now.",
             "heads-up",
         );
         const report: {
