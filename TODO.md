@@ -19,10 +19,6 @@ from_git = { git = "https://github.com/FuckingNode/FuckingRust.git", branch = "d
 from_tarball = { url = "https://somewhere.com/some_crate-1.0.0.tar.gz" }
 ```
 
-## Features
-
-- [ ] Dual release, so that the same package is released to both npm and jsr. Requires expanding the FnCPF spec.
-
 ## Better UX
 
 - [ ] Allow for spread commands, using --flags instead of plaintext for specific arguments, e.g. `fkn add path1 path2 path3` or `fkclean project1 project2 project3 --intensity=normal`.

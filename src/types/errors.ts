@@ -50,7 +50,6 @@ export const INTEROP_ERRORS = [
     "Interop__ReqParamLost",
 ] as const;
 export const INTERNAL_ERRORS = [
-    "Internal__NonexistentAppPath",
     "Internal__ImproperAssignment",
     "Internal__InvalidEmbedded",
     "Internal__Lazy",

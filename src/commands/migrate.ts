@@ -27,10 +27,14 @@ function handler(
         LogStuff("Updating dependencies (1/6)...", "working");
         FkNodeInterop.Features.Update(env);
 
-        LogStuff("Removing node_modules (2/6)...", "working");
-        Deno.removeSync(env.hall_of_trash, {
-            recursive: true,
-        });
+        if (env.runtime !== "deno") {
+            LogStuff("Removing node_modules (2/6)...", "working");
+            Deno.removeSync(env.hall_of_trash, {
+                recursive: true,
+            });
+        } else {
+            LogStuff("Step 2/6 (removing node_modules) doesn't apply for Deno...", "bulb");
+        }
 
         Deno.chdir(env.root);
 

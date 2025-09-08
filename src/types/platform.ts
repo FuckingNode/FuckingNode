@@ -96,6 +96,8 @@ export interface GolangPkgFile {
     };
 }
 
+// TODO(@ZakaHaceCosas): make this global, instead of hardcoding types for supported platforms
+//anywhere where false or unsupported is a thing, make sure to make proper type guards
 interface GenericProjectEnvironment {
     /**
      * Path to the **root** of the project.
@@ -230,12 +232,6 @@ interface GenericProjectEnvironment {
          */
         start: "run" | "start";
     };
-    /**
-     * File paths to valid workspaces.
-     *
-     * @type {(string[])}
-     */
-    workspaces: string[];
 }
 
 interface NodeEnvironment extends GenericProjectEnvironment {
@@ -305,12 +301,6 @@ interface DenoEnvironment extends GenericProjectEnvironment {
         publish: ["publish", "--check=all"];
         start: "run";
     };
-    /**
-     * Path to `node_modules`.
-     *
-     * @type {string}
-     */
-    hall_of_trash: string;
 }
 
 interface CargoEnvironment extends GenericProjectEnvironment {

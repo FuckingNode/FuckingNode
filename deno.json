@@ -151,6 +151,7 @@
         "exactOptionalPropertyTypes": true
     },
     "imports": {
+        "@std/cli": "jsr:@std/cli@^1.0.22",
         "@std/datetime": "jsr:@std/datetime@^0.225.5",
         "@std/fmt": "jsr:@std/fmt@^1.0.8",
         "@std/fs": "jsr:@std/fs@^1.0.19",

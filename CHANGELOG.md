@@ -41,6 +41,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   - Parallelized workspace lookup when adding a project.
   - Optimized I/O, there were operations making several calls to `console.log`, when a single call (with `\n`s) is more efficient.
   - Also removed useless `String.trim()` calls.
+  - Remove duplicate and unused properties from project environment objects.
 
 ### Changed
 
@@ -61,6 +62,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Fixed the entire maxim cleanup process failing if just one project doesn't somehow have a `node_modules` DIR.
 - Fixed compatibility with Golang projects; now Golang version and dependencies are correctly read (it previously failed to get Golang version, skipped indirect dependencies, and didn't differentiate `github.com` from `pkg.go.dev` dependencies; now it does).
 - Fixed a typo in `export`'s help entry.
+- Fixed `migrate` and maxim cleanup wrongly attempting to remove `node_modules` from Deno projects.
 
 ### Removed
 

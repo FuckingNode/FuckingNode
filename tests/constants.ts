@@ -93,7 +93,6 @@ const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
             path: ParsePath(`${CONSTANTS.ENV_PATH}/test-one/package-lock.json`),
         },
         hall_of_trash: ParsePath(`${CONSTANTS.ENV_PATH}/test-one/node_modules`),
-        workspaces: [ParsePath(`${CONSTANTS.ENV_PATH}/test-two`)],
     },
 };
 

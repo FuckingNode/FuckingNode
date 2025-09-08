@@ -127,12 +127,12 @@ export async function AddProject(
             return;
         }
 
-        if (env.workspaces.length === 0) {
+        if (env.main.cpf.ws.length === 0) {
             addTheEntry(env.names.full, env.runtime);
             return;
         }
 
-        const workspaceString: string[] = await Promise.all(env.workspaces.map(async (ws) => await NameProject(ws, "all")));
+        const workspaceString: string[] = await Promise.all(env.main.cpf.ws.map(async (ws) => await NameProject(ws, "all")));
 
         const addWorkspaces = Interrogate(
             `Hey! This looks like a ${FWORDS.FKN} monorepo. We've found these workspaces:\n\n${
@@ -147,7 +147,7 @@ export async function AddProject(
             return;
         }
 
-        const allEntries = [workingEntry, ...env.workspaces].join("\n") + "\n";
+        const allEntries = [workingEntry, ...env.main.cpf.ws].join("\n") + "\n";
         Deno.writeTextFileSync(GetAppPath("MOTHERFKRS"), allEntries, { append: true });
 
         LogStuff(
@@ -558,8 +558,12 @@ export function GetWorkspaces(path: string): string[] {
 export async function GetProjectEnvironment(path: UnknownString): Promise<ProjectEnvironment> {
     DEBUG_LOG("CALLED GetProjectEnvironment WITH path", path);
     const root = await SpotProject(path);
+    const settings: FullFkNodeYaml = GetProjectSettings(root);
 
-    const hall_of_trash = JoinPaths(root, "node_modules");
+    /* if (settings.projectEnvOverride && settings.projectEnvOverride.startsWith("node:")) {
+        return await GetProjectEnvironmentFromNode(root, settings);
+    } */
+
     const workspaces = GetWorkspaces(root);
 
     const paths = {
@@ -615,8 +619,6 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
         golang: Object.fromEntries(Object.entries(paths.golang).map(([key, path]) => [key, CheckForPath(path)] as const)),
         rust: Object.fromEntries(Object.entries(paths.rust).map(([key, path]) => [key, CheckForPath(path)] as const)),
     };
-
-    const settings: FullFkNodeYaml = GetProjectSettings(root);
 
     /** prevent short-circuiting
      * like if `isGo` is true but `envOverride` is `"bun"`, go evaluates first and JS short circuits,
@@ -738,7 +740,6 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
                 publish: false, // ["test", "./..."]
                 start: "run",
             },
-            workspaces,
         };
     }
     if (settings.projectEnvOverride === "cargo" || isRust) {
@@ -777,7 +778,6 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
                 publish: ["publish"],
                 start: "run",
             },
-            workspaces,
         };
     }
     if (settings.projectEnvOverride === "deno" || isDeno) {
@@ -805,7 +805,6 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             },
             runtime: "deno",
             manager: "deno",
-            hall_of_trash,
             commands: {
                 base: "deno",
                 dlx: ["deno", "run"],
@@ -817,7 +816,6 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
                 publish: ["publish", "--check=all"],
                 start: "run",
             },
-            workspaces,
         };
     }
     if (settings.projectEnvOverride === "bun" || isBun) {
@@ -845,7 +843,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             },
             runtime: "bun",
             manager: "bun",
-            hall_of_trash,
+            hall_of_trash: JoinPaths(root, "node_modules"),
             commands: {
                 base: "bun",
                 dlx: ["bunx"],
@@ -858,7 +856,6 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
                 publish: ["publish"],
                 start: "start",
             },
-            workspaces,
         };
     }
     if (settings.projectEnvOverride === "yarn" || isYarn) {
@@ -886,7 +883,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             },
             runtime: "node",
             manager: "yarn",
-            hall_of_trash,
+            hall_of_trash: JoinPaths(root, "node_modules"),
             commands: {
                 base: "yarn",
                 dlx: ["yarn", "dlx"],
@@ -898,7 +895,6 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
                 publish: ["publish", "--non-interactive"],
                 start: "start",
             },
-            workspaces,
         };
     }
     if (settings.projectEnvOverride === "pnpm" || isPnpm) {
@@ -926,7 +922,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             },
             runtime: "node",
             manager: "pnpm",
-            hall_of_trash,
+            hall_of_trash: JoinPaths(root, "node_modules"),
             commands: {
                 base: "pnpm",
                 dlx: ["pnpm", "dlx"],
@@ -938,7 +934,6 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
                 publish: ["publish"],
                 start: "start",
             },
-            workspaces,
         };
     }
     // (|| isNode) assume it's npm if it's node.js and we can't tell the package manager
@@ -967,7 +962,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             },
             runtime: "node",
             manager: "npm",
-            hall_of_trash,
+            hall_of_trash: JoinPaths(root, "node_modules"),
             commands: {
                 base: "npm",
                 dlx: ["npx"],
@@ -979,7 +974,6 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
                 publish: ["publish"],
                 start: "start",
             },
-            workspaces,
         };
     }
 

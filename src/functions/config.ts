@@ -14,11 +14,11 @@ import { ColorString } from "./color.ts";
  * Returns file paths for all config files the app uses.
  *
  * @async
- * @param {("BASE" | "MOTHERFKRS" | "SCHEDULE" | "SETTINGS" | "ERRORS")} path What path you want.
+ * @param {("BASE" | "MOTHERFKRS" | "SCHEDULE" | "SETTINGS" | "ERRORS" | "NODES")} path What path you want.
  * @returns {string} The path as a string.
  */
 export function GetAppPath(
-    path: "BASE" | "MOTHERFKRS" | "SCHEDULE" | "SETTINGS" | "ERRORS",
+    path: "BASE" | "MOTHERFKRS" | "SCHEDULE" | "SETTINGS" | "ERRORS" | "NODES",
 ): string {
     if (!validate(LOCAL_PLATFORM.APPDATA)) {
         throw new FknError(
@@ -35,12 +35,12 @@ export function GetAppPath(
         return JoinPaths(BASE_DIR, `${APP_NAME.CLI}-${name}`);
     }
 
-    if (path === "BASE") return BASE_DIR;
     if (path === "MOTHERFKRS") return formatDir("motherfuckers.txt");
     if (path === "SCHEDULE") return formatDir("schedule.yaml");
     if (path === "SETTINGS") return formatDir("settings.yaml");
     if (path === "ERRORS") return formatDir("errors.log");
-    throw new FknError("Internal__NonexistentAppPath", `Invalid config path ${path} requested.`);
+    if (path === "NODES") return formatDir("nodes");
+    else return BASE_DIR;
 }
 
 /**
