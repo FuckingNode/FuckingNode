@@ -42,33 +42,35 @@ export function GetAppPath(
  * Check if config files are present, create them otherwise ("Fresh Setup").
  */
 export async function FreshSetup(repairSetts?: boolean): Promise<void> {
-    const [basePath, projectPath, errorLogsPath, settingsPath, schedulePath] = await Promise.all([
-        GetAppPath("BASE"),
-        GetAppPath("MOTHERFKRS"),
-        GetAppPath("ERRORS"),
-        GetAppPath("SETTINGS"),
-        GetAppPath("SCHEDULE"),
-    ]);
+    const basePath = GetAppPath("BASE");
+    const projectPath = GetAppPath("MOTHERFKRS");
+    const errorLogsPath = GetAppPath("ERRORS");
+    const settingsPath = GetAppPath("SETTINGS");
+    const schedulePath = GetAppPath("SCHEDULE");
 
-    await Promise.all([
-        (async () => {
-            if (!(CheckForPath(basePath))) await Deno.mkdir(basePath, { recursive: true });
-        })(),
-        (async () => {
-            if (!(CheckForPath(projectPath))) await Deno.writeTextFile(projectPath, "", { create: true });
-        })(),
-        (async () => {
-            if (!(CheckForPath(errorLogsPath))) await Deno.writeTextFile(errorLogsPath, "", { create: true });
-        })(),
-        (async () => {
-            if (!(CheckForPath(settingsPath)) || repairSetts === true) {
-                await Deno.writeTextFile(settingsPath, StringifyYaml(DEFAULT_SETTINGS), { create: true });
-            }
-        })(),
-        (async () => {
-            if (!(CheckForPath(schedulePath))) await Deno.writeTextFile(schedulePath, StringifyYaml(DEFAULT_SCHEDULE_FILE), { create: true });
-        })(),
-    ]);
+    const tasks: Promise<void>[] = [];
+
+    if (!CheckForPath(basePath)) {
+        tasks.push(Deno.mkdir(basePath, { recursive: true }));
+    }
+
+    if (!CheckForPath(projectPath)) {
+        tasks.push(Deno.writeTextFile(projectPath, "", { create: true }));
+    }
+
+    if (!CheckForPath(errorLogsPath)) {
+        tasks.push(Deno.writeTextFile(errorLogsPath, "", { create: true }));
+    }
+
+    if (!CheckForPath(settingsPath) || repairSetts) {
+        tasks.push(Deno.writeTextFile(settingsPath, StringifyYaml(DEFAULT_SETTINGS), { create: true }));
+    }
+
+    if (!CheckForPath(schedulePath)) {
+        tasks.push(Deno.writeTextFile(schedulePath, StringifyYaml(DEFAULT_SCHEDULE_FILE), { create: true }));
+    }
+
+    await Promise.all(tasks);
 
     return;
 }
