@@ -227,7 +227,7 @@ export async function RemoveProject(
         const index = list.indexOf(workingEntry);
 
         if (index !== -1) list.splice(index, 1);
-        Deno.writeTextFileSync(GetAppPath("MOTHERFKRS"), list.join("\n"));
+        Deno.writeTextFileSync(GetAppPath("MOTHERFKRS"), list.join("\n") + "\n");
 
         if (!showOutput) return;
         if (list.length > 0) {
