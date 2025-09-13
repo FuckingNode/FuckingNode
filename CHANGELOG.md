@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Added the ability for the CLI to update itself when running `update`. _Yes, it now properly works._
 - Added an `--export` option to `export`; if not provided the default behavior is to just show it in terminal instead of writing it.
 - Added a 3 second countdown to `surrender`, giving you time to rethink and quit the program.
+- Added spreading to `add` and `remove`, allowing you to `fkadd project1 project2 project3` from one command.
 - Added several changes to improve the CLI's performance.
   - FuckingNode runs some checks every time before actually running. _Just_ parallelizing them made the entire CLI much, MUCH faster.
   - Bulk adding projects (via glob patterns) was also parallelized. Made it 5% faster.
@@ -29,7 +30,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   - Removed useless file existence checks where we already know a file exists.
   - Removed some useless object mutations.
   - "Naming a project" (when we show its name with colors and stuff) is actually a somewhat expensive operation. We slightly optimized it + removed duplicate calls.
-    - Where possible, the overhead was moved to getting a project's environment (as otherwise this is done duplicatedly from the naming flow), reducing workload. Not everywhere we can do this, though.
+    - Where possible, the overhead was moved to getting a project's environment (as otherwise this is done _twice_ from the naming flow), reducing workload. Not everywhere we can do this, though.
   - `settings flush` should now be a few milliseconds faster (removed useless array check + parallelized filesize recovery calculations).
   - Avoided unnecessary checks for spotting project paths.
   - Removed duplicate calls to check for staged files via `commit`.
@@ -71,7 +72,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - (Breaking) Removed `"disabled"` option from `divineProtection` in `fknode.yaml`. Just don't declare it at all.
 - (Breaking) Removed the `logs.log` file, where _everything_ that happened in the CLI was logged. This meant writing to a file every time we wrote to the stdout, slowing the CLI down and taking up unneeded space. This change improves performance.
   - Errors still get logged to the `errors.log` file.
+- (Breaking) Removed the `something-fucked-up` command.
 - Removed emojis from `surrender` templates. They're not too professional, you know.
+- Removed some ASCII arts from `about`.
 
 <!-- Once V5 is done, take the benchmark set and run it on V4.3.0 and compare results. Log the improvement here. -->
 

@@ -1,5 +1,5 @@
+import * as DenoJson from "../../deno.json" with { type: "json" };
 import { normalize, validate } from "@zakahacecosas/string-utils";
-import { FULL_NAME } from "../constants.ts";
 import { GetDateNow, GetElapsedTime } from "../functions/date.ts";
 import { JoinPaths } from "../functions/filesystem.ts";
 import { LogStuff, Notification } from "../functions/io.ts";
@@ -66,7 +66,7 @@ function handler(
             );
         Deno.writeTextFileSync(
             JoinPaths(env.root, `${env.main.name}.jsonc.bak`),
-            `// This is a backup of your previous project file. We (${FULL_NAME}) overwrote it at ${GetDateNow()}.\n${
+            `// This is a backup of your previous project file. We (FuckingNode v${DenoJson.default.version}) overwrote it at ${GetDateNow()}.\n${
                 JSON.stringify(env.main.std)
             }`,
         );

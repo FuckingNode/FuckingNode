@@ -33,7 +33,7 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
     if (clonePathValidator === "NotDir") {
         throw new FknError(
             "Fs__DemandsDIR",
-            `${path} is not a directory...`,
+            `${clonePath} is not a directory...`,
         );
     }
 

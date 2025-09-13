@@ -1,5 +1,4 @@
 import * as DenoJson from "../../deno.json" with { type: "json" };
-import { WEBSITE } from "../constants.ts";
 import { ColorString } from "../functions/color.ts";
 import { LogStuff } from "../functions/io.ts";
 import type { VALID_COLORS } from "../types/misc.ts";
@@ -32,7 +31,7 @@ function colorizeText(text: string): string {
 }
 
 const coolStrings = {
-    ver: ColorString(`FuckingNode ${DenoJson.default.version}`, "bold", "red"),
+    ver: ColorString(`FuckingNode v${DenoJson.default.version}`, "bold", "red"),
     ts: ColorString(`TypeScript ${Deno.version.typescript}`, "bright-blue"),
     deno: ColorString(`Deno ${Deno.version.deno}`, "bright-yellow"),
     spain: ColorString("Spain", "red"),
@@ -63,7 +62,7 @@ export default async function TheAbouter(): Promise<void> {
         10,
     );
     await reveal(
-        `Follow us and join our Discord at ${ColorString(`${WEBSITE}follow-us`, "orange")}`,
+        `Follow us and join our Discord at ${ColorString("https://fuckingnode.github.io/follow-us", "orange")}`,
         2,
     );
     await reveal(

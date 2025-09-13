@@ -1,4 +1,4 @@
-import { stringify as stringifyYaml } from "@std/yaml";
+import { StringifyYaml } from "../src/functions/io.ts";
 
 const release = Deno.args.includes("--release");
 
@@ -94,7 +94,7 @@ if (release) {
         const hash = new TextDecoder().decode(hashing.stdout).trim();
         hashes[CMD.target] = hash;
         console.log(CMD.target, "HASH", hash);
-        Deno.writeTextFileSync("dist/konbini.hash.yaml", stringifyYaml(hashes));
+        Deno.writeTextFileSync("dist/konbini.hash.yaml", StringifyYaml(hashes));
         CMD.signCmd.outputSync();
         console.log("Signed", CMD.target);
     }

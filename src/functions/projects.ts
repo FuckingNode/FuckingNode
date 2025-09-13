@@ -2,7 +2,7 @@ import { parse as parseYaml } from "@std/yaml";
 import { parse as parseToml } from "@std/toml";
 import { parse as parseJsonc } from "@std/jsonc";
 import { expandGlobSync } from "@std/fs";
-import { DEFAULT_FKNODE_YAML, WEBSITE } from "../constants.ts";
+import { DEFAULT_FKNODE_YAML } from "../constants.ts";
 import type { CargoPkgFile, NodePkgFile, ProjectEnvironment, UnderstoodProjectProtection } from "../types/platform.ts";
 import { CheckForPath, JoinPaths, ParsePath, ParsePathList } from "./filesystem.ts";
 import { Interrogate, LogStuff } from "./io.ts";
@@ -253,6 +253,14 @@ export async function RemoveProject(
     }
 }
 
+/** Manages the project list by adding or removing projects. */
+export async function ListManager(action: "add" | "rem", paths: string[]): Promise<void> {
+    // dedupe
+    const projects = new Set(paths).values().toArray();
+    if (action === "add") await Promise.all(projects.map((p) => AddProject(p)));
+    else await Promise.all(projects.map((p) => RemoveProject(p)));
+}
+
 /**
  * Given a path to a project, returns it's name.
  *
@@ -356,7 +364,7 @@ function GetProjectSettings(path: string): FullFkNodeYaml {
         if (!content.includes("UPON INTERACTING")) {
             Deno.writeTextFileSync(
                 pathToDivineFile,
-                `\n# [NOTE (${GetDateNow()}): Invalid config file! (Auto-added by FuckingNode). DEFAULT SETTINGS WILL BE USED UPON INTERACTING WITH THIS MOTHERFUCKER UNTIL YOU FIX THIS FILE! Refer to ${WEBSITE} to learn about how fknode.yaml works.]\n`,
+                `\n# [NOTE (${GetDateNow()}): Invalid config file! (Auto-added by FuckingNode). DEFAULT SETTINGS WILL BE USED UPON INTERACTING WITH THIS MOTHERFUCKER UNTIL YOU FIX THIS FILE! Refer to https://fuckingnode.github.io/manual/fknode-yaml/ to learn about how fknode.yaml works.]\n`,
                 {
                     append: true,
                 },

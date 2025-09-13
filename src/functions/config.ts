@@ -1,4 +1,6 @@
-import { DEFAULT_SCHEDULE_FILE, DEFAULT_SETTINGS } from "../constants.ts";
+import * as DenoJson from "../../deno.json" with { type: "json" };
+import { GetDateNow } from "../functions/date.ts";
+import { DEFAULT_SETTINGS } from "../constants.ts";
 import type { CF_FKNODE_SETTINGS } from "../types/config_files.ts";
 import { FknError } from "./error.ts";
 import { BulkRemove, CheckForPath, JoinPaths } from "./filesystem.ts";
@@ -67,7 +69,19 @@ export async function FreshSetup(repairSetts?: boolean): Promise<void> {
     }
 
     if (!CheckForPath(schedulePath)) {
-        tasks.push(Deno.writeTextFile(schedulePath, StringifyYaml(DEFAULT_SCHEDULE_FILE), { create: true }));
+        tasks.push(Deno.writeTextFile(
+            schedulePath,
+            StringifyYaml({
+                updater: {
+                    latestVer: DenoJson.default.version,
+                    lastCheck: GetDateNow(),
+                },
+                flusher: {
+                    lastFlush: GetDateNow(),
+                },
+            }),
+            { create: true },
+        ));
     }
 
     await Promise.all(tasks);

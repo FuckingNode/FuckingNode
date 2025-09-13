@@ -18,46 +18,18 @@ import TheSetuper from "./commands/setup.ts";
 import TheLauncher from "./commands/launch.ts";
 import TheBuilder from "./commands/build.ts";
 // other things
-import { FULL_NAME, WEBSITE } from "./constants.ts";
+import * as DenoJson from "../deno.json" with { type: "json" };
 import { LogStuff } from "./functions/io.ts";
-import { FreshSetup, GetAppPath, GetUserSettings } from "./functions/config.ts";
+import { FreshSetup, GetUserSettings } from "./functions/config.ts";
 import { DEBUG_LOG, ErrorHandler } from "./functions/error.ts";
 import type { TheCleanerConstructedParams } from "./commands/constructors/command.ts";
 import { RunScheduledTasks } from "./functions/schedules.ts";
 import { normalize, testFlag, testFlags, type UnknownString, validate } from "@zakahacecosas/string-utils";
-import { AddProject, CleanupProjects, RemoveProject } from "./functions/projects.ts";
+import { CleanupProjects, ListManager } from "./functions/projects.ts";
 import { LaunchWebsite } from "./functions/http.ts";
 import { HINTS } from "./functions/phrases.ts";
-import { GetDateNow, GetElapsedTime } from "./functions/date.ts";
-import { ColorString } from "./functions/color.ts";
+import { GetElapsedTime } from "./functions/date.ts";
 import { LOCAL_PLATFORM } from "./constants/platform.ts";
-import { BulkRemove } from "./functions/filesystem.ts";
-
-// this is outside the main loop so it can be executed
-// without depending on other modules
-// yes i added this feature because of a breaking change i wasn't expecting
-
-// ps. i don't use LogStuff because if something broke, well, it might not work
-if (normalize(Deno.args[0] ?? "") === "something-fucked-up") {
-    console.log(
-        `This command will reset FuckingNode's settings, logs, and configs ENTIRELY (except for project list). Are you sure things fucked up that much?`,
-    );
-    const c = confirm("Confirm reset?");
-    if (c === true) {
-        await BulkRemove(
-            [
-                GetAppPath("SCHEDULE"),
-                GetAppPath("SETTINGS"),
-                GetAppPath("ERRORS"),
-            ],
-        );
-
-        console.log(`Done. Don't fuck up again this time.`);
-    } else {
-        console.log(`I knew it wasn't that fucked up...`);
-    }
-    Deno.exit(0);
-}
 
 async function init(): Promise<void> {
     FreshSetup();
@@ -83,6 +55,12 @@ function hasFlag(flag: string, allowQuickFlag: boolean, firstOnly: boolean = fal
     return testFlags(flags, flag, { allowQuickFlag, allowNonExactString: true });
 }
 
+function isNotFlag(arg: UnknownString): arg is string {
+    if (!validate(arg)) return false;
+    const str = normalize(arg, { preserveCase: true, strict: false, removeCliColors: true });
+    return !str.startsWith("-") && !str.startsWith("--");
+}
+
 if (hasFlag("help", true)) {
     try {
         await init();
@@ -96,24 +74,13 @@ if (hasFlag("help", true)) {
 
 if (hasFlag("version", true, true) && !flags[1]) {
     console.log(
-        `${FULL_NAME} built for ${Deno.build.target}\nDeno JavaScript runtime ${Deno.version.deno} | TypeScript ${Deno.version.typescript} | V8 Engine ${Deno.version.v8}\nRun 'fuckingnode about' for details.`,
+        `FuckingNode v${DenoJson.default.version} built for ${Deno.build.target}\nDeno JavaScript runtime ${Deno.version.deno} | TypeScript ${Deno.version.typescript} | V8 Engine ${Deno.version.v8}\nRun 'fuckingnode about' for details.`,
     );
     Deno.exit(0);
 }
 
-function isNotFlag(arg: UnknownString): arg is string {
-    if (!validate(arg)) return false;
-    const str = normalize(arg, { preserveCase: true, strict: false, removeCliColors: true });
-    return !str.startsWith("-") && !str.startsWith("--");
-}
-
 async function main(command: UnknownString): Promise<void> {
     // debug commands
-    if (FKNODE_SHALL_WE_DEBUG || Deno.args[0]?.startsWith("FKNDBG")) {
-        console.log(
-            `${ColorString("FKNDBG at " + GetDateNow(), "italic")}\nFKNDBG Logs aren't stored into the .log file.\n${"-".repeat(37)}`,
-        );
-    }
     if (Deno.args[0] === "FKNDBG_PROC") {
         console.log(
             "PROC NAME",
@@ -211,10 +178,10 @@ async function main(command: UnknownString): Promise<void> {
             await TheLister(flags[1]);
             break;
         case "add":
-            await AddProject(flags[1]);
+            await ListManager("add", flags.slice(1));
             break;
         case "remove":
-            await RemoveProject(flags[1]);
+            await ListManager("rem", flags.slice(1));
             break;
         case "kickstart":
             await TheKickstarter({
@@ -321,8 +288,8 @@ async function main(command: UnknownString): Promise<void> {
         case "docs":
         case "web":
         case "website":
-            LogStuff(`Best documentation website for best CLI, live at ${WEBSITE}`, "bulb");
-            LaunchWebsite(WEBSITE);
+            LogStuff(`Best documentation website for best CLI, live at https://fuckingnode.github.io/`, "bulb");
+            LaunchWebsite("https://fuckingnode.github.io/");
             break;
         case "github":
         case "repo":
@@ -330,10 +297,10 @@ async function main(command: UnknownString): Promise<void> {
         case "oss":
         case "gh":
             LogStuff(
-                `Free and open source, and free as in freedom, live at ${WEBSITE}repo\n(The above URL is a redirect to GitHub.)`,
+                `Free and open source, and free as in freedom, live at https://fuckingnode.github.io/repo\n(The above URL is a redirect to GitHub.)`,
                 "bulb",
             );
-            LaunchWebsite(`${WEBSITE}repo`);
+            LaunchWebsite(`https://fuckingnode.github.io/repo`);
             break;
         case "audit":
             await TheAuditer({

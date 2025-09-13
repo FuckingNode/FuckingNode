@@ -1,6 +1,4 @@
 import { compare, parse } from "@std/semver";
-import { FetchGitHub } from "../functions/http.ts";
-import { RELEASE_URL } from "../constants.ts";
 import type { GITHUB_RELEASE } from "../types/misc.ts";
 import { GetDateNow } from "../functions/date.ts";
 import type { TheUpdaterConstructedParams } from "./constructors/command.ts";
@@ -17,7 +15,9 @@ async function CheckUpdates(): Promise<CF_FKNODE_SCHEDULE | "rl"> {
     const scheduleFilePath = GetAppPath("SCHEDULE");
     const scheduleFileContents = parseYaml(Deno.readTextFileSync(scheduleFilePath)) as CF_FKNODE_SCHEDULE;
 
-    const response = await FetchGitHub(RELEASE_URL);
+    const response = await fetch("https://api.github.com/repos/FuckingNode/FuckingNode/releases/latest", {
+        headers: { Accept: "application/vnd.github.v3+json" },
+    });
 
     if (!response.ok) {
         // (github has a rate limit, so this is not an error we should be really aware of)

@@ -1,6 +1,6 @@
+import * as DenoJson from "../../deno.json" with { type: "json" };
 import { Commander } from "../functions/cli.ts";
 import { CheckForPath, JoinPaths, ParsePath } from "../functions/filesystem.ts";
-import { FULL_NAME } from "../constants.ts";
 import { normalize, normalizeArray, StringArray, validate } from "@zakahacecosas/string-utils";
 import { FknError } from "./error.ts";
 import type { GIT_FILES } from "../types/misc.ts";
@@ -148,32 +148,20 @@ export function Push(path: string, branch: string | false): void {
  */
 export function AddToGitIgnore(path: string, toBeIgnored: string): void {
     const gitIgnoreFile = JoinPaths(path, ".gitignore");
-    try {
-        const gitIgnoreContent = Deno.readTextFileSync(gitIgnoreFile);
 
-        if (gitIgnoreContent.includes(toBeIgnored)) return;
+    const gitIgnoreContent = Deno.readTextFileSync(gitIgnoreFile).trim();
 
-        Deno.writeTextFileSync(
-            gitIgnoreFile,
-            `${gitIgnoreContent.endsWith("\n") ? "" : "\n"}# auto-added by ${FULL_NAME} release command\n${toBeIgnored}`,
-            {
-                append: true,
-            },
-        );
+    if (gitIgnoreContent.includes(toBeIgnored)) return;
 
-        return;
-    } catch (e) {
-        if (e instanceof Deno.errors.NotFound) {
-            Deno.writeTextFileSync(
-                gitIgnoreFile,
-                `# auto-added by ${FULL_NAME} release command\n${toBeIgnored}\n`,
-            );
-        }
-        throw new FknError(
-            "Git__Ignore",
-            `Couldn't gitignore file ${toBeIgnored} at ${ColorString(path, "bold")}: ${e}`,
-        );
-    }
+    Deno.writeTextFileSync(
+        gitIgnoreFile,
+        `\n# auto-added by FuckingNode v${DenoJson.default.version} release command\n${toBeIgnored}`,
+        {
+            append: true,
+        },
+    );
+
+    return;
 }
 
 export function Tag(path: string, tag: string, push: boolean): void {
