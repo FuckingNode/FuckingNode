@@ -23,7 +23,7 @@ export const DEFAULT_SETTINGS: CF_FKNODE_SETTINGS = {
  * @type {FullFkNodeYaml}
  */
 export const DEFAULT_FKNODE_YAML: FullFkNodeYaml = {
-    divineProtection: "*",
+    divineProtection: [],
     lintScript: false,
     prettyScript: false,
     destroy: {

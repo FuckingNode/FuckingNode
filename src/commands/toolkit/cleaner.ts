@@ -190,7 +190,6 @@ const ProjectCleaningFeatures = {
 /**
  * Cleans a project.
  *
- * @param {string} motherfuckerInQuestion
  * @param {boolean} shouldUpdate
  * @param {boolean} shouldLint
  * @param {boolean} shouldPrettify
@@ -199,20 +198,18 @@ const ProjectCleaningFeatures = {
  * @param {("normal" | "hard" | "maxim")} intensity
  * @returns {Promise<{ protection: string | null; errors: string | null; }>}
  */
-export async function PerformCleanup(
-    motherfuckerInQuestion: string,
+export function PerformCleanup(
     shouldUpdate: boolean,
     shouldLint: boolean,
     shouldPrettify: boolean,
     shouldDestroy: boolean,
     shouldCommit: boolean,
     intensity: "normal" | "hard" | "maxim",
-): Promise<{
+    env: ProjectEnvironment,
+): {
     protection: string | null;
     errors: string | null;
-}> {
-    const env = await GetProjectEnvironment(motherfuckerInQuestion);
-
+} {
     const protections: string[] = [];
     const errors: string[] = [];
 
@@ -249,7 +246,7 @@ export async function PerformCleanup(
         LogStuff(
             `${env.names.name} will be skipped. ${
                 ColorString(env.manager, "bold")
-            } has no cleanup commands and no other feature is being used here.`,
+            } has no cleanup commands and no other feature is being used here.\n`,
         );
     }
 

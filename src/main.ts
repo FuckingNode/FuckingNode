@@ -28,11 +28,10 @@ import { normalize, testFlag, testFlags, type UnknownString, validate } from "@z
 import { CleanupProjects, ListManager } from "./functions/projects.ts";
 import { LaunchWebsite } from "./functions/http.ts";
 import { HINTS } from "./functions/phrases.ts";
-import { GetElapsedTime } from "./functions/date.ts";
 import { LOCAL_PLATFORM } from "./constants/platform.ts";
 
 async function init(): Promise<void> {
-    FreshSetup();
+    await FreshSetup();
     await RunScheduledTasks();
     await CleanupProjects();
 }
@@ -334,15 +333,11 @@ async function main(command: UnknownString): Promise<void> {
     }
 }
 
-// I SWEAR - THE FACT THAT THIS "IF" WAS MISSING MADE ALL THE TEST SUITE NOT WORK LMFAO
-// javascript is definitely... something
 if (import.meta.main) {
     try {
-        const STARTUP = new Date();
         await init();
 
         await main(flags[0]);
-        DEBUG_LOG("STARTUP TIME", GetElapsedTime(STARTUP));
         Deno.exit(0);
     } catch (e) {
         ErrorHandler(e);

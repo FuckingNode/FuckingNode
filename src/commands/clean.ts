@@ -1,5 +1,5 @@
 import { LogStuff, Notification } from "../functions/io.ts";
-import { GetAllProjects, NameProject } from "../functions/projects.ts";
+import { GetAllProjects, GetProjectEnvironment } from "../functions/projects.ts";
 import type { TheCleanerConstructedParams } from "./constructors/command.ts";
 import { PerformCleanup, PerformHardCleanup, PerformMaximCleanup, ShowReport, ValidateIntensity } from "./toolkit/cleaner.ts";
 import type { CleanerIntensity } from "../types/config_params.ts";
@@ -45,7 +45,7 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
     }
 
     LogStuff(
-        `Cleaning started at ${new Date().toLocaleString()}`,
+        `Cleaning started at ${new Date().toLocaleString()}\n`,
         "working",
         "bright-green",
     );
@@ -55,7 +55,8 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
     for (const project of projects) {
         // start time of each cleanup
         const startTime = new Date();
-        const projectName = await NameProject(project, "name-ver");
+        const env = await GetProjectEnvironment(project);
+        const projectName = env.names.nameVer;
         try {
             Deno.chdir(project);
 
@@ -63,14 +64,14 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
                 `Cleaning the ${projectName} motherfucker...`,
                 "package",
             );
-            const res = await PerformCleanup(
-                project,
+            const res = PerformCleanup(
                 update,
                 lint,
                 prettify,
                 destroy,
                 commit,
                 realIntensity,
+                env,
             );
 
             const result: RESULT = {
@@ -86,7 +87,7 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
             results.push(result);
         } catch (e) {
             LogStuff(
-                `Error while working around with ${projectName}: ${e}`,
+                `Error while working around with ${projectName}: ${e}\n`,
                 "error",
                 "red",
             );
