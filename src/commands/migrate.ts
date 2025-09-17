@@ -49,7 +49,7 @@ function handler(
         // i'm a damn genius
         LogStuff("Migrating versions from previous package file (3/6)...", "working");
         LogStuff("A copy will be made (package.json.bak), just in case", "wink");
-        if (env.main.path.endsWith("jsonc")) {
+        if (env.mainPath.endsWith("jsonc")) {
             LogStuff(
                 "Your deno.jsonc's comments (if any) WON'T be preserved in final package file, but WILL be present in the .bak file. Sorry bro.",
                 "bruh",
@@ -57,21 +57,21 @@ function handler(
         }
         const newPackageFile = from === "deno"
             ? FkNodeInterop.Generators.Deno(
-                env.main.cpf,
-                env.main.std,
+                env.mainCPF,
+                env.mainSTD,
             )
             : FkNodeInterop.Generators.NodeBun(
-                env.main.cpf,
-                env.main.std,
+                env.mainCPF,
+                env.mainSTD,
             );
         Deno.writeTextFileSync(
-            JoinPaths(env.root, `${env.main.name}.jsonc.bak`),
+            JoinPaths(env.root, `${env.mainName}.jsonc.bak`),
             `// This is a backup of your previous project file. We (FuckingNode v${DenoJson.default.version}) overwrote it at ${GetDateNow()}.\n${
-                JSON.stringify(env.main.std)
+                JSON.stringify(env.mainSTD)
             }`,
         );
         Deno.writeTextFileSync(
-            env.main.path,
+            env.mainPath,
             JSON.stringify(newPackageFile),
         );
 

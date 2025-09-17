@@ -28,7 +28,7 @@ export default async function TheBuilder(params: TheBuilderConstructedParams): P
 
     Notification(
         "Build completed!",
-        `Your build of ${env.main.cpf.name} succeeded! Elapsed ${GetElapsedTime(startup)}.`,
+        `Your build of ${env.mainCPF.name} succeeded! Elapsed ${GetElapsedTime(startup)}.`,
         elapsed,
     );
 

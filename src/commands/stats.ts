@@ -30,7 +30,7 @@ export default async function TheStatistics(target: UnknownString): Promise<void
 
     const maxDeps = 3;
 
-    const realDeps = env.main.cpf.deps;
+    const realDeps = env.mainCPF.deps;
     const deps: string = realDeps
         .toSorted()
         .slice(0, maxDeps)

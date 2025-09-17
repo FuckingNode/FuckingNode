@@ -1,5 +1,4 @@
 import type { CF_FKNODE_SETTINGS, FullFkNodeYaml } from "./types/config_files.ts";
-import { ManagerExists } from "./functions/cli.ts";
 
 /**
  * Default app settings.
@@ -11,7 +10,7 @@ export const DEFAULT_SETTINGS: CF_FKNODE_SETTINGS = {
     "flush-freq": 14,
     "default-intensity": "normal",
     "fav-editor": "vscode",
-    "default-manager": ManagerExists("bun") ? "bun" : ManagerExists("pnpm") ? "pnpm" : "npm",
+    "default-manager": "npm",
     "notifications": true,
     "notification-threshold": false,
     "notification-threshold-value": 10000,

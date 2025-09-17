@@ -37,8 +37,8 @@ export default async function TheReleaser(params: TheReleaserConstructedParams):
     const buildCmd = ValidateCmdSet({ env, key: "buildCmd" });
 
     const actions: string[] = [
-        `${ColorString(`Update your ${ColorString(env.main.name, "bold")}'s`, "white")} "version" field`,
-        `Create a ${ColorString(`${env.main.name}.bak`, "bold")} file, and add it to .gitignore`,
+        `${ColorString(`Update your ${ColorString(env.mainName, "bold")}'s`, "white")} "version" field`,
+        `Create a ${ColorString(`${env.mainName}.bak`, "bold")} file, and add it to .gitignore`,
     ];
     if (buildCmd && env.settings.buildForRelease) {
         actions.push(
@@ -80,23 +80,23 @@ export default async function TheReleaser(params: TheReleaserConstructedParams):
     if (!confirmation) return;
 
     // write the updated pkg file
-    Deno.copyFileSync(env.main.path, `${env.main.path}.bak`); // Backup original
+    Deno.copyFileSync(env.mainPath, `${env.mainPath}.bak`); // Backup original
     if (env.runtime === "rust") {
         const newPackageFile = {
-            ...(env.main.std),
+            ...(env.mainSTD),
             package: {
-                ...(env.main.std as CargoPkgFile).package,
+                ...(env.mainSTD as CargoPkgFile).package,
                 version: format(parsedVersion),
             },
         };
-        Deno.writeTextFileSync(env.main.path, stringifyToml(newPackageFile));
+        Deno.writeTextFileSync(env.mainPath, stringifyToml(newPackageFile));
     } else {
         const newPackageFile = {
-            ...env.main.std,
+            ...env.mainSTD,
             version: format(parsedVersion),
         };
-        const indent = GetTextIndentSize(Deno.readTextFileSync(env.main.path));
-        Deno.writeTextFileSync(env.main.path, JSON.stringify(newPackageFile, undefined, indent));
+        const indent = GetTextIndentSize(Deno.readTextFileSync(env.mainPath));
+        Deno.writeTextFileSync(env.mainPath, JSON.stringify(newPackageFile, undefined, indent));
     }
 
     // build
@@ -152,17 +152,17 @@ export default async function TheReleaser(params: TheReleaserConstructedParams):
         // just in case
         AddToGitIgnore(
             env.root,
-            `${env.main.name}.bak`,
+            `${env.mainName}.bak`,
         );
         LogStuff(
-            `Ignored ${env.main.name}.bak successfully`,
+            `Ignored ${env.mainName}.bak successfully`,
             "tick",
         );
 
         Commit(
             env.root,
-            `Release v${format(parsedVersion)} (automated by F*ckingNode)`,
-            [env.main.path],
+            `Release v${format(parsedVersion)} (automated by FuckingNode)`,
+            [env.mainPath],
             [],
         );
 

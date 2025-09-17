@@ -34,7 +34,7 @@ export const InteropedFeatures = {
 
         if (TypeGuardForNodeBun(env)) {
             if (script === false) {
-                if (FkNodeInterop.PackageFileUtils.SpotDependency("eslint", env.main.cpf.deps) === undefined) {
+                if (FkNodeInterop.PackageFileUtils.SpotDependency("eslint", env.mainCPF.deps) === undefined) {
                     LogStuff(
                         "No linter was given (via fknode.yaml > lintCmd), hence defaulted to ESLint - but ESLint is not installed!",
                         "bruh",
@@ -99,7 +99,7 @@ export const InteropedFeatures = {
 
         if (TypeGuardForNodeBun(env)) {
             if (script === false) {
-                if (FkNodeInterop.PackageFileUtils.SpotDependency("prettier", env.main.cpf.deps) === undefined) {
+                if (FkNodeInterop.PackageFileUtils.SpotDependency("prettier", env.mainCPF.deps) === undefined) {
                     LogStuff(
                         "No prettifier was given (via fknode.yaml > prettyCmd), hence defaulted to Prettier - but Prettier is not installed!",
                         "bruh",

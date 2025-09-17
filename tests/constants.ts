@@ -40,28 +40,26 @@ const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
             },
         },
         runtimeColor: "bright-green",
-        main: {
-            path: ParsePath(`${CONSTANTS.ENV_PATH}/test-one/package.json`),
-            name: "package.json",
-            std: JSON.parse(Deno.readTextFileSync(ParsePath(`${CONSTANTS.ENV_PATH}/test-one/package.json`))),
-            cpf: {
-                name: "uwu.js",
-                version: "1.0.0",
-                rm: "npm",
-                plat: { edt: null },
-                deps: [
-                    {
-                        name: "tslib",
-                        ver: "^2.0.0",
-                        rel: "univ:dep",
-                        src: "npm",
-                    },
-                ],
-                ws: [
-                    ParsePath(`${CONSTANTS.ENV_PATH}/test-two`),
-                ],
-                fknVer: DenoJson.default.version,
-            },
+        mainPath: ParsePath(`${CONSTANTS.ENV_PATH}/test-one/package.json`),
+        mainName: "package.json",
+        mainSTD: JSON.parse(Deno.readTextFileSync(ParsePath(`${CONSTANTS.ENV_PATH}/test-one/package.json`))),
+        mainCPF: {
+            name: "uwu.js",
+            version: "1.0.0",
+            rm: "npm",
+            plat: { edt: null },
+            deps: [
+                {
+                    name: "tslib",
+                    ver: "^2.0.0",
+                    rel: "univ:dep",
+                    src: "npm",
+                },
+            ],
+            ws: [
+                ParsePath(`${CONSTANTS.ENV_PATH}/test-two`),
+            ],
+            fknVer: DenoJson.default.version,
         },
         commands: {
             base: "npm",

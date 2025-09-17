@@ -59,14 +59,19 @@ export function GetAllProjects(ignored?: false | "limit" | "exclude"): string[] 
 /**
  * Adds a new project.
  *
+ * TODO(@ZakaHaceCosas): make this reliably return the ProjectEnv of the added project
+ * LEFT: rootless monorepos
+ * we still need to rethink workspace handling overall
+ *
  * @async
  * @param {UnknownString} entry Path to the project.
- * @returns {Promise<void>}
+ * @param {boolean} [glob=false] Whether a glob pattern is being used.
+ * @returns {Promise<ProjectEnvironment | undefined>} `ProjectEnvironment` of the added project (`void` if a glob pattern is used OR if an error happens).
  */
 export async function AddProject(
     entry: UnknownString,
     glob: boolean = false,
-): Promise<void> {
+): Promise<ProjectEnvironment | void> {
     if (validate(entry) && isGlob(entry)) {
         await Promise.all(
             globSync(entry)
@@ -125,12 +130,12 @@ export async function AddProject(
             return;
         }
 
-        if (env.main.cpf.ws.length === 0) {
+        if (env.mainCPF.ws.length === 0) {
             addTheEntry(env.names.full, env.runtime);
-            return;
+            return env;
         }
 
-        const workspaceString: string[] = await Promise.all(env.main.cpf.ws.map(async (ws) => await NameProject(ws, "all")));
+        const workspaceString: string[] = await Promise.all(env.mainCPF.ws.map(async (ws) => await NameProject(ws, "all")));
 
         const addWorkspaces = Interrogate(
             `Hey! This looks like a fucking monorepo. We've found these workspaces:\n\n${
@@ -142,17 +147,17 @@ export async function AddProject(
 
         if (!addWorkspaces) {
             addTheEntry(env.names.full, env.runtime);
-            return;
+            return env;
         }
 
-        const allEntries = [workingEntry, ...env.main.cpf.ws].join("\n") + "\n";
+        const allEntries = [workingEntry, ...env.mainCPF.ws].join("\n") + "\n";
         Deno.writeTextFileSync(GetAppPath("MOTHERFKRS"), allEntries, { append: true });
 
         LogStuff(
             `Added all of your projects. Many motherfuckers less to care about!`,
             "tick-clear",
         );
-        return;
+        return env;
     } catch (e) {
         if (e instanceof FknError && glob) {
             LogStuff(`Couldn't add ${workingEntry}. Maybe it's not a project. Skipping it...`, undefined, ["italic", "half-opaque"]);
@@ -281,7 +286,7 @@ export async function NameProject(
     try {
         const env = await GetProjectEnvironment(workingPath);
 
-        const pkgFile = env.main.cpf;
+        const pkgFile = env.mainCPF;
 
         const formattedName = ColorString(pkgFile.name, "bold", env.runtimeColor);
 
@@ -435,8 +440,8 @@ export async function ValidateProject(entry: string, existing: boolean): Promise
     try {
         const env = await GetProjectEnvironment(entry);
 
-        if (!env.main.cpf.name) return "NoName";
-        if (!env.main.cpf.version) return "NoVersion";
+        if (!env.mainCPF.name) return "NoName";
+        if (!env.mainCPF.version) return "NoVersion";
     } catch (error) {
         if (error instanceof FknError && error.code === "Env__SchrodingerLockfile") return "TooManyLockfiles";
         else return "CantGetProjectEnv";
@@ -717,12 +722,10 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             root,
             settings,
             runtimeColor,
-            main: {
-                path: mainPath,
-                name: "go.mod",
-                std: PackageFileParsers.Golang.STD(mainString),
-                cpf,
-            },
+            mainPath: mainPath,
+            mainName: "go.mod",
+            mainSTD: PackageFileParsers.Golang.STD(mainString),
+            mainCPF: cpf,
             names: {
                 path: formattedPath,
                 name: ColorString(cpf.name, "bold", runtimeColor),
@@ -755,12 +758,10 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             root,
             settings,
             runtimeColor,
-            main: {
-                path: mainPath,
-                name: "Cargo.toml",
-                std: PackageFileParsers.Cargo.STD(mainString),
-                cpf,
-            },
+            mainPath: mainPath,
+            mainName: "Cargo.toml",
+            mainSTD: PackageFileParsers.Cargo.STD(mainString),
+            mainCPF: cpf,
             names: {
                 path: formattedPath,
                 name: ColorString(cpf.name, "bold", runtimeColor),
@@ -793,12 +794,10 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             root,
             settings,
             runtimeColor,
-            main: {
-                path: mainPath,
-                name: pathChecks.deno["jsonc"] ? "deno.jsonc" : "deno.json",
-                std: PackageFileParsers.Deno.STD(mainString),
-                cpf,
-            },
+            mainPath: mainPath,
+            mainName: pathChecks.deno["jsonc"] ? "deno.jsonc" : "deno.json",
+            mainSTD: PackageFileParsers.Deno.STD(mainString),
+            mainCPF: cpf,
             names: {
                 path: formattedPath,
                 name: ColorString(cpf.name, "bold", runtimeColor),
@@ -831,12 +830,10 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             root,
             settings,
             runtimeColor,
-            main: {
-                path: mainPath,
-                name: "package.json",
-                std: PackageFileParsers.NodeBun.STD(mainString),
-                cpf,
-            },
+            mainPath: mainPath,
+            mainName: "package.json",
+            mainSTD: PackageFileParsers.NodeBun.STD(mainString),
+            mainCPF: cpf,
             names: {
                 path: formattedPath,
                 name: ColorString(cpf.name, "bold", runtimeColor),
@@ -871,12 +868,10 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             root,
             settings,
             runtimeColor,
-            main: {
-                path: mainPath,
-                name: "package.json",
-                std: parseJsonc(mainString) as NodePkgFile,
-                cpf,
-            },
+            mainPath: mainPath,
+            mainName: "package.json",
+            mainSTD: parseJsonc(mainString) as NodePkgFile,
+            mainCPF: cpf,
             names: {
                 path: formattedPath,
                 name: ColorString(cpf.name, "bold", runtimeColor),
@@ -910,12 +905,10 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             root,
             settings,
             runtimeColor,
-            main: {
-                path: mainPath,
-                name: "package.json",
-                std: PackageFileParsers.NodeBun.STD(mainString),
-                cpf,
-            },
+            mainPath: mainPath,
+            mainName: "package.json",
+            mainSTD: PackageFileParsers.NodeBun.STD(mainString),
+            mainCPF: cpf,
             names: {
                 path: formattedPath,
                 name: ColorString(cpf.name, "bold", runtimeColor),
@@ -950,12 +943,10 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             root,
             settings,
             runtimeColor,
-            main: {
-                path: mainPath,
-                name: "package.json",
-                std: PackageFileParsers.NodeBun.STD(mainString),
-                cpf,
-            },
+            mainPath: mainPath,
+            mainName: "package.json",
+            mainSTD: PackageFileParsers.NodeBun.STD(mainString),
+            mainCPF: cpf,
             names: {
                 path: formattedPath,
                 name: ColorString(cpf.name, "bold", runtimeColor),

@@ -9,7 +9,7 @@ import { ColorString } from "../functions/color.ts";
 export default async function TheExporter(params: TheExporterConstructedParams): Promise<void> {
     const env = await GetProjectEnvironment(params.project);
 
-    const cpfString = params.jsonc === true ? JSON.stringify(env.main.cpf, undefined, 2) : StringifyYaml(env.main.cpf);
+    const cpfString = params.jsonc === true ? JSON.stringify(env.mainCPF, undefined, 2) : StringifyYaml(env.mainCPF);
 
     const outFileName = params.jsonc === true ? "fknode-cpf.jsonc" : "fknode-cpf.yaml";
 

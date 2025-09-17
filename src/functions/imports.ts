@@ -1,14 +1,15 @@
 import { createSourceFile, forEachChild, isImportDeclaration, ScriptTarget } from "typescript";
-import { join, parse } from "@std/path";
+import { extname, join, parse } from "@std/path";
+import { validateAgainst } from "@zakahacecosas/string-utils";
 
 /**
- * Gets all imports from a JavaScript/TypeScript projects.
+ * Gets all imports from a JavaScript/TypeScript project.
  *
  * @async
  * @param {string} dir Base directory. It'll be recursively read, so be sure it's something like `src/`.
  * @returns {Promise<Set<string>>}
  */
-export async function GetTsImports(dir: string): Promise<Set<string>> {
+export async function GetJavascriptImports(dir: string): Promise<Set<string>> {
     const imports = new Set<string>();
 
     async function walk(directory: string): Promise<void> {
@@ -18,9 +19,9 @@ export async function GetTsImports(dir: string): Promise<Set<string>> {
             const stat = await Deno.stat(fullPath);
 
             if (stat.isDirectory) {
-                if (fullPath.endsWith("node_modules")) console.warn("ERROR: getting TS imports from node_modules!?");
+                if (fullPath.endsWith("node_modules")) throw "Getting JS imports from node_modules!?";
                 await walk(fullPath);
-            } else if (fullPath.endsWith(".ts") || fullPath.endsWith(".js")) {
+            } else if (validateAgainst(extname(fullPath), [".ts", ".mts", ".cts", ".js", ".mjs", ".cjs"])) {
                 const content = await Deno.readTextFile(fullPath);
                 const sourceFile = createSourceFile(fullPath, content, ScriptTarget.ESNext, true);
 

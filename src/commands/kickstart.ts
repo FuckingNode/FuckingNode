@@ -1,7 +1,7 @@
 import { ManagerExists } from "../functions/cli.ts";
 import { CheckForDir, JoinPaths, ParsePath } from "../functions/filesystem.ts";
 import { LogStuff, Notification } from "../functions/io.ts";
-import { AddProject, GetProjectEnvironment } from "../functions/projects.ts";
+import { AddProject } from "../functions/projects.ts";
 import type { TheKickstarterConstructedParams } from "./constructors/command.ts";
 import { FkNodeInterop } from "./interop/interop.ts";
 import { NameLockfile, ResolveLockfiles } from "./toolkit/cleaner.ts";
@@ -13,7 +13,7 @@ import { GenerateGitUrl } from "./toolkit/git-url.ts";
 import { Clone } from "../functions/git.ts";
 import { validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { GetElapsedTime } from "../functions/date.ts";
-import { ColorString } from "../functions/color.ts";
+import { bold, italic } from "@std/fmt/colors";
 
 export default async function TheKickstarter(params: TheKickstarterConstructedParams): Promise<void> {
     const { gitUrl, path, manager } = params;
@@ -37,10 +37,12 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
         );
     }
 
-    LogStuff("Let's begin! Wait a moment please...", "tick-clear", ["bright-green", "bold"]);
-    LogStuff(`Cloning from ${repoUrl}`);
+    LogStuff("Let's kickstart! Wait a moment please...", "tick-clear", ["bright-green", "bold"]);
+    LogStuff(`Cloning repo from ${bold(repoUrl)}`);
 
     Clone(repoUrl, clonePath);
+
+    LogStuff("Cloned!");
 
     Deno.chdir(clonePath);
 
@@ -48,21 +50,20 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
 
     if (lockfiles.length === 0) {
         if (validateAgainst(manager, ["npm", "pnpm", "yarn", "bun", "deno", "cargo", "go"])) {
-            LogStuff(`This project lacks a lockfile. We'll generate it right away!`, "warn");
+            LogStuff("This project lacks a lockfile. We'll generate an empty one then populate it.", "warn");
             Deno.writeTextFileSync(
                 JoinPaths(Deno.cwd(), NameLockfile(manager)),
                 "",
-            ); // fix Internal__CantDetermineEnv by adding a fake lockfile
+            ); // fix env determination error by adding a fake lockfile
             // the pkg manager SHOULD BE smart enough to ignore and overwrite it
             // tested with pnpm and it works, i'll assume it works everywhere
         } else {
             LogStuff(
                 `${
-                    ColorString("This project lacks a lockfile and we can't set it up.", "bold")
-                }\nIf the project lacks a lockfile and you don't specify a package manager to use (kickstart 3RD argument), we simply can't tell what to use to install dependencies. Sorry!\n${
-                    ColorString(
+                    bold("This project lacks a lockfile and we can't set it up.")
+                }\nIf the project lacks a lockfile and you don't specify a package manager to use (kickstart 3rd argument), we simply can't tell what to use to install dependencies. Sorry!\n${
+                    italic(
                         `PS. Git DID clone the project at ${Deno.cwd()}. Just run there the install command you'd like!`,
-                        "italic",
                     )
                 }`,
                 "warn",
@@ -71,10 +72,11 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
         }
     }
 
-    await AddProject(Deno.cwd());
+    const env = await AddProject(Deno.cwd());
 
-    // assume we skipped error
-    const env = await GetProjectEnvironment(Deno.cwd());
+    // if there's no env the error should've already been reported
+    // TODO(@ZakaHaceCosas): what if a rootless monorepo?
+    if (!env) return;
 
     const initialManager = validateAgainst(manager, ["npm", "pnpm", "yarn", "deno", "bun"]) ? manager : env.manager;
 
@@ -94,7 +96,7 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
     }
 
     LogStuff(
-        `Installation began using ${ColorString(managerToUse, "bold")}. Have a coffee meanwhile!`,
+        `Installation began using ${bold(managerToUse)}. Have a coffee meanwhile!`,
         "tick-clear",
     );
 

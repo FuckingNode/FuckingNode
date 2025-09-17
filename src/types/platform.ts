@@ -40,6 +40,14 @@ export interface NodePkgFile extends GenericJsPkgFile {
         packages: string[];
         nohoist?: string[];
     };
+    private?: boolean;
+    license?: string;
+    author?: string | { name: string };
+    description?: string;
+    repository?: string;
+    bugs?: string;
+    type?: string;
+    contributors?: unknown[];
 }
 
 /**
@@ -52,6 +60,8 @@ export interface DenoPkgFile extends GenericJsPkgFile {
     workspaces?: string[];
     exports?: Record<string, string>;
     fmt?: Record<string, string | number | boolean | string[]>;
+    lint?: unknown;
+    lock?: unknown;
 }
 
 /**
@@ -78,6 +88,11 @@ export interface CargoPkgFile {
         };
         members?: string[];
     };
+    "license"?: string;
+    "authors"?: unknown[];
+    "description"?: string;
+    "repository"?: string;
+    "edition"?: string | { workspace: true };
 }
 
 /**
@@ -112,34 +127,27 @@ interface GenericProjectEnvironment {
      */
     settings: FullFkNodeYaml;
     /**
-     * Main file (`package.json`, `deno.json`, `Cargo.toml`...)
+     * Path to the main file (`package.json`, `deno.json`, `Cargo.toml`...)
      */
-    main: {
-        /**
-         * Path to the main file
-         *
-         * @type {string}
-         */
-        path: string;
-        /**
-         * Name of the main file.
-         *
-         * @type {("package.json" | "deno.json" | "deno.jsonc" | "Cargo.toml" | "go.mod")}
-         */
-        name: "package.json" | "deno.json" | "deno.jsonc" | "Cargo.toml" | "go.mod";
-        /**
-         * Contents of the main file (**standard format**).
-         *
-         * @type {(NodePkgFile | DenoPkgFile | CargoPkgFile | GolangPkgFile)}
-         */
-        std: NodePkgFile | DenoPkgFile | CargoPkgFile | GolangPkgFile;
-        /**
-         * Contents of the main file (**FnCPF format**).
-         *
-         * @type {FnCPF}
-         */
-        cpf: FnCPF;
-    };
+    mainPath: string;
+    /**
+     * Contents of the main file (**FnCPF format**).
+     *
+     * @type {FnCPF}
+     */
+    mainCPF: FnCPF;
+    /**
+     * Name of the main file.
+     *
+     * @type {("package.json" | "deno.json" | "deno.jsonc" | "Cargo.toml" | "go.mod")}
+     */
+    mainName: "package.json" | "deno.json" | "deno.jsonc" | "Cargo.toml" | "go.mod";
+    /**
+     * Contents of the main file (**standard format**).
+     *
+     * @type {(NodePkgFile | DenoPkgFile | CargoPkgFile | GolangPkgFile)}
+     */
+    mainSTD: NodePkgFile | DenoPkgFile | CargoPkgFile | GolangPkgFile;
     /** Names this project can be represented with. */
     names: {
         /** Path to the project, with colors and stuff. */
@@ -237,7 +245,8 @@ interface GenericProjectEnvironment {
 interface NodeEnvironment extends GenericProjectEnvironment {
     runtime: "node";
     manager: "npm" | "pnpm" | "yarn";
-    main: GenericProjectEnvironment["main"] & { name: "package.json" };
+    mainName: "package.json";
+    mainSTD: NodePkgFile;
     commands: {
         base: "npm" | "pnpm" | "yarn";
         dlx: ["npx"] | ["pnpm", "dlx"] | ["yarn", "dlx"];
@@ -266,7 +275,8 @@ interface NodeEnvironment extends GenericProjectEnvironment {
 interface BunEnvironment extends GenericProjectEnvironment {
     runtime: "bun";
     manager: "bun";
-    main: GenericProjectEnvironment["main"] & { name: "package.json" };
+    mainName: "package.json";
+    mainSTD: NodePkgFile;
     commands: {
         base: "bun";
         dlx: ["bunx"];
@@ -289,7 +299,8 @@ interface BunEnvironment extends GenericProjectEnvironment {
 interface DenoEnvironment extends GenericProjectEnvironment {
     runtime: "deno";
     manager: "deno";
-    main: GenericProjectEnvironment["main"] & { name: "deno.json" | "deno.jsonc" };
+    mainName: "deno.json" | "deno.jsonc";
+    mainSTD: DenoPkgFile;
     commands: {
         base: "deno";
         dlx: ["deno", "run"];
@@ -306,7 +317,8 @@ interface DenoEnvironment extends GenericProjectEnvironment {
 interface CargoEnvironment extends GenericProjectEnvironment {
     runtime: "rust";
     manager: "cargo";
-    main: GenericProjectEnvironment["main"] & { name: "Cargo.toml" };
+    mainName: "Cargo.toml";
+    mainSTD: CargoPkgFile;
     commands: {
         base: "cargo";
         dlx: false;
@@ -323,7 +335,8 @@ interface CargoEnvironment extends GenericProjectEnvironment {
 interface GolangEnvironment extends GenericProjectEnvironment {
     runtime: "golang";
     manager: "go";
-    main: GenericProjectEnvironment["main"] & { name: "go.mod" };
+    mainName: "go.mod";
+    mainSTD: GolangPkgFile;
     commands: {
         base: "go";
         dlx: false;
@@ -452,4 +465,12 @@ export function TypeGuardForNodeBun(env: AnyEnv): env is NodeEnvironment | BunEn
 
 export function TypeGuardForJS(env: AnyEnv): env is NodeEnvironment | BunEnvironment | DenoEnvironment {
     return (env.runtime === "node" || env.runtime === "bun" || env.runtime === "deno");
+}
+
+export function TypeGuardForDeno(env: AnyEnv): env is DenoEnvironment {
+    return (env.runtime === "deno");
+}
+
+export function TypeGuardForCargo(env: AnyEnv): env is CargoEnvironment {
+    return (env.runtime === "rust");
 }
