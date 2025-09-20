@@ -1,9 +1,10 @@
 import type { RESULT } from "../commands/clean.ts";
 import TheLister from "../commands/list.ts";
+import TheStatistics from "../commands/stats.ts";
 import { ShowReport } from "../commands/toolkit/cleaner.ts";
 import { GetAppPath } from "../functions/config.ts";
 import { GetBranches, GetLatestTag, IsRepo } from "../functions/git.ts";
-import { AddProject, GetProjectEnvironment, RemoveProject } from "../functions/projects.ts";
+import { AddProject, GetProjectEnvironment, NameProject, RemoveProject } from "../functions/projects.ts";
 
 Deno.bench({
     name: "lister",
@@ -85,10 +86,26 @@ Deno.bench({
 });
 
 Deno.bench({
+    name: "name a project",
+    warmup: 350,
+    fn: () => {
+        NameProject(".");
+    },
+});
+
+Deno.bench({
     name: "get project env",
     warmup: 350,
     fn: async () => {
         await GetProjectEnvironment(".");
+    },
+});
+
+Deno.bench({
+    name: "stats",
+    warmup: 350,
+    fn: async () => {
+        await TheStatistics(".");
     },
 });
 

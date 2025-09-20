@@ -1,6 +1,6 @@
 import { Interrogate, LogStuff } from "../functions/io.ts";
-import { GetProjectEnvironment, NameProject } from "../functions/projects.ts";
-import type { TheCommitterConstructedParams } from "./constructors/command.ts";
+import { GetProjectEnvironment } from "../functions/projects.ts";
+import type { TheCommitterConstructedParams } from "./_interfaces.ts";
 import { CanCommit, Commit, GetBranches, GetCommittableFiles, GetStagedFiles, IsRepo, Push, StageFiles } from "../functions/git.ts";
 import { normalize, pluralOrNot, testFlag, validate } from "@zakahacecosas/string-utils";
 import type { GIT_FILES } from "../types/misc.ts";
@@ -152,10 +152,7 @@ export default async function TheCommitter(params: TheCommitterConstructedParams
 
     if (
         !params.y && !Interrogate(
-            `Heads up! We're about to take the following actions:\n\n${actions.join("\n")}\n\n- all of this at ${await NameProject(
-                project,
-                "all",
-            )}\n`,
+            `Heads up! We're about to take the following actions:\n\n${actions.join("\n")}\n\n- all of this at ${env.names.full}\n`,
         )
     ) {
         LogStuff("Aborting commit.", "bruh");

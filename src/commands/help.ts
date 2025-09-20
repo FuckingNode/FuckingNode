@@ -1,6 +1,6 @@
 import { normalize, spaceString } from "@zakahacecosas/string-utils";
 import { LogStuff } from "../functions/io.ts";
-import type { TheHelperConstructedParams } from "./constructors/command.ts";
+import type { TheHelperConstructedParams } from "./_interfaces.ts";
 import { ColorString } from "../functions/color.ts";
 
 type HelpItem = [string, string | null, string] | [string, string | null, string, boolean];

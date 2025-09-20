@@ -194,9 +194,9 @@ export function Tag(path: string, tag: string, push: boolean): void {
  * Gets the latest tag for a project.
  *
  * @param path Project path. **Assumes it's parsed & spotted.**
- * @returns A string with the tag name, or `undefined` if an error happens.
+ * @returns A string with the tag name.
  */
-export function GetLatestTag(path: string): string | undefined {
+export function GetLatestTag(path: string): string {
     try {
         const getTagOutput = g(
             path,
@@ -206,10 +206,7 @@ export function GetLatestTag(path: string): string | undefined {
                 "--abbrev=0",
             ],
         );
-        if (!getTagOutput.success) {
-            if (getTagOutput.stdout.includes("cannot describe anything")) return undefined;
-            throw `(git describe --tags --abbrev=0) ${getTagOutput.stdout}`;
-        }
+        if (!getTagOutput.success) throw `(git describe --tags --abbrev=0) ${getTagOutput.stdout}`;
         return getTagOutput.stdout; // describe --tags --abbrev=0 should return a string with nothing but the latest tag, so this will do
     } catch (e) {
         throw new FknError(

@@ -11,7 +11,7 @@ import { CanCommit, Commit } from "../../functions/git.ts";
 import type { RESULT } from "../clean.ts";
 import { sortAlphabetically, validate } from "@zakahacecosas/string-utils";
 import { FkNodeInterop } from "../interop/interop.ts";
-import { LOCAL_PLATFORM } from "../../constants/platform.ts";
+import { LOCAL_PLATFORM } from "../../platform.ts";
 import { ColorString } from "../../functions/color.ts";
 
 /**

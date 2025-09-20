@@ -12,7 +12,7 @@ import {
     type ParsedCmdInstruction,
 } from "../types/config_files.ts";
 import type { NonEmptyArray } from "../types/misc.ts";
-import { LOCAL_PLATFORM } from "../constants/platform.ts";
+import { LOCAL_PLATFORM } from "../platform.ts";
 
 type Parameters = { key: "commitCmd" | "releaseCmd" | "buildCmd" | "launchCmd"; env: ProjectEnvironment };
 

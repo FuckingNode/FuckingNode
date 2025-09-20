@@ -1,6 +1,6 @@
 import { LogStuff, Notification } from "../functions/io.ts";
 import { GetAllProjects, GetProjectEnvironment } from "../functions/projects.ts";
-import type { TheCleanerConstructedParams } from "./constructors/command.ts";
+import type { TheCleanerConstructedParams } from "./_interfaces.ts";
 import { PerformCleanup, PerformHardCleanup, PerformMaximCleanup, ShowReport, ValidateIntensity } from "./toolkit/cleaner.ts";
 import type { CleanerIntensity } from "../types/config_params.ts";
 import { GetElapsedTime } from "../functions/date.ts";

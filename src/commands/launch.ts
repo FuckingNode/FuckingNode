@@ -1,7 +1,7 @@
 import { RunCmdSet } from "../functions/cmd-set.ts";
 import { GetProjectEnvironment } from "../functions/projects.ts";
 import { LaunchUserIDE } from "../functions/user.ts";
-import type { TheLauncherConstructedParams } from "./constructors/command.ts";
+import type { TheLauncherConstructedParams } from "./_interfaces.ts";
 
 export default async function TheLauncher(params: TheLauncherConstructedParams): Promise<void> {
     const env = await GetProjectEnvironment(params.project);

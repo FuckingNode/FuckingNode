@@ -1,7 +1,7 @@
 import { format, parse } from "@std/semver";
 import { Interrogate, LogStuff } from "../functions/io.ts";
 import { GetProjectEnvironment } from "../functions/projects.ts";
-import type { TheReleaserConstructedParams } from "./constructors/command.ts";
+import type { TheReleaserConstructedParams } from "./_interfaces.ts";
 import type { CargoPkgFile } from "../types/platform.ts";
 import { Commander } from "../functions/cli.ts";
 import { AddToGitIgnore, Commit, IsRepo, Push, Tag } from "../functions/git.ts";

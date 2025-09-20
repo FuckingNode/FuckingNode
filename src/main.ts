@@ -22,13 +22,13 @@ import * as DenoJson from "../deno.json" with { type: "json" };
 import { LogStuff } from "./functions/io.ts";
 import { FreshSetup, GetUserSettings } from "./functions/config.ts";
 import { DEBUG_LOG, ErrorHandler } from "./functions/error.ts";
-import type { TheCleanerConstructedParams } from "./commands/constructors/command.ts";
+import type { TheCleanerConstructedParams } from "./commands/_interfaces.ts";
 import { RunScheduledTasks } from "./functions/schedules.ts";
 import { normalize, testFlag, testFlags, type UnknownString, validate } from "@zakahacecosas/string-utils";
 import { CleanupProjects, ListManager } from "./functions/projects.ts";
 import { LaunchWebsite } from "./functions/http.ts";
 import { HINTS } from "./functions/phrases.ts";
-import { LOCAL_PLATFORM } from "./constants/platform.ts";
+import { LOCAL_PLATFORM } from "./platform.ts";
 
 async function init(): Promise<void> {
     await FreshSetup();

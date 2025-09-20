@@ -2,7 +2,7 @@ import type { VALID_COLORS, VALID_EMOJIS } from "../types/misc.ts";
 import { GetUserSettings } from "./config.ts";
 import { stringify as stringifyYaml } from "@std/yaml";
 import { Commander } from "./cli.ts";
-import { LOCAL_PLATFORM } from "../constants/platform.ts";
+import { LOCAL_PLATFORM } from "../platform.ts";
 import { ColorString } from "./color.ts";
 
 /**

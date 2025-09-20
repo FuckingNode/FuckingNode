@@ -1,7 +1,7 @@
 import { CheckForPath, GetTextIndentSize, JoinPaths } from "../functions/filesystem.ts";
 import { Interrogate, LogStuff, StringifyYaml } from "../functions/io.ts";
 import { deepMerge, NameProject } from "../functions/projects.ts";
-import type { TheSetuperConstructedParams } from "./constructors/command.ts";
+import type { TheSetuperConstructedParams } from "./_interfaces.ts";
 import { parse as parseYaml } from "@std/yaml";
 import { parse as parseJsonc } from "@std/jsonc";
 import { SETUPS, VISIBLE_SETUPS } from "./toolkit/setups.ts";

@@ -1,5 +1,5 @@
 import { assertThrows } from "@std/assert/throws";
-import { LOCAL_PLATFORM } from "../src/constants/platform.ts";
+import { LOCAL_PLATFORM } from "../src/platform.ts";
 import { Commander, ManagerExists } from "../src/functions/cli.ts";
 import { assertEquals } from "@std/assert";
 

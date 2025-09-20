@@ -2,7 +2,7 @@ import { LogStuff } from "../functions/io.ts";
 import { GetAllProjects } from "../functions/projects.ts";
 import { PerformAuditing } from "./toolkit/auditer.ts";
 import type { FkNodeSecurityAudit } from "../types/audit.ts";
-import type { TheAuditerConstructedParams } from "./constructors/command.ts";
+import type { TheAuditerConstructedParams } from "./_interfaces.ts";
 import { normalize, testFlag, validate } from "@zakahacecosas/string-utils";
 import { ColorString } from "../functions/color.ts";
 

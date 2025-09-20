@@ -1,5 +1,5 @@
 import { Interrogate, LogStuff } from "../functions/io.ts";
-import type { TheSettingsConstructedParams } from "./constructors/command.ts";
+import type { TheSettingsConstructedParams } from "./_interfaces.ts";
 import { ChangeSetting, DisplaySettings, FlushConfigFiles, FreshSetup } from "../functions/config.ts";
 import { normalizeArray, testFlag, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import type { CF_FKNODE_SETTINGS } from "../types/config_files.ts";

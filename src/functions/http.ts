@@ -1,4 +1,4 @@
-import { LOCAL_PLATFORM } from "../constants/platform.ts";
+import { LOCAL_PLATFORM } from "../platform.ts";
 import { Commander } from "./cli.ts";
 
 /**

@@ -1,6 +1,6 @@
 import { normalize, table, validate } from "@zakahacecosas/string-utils";
 import { LogStuff } from "../functions/io.ts";
-import type { TheCompaterConstructedParams } from "./constructors/command.ts";
+import type { TheCompaterConstructedParams } from "./_interfaces.ts";
 import { ColorString } from "../functions/color.ts";
 
 const labels = {

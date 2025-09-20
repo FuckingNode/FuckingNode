@@ -8,7 +8,7 @@ import { parse as parseYaml } from "@std/yaml";
 import { Interrogate, LogStuff, StringifyYaml } from "./io.ts";
 import { type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { format } from "@std/fmt/bytes";
-import { LOCAL_PLATFORM } from "../constants/platform.ts";
+import { LOCAL_PLATFORM } from "../platform.ts";
 import { ColorString } from "./color.ts";
 
 /**

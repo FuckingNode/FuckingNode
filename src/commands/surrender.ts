@@ -1,7 +1,7 @@
 import * as DenoJson from "../../deno.json" with { type: "json" };
 import { normalize, reveal, type UnknownString, validate } from "@zakahacecosas/string-utils";
 import { GetProjectEnvironment, RemoveProject } from "../functions/projects.ts";
-import type { TheSurrendererConstructedParams } from "./constructors/command.ts";
+import type { TheSurrendererConstructedParams } from "./_interfaces.ts";
 import { Interrogate, LogStuff } from "../functions/io.ts";
 import { Commit, GetBranches, Push } from "../functions/git.ts";
 import { CheckForPath, JoinPaths } from "../functions/filesystem.ts";

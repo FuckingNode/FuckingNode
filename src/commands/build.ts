@@ -1,5 +1,5 @@
 import { GetProjectEnvironment } from "../functions/projects.ts";
-import type { TheBuilderConstructedParams } from "./constructors/command.ts";
+import type { TheBuilderConstructedParams } from "./_interfaces.ts";
 import { LogStuff, Notification } from "../functions/io.ts";
 import { GetElapsedTime } from "../functions/date.ts";
 import { RunCmdSet, ValidateCmdSet } from "../functions/cmd-set.ts";

@@ -5,7 +5,7 @@ import { JoinPaths } from "../functions/filesystem.ts";
 import { LogStuff, Notification } from "../functions/io.ts";
 import { GetProjectEnvironment } from "../functions/projects.ts";
 import type { MANAGER_JS, ProjectEnvironment } from "../types/platform.ts";
-import type { TheMigratorConstructedParams } from "./constructors/command.ts";
+import type { TheMigratorConstructedParams } from "./_interfaces.ts";
 import { FkNodeInterop } from "./interop/interop.ts";
 import { FknError } from "../functions/error.ts";
 

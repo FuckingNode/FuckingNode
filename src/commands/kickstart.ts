@@ -2,7 +2,7 @@ import { ManagerExists } from "../functions/cli.ts";
 import { CheckForDir, JoinPaths, ParsePath } from "../functions/filesystem.ts";
 import { LogStuff, Notification } from "../functions/io.ts";
 import { AddProject } from "../functions/projects.ts";
-import type { TheKickstarterConstructedParams } from "./constructors/command.ts";
+import type { TheKickstarterConstructedParams } from "./_interfaces.ts";
 import { FkNodeInterop } from "./interop/interop.ts";
 import { NameLockfile, ResolveLockfiles } from "./toolkit/cleaner.ts";
 import type { MANAGER_GLOBAL } from "../types/platform.ts";

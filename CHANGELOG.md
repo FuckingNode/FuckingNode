@@ -143,7 +143,7 @@ _Sort of_ breaking, but nothing important so I won't make a major release.
 ### Fixed
 
 - Fixed (FINAL and HOPEFULLY) `buildCmd`.
-- Fixed a missing line break causing `- /path/to/fileand 7 more files` in `commit`.
+- Fixed a missing line break causing text to look wrong in `commit`.
 - Fixed elapsed time showing 0m 0s sometimes if it only took milliseconds.
 - Fixed calculation of elapsed times. [Thanks.](https://stackoverflow.com/a/21294619)
 

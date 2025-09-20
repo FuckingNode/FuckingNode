@@ -1,5 +1,5 @@
 import * as DenoJson from "../../deno.json" with { type: "json" };
-import type { TheExporterConstructedParams } from "./constructors/command.ts";
+import type { TheExporterConstructedParams } from "./_interfaces.ts";
 import { GetProjectEnvironment } from "../functions/projects.ts";
 import { JoinPaths } from "../functions/filesystem.ts";
 import { LogStuff, StringifyYaml } from "../functions/io.ts";

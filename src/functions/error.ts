@@ -4,7 +4,7 @@ import type { GLOBAL_ERROR_CODES } from "../types/errors.ts";
 import { GetDateNow } from "./date.ts";
 import { type UnknownString, validate } from "@zakahacecosas/string-utils";
 import { FKNODE_SHALL_WE_DEBUG } from "../main.ts";
-import { LOCAL_PLATFORM } from "../constants/platform.ts";
+import { LOCAL_PLATFORM } from "../platform.ts";
 import { stripAnsiCode } from "@std/fmt/colors";
 import { ALIASES } from "../commands/toolkit/git-url.ts";
 

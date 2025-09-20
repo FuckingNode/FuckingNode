@@ -286,21 +286,11 @@ export async function NameProject(
     try {
         const env = await GetProjectEnvironment(workingPath);
 
-        const pkgFile = env.mainCPF;
-
-        const formattedName = ColorString(pkgFile.name, "bold", env.runtimeColor);
-
-        const formattedVersion = `@${ColorString(pkgFile.version, "purple")}`;
-
-        const formattedNameVer = `${formattedName}${formattedVersion}`;
-
-        const fullNamedProject = `${formattedNameVer} ${formattedPath}`;
-
-        if (wanted === "all") return fullNamedProject;
-        else if (wanted === "name") return formattedName;
+        if (wanted === "all") return env.names.full;
+        else if (wanted === "name") return env.names.name;
         else if (wanted === "path") return formattedPath;
-        else if (wanted === "name-colorless") return pkgFile.name;
-        else return formattedNameVer;
+        else if (wanted === "name-colorless") return env.mainCPF.name;
+        else return env.names.nameVer;
     } catch {
         // (needed to prevent crashes from invalid projects or not found paths)
         return formattedPath;
