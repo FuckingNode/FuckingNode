@@ -52,7 +52,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - (Breaking) Now `export` expects `--jsonc` and not `--json` to be passed, matching the output filetype.
 - (Breaking) FnCPF spec slightly changed. Starting with V5 this spec will be publicly documented.
 - (Breaking) Annoyingly (but to avoid confusion), the default package manager is now `npm`.
-- Now, if installed, Bun will be the default package manager.
 - Now Git errors should be much more properly handled and reported.
 - Now the error dump file should be more readable.
 - Now `surrender` templates will take your project's name and use it within the template.
