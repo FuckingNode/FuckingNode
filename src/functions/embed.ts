@@ -1,10 +1,16 @@
+import { join } from "@std/path";
 import { FknError } from "./error.ts";
 
 /** Get an embedded file. */
-export function Get(name: string, src: "/setups" | "/terminators"): string {
-    const dir = Deno.readDirSync(import.meta.dirname + src);
+export function Get(name: string, _src: "/setups" | "/terminators"): string {
+    const src = _src === "/setups" ? "../commands/toolkit/setups" : "../functions/terminators";
+    const dir = Deno.readDirSync(join(import.meta.dirname!, src));
     for (const match of dir) {
-        if (match.isFile && match.name === name) return Deno.readTextFileSync(import.meta.dirname + src + "/" + match.name);
+        if (match.isFile && match.name === name) {
+            return Deno.readTextFileSync(
+                join(import.meta.dirname!, src, match.name),
+            );
+        }
     }
     throw new FknError(
         "Internal__InvalidEmbedded",

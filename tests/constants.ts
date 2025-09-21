@@ -16,9 +16,9 @@ const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
         root: ParsePath(`${CONSTANTS.ENV_PATH}/test-one`),
         names: {
             full:
-                "\x1b[92m\x1b[1muwu.js\x1b[22m\x1b[39m@\x1b[35m1.0.0\x1b[39m \x1b[2m\x1b[3mC:\\Users\\Zaka\\proyectitos\\FuckingNode\\tests\\environment\\test-one\x1b[23m\x1b[22m",
-            name: "\x1b[92m\x1b[1muwu.js\x1b[22m\x1b[39m",
-            nameVer: "\x1b[92m\x1b[1muwu.js\x1b[22m\x1b[39m@\x1b[35m1.0.0\x1b[39m",
+                "\x1b[92m\x1b[1ma.js\x1b[22m\x1b[39m@\x1b[35m1.0.0\x1b[39m \x1b[2m\x1b[3mC:\\Users\\Zaka\\proyectitos\\FuckingNode\\tests\\environment\\test-one\x1b[23m\x1b[22m",
+            name: "\x1b[92m\x1b[1ma.js\x1b[22m\x1b[39m",
+            nameVer: "\x1b[92m\x1b[1ma.js\x1b[22m\x1b[39m@\x1b[35m1.0.0\x1b[39m",
             path: "\x1b[2m\x1b[3mC:\\Users\\Zaka\\proyectitos\\FuckingNode\\tests\\environment\\test-one\x1b[23m\x1b[22m",
         },
         settings: {
@@ -44,7 +44,7 @@ const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
         mainName: "package.json",
         mainSTD: JSON.parse(Deno.readTextFileSync(ParsePath(`${CONSTANTS.ENV_PATH}/test-one/package.json`))),
         mainCPF: {
-            name: "uwu.js",
+            name: "a.js",
             version: "1.0.0",
             rm: "npm",
             plat: { edt: null },
@@ -56,9 +56,7 @@ const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
                     src: "npm",
                 },
             ],
-            ws: [
-                ParsePath(`${CONSTANTS.ENV_PATH}/test-two`),
-            ],
+            ws: [],
             fknVer: DenoJson.default.version,
         },
         commands: {

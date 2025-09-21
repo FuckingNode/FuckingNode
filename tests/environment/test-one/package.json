@@ -26,9 +26,6 @@
         "url": "https://github.com/ZakaHaceCosas/uwu.js/issues"
     },
     "homepage": "https://github.com/ZakaHaceCosas/uwu.js#readme",
-    "workspaces": [
-        "../test-two"
-    ],
     "dependencies": {
         "tslib": "^2.0.0"
     }
