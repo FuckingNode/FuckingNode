@@ -36,14 +36,23 @@ const ALL_COMMANDS = Object.entries(TARGETS).map(([key, [target, output]]: [stri
 
     const compilerArguments = [
         "compile",
-        "--allow-write", // write files, like project list
-        "--allow-read", // read files, like a project's package.json
-        "--allow-net", // fetch the network, to update the app
-        "--allow-env", // see ENV variables, to access .../AppData/...
-        "--allow-run", // run cleanup commands
-        "--allow-sys=osUptime", // used for an easter egg that requires OS uptime
+        // write files, like project list
+        "--allow-write",
+        // read files, like a project's package.json
+        "--allow-read",
+        // fetch the network, to update the app
+        "--allow-net",
+        // see ENV variables, to access .../AppData/...
+        "--allow-env",
+        // run cleanup commands
+        "--allow-run",
+        // used for an easter egg that requires OS uptime
+        "--allow-sys=osUptime",
         "--include",
-        "./src/commands/toolkit/setups", // include setups
+        // include setups
+        "./src/commands/toolkit/setups",
+        // include uninstallers
+        "./src/commands/terminators",
         "--target",
         target,
         "--output",

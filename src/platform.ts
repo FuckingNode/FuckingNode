@@ -11,8 +11,10 @@ export const LOCAL_PLATFORM: {
     USER: string | undefined;
     /** APPDATA or whatever it is equivalent to on Linux & macOS. */
     APPDATA: string | undefined;
-    /** Shell prefix. */
-    SHELL: ["bash", "-c"] | ["powershell", "-c"];
+    /** Shell name (and command prefix). */
+    SHELL: "bash" | "powershell";
+    /** Shell Script Suffix for filenames. */
+    SSS: ".ps1" | ".sh";
 } = {
     SYSTEM: WIN ? "msft" : "posix",
     USER: (Deno.env.get("USERNAME") || Deno.env.get("USER")),
@@ -21,5 +23,6 @@ export const LOCAL_PLATFORM: {
         || Deno.env.get("XDG_CONFIG_HOME")
         || `${Deno.env.get("HOME") ?? ""}/.config/` // this is a fallback
     ),
-    SHELL: WIN ? ["powershell", "-c"] : ["bash", "-c"],
+    SHELL: WIN ? "powershell" : "bash",
+    SSS: WIN ? ".ps1" : ".sh",
 };

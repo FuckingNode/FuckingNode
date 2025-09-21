@@ -22,10 +22,7 @@ Deno.test({
 Deno.test({
     name: "commander returns output",
     fn: () => {
-        const command = LOCAL_PLATFORM.SYSTEM === "msft" ? "powershell" : "echo";
-        const args = LOCAL_PLATFORM.SYSTEM === "msft" ? ["echo", "hi"] : ["hi"];
-
-        const out = Commander(command, args);
+        const out = Commander(LOCAL_PLATFORM.SHELL, ["echo", "hi"]);
         assertEquals(out, { success: true, stdout: "hi" });
         assertThrows(() => Commander("i don't exist", []));
     },

@@ -98,14 +98,14 @@ export async function RunCmdSet(params: Parameters): Promise<void> {
                 ? params.env.commands.script[0]
                 : command.type === "="
                 ? params.env.commands.file[0]
-                : LOCAL_PLATFORM.SHELL[0];
+                : LOCAL_PLATFORM.SHELL;
             const expr = [
                 command.type === "<" ? undefined : command.type === "$"
                     // @ts-expect-error same as above
                     ? params.env.commands.script[1]
                     : command.type === "="
                     ? params.env.commands.file[1]
-                    : LOCAL_PLATFORM.SHELL[1],
+                    : "-c",
             ];
             if (command.type === "<") expr.push(...command.cmd.slice(1));
             else if (command.type === "~") expr.push(command.cmd.join(" "));

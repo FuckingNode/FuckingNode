@@ -74,17 +74,16 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
     );
     if (params.silent) return;
     LogStuff("Updating...", "package");
-    const suffix = LOCAL_PLATFORM.SYSTEM === "msft" ? ".ps1" : ".sh";
     const res = await fetch(
-        `https://fuckingnode.github.io/install${suffix}`,
+        `https://fuckingnode.github.io/install${LOCAL_PLATFORM.SSS}`,
     );
-    const path = Deno.makeTempFileSync({ suffix });
+    const path = Deno.makeTempFileSync({ suffix: LOCAL_PLATFORM.SSS });
     Deno.writeFileSync(
         path,
         await res.bytes(),
     );
     await new Deno.Command(
-        LOCAL_PLATFORM.SYSTEM === "msft" ? "powershell" : "bash",
+        LOCAL_PLATFORM.SHELL,
         {
             args: [
                 LOCAL_PLATFORM.SYSTEM === "msft" ? "-File" : undefined,
