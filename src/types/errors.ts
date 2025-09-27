@@ -4,6 +4,8 @@ export const CFG_ERRORS = ["Cfg__InvalidCmdK"] as const;
 export const GIT_ERRORS = [
     "Git__GCommittable",
     "Git__CanCommit",
+    "Git__Uncommit",
+    "Git__ReadCommit",
     "Git__GBranches",
     "Git__Ignore",
     "Git__Commit",

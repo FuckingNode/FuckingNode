@@ -242,6 +242,66 @@ export function GetStagedFiles(path: string): string[] {
         );
     }
 }
+/**
+ * Undoes the last commit, keeping files in the stage area.
+ *
+ * @param {string} path
+ * @returns {void}
+ */
+export function UndoCommit(path: string): void {
+    try {
+        const output = g(
+            path,
+            [
+                "reset",
+                "--soft",
+                "HEAD~1",
+            ],
+        );
+        if (!output.success) throw `(git reset --soft HEAD~1) ${output.stdout}`;
+        return;
+    } catch (e) {
+        throw new FknError(
+            "Git__Uncommit",
+            `Couldn't undo commit at ${ColorString(path, "bold")}: ${e}`,
+        );
+    }
+}
+/**
+ * Reads the last commit and returns important properties.
+ *
+ * @param {string} path
+ * @returns {{ message: string; hash: string; author: string; date: string }}
+ */
+export function ReadLastCommit(path: string): { message: string; hash: string; author: string; date: string } {
+    try {
+        const output = g(
+            path,
+            [
+                "log",
+                "-1",
+                '--pretty=format:"%B ¨ %h ¨ %an ¨ %ad"',
+            ],
+        );
+        if (!output.success) throw `(git log -1 --pretty=format:"%B ¨ %h ¨ %an ¨ %ad") ${output.stdout}`;
+        const data = output.stdout.split(" ¨ ");
+        if (!data[0]) throw `Missing name.`;
+        if (!data[1]) throw `Missing hash.`;
+        if (!data[2]) throw `Missing author.`;
+        if (!data[3]) throw `Missing date.`;
+        return {
+            message: data[0].replace('"', ""),
+            hash: data[1],
+            author: data[2],
+            date: data[3].replace('"', ""),
+        };
+    } catch (e) {
+        throw new FknError(
+            "Git__ReadCommit",
+            `Couldn't get files ready for commit (staged) at ${ColorString(path, "bold")}: ${e}`,
+        );
+    }
+}
 export function GetCommittableFiles(path: string): string[] {
     try {
         const getFilesOutput = g(

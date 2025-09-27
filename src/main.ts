@@ -18,6 +18,7 @@ import TheSetuper from "./commands/setup.ts";
 import TheLauncher from "./commands/launch.ts";
 import TheBuilder from "./commands/build.ts";
 import TheTerminator from "./commands/terminate.ts";
+import TheUncommitter from "./commands/uncommit.ts";
 // other things
 import * as DenoJson from "../deno.json" with { type: "json" };
 import { LogStuff } from "./functions/io.ts";
@@ -236,6 +237,10 @@ async function main(command: UnknownString): Promise<void> {
                 keepStagedFiles: hasFlag("keep-staged", true),
                 y: hasFlag("yes", true),
             });
+            break;
+        }
+        case "uncommit": {
+            await TheUncommitter();
             break;
         }
         case "surrender":
