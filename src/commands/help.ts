@@ -52,18 +52,18 @@ export default function TheHelper(params: TheHelperConstructedParams): void {
         ],
         [
             "clean",
-            "<intensity | --> [--update] [--lint] [--pretty] [--commit] [--destroy]",
+            "<project | -- | ...projects> <intensity | --> [--update] [--lint] [--pretty] [--commit] [--destroy]",
             "Cleans all of your projects.",
         ],
         [
             "add",
-            "<project>",
-            "Adds a project to your list.",
+            "<...project>",
+            "Adds a project (or more) to your list.",
         ],
         [
             "remove",
-            "<project>",
-            "Removes a project from your list.",
+            "<...project>",
+            "Removes a project (or more) from your list.",
         ],
         [
             "list",
@@ -176,9 +176,9 @@ export default function TheHelper(params: TheHelperConstructedParams): void {
                     "Recursively runs a set of tasks across all of your projects, depending on given flags and project configuration (via fknode.yaml).\nIt's our main feature, base for FuckingNode saving you time.",
                     [
                         [
-                            "<project | -->",
+                            "<(projects)>",
                             null,
-                            'Project to be cleaned. Set to "--" to bulk-clean all added projects.\nRun with no args to bulk-clean all projects, too.',
+                            "Project to be cleaned. Set to '--' to bulk-clean all added projects.\nRun with no args to bulk-clean all projects, too.\nRun with --projects followed by a spreading list to clean many but not all projects.\nWhen spreading, intensity must go after an --intensity flag and before any feature flags.",
                         ],
                         [
                             "[intensity | --]",
@@ -222,9 +222,9 @@ export default function TheHelper(params: TheHelperConstructedParams): void {
                     "Your project list is used to:\n- Bulk-run several maintenance tasks (like cleaning, linting, etc.) at once, via 'clean'.\n- Let you use a project's name instead of full path from most other commands.\nThis command lets you add projects to it.",
                     [
                         [
-                            "<project>",
+                            "<...project>",
                             null,
-                            "Path to the project to be added.",
+                            "Path to the project to be added. The command spreads, so you can pass more than one path.\nE.g., 'add ./foo ./bar'.",
                         ],
                     ],
                 ),
@@ -238,9 +238,9 @@ export default function TheHelper(params: TheHelperConstructedParams): void {
                     "Your project list is used to:\n- Bulk-run several maintenance tasks (like cleaning, linting, etc.) at once, via 'clean'.\n- Let you use a project's name instead of full path from most other commands.\nThis command lets you remove projects from it.",
                     [
                         [
-                            "<project>",
+                            "<...project>",
                             null,
-                            "Path to the project to be removed.",
+                            "Path to the project to be removed. The command spreads, so you can pass more than one path.\nE.g., 'remove ./foo ./bar'.",
                         ],
                     ],
                 ),
@@ -320,7 +320,7 @@ export default function TheHelper(params: TheHelperConstructedParams): void {
                         [
                             "flush <f> [--force]",
                             null,
-                            "Flushes (removes) chosen config files.\nSpecify what to remove by setting <f> to either:\n'logs' (logging files), 'updates' (update data), 'projects' (all added projects), or 'all' (everything).\nYou can pass --force to skip confirmation.",
+                            "Flushes (removes) chosen config files.\nSpecify what to remove by setting <f> to either:\n'errors' (error log file), 'updates' (update data), 'projects' (all added projects), or 'all' (everything).\nYou can pass --force to skip confirmation.",
                         ],
                         [
                             "repair",
@@ -331,6 +331,26 @@ export default function TheHelper(params: TheHelperConstructedParams): void {
                             "change <s> <v>",
                             null,
                             "Allows to change chosen setting, <s>, to given value, <v>.\nWhen you run 'settings' with no args, you'll see all settings and their key.\n(The key is the gray, cursive, code-like word at the end).\nThat's the name you'll use for <s>.",
+                        ],
+                    ],
+                ),
+            );
+            break;
+        case "terminate":
+            LogStuff(
+                formatCmdWithTitle(
+                    "'terminate' lets you remove a language, literally.",
+                    "This commands uninstalls the chosen runtime (and all package managers in the case of NodeJS).\nIt also tries its best at removing leftovers.\nIf chosen (though discouraged), it can remove from your disk all projects written in said lang.",
+                    [
+                        [
+                            "<language>",
+                            null,
+                            "Language to be removed, either 'node', 'deno', 'bun', 'go', or 'rust'.",
+                        ],
+                        [
+                            "[--remove-all-motherfuckers-too]",
+                            null,
+                            "Be careful with this!\nRemoves from your disk any project written in the language to be removed.",
                         ],
                     ],
                 ),
@@ -574,7 +594,7 @@ export default function TheHelper(params: TheHelperConstructedParams): void {
             projectReminder();
             break;
         case "upgrade":
-            LogStuff("Checks for updates. Takes no arguments.\nAs of now, updates need to be installed manually. Data won't be lost.");
+            LogStuff("Checks for updates, and auto-updates the CLI if a newer version is available. Takes no args.");
             break;
         case "about":
             LogStuff(

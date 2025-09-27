@@ -34,7 +34,7 @@ export const InteropedFeatures = {
             if (env.settings.lintScript === false) {
                 if (FkNodeInterop.PackageFileUtils.SpotDependency("eslint", env.mainCPF.deps) === undefined) {
                     LogStuff(
-                        "No linter was given (via fknode.yaml > lintCmd), hence defaulted to ESLint - but ESLint is not installed!",
+                        "No linter was given (via fknode.yaml > lintScript), hence defaulted to ESLint - but ESLint is not installed!",
                         "bruh",
                     );
                     return false;
@@ -99,7 +99,7 @@ export const InteropedFeatures = {
             if (script === false) {
                 if (FkNodeInterop.PackageFileUtils.SpotDependency("prettier", env.mainCPF.deps) === undefined) {
                     LogStuff(
-                        "No prettifier was given (via fknode.yaml > prettyCmd), hence defaulted to Prettier - but Prettier is not installed!",
+                        "No prettifier was given (via fknode.yaml > prettyScript), hence defaulted to Prettier - but Prettier is not installed!",
                         "bruh",
                     );
                     return false;
