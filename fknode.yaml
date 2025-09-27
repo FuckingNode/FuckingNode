@@ -4,6 +4,8 @@ destroy:
     intensities: ["*"]
     targets:
         - "dist"
+commitCmd:
+    - $"test"
 commitActions: false
 prettyScript: "good"
 buildCmd:

@@ -364,3 +364,24 @@ export interface TheLauncherConstructedParams {
      */
     project: UnknownString;
 }
+
+/**
+ * The Terminator
+ * @author ZakaHaceCosas
+ *
+ * @interface TheTerminatorConstructedParams
+ */
+export interface TheTerminatorConstructedParams {
+    /**
+     * Runtime to be terminated.
+     *
+     * @type {UnknownString}
+     */
+    runtime: UnknownString;
+    /**
+     * Whether to terminate projects too or not. Defaults to not.
+     *
+     * @type {boolean}
+     */
+    projectsToo: boolean;
+}

@@ -17,6 +17,7 @@ import TheSurrenderer from "./commands/surrender.ts";
 import TheSetuper from "./commands/setup.ts";
 import TheLauncher from "./commands/launch.ts";
 import TheBuilder from "./commands/build.ts";
+import TheTerminator from "./commands/terminate.ts";
 // other things
 import * as DenoJson from "../deno.json" with { type: "json" };
 import { LogStuff } from "./functions/io.ts";
@@ -29,6 +30,7 @@ import { CleanupProjects, ListManager } from "./functions/projects.ts";
 import { LaunchWebsite } from "./functions/http.ts";
 import { HINTS } from "./functions/phrases.ts";
 import { LOCAL_PLATFORM } from "./platform.ts";
+import { parse } from "@std/path";
 
 async function init(): Promise<void> {
     await FreshSetup();
@@ -116,6 +118,10 @@ async function main(command: UnknownString): Promise<void> {
             ...Deno.build,
             hostname: Deno.hostname(),
         });
+        return;
+    }
+    if (Deno.args[0] === "FKNDBG_ROOT") {
+        console.log(parse(Deno.execPath()).dir);
         return;
     }
 
@@ -248,6 +254,32 @@ async function main(command: UnknownString): Promise<void> {
                 learnMoreUrl: flags[4],
                 gfm: hasFlag("github", false) || hasFlag("gh", false),
                 glfm: hasFlag("gitlab", false) || hasFlag("gl", false),
+            });
+            break;
+        case "terminate":
+        case "ftl":
+        case "fuck-the-lang":
+        case "resign":
+        case "unnode":
+        case "undeno":
+        case "unbun":
+        case "unrust":
+        case "ungo":
+        case "seriously-fuck-node":
+            await TheTerminator({
+                runtime: (command === "unnode" || command === "seriously-fuck-node")
+                    ? "node"
+                    : command === "undeno"
+                    ? "deno"
+                    : command === "unbun"
+                    ? "bun"
+                    : command === "unrust"
+                    ? "rust"
+                    : command === "ungo"
+                    ? "go"
+                    : flags[1],
+                // TODO(@ZakaHaceCosas)
+                projectsToo: false, //hasFlag("remove-all-motherfuckers-too", false, false),
             });
             break;
         case "setup":
