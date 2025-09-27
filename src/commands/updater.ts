@@ -1,21 +1,24 @@
 import { compare, parse } from "@std/semver";
-import { FetchGitHub } from "../functions/http.ts";
-import { RELEASE_URL } from "../constants.ts";
 import type { GITHUB_RELEASE } from "../types/misc.ts";
 import { GetDateNow } from "../functions/date.ts";
-import type { TheUpdaterConstructedParams } from "./constructors/command.ts";
+import type { TheUpdaterConstructedParams } from "./_interfaces.ts";
 import { LogStuff, StringifyYaml } from "../functions/io.ts";
 import { parse as parseYaml } from "@std/yaml";
 import { GetAppPath } from "../functions/config.ts";
 import type { CF_FKNODE_SCHEDULE } from "../types/config_files.ts";
 import * as DenoJson from "../../deno.json" with { type: "json" };
 import { ColorString } from "../functions/color.ts";
+import { LOCAL_PLATFORM } from "../platform.ts";
+import { validate, validateAgainst } from "@zakahacecosas/string-utils";
+import { parse as parsePath } from "@std/path";
 
 async function CheckUpdates(): Promise<CF_FKNODE_SCHEDULE | "rl"> {
     const scheduleFilePath = GetAppPath("SCHEDULE");
     const scheduleFileContents = parseYaml(Deno.readTextFileSync(scheduleFilePath)) as CF_FKNODE_SCHEDULE;
 
-    const response = await FetchGitHub(RELEASE_URL);
+    const response = await fetch("https://api.github.com/repos/FuckingNode/FuckingNode/releases/latest", {
+        headers: { Accept: "application/vnd.github.v3+json" },
+    });
 
     if (!response.ok) {
         // (github has a rate limit, so this is not an error we should be really aware of)
@@ -39,7 +42,7 @@ async function CheckUpdates(): Promise<CF_FKNODE_SCHEDULE | "rl"> {
 }
 
 /**
- * Checks for updates.
+ * Checks for updates and updates the CLI if outdated.
  *
  * @async
  * @returns {void}
@@ -49,7 +52,7 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
 
     if (needsToUpdate === "rl") {
         LogStuff(
-            "Bro was rate-limited by GitHub (update provider). Try again in a few hours.",
+            "You were rate-limited by GitHub (from where we download updates), my bro. Try again in, at most, one hour.",
             "bruh",
             "bright-yellow",
         );
@@ -70,5 +73,31 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
         }, by the way.`,
         "bulb",
     );
+    if (params.silent) return;
+    if (!validateAgainst(parsePath(Deno.execPath()).dir, ["C:\\FuckingNode", "/usr/local/fuckingnode"])) {
+        LogStuff(
+            "Installed from a package manager, please use said package manager to update FuckingNode.\nIf you didn't install from a package manager, then FuckingNode is running from an unknown, which is likely an installation error (or you moving it somewhere else).",
+        );
+    }
+    LogStuff("Updating...", "package");
+    const res = await fetch(
+        `https://fuckingnode.github.io/install${LOCAL_PLATFORM.SSS}`,
+    );
+    const path = Deno.makeTempFileSync({ suffix: LOCAL_PLATFORM.SSS });
+    Deno.writeFileSync(
+        path,
+        await res.bytes(),
+    );
+    await new Deno.Command(
+        LOCAL_PLATFORM.SHELL,
+        {
+            args: [
+                LOCAL_PLATFORM.SYSTEM === "msft" ? "-File" : undefined,
+                path,
+                Deno.pid.toString(),
+            ].filter(validate),
+        },
+    ).spawn().output();
+    LogStuff(`You're now up to date! Congrats and welcome to ${ColorString(latestVer, "bright-green")}.`, "tick");
     return;
 }

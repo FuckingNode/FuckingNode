@@ -20,7 +20,7 @@ You already know how this works.
 
 ## Following our guidelines
 
-We at F\*ckingNode want our code NOT to be F\*ckingUnreadable, hence we enforce some code style guidelines.
+We at FuckingNode want our code NOT to be FuckingUnreadable, hence we enforce some code style guidelines.
 
 ### Use these naming patterns
 
@@ -68,7 +68,7 @@ Another case where you can't choose is function objects, like the `FkNodeInterop
 
 ### Error handling
 
-F\*ckingNode is wrapped in an error boundary (`ErrorHandler()`) that automatically stops execution and handles the error, so no need to try/catch every function. When throwing an error, you'll see we sometimes use `FknError` instead of `Error`. It's a superset of `Error` with searchable error codes and hints for our users. Attempt to add an error code and throwing a `FknError` instead of just throwing JS errors.
+FuckingNode is wrapped in an error boundary (`ErrorHandler()`) that automatically stops execution and handles the error, so no need to try/catch every function. When throwing an error, you'll see we sometimes use `FknError` instead of `Error`. It's a superset of `Error` with searchable error codes and hints for our users. Attempt to add an error code and throwing a `FknError` instead of just throwing JS errors.
 
 ### Comment in a readable manner
 
@@ -82,8 +82,7 @@ Both single and multiline comments are valid. Our only rule is:
 // this works
 const hi = "hi, CONTRIBUTING.md reader!";
 
-const bye = "bye, CONTRIBUTING.md reader!"; // THIS DOES NOT!
-// NOT EVERYONE HAS A 4K MONITOR TO READ THIS COMMENT WITHOUT SCROLLING OR ENABLING LINE WRAP!
+const bye = "bye, CONTRIBUTING.md reader!"; // THIS DOES NOT! NOT EVERYONE HAS A 4K MONITOR TO READ THIS COMMENT WITHOUT SCROLLING OR ENABLING LINE WRAP!
 ```
 
 ### Avoid nesting
@@ -139,6 +138,12 @@ The answer is simple: both, depending on (1) the amount of cases that can appear
 
 Places where _not too many_ cases are possible and/or an `else`/`default` statement would be used, should use `if else` directives, while cases where A LOT of options are possible and/or there isn't a "default" one, should use `switch`.
 
-> Other than that, as long as your code doesn't suck, anything will do.
+## Make good commits
+
+As the main maintainer of this I made a TON of weirdly named commits (and to be fair, I will probably keep doing it sometimes). However this projects now adheres to [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for all(most) commits.
+
+---
+
+> If in doubt about any code decision and this file doesn't cover said doubt, as long as your code doesn't suck, anything will do.
 
 Thank you so much for contributing. Happy coding!

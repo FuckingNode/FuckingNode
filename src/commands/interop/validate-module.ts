@@ -12,8 +12,8 @@ export const BareValidators = {
 
     // deno-lint-ignore no-explicit-any
     Golang: (obj: any): obj is GolangPkgFile => {
-        return isObject(obj) && validate(obj["module"]) &&
-            validate(obj["go"]);
+        return isObject(obj) && validate(obj["module"])
+            && validate(obj["go"]);
     },
 
     // deno-lint-ignore no-explicit-any

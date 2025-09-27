@@ -1,5 +1,5 @@
 {
-    "name": "uwu.js",
+    "name": "a.js",
     "version": "1.0.0",
     "description": "Certainly! Here's a description for a useless NPM package called 'uwu.js': \"A simple package to uwu-ify your text.\"",
     "main": "index.js",
@@ -26,9 +26,6 @@
         "url": "https://github.com/ZakaHaceCosas/uwu.js/issues"
     },
     "homepage": "https://github.com/ZakaHaceCosas/uwu.js#readme",
-    "workspaces": [
-        "../test-two"
-    ],
     "dependencies": {
         "tslib": "^2.0.0"
     }

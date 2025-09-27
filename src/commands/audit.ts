@@ -1,22 +1,22 @@
-import { APP_NAME } from "../constants/name.ts";
 import { LogStuff } from "../functions/io.ts";
-import { GetAllProjects, NameProject } from "../functions/projects.ts";
+import { GetAllProjects } from "../functions/projects.ts";
 import { PerformAuditing } from "./toolkit/auditer.ts";
 import type { FkNodeSecurityAudit } from "../types/audit.ts";
-import type { TheAuditerConstructedParams } from "./constructors/command.ts";
+import type { TheAuditerConstructedParams } from "./_interfaces.ts";
 import { normalize, testFlag, validate } from "@zakahacecosas/string-utils";
 import { ColorString } from "../functions/color.ts";
 
-export default function TheAuditer(params: TheAuditerConstructedParams) {
+export default async function TheAuditer(params: TheAuditerConstructedParams): Promise<void> {
     const { project } = params;
 
-    const shouldAuditAll = !validate(project) ||
-        testFlag(project, "all", { allowQuickFlag: true, allowSingleDash: true, allowNonExactString: true }) || normalize(project) === "--";
+    const shouldAuditAll = !validate(project)
+        || testFlag(project, "all", { allowQuickFlag: true, allowSingleDash: true, allowNonExactString: true })
+        || normalize(project) === "--";
 
     if (shouldAuditAll) {
         const projects = GetAllProjects();
         LogStuff(
-            `${APP_NAME.CASED} Audit is only supported for NodeJS projects as of now.`,
+            "Audit is only supported for NodeJS and BunJS projects as of now.",
             "heads-up",
         );
         const report: {
@@ -24,7 +24,7 @@ export default function TheAuditer(params: TheAuditerConstructedParams) {
             audit: FkNodeSecurityAudit;
         }[] = [];
         for (const project of projects) {
-            const res = PerformAuditing(project);
+            const res = await PerformAuditing(project);
             if (typeof res === "number") continue;
             report.push({
                 project: project,
@@ -33,8 +33,7 @@ export default function TheAuditer(params: TheAuditerConstructedParams) {
         }
 
         const reportDetails = report.map((item) => {
-            const name = NameProject(item.project, "name-ver");
-            const string = `${name} # ${ColorString(`${item.audit.percentage.toFixed(2)}%`, "bold")} risk factor`;
+            const string = `${item.audit.name} # ${ColorString(`${item.audit.percentage.toFixed(2)}%`, "bold")} risk factor`;
             return string;
         });
         if (reportDetails.length === 0) {
@@ -46,7 +45,7 @@ export default function TheAuditer(params: TheAuditerConstructedParams) {
             "chart",
         );
     } else {
-        PerformAuditing(project);
+        await PerformAuditing(project);
     }
 
     LogStuff("Audit complete!", "tick-clear");

@@ -1,7 +1,6 @@
 import { normalize, table, validate } from "@zakahacecosas/string-utils";
 import { LogStuff } from "../functions/io.ts";
-import type { TheCompaterConstructedParams } from "./constructors/command.ts";
-import { APP_URLs } from "../constants.ts";
+import type { TheCompaterConstructedParams } from "./_interfaces.ts";
 import { ColorString } from "../functions/color.ts";
 
 const labels = {
@@ -60,7 +59,7 @@ const migrateCompatibility = [
     { From: "NodeJS / yarn", To: "npm / pnpm", Supported: labels.y },
 ];
 
-function overallSupport() {
+function overallSupport(): void {
     LogStuff("OVERALL SUPPORT ---");
     LogStuff(table(featureCompatibility));
     LogStuff(
@@ -69,11 +68,11 @@ function overallSupport() {
     return;
 }
 
-export default function TheCompater(params: TheCompaterConstructedParams) {
+export default function TheCompater(params: TheCompaterConstructedParams): void {
     LogStuff(
         `${
             ColorString("This table shows feature compatibility across environments.", "bold")
-        }\nMore details available at ${APP_URLs.WEBSITE}crossruntime`,
+        }\nMore details available at https://fuckingnode.github.io/crossruntime`,
         "bulb",
     );
 

@@ -1,10 +1,98 @@
 <!-- markdownlint-disable MD024 -->
 
-# F\*ckingNode Changelog
+# FuckingNode Changelog
 
 All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
+
+## [5.0.0] (Unreleased)
+
+### Added
+
+- Added a new, common interface for command automation (`commitCmd`, `launchCmd`, etc...). Now everything runs the on `CmdSets`, which are much more powerful + are also consistent across cmds.
+- Added a new `terminate` command (with many aliases) that uninstalls a language (literally) and removes leftovers, if any.
+- Added an option to customize (in milliseconds) the threshold for notifications.
+- Added the option to use GLFM instead of GFM for `surrender` (via `--gitlab/-gl`).
+- Added `deprecate` and `nevermind` as aliases to `surrender`.
+- Added the ability for the CLI to update itself when running `update`. _Yes, it now properly works._
+- Added an `--export` option to `export`; if not provided the default behavior is to just show it in terminal instead of writing it.
+- Added a 3 second countdown to `surrender`, giving you time to rethink and quit the program.
+- Added spreading to `add` and `remove`, allowing you to `fkadd project1 project2 project3` from one command.
+- Added spreading to `clean` too, so you can use `--projects` to cleanup several projects at once. When not using it, behavior should not break.
+- Added removal of `target/` on Rust projects for maxim cleanup.
+- Added more setups to `setup`.
+- Added the ability to make the cleaner immediately stop upon an error instead of collecting them as "statistics", via both project settings and global settings. Global setting affects hard-cleanup too.
+- Added more questions to `audit` for improved accuracy.
+- Added support for custom `lintScript` and `prettyScript` (prev. `lintCmd` and `prettyCmd`) for Deno.
+- While experimental, undocumented, and very very far from complete, FuckingNode 5 exposes for testing purposes an extension runner we're working on for the next major release.
+
+- Added several changes to improve the CLI's performance.
+  - FuckingNode runs some checks every time before actually running. _Just_ parallelizing them made the entire CLI much, MUCH faster.
+  - Bulk adding projects (via glob patterns) was also parallelized. Made it 5% faster.
+  - Git-related and project environment-related operations used to check for filepaths _twice_, this duplication was removed.
+    - For example, checking if a project has an active Git repo is now over 10 times faster.
+  - Optimized config filepaths.
+    - Removed a useless lowercasing call when getting any path.
+    - A string conversion needed for the project's list file happened whenever _any_ path was queried, now it only happens when we query that specific file.
+    - All paths were initialized when querying any path, now only the base one (needed) is.
+  - Removed useless file existence checks where we already know a file exists.
+  - Removed some useless object mutations.
+  - "Naming a project" (when we show its name with colors and stuff) is actually a somewhat expensive operation. We slightly optimized it + removed duplicate calls.
+    - Where possible, the overhead was moved to getting a project's environment (as otherwise this is done _twice_ from the naming flow), reducing workload. Not everywhere we can do this, though.
+  - `settings flush` should now be a few milliseconds faster (removed useless array check + parallelized filesize recovery calculations).
+  - Avoided unnecessary checks for spotting project paths.
+  - Removed duplicate calls to check for staged files via `commit`.
+  - Removed `logs.log`, removing a ton of file writes.
+  - Parallelized reading cleanup results for showing you the final report, very slightly speeding it up.
+  - Removed unnecessary array conversions and operations for parsing a project's `divineProtection` setting, as well as avoiding parsing entirely if the setting is not defined.
+  - Differentiating certain frequently queried settings (like on what runtime a project runs, for compatibility) was actually done through somewhat expensive operation with "sentinel strings" (`#disable`(cmd), `__DISABLE`(cfg), `__USE_DEFAULT`(cfg), and other values you could actually set in your `fknode.yaml`). They were replaced with proper type guards + strings were replaced with booleans (primitives, more efficient), as such slightly improving performance.
+  - Update some strings so they don't "name the project", reducing operations.
+  - Parallelized workspace lookup when adding a project.
+  - Optimized I/O, there were operations making several calls to `console.log`, when a single call (with `\n`s) is more efficient.
+  - Also removed useless `String.trim()` calls.
+  - Remove duplicate and unused properties from project environment objects.
+
+### Changed
+
+- (Breaking) Renamed `prettyCmd` and `lintCmd` to `prettyScript` and `lintScript`.
+- (Breaking) All `fknode.yaml` keys ending in `Cmd` have been updated to a whole different syntax (more verbose, but much more powerful). See documentation for info.
+- (Breaking) Now setting keys were changed and use dashes, much more common for CLIs (and also makes keys consistent with what you see when running `settings`).
+- (Breaking) Now `export` expects `--jsonc` and not `--json` to be passed, matching the output filetype.
+- (Breaking) FnCPF spec slightly changed. Starting with V5 this spec will be publicly documented.
+- (Breaking) Annoyingly (but to avoid confusion), the default package manager is now `npm`.
+- (Breaking) Now, to use the destroyer with all intensities, use just `"*"` and not an array containing `"*"`.
+- Now Git errors should be much more properly handled and reported.
+- Now the error dump file should be more readable.
+- Now `surrender` templates will take your project's name and use it within the template.
+- Now the `about` command plays a typewriter animation.
+- Now `setup` will search for setups instead of throwing an error when typing an invalid setup name.
+- Now workspace handling should be a bit more reliable.
+
+### Fixed
+
+- Fixed `projectEnvOverride` potentially not working if FuckingNode's inference short-circuits the process first.
+- Fixed the entire maxim cleanup process failing if just one project doesn't somehow have a `node_modules` DIR.
+- Fixed compatibility with Golang projects; now Golang version and dependencies are correctly read (it previously failed to get Golang version, skipped indirect dependencies, and didn't differentiate `github.com` from `pkg.go.dev` dependencies; now it does).
+- Fixed a typo in `export`'s help entry.
+- Fixed `migrate` and maxim cleanup wrongly attempting to remove `node_modules` from Deno projects.
+- Fixed `commit` showing a wrong number in the "and N more" string.
+- Fixed Cargo hard cleanup showing both the success and error messages when an error happens.
+- Fixed `clean` being error-prone when cleaning specific projects.
+
+### Removed
+
+- (Breaking) Removed `launchWithUpdate` from `fknode.yaml`. Your `launchCmd` now can contain several instructions, so you an move your update command there.
+- (Breaking) Removed `launchFile` from `fknode.yaml`. Your `launchCmd` now can have its behavior customized, you directly declare wether a script, a file, both, or none, should run.
+- (Breaking) Removed `"disabled"` option from `divineProtection` in `fknode.yaml`. Just don't declare it at all.
+- (Breaking) Removed the `logs.log` file, where _everything_ that happened in the CLI was logged. This meant writing to a file every time we wrote to the stdout, slowing the CLI down and taking up unneeded space. This change improves performance.
+  - Errors still get logged to the `errors.log` file.
+- (Breaking) Removed the `something-fucked-up` command.
+- Removed emojis from `surrender` templates. They're not too professional, you know.
+- Removed some ASCII arts from `about`.
+- Removed the `flush-freq` settings. It's not used anymore as no log file exists.
+
+<!-- Once V5 is done, take the benchmark set and run it on V4.3.0 and compare results. Log the improvement here. -->
 
 ## [4.3.0] (26-08-2025)
 
@@ -70,7 +158,7 @@ _Sort of_ breaking, but nothing important so I won't make a major release.
 ### Fixed
 
 - Fixed (FINAL and HOPEFULLY) `buildCmd`.
-- Fixed a missing line break causing `- /path/to/fileand 7 more files` in `commit`.
+- Fixed a missing line break causing text to look wrong in `commit`.
 - Fixed elapsed time showing 0m 0s sometimes if it only took milliseconds.
 - Fixed calculation of elapsed times. [Thanks.](https://stackoverflow.com/a/21294619)
 
@@ -234,7 +322,7 @@ _Sort of_ breaking, but nothing important so I won't make a major release.
 - Added the ability to run a script/file when launching a project.
 - Added `fklist` alias to `fuckingnode manager list`.
 - Added two new setups to `fkn setup`
-- Added `fkn hint` to randomly show one of the hints / _F\*ckingProTips_ shown in the about page. A few more hints were added as well.
+- Added `fkn hint` to randomly show one of the hints / _FuckingProTips_ shown in the about page. A few more hints were added as well.
 
 ### Changed
 
@@ -498,7 +586,7 @@ Happy new year btw
 
 - This release SHOULD have fixed macOS and Linux compatibility. Report any issues you find, please. Thank you.
 
-## [2.0.0] 25-12-2024 <!-- 2.0.0 - major release, even tho there aren't "breaking" changes (well, adding runtimes that aren't Node to the "F*ckingNODE" project is kinda "breaking") -->
+## [2.0.0] 25-12-2024 <!-- 2.0.0 - major release, even tho there aren't "breaking" changes (well, adding runtimes that aren't Node to the "FuckingNODE" project is kinda "breaking") -->
 
 ### Breaking changes
 
@@ -575,7 +663,7 @@ Happy new year btw
 
 ### Added
 
-- Added `settings schedule <hour> <day>` to schedule F\*ckingNode, so your projects are automatically cleaned.
+- Added `settings schedule <hour> <day>` to schedule FuckingNode, so your projects are automatically cleaned.
 
 ### Fixed
 
@@ -592,7 +680,7 @@ Happy new year btw
 
 ### Added
 
-- Added support for monorepos / Node workspaces. When adding a project, now F\*ckingNode will look through the `package.json`. If `workspaces` are found, it will prompt to add them as separate projects so they get their own cleanup as well.
+- Added support for monorepos / Node workspaces. When adding a project, now FuckingNode will look through the `package.json`. If `workspaces` are found, it will prompt to add them as separate projects so they get their own cleanup as well.
 - Added cleaning levels, adding a new `hard` level and replacing the `--maxim` flag. Now `clean` takes a level, either `clean normal`, `clean hard`, or `clean maxim` (if no level, "normal" will be used as default).
   - `normal` will do the easy: recursively run cleaning commands.
   - `hard` will do what default used to do (clean + dedupe) + it will also clean cache.
@@ -683,11 +771,11 @@ Happy new year btw
 ### Added
 
 - Added `stats` command. Shows stats, AKA how much storage your projects are taking up. By default only counts the size of `node_modules/`, but you can pass the `--full` flag to it so it also includes your code.
-- Added `manager ignore` command. Creates a `.fknodeignore` file at the root of the project, so F\*ckingNode simply ignores it whenever a cleanup is made.
+- Added `manager ignore` command. Creates a `.fknodeignore` file at the root of the project, so FuckingNode simply ignores it whenever a cleanup is made.
 
 ### Changed
 
-- Replaced the actual f-word with an asterisk-included version (f\*cking) app-wide. Also made an effort to rename variables and all that kind of stuff. ~~I don't want to get banned~~.
+- Replaced the actual f-word with an asterisk-included version (fucking) app-wide. Also made an effort to rename variables and all that kind of stuff. ~~I don't want to get banned~~.
 - Now "unknown errors" when pruning a project actually show the command's `stderr`.
 
 ### Fixed

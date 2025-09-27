@@ -1,10 +1,18 @@
 # this is the real config for this repo
 # for learning about this, head to https://fuckingnode.github.io/manual/fknode-yaml
 destroy:
-    intensities: ["*"]
+    intensities: "*"
     targets:
         - "dist"
+commitCmd:
+    - $"test"
 commitActions: false
-commitCmd: "precommit"
-prettyCmd: "good"
-buildCmd: "cmd ls^cmd tree^sodapda"
+prettyScript: "good"
+buildCmd:
+    # this is for testing, we don't really build with this
+    - { msft: ~echo 'Running from Windows!', posix: ~"echo 'Running from Linux!'" }
+    - ~echo 'test'
+    - ~"echo ''"
+    - ~ls
+    - ="src/types/misc.ts --args"
+cleanerShortCircuit: true

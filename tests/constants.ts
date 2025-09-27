@@ -14,12 +14,17 @@ export const CONSTANTS = {
 const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
     ONE: {
         root: ParsePath(`${CONSTANTS.ENV_PATH}/test-one`),
+        names: {
+            full:
+                "\x1b[92m\x1b[1ma.js\x1b[22m\x1b[39m@\x1b[35m1.0.0\x1b[39m \x1b[2m\x1b[3mC:\\Users\\Zaka\\proyectitos\\FuckingNode\\tests\\environment\\test-one\x1b[23m\x1b[22m",
+            name: "\x1b[92m\x1b[1ma.js\x1b[22m\x1b[39m",
+            nameVer: "\x1b[92m\x1b[1ma.js\x1b[22m\x1b[39m@\x1b[35m1.0.0\x1b[39m",
+            path: "\x1b[2m\x1b[3mC:\\Users\\Zaka\\proyectitos\\FuckingNode\\tests\\environment\\test-one\x1b[23m\x1b[22m",
+        },
         settings: {
             ...DEFAULT_FKNODE_YAML,
             destroy: {
-                intensities: [
-                    "*",
-                ],
+                intensities: "*",
                 targets: [
                     "node_modules/",
                 ],
@@ -33,31 +38,28 @@ const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
             },
         },
         runtimeColor: "bright-green",
-        main: {
-            path: ParsePath(`${CONSTANTS.ENV_PATH}/test-one/package.json`),
-            name: "package.json",
-            stdContent: JSON.parse(Deno.readTextFileSync(ParsePath(`${CONSTANTS.ENV_PATH}/test-one/package.json`))),
-            cpfContent: {
-                name: "uwu.js",
-                version: "1.0.0",
-                rm: "npm",
-                perPlatProps: { cargo_edt: "__NTP" },
-                deps: [
-                    {
-                        name: "tslib",
-                        ver: "^2.0.0",
-                        rel: "univ:dep",
-                        src: "npm",
-                    },
-                ],
-                ws: [
-                    ParsePath(`${CONSTANTS.ENV_PATH}/test-two`),
-                ],
-                fknVer: DenoJson.default.version,
-            },
+        mainPath: ParsePath(`${CONSTANTS.ENV_PATH}/test-one/package.json`),
+        mainName: "package.json",
+        mainSTD: JSON.parse(Deno.readTextFileSync(ParsePath(`${CONSTANTS.ENV_PATH}/test-one/package.json`))),
+        mainCPF: {
+            name: "a.js",
+            version: "1.0.0",
+            rm: "npm",
+            plat: { edt: null },
+            deps: [
+                {
+                    name: "tslib",
+                    ver: "^2.0.0",
+                    rel: "univ:dep",
+                    src: "npm",
+                },
+            ],
+            ws: [],
+            fknVer: DenoJson.default.version,
         },
         commands: {
             base: "npm",
+            dlx: ["npx"],
             clean: [
                 [
                     "dedupe",
@@ -66,9 +68,6 @@ const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
                     "prune",
                 ],
             ],
-            exec: [
-                "npx",
-            ],
             update: [
                 "update",
             ],
@@ -76,7 +75,8 @@ const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
                 "audit",
                 "--json",
             ],
-            run: ["npm", "run"],
+            file: ["node"],
+            script: ["npm", "run"],
             publish: ["publish"],
             start: "start",
         },
@@ -87,7 +87,6 @@ const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
             path: ParsePath(`${CONSTANTS.ENV_PATH}/test-one/package-lock.json`),
         },
         hall_of_trash: ParsePath(`${CONSTANTS.ENV_PATH}/test-one/node_modules`),
-        workspaces: [ParsePath(`${CONSTANTS.ENV_PATH}/test-two`)],
     },
 };
 

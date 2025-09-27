@@ -1,19 +1,17 @@
-import { FWORDS } from "../constants/fwords.ts";
 import { LogStuff } from "../functions/io.ts";
-import { GetAllProjects, GetProjectEnvironment, NameProject } from "../functions/projects.ts";
+import { GetAllProjects, GetProjectEnvironment } from "../functions/projects.ts";
 import { DEBUG_LOG } from "../functions/error.ts";
-import { sortAlphabetically, testFlag, UnknownString, validate } from "@zakahacecosas/string-utils";
+import { sortAlphabetically, testFlag, type UnknownString, validate } from "@zakahacecosas/string-utils";
 import { ColorString } from "../functions/color.ts";
 
 /**
  * Lists all projects.
  *
  * @param {"limit" | "exclude" | false} ignore
- * @returns {void}
  */
-function ListProjects(
+async function ListProjects(
     ignore: "limit" | "exclude" | false,
-): void {
+): Promise<void> {
     const list = GetAllProjects(ignore);
     DEBUG_LOG("FULL PROJECT LIST", list);
     if (list.length === 0) {
@@ -31,69 +29,51 @@ function ListProjects(
             return;
         } else {
             LogStuff(
-                "Man, your mfs list is empty! Ain't nobody here!",
+                "Man, your motherfuckers list is empty! Ain't nobody here!",
                 "moon-face",
             );
             return;
         }
     }
 
-    const toPrint: string[] = [];
-    let message: string;
-
-    if (ignore === "limit") {
-        message = `Here are the ${FWORDS.MFS} you added (and ignored) so far:\n`;
-        for (const entry of list) {
-            const protection = (GetProjectEnvironment(entry)).settings.divineProtection; // array
-            let protectionString: string;
-            if (!(Array.isArray(protection))) {
-                protectionString = "ERROR: CANNOT READ SETTINGS, CHECK YOUR FKNODE.YAML!";
-            } else {
-                protectionString = protection.join(" and ");
-            }
-
-            toPrint.push(
-                `${NameProject(entry, "all")} (${
-                    ColorString(
-                        protectionString,
-                        "bold",
-                    )
-                })\n`,
-            );
+    const message: string = ignore === "limit"
+        ? `Here are the motherfuckers you added (and ignored) so far:\n`
+        : ignore === "exclude"
+        ? `Here are the motherfuckers you added (and haven't ignored) so far:\n`
+        : `Here are the motherfuckers you added so far:\n`;
+    const promises = await Promise.all(
+        list.map((entry) => GetProjectEnvironment(entry)),
+    );
+    const toPrint = promises.map((env) => {
+        if (ignore === "limit") {
+            return `${env.names.full} (${
+                ColorString(
+                    Array.isArray(env.settings.divineProtection) ? env.settings.divineProtection.join(" and ") : "Everything!",
+                    "bold",
+                )
+            })\n`;
         }
-    } else if (ignore === "exclude") {
-        message = `Here are the ${FWORDS.MFS} you added (and haven't ignored) so far:\n`;
-        for (const entry of list) {
-            toPrint.push(NameProject(entry, "all"));
-        }
-    } else {
-        message = `Here are the ${FWORDS.MFS} you added so far:\n`;
-        for (const entry of list) {
-            toPrint.push(NameProject(entry, "all"));
-        }
-    }
+        return env.names.full;
+    });
 
     LogStuff(message, "bulb");
-    for (const entry of sortAlphabetically(toPrint)) LogStuff(entry);
+    LogStuff(sortAlphabetically(toPrint).join("\n"));
 
     return;
 }
 
-export default function TheLister(arg: UnknownString) {
+export default async function TheLister(arg: UnknownString): Promise<void> {
     if (!validate(arg)) {
-        ListProjects(
+        await ListProjects(
             false,
         );
         return;
     }
 
     let ignoreParam: false | "limit" | "exclude" = false;
-    if (testFlag(arg, "ignored")) {
-        ignoreParam = "limit";
-    } else if (testFlag(arg, "alive")) {
-        ignoreParam = "exclude";
-    }
-    ListProjects(
+    if (testFlag(arg, "ignored")) ignoreParam = "limit";
+    else if (testFlag(arg, "alive")) ignoreParam = "exclude";
+    await ListProjects(
         ignoreParam,
     );
 }

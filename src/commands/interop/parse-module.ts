@@ -54,60 +54,47 @@ export function internalGolangRequireLikeStringParser(content: string[], kw: str
 // * ###
 const internalParsers = {
     GolangPkgFile: (content: string): GolangPkgFile => {
-        const lines = content.trim().split("\n");
-        let module: UnknownString = "";
-        let go: UnknownString = "";
+        const lines = content.split("\n").map((s) => s.trim());
+        const module: UnknownString = lines.find((l) => l.startsWith("module"))?.split(" ")[1];
+        const go: UnknownString = lines.find((l) => l.startsWith("go"))?.split(" ")[1];
         const require: GolangPkgFile["require"] = {};
 
-        const parsedLines = internalGolangRequireLikeStringParser(lines, "require").filter((line) => line.trim() !== "");
-
-        for (const line of parsedLines) {
-            // ?? we assume that module & go version are defined
-            if (line.trim().startsWith("module")) {
-                module = line.split(" ")[1]?.trim();
-                // ?? "__NO_GOLANG_MODULE";
-            } else if (line.trim().startsWith("go")) {
-                const match = line.trim().match(/go\s+(\d+\.\d+)/);
-                // not mine
-                go = match ? match[0] : "__NO_GOLANG_VERSION";
-                // ?? "__NO_GOLANG_MODULE";
-            } else if (line.trim().startsWith("require")) {
+        for (const line of lines) {
+            if (line.startsWith("require")) {
                 // Process the `require` line by checking for multiple strings in one line or across multiple lines
 
                 // If there's more than one part (URL + version)
                 // If it's broken across multiple lines (next line might contain the version), concatenate
-                const index = parsedLines.indexOf(line);
-                let newIndex = index + 1;
+                const startIndex = lines.indexOf(line);
+                let newIndex = startIndex + 1;
 
-                while (newIndex < parsedLines.length) {
-                    const nextLine = parsedLines[newIndex]?.trim();
+                while (newIndex < lines.length) {
+                    const nextLine = lines[newIndex];
+                    if (nextLine === undefined) break; // break if the line is invalid
+                    const nextParts = nextLine.split(" ");
 
-                    if (nextLine === undefined) {
-                        break; // break if the line is invalid
-                    }
+                    if (nextParts[0] === undefined || nextParts[1] === undefined) break; // break if invalid
 
-                    const nextParts = nextLine.split(/\s+/);
-
-                    if (nextParts[0] === undefined || nextParts[1] === undefined) {
-                        break; // break if invalid
-                    }
-
-                    const moduleName = nextParts[0].trim();
-                    const version = nextParts[1].trim();
-                    const isIndirect = (nextParts[2] ?? "").includes("indirect") || (nextParts[3] ?? "").includes("indirect");
+                    const moduleName = nextParts[0];
+                    const version = nextParts[1];
+                    // double checks bc since we split by spaces, "//indirect" won't be in same position as "// indirect"
+                    const isIndirect = (nextParts[2] || "").includes("indirect") || (nextParts[3] || "").includes("indirect");
                     require[moduleName] = {
                         version: version,
                         indirect: isIndirect,
+                        // running on assumptions is not great
+                        // but eh i THINK these are the only go dep sources
+                        src: moduleName.includes("golang.org") ? "pkg.go.dev" : "github",
                     };
 
                     newIndex++; // Move to the next line after processing
                 }
+                lines[startIndex] = "";
             }
         }
 
-        if (!validate(module) || !validate(go)) {
-            throw new FknError("Env__PkgFileUnparsable", `Given go.mod contents are unparsable.\n${content}`);
-        }
+        if (!validate(module)) throw new FknError("Env__PkgFileUnparsable", `Given go.mod lacks module.\n${content}`);
+        if (!validate(go)) throw new FknError("Env__PkgFileUnparsable", `Given go.mod lacks go version.\n${content}`);
 
         const toReturn: GolangPkgFile = {
             module,
@@ -150,14 +137,14 @@ const internalParsers = {
     },
 };
 
-export const dedupeDependencies = (deps: FnCPF["deps"]) => {
+export function dedupeDependencies(deps: FnCPF["deps"]): FnCPF["deps"] {
     return deps.filter((dep, index, self) => index === self.findIndex((d) => d.name === dep.name));
-};
+}
 
 export const findDependency = (target: string, deps: FnCPF["deps"]): FnCPF["deps"][0] | undefined => {
     return deps.find((dep) =>
-        normalize(dep.name, { strict: true, preserveCase: true, removeCliColors: true }) ===
-            normalize(target, { strict: true, preserveCase: true, removeCliColors: true })
+        normalize(dep.name, { strict: true, preserveCase: true, removeCliColors: true })
+            === normalize(target, { strict: true, preserveCase: true, removeCliColors: true })
     );
 };
 
@@ -165,7 +152,7 @@ export const findDependency = (target: string, deps: FnCPF["deps"]): FnCPF["deps
 // * "END" THIS CODE SUCKS
 // * ###
 
-export const Parsers = {
+export const PackageFileParsers = {
     Golang: {
         STD: internalParsers.GolangPkgFile,
         CPF: (content: string, version: string | undefined, ws: string[]): FnCPF => {
@@ -175,12 +162,13 @@ export const Parsers = {
 
             Object.entries(parsedContent.require ?? []).map(
                 ([k, v]) => {
+                    if (!v.src) throw `No src for Golang dep ${v}`;
                     deps.push(
                         {
                             name: k,
                             ver: v.version,
                             rel: v.indirect === true ? "go:ind" : "univ:dep",
-                            src: "pkg.go.dev",
+                            src: v.src,
                         },
                     );
                 },
@@ -189,9 +177,9 @@ export const Parsers = {
             return {
                 name: parsedContent.module,
                 version: version === undefined ? "Unknown" : version,
-                rm: "golang",
-                perPlatProps: {
-                    cargo_edt: "__NTP",
+                rm: "go",
+                plat: {
+                    edt: parsedContent.go,
                 },
                 ws,
                 deps: dedupeDependencies(deps),
@@ -210,7 +198,7 @@ export const Parsers = {
                 depsObject: CargoPkgFile["dependencies"] | undefined,
                 rValue: FnCPF["deps"][0]["rel"],
                 depsArray: { name: string; ver: string; rel: string; src: string }[],
-            ) {
+            ): void {
                 Object.entries(depsObject ?? {}).forEach(([k, v]) => {
                     depsArray.push({
                         name: k,
@@ -230,29 +218,29 @@ export const Parsers = {
                     ? parsedContent.package?.name
                     : parsedContent.package?.name?.workspace === true
                     ? parsedContent.workspace?.package?.name
-                    : "unknown-name") ??
-                    "unknown-name";
+                    : "unknown-name")
+                    ?? "unknown-name";
             const version =
                 (typeof parsedContent.package?.version === "string"
                     ? parsedContent.package?.version
                     : parsedContent.package?.version?.workspace === true
                     ? parsedContent.workspace?.package?.version
-                    : "unknown-ver") ??
-                    "unknown-ver";
-            const cargo_edt =
+                    : "unknown-ver")
+                    ?? "unknown-ver";
+            const edt =
                 (typeof parsedContent.package?.edition === "string"
                     ? parsedContent.package?.edition
                     : parsedContent.package?.edition?.workspace === true
                     ? parsedContent.workspace?.package?.edition
-                    : "unknown-edt") ??
-                    "unknown-edt";
+                    : null)
+                    ?? null;
 
             return {
                 name,
                 version,
                 rm: "cargo",
-                perPlatProps: {
-                    cargo_edt,
+                plat: {
+                    edt,
                 },
                 deps: dedupeDependencies(deps),
                 ws,
@@ -268,7 +256,7 @@ export const Parsers = {
             if (!parsedContent.name) {
                 throw new FknError(
                     "Env__PkgFileUnparsable",
-                    "Invalid package.json file",
+                    "Invalid package.json file. Your project doesn't have the 'name' field.",
                 );
             }
 
@@ -277,7 +265,7 @@ export const Parsers = {
                 depsObject: NodePkgFile["dependencies"] | undefined,
                 rValue: FnCPF["deps"][0]["rel"],
                 depsArray: { name: string; ver: string; rel: string; src: string }[],
-            ) {
+            ): void {
                 Object.entries(depsObject ?? {}).map(([k, v]) => {
                     depsArray.push({ name: k, ver: v, rel: rValue, src: "npm" });
                 });
@@ -290,8 +278,8 @@ export const Parsers = {
                 name: parsedContent.name,
                 version: parsedContent.version ?? "Unknown",
                 rm: rt,
-                perPlatProps: {
-                    cargo_edt: "__NTP",
+                plat: {
+                    edt: null,
                 },
                 deps: dedupeDependencies(deps),
                 ws,
@@ -304,6 +292,13 @@ export const Parsers = {
         CPF: (content: string, ws: string[]): FnCPF => {
             const parsedContent = internalParsers.DenoPkgFile(content);
 
+            if (!parsedContent.name) {
+                throw new FknError(
+                    "Env__PkgFileUnparsable",
+                    "Invalid package.json file. Your project doesn't have the 'name' field.",
+                );
+            }
+
             const denoImportRegex = /^(?<source>[a-z]+):(?<package>@[a-zA-Z0-9_\-/]+)@(?<version>[~^<>=]*\d+\.\d+\.\d+)$/;
             // regex not mine. deno uses platform:@scope/package@version imports so we gotta do that.
 
@@ -312,8 +307,8 @@ export const Parsers = {
             Object.values(parsedContent.imports ?? {}).map((v) => {
                 const t = v.match(denoImportRegex); // Directly use the match result
                 if (
-                    t && t.groups && t.groups["package"] && t.groups["version"] &&
-                    validateAgainst(t.groups["source"], ["npm", "jsr"])
+                    t && t.groups && t.groups["package"] && t.groups["version"]
+                    && validateAgainst(t.groups["source"], ["npm", "jsr"])
                 ) {
                     deps.push({
                         name: t.groups["package"], // Scope/package
@@ -325,11 +320,11 @@ export const Parsers = {
             });
 
             return {
-                name: parsedContent.name ?? "__ERROR_NOT_PROVIDED",
+                name: parsedContent.name,
                 version: parsedContent.version ?? "Unknown",
                 rm: "deno",
-                perPlatProps: {
-                    cargo_edt: "__NTP",
+                plat: {
+                    edt: null,
                 },
                 deps: dedupeDependencies(deps),
                 ws,

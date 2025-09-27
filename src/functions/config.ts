@@ -1,4 +1,6 @@
-import { DEFAULT_SCHEDULE_FILE, DEFAULT_SETTINGS } from "../constants.ts";
+import * as DenoJson from "../../deno.json" with { type: "json" };
+import { GetDateNow } from "../functions/date.ts";
+import { DEFAULT_SETTINGS } from "../constants.ts";
 import type { CF_FKNODE_SETTINGS } from "../types/config_files.ts";
 import { FknError } from "./error.ts";
 import { BulkRemove, CheckForPath, JoinPaths } from "./filesystem.ts";
@@ -6,96 +8,80 @@ import { parse as parseYaml } from "@std/yaml";
 import { Interrogate, LogStuff, StringifyYaml } from "./io.ts";
 import { type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { format } from "@std/fmt/bytes";
-import { FWORDS } from "../constants/fwords.ts";
-import { LOCAL_PLATFORM } from "../constants/platform.ts";
-import { APP_NAME } from "../constants/name.ts";
+import { LOCAL_PLATFORM } from "../platform.ts";
 import { ColorString } from "./color.ts";
 
 /**
  * Returns file paths for all config files the app uses.
  *
- * @param {("BASE" | "MOTHERFKRS" | "LOGS" | "SCHEDULE" | "SETTINGS" | "ERRORS")} path What path you want.
+ * @async
+ * @param {("BASE" | "MOTHERFKRS" | "SCHEDULE" | "SETTINGS" | "ERRORS" | "NODES")} path What path you want.
  * @returns {string} The path as a string.
  */
 export function GetAppPath(
-    path: "BASE" | "MOTHERFKRS" | "LOGS" | "SCHEDULE" | "SETTINGS" | "ERRORS",
+    path: "BASE" | "MOTHERFKRS" | "SCHEDULE" | "SETTINGS" | "ERRORS" | "NODES",
 ): string {
-    if (!validate(LOCAL_PLATFORM.APPDATA) || !CheckForPath(LOCAL_PLATFORM.APPDATA)) {
+    if (!validate(LOCAL_PLATFORM.APPDATA)) {
         throw new FknError(
             "Os__NoAppdataNoHome",
             `We searched for ${
-                LOCAL_PLATFORM.SYSTEM === "windows" ? "APPDATA" : "XDG_CONFIG_HOME and HOME"
+                LOCAL_PLATFORM.SYSTEM === "msft" ? "APPDATA" : "XDG_CONFIG_HOME and HOME"
             } in your environment variables, but nothing was found.\nThis breaks the entire CLI, please report this on GitHub.`,
         );
     }
 
-    const funny = FWORDS.MFS.toLowerCase().replace("*", "o").replace("*", "u");
+    const BASE_DIR = JoinPaths(LOCAL_PLATFORM.APPDATA, "fuckingnode");
 
-    function formatDir(name: string) {
-        return JoinPaths(BASE_DIR, `${APP_NAME.CLI}-${name}`);
-    }
-
-    const BASE_DIR = JoinPaths(LOCAL_PLATFORM.APPDATA, APP_NAME.CLI);
-    const PROJECTS = formatDir(`${funny}.txt`);
-    const LOGS = formatDir("logs.log");
-    const SCHEDULE = formatDir("schedule.yaml");
-    const SETTINGS = formatDir("settings.yaml");
-    const ERRORS = formatDir("errors.log");
-
-    if (path === "BASE") return BASE_DIR;
-    if (path === "MOTHERFKRS") return PROJECTS;
-    if (path === "LOGS") return LOGS;
-    if (path === "SCHEDULE") return SCHEDULE;
-    if (path === "SETTINGS") return SETTINGS;
-    if (path === "ERRORS") return ERRORS;
-    throw new FknError("Internal__NonexistentAppPath", `Invalid config path ${path} requested.`);
+    if (path === "MOTHERFKRS") return JoinPaths(BASE_DIR, "fuckingnode-motherfuckers.txt");
+    if (path === "SCHEDULE") return JoinPaths(BASE_DIR, "fuckingnode-schedule.yaml");
+    if (path === "SETTINGS") return JoinPaths(BASE_DIR, "fuckingnode-settings.yaml");
+    if (path === "ERRORS") return JoinPaths(BASE_DIR, "fuckingnode-errors.log");
+    if (path === "NODES") return JoinPaths(BASE_DIR, "fuckingnode-nodes/");
+    else return BASE_DIR;
 }
 
 /**
  * Check if config files are present, create them otherwise ("Fresh Setup").
- *
- * @returns {void}
  */
-export function FreshSetup(repairSetts?: boolean): void {
+export async function FreshSetup(repairSetts?: boolean): Promise<void> {
     const basePath = GetAppPath("BASE");
-    if (!CheckForPath(basePath)) {
-        Deno.mkdirSync(basePath, { recursive: true });
-    }
-
     const projectPath = GetAppPath("MOTHERFKRS");
-    if (!CheckForPath(projectPath)) {
-        Deno.writeTextFileSync(projectPath, "", {
-            create: true,
-        });
-    }
-
-    const logsPath = GetAppPath("LOGS");
-    if (!CheckForPath(logsPath)) {
-        Deno.writeTextFileSync(logsPath, "", {
-            create: true,
-        });
-    }
-
     const errorLogsPath = GetAppPath("ERRORS");
-    if (!CheckForPath(errorLogsPath)) {
-        Deno.writeTextFileSync(errorLogsPath, "", {
-            create: true,
-        });
-    }
-
     const settingsPath = GetAppPath("SETTINGS");
-    if ((!CheckForPath(settingsPath) || repairSetts === true)) {
-        Deno.writeTextFileSync(settingsPath, StringifyYaml(DEFAULT_SETTINGS), {
-            create: true,
-        });
+    const schedulePath = GetAppPath("SCHEDULE");
+
+    const tasks: Promise<void>[] = [];
+
+    if (!CheckForPath(basePath)) {
+        tasks.push(Deno.mkdir(basePath, { recursive: true }));
     }
 
-    const schedulePath = GetAppPath("SCHEDULE");
-    if (!CheckForPath(schedulePath)) {
-        Deno.writeTextFileSync(schedulePath, StringifyYaml(DEFAULT_SCHEDULE_FILE), {
-            create: true,
-        });
+    if (!CheckForPath(projectPath)) {
+        tasks.push(Deno.writeTextFile(projectPath, "", { create: true }));
     }
+
+    if (!CheckForPath(errorLogsPath)) {
+        tasks.push(Deno.writeTextFile(errorLogsPath, "", { create: true }));
+    }
+
+    if (!CheckForPath(settingsPath) || repairSetts) {
+        tasks.push(Deno.writeTextFile(settingsPath, StringifyYaml(DEFAULT_SETTINGS), { create: true }));
+    }
+
+    if (!CheckForPath(schedulePath)) {
+        tasks.push(Deno.writeTextFile(
+            schedulePath,
+            StringifyYaml({
+                updater: {
+                    latestVer: DenoJson.default.version,
+                    lastCheck: GetDateNow(),
+                },
+            }),
+            { create: true },
+        ));
+    }
+
+    await Promise.all(tasks);
 
     return;
 }
@@ -103,7 +89,7 @@ export function FreshSetup(repairSetts?: boolean): void {
 /**
  * Returns current user settings.
  *
- * @returns {FKNODE_SETTINGS}
+ * @returns {CF_FKNODE_SETTINGS}
  */
 export function GetUserSettings(): CF_FKNODE_SETTINGS {
     const stuff: CF_FKNODE_SETTINGS = parseYaml(Deno.readTextFileSync(GetAppPath("SETTINGS"))) as CF_FKNODE_SETTINGS;
@@ -113,29 +99,14 @@ export function GetUserSettings(): CF_FKNODE_SETTINGS {
     };
 }
 
-// TODO (for v5 cause breaking)
-// don't use casing for settings
-// the CLI lowercases params, breaking programmatic changing of settings
-// use dashes instead
-export const VALID_SETTINGS = [
-    "defaultintensity",
-    "defaultmanager",
-    "updatefreq",
-    "faveditor",
-    "flushfreq",
-    "shownotifications",
-    "thresholdnotifications",
-] as const;
-
 /**
  * Changes a given user setting to a given value.
  *
  * @param {setting} setting Setting to change.
  * @param {UnknownString} value Value to set it to.
- * @returns {void}
  */
 export function ChangeSetting(
-    setting: typeof VALID_SETTINGS[number],
+    setting: keyof CF_FKNODE_SETTINGS,
     value: UnknownString,
 ): void {
     const settingsPath = GetAppPath("SETTINGS");
@@ -143,54 +114,49 @@ export function ChangeSetting(
 
     let newSettings: CF_FKNODE_SETTINGS | undefined;
 
-    if (setting === "defaultintensity") {
+    if (setting === "default-intensity") {
         if (!validateAgainst(value, ["normal", "hard", "hard-only", "maxim", "maxim-only"])) {
             return LogStuff(`${value} is not valid. Enter either 'normal', 'hard', 'hard-only', or 'maxim'.`);
         }
-        newSettings = { ...currentSettings, defaultIntensity: value };
-    } else if (setting === "defaultmanager") {
+        newSettings = { ...currentSettings, "default-intensity": value };
+    } else if (setting === "default-manager") {
         if (!validateAgainst(value, ["npm", "pnpm", "yarn", "deno", "bun", "cargo", "go"])) {
             return LogStuff(`${value} is not valid. Enter either "npm", "pnpm", "yarn", "deno", "bun", "cargo", or "go".`);
         }
-        newSettings = { ...currentSettings, defaultManager: value };
-    } else if (setting === "updatefreq") {
+        newSettings = { ...currentSettings, "default-manager": value };
+    } else if (setting === "update-freq") {
         const freq = Math.ceil(Number(value));
-        if (!Number.isFinite(freq) || freq <= 0) {
-            return LogStuff(`${value} is not valid. Enter a valid number greater than 0.`);
-        }
-        newSettings = { ...currentSettings, updateFreq: freq };
-    } else if (setting === "faveditor") {
+        if (!Number.isFinite(freq) || freq <= 0) return LogStuff(`${value} is not valid. Enter a valid number greater than 0.`);
+        newSettings = { ...currentSettings, "update-freq": freq };
+    } else if (setting === "notification-threshold-value") {
+        const freq = Math.ceil(Number(value));
+        if (!Number.isFinite(freq) || freq <= 1000) return LogStuff(`${value} is not valid. Enter a valid number greater than 1000.`);
+        newSettings = { ...currentSettings, "notification-threshold-value": freq };
+    } else if (setting === "fav-editor") {
         if (!validateAgainst(value, ["vscode", "sublime", "emacs", "atom", "notepad++", "vscodium"])) {
             return LogStuff(`${value} is not valid. Enter one of: vscode, sublime, emacs, atom, notepad++, vscodium.`);
         }
-        newSettings = { ...currentSettings, favEditor: value };
-    } else if (setting === "flushfreq") {
-        const flush = Math.ceil(Number(value));
-        if (!Number.isFinite(flush) || flush <= 0) {
-            return LogStuff(`${value} is not valid. Enter a valid number greater than 0.`);
-        }
-        newSettings = { ...currentSettings, flushFreq: flush };
-    } else if (setting === "shownotifications") {
-        if (!validateAgainst(value, ["true", "false"])) {
-            return LogStuff(`${value} is not valid. Enter either 'true' or 'false'.`);
-        }
-        newSettings = { ...currentSettings, showNotifications: value === "true" };
-    } else if (setting === "thresholdnotifications") {
-        if (!validateAgainst(value, ["true", "false"])) {
-            return LogStuff(`${value} is not valid. Enter either 'true' or 'false'.`);
-        }
-        newSettings = { ...currentSettings, thresholdNotifications: value === "true" };
+        newSettings = { ...currentSettings, "fav-editor": value };
+    } else if (setting === "notifications") {
+        if (!validateAgainst(value, ["true", "false"])) return LogStuff(`${value} is not valid. Enter either 'true' or 'false'.`);
+        newSettings = { ...currentSettings, notifications: value === "true" };
+    } else if (setting === "always-short-circuit-cleanup") {
+        if (!validateAgainst(value, ["true", "false"])) return LogStuff(`${value} is not valid. Enter either 'true' or 'false'.`);
+        newSettings = { ...currentSettings, "always-short-circuit-cleanup": value === "true" };
+    } else if (setting === "notification-threshold") {
+        if (!validateAgainst(value, ["true", "false"])) return LogStuff(`${value} is not valid. Enter either 'true' or 'false'.`);
+        newSettings = { ...currentSettings, "notification-threshold": value === "true" };
     } else {
         if (!validateAgainst(value, ["npm", "pnpm", "yarn", "bun", "deno", "cargo", "go"])) {
             return LogStuff(`${value} is not valid. Enter a valid package manager (npm, pnpm, yarn, bun, deno, cargo, go).`);
         }
         if (
-            ["cargo", "go"].includes(value) &&
-            !Interrogate(
-                `Are you sure? ${value} is a non-JS runtime and ${APP_NAME.CASED} is mainly a JS-related CLI; you'll be using JS projects more often.`,
+            ["cargo", "go"].includes(value)
+            && !Interrogate(
+                `Are you sure? ${value} is a non-JS runtime and FuckingNode is mainly a JS-related CLI; you'll be using JS projects more often.`,
             )
         ) return;
-        newSettings = { ...currentSettings, defaultManager: value };
+        newSettings = { ...currentSettings, "default-manager": value };
     }
 
     if (newSettings) {
@@ -203,31 +169,35 @@ export function ChangeSetting(
 
 /**
  * Formats user settings and logs them.
- *
- * @returns {void}
  */
 export function DisplaySettings(): void {
     const settings = GetUserSettings();
 
     const formattedSettings = [
-        `Check for updates             | Every ${ColorString(settings.updateFreq, "bright-green")} days. ${
-            ColorString("updateFreq", "half-opaque", "italic")
+        `Check for updates             | Every ${ColorString(settings["update-freq"], "bright-green")} days. ${
+            ColorString("update-freq", "half-opaque", "italic")
         }`,
-        `Default cleaner intensity     | ${ColorString(settings.defaultIntensity, "bright-green")}. ${
-            ColorString("defaultIntensity", "half-opaque", "italic")
+        `Default cleaner intensity     | ${ColorString(settings["default-intensity"], "bright-green")}. ${
+            ColorString("default-intensity", "half-opaque", "italic")
         }`,
-        `Favorite code editor          | ${ColorString(settings.favEditor, "bright-green")}. ${
-            ColorString("favEditor", "half-opaque", "italic")
+        `Default package manager       | ${ColorString(settings["default-manager"], "bright-green")}. ${
+            ColorString("default-manager", "half-opaque", "italic")
         }`,
-        `Auto-flush log file           | Every ${ColorString(settings.flushFreq, "bright-green")} days. ${
-            ColorString("flushFreq", "half-opaque", "italic")
+        `Favorite code editor          | ${ColorString(settings["fav-editor"], "bright-green")}. ${
+            ColorString("fav-editor", "half-opaque", "italic")
         }`,
-        `Send system notifications     | ${ColorString(settings.showNotifications ? "Enabled" : "Disabled", "bright-green")}. ${
-            ColorString("showNotifications", "half-opaque", "italic")
+        `Send system notifications     | ${ColorString(settings["notifications"] ? "Enabled" : "Disabled", "bright-green")}. ${
+            ColorString("notifications", "half-opaque", "italic")
         }`,
-        `Threshold notifications (30") | ${ColorString(settings.thresholdNotifications ? "Enabled" : "Disabled", "bright-green")}. ${
-            ColorString("thresholdNotifications", "half-opaque", "italic")
+        `Threshold notifications?      | ${ColorString(settings["notification-threshold"] ? "Enabled" : "Disabled", "bright-green")}. ${
+            ColorString("notification-threshold", "half-opaque", "italic")
         }`,
+        `Notification threshold        | ${ColorString(settings["notification-threshold-value"], "bright-green")} milliseconds. ${
+            ColorString("notification-threshold", "half-opaque", "italic")
+        }`,
+        `Cleanup error behavior?       | ${
+            ColorString(settings["always-short-circuit-cleanup"] ? "Short-circuit" : "Continue", "bright-green")
+        } ${ColorString("always-short-circuit-cleanup", "half-opaque", "italic")}`,
     ].join("\n");
 
     LogStuff(`${ColorString("Your current settings are:", "bright-yellow")}\n---\n${formattedSettings}`, "bulb");
@@ -240,12 +210,11 @@ export function DisplaySettings(): void {
  * @param {UnknownString} target What to flush.
  * @param {boolean} force If true no confirmation prompt will be shown.
  * @param {boolean} [silent=false] If true no success message will be shown.
- * @returns {void}
  */
 export async function FlushConfigFiles(target: UnknownString, force: boolean, silent: boolean = false): Promise<void> {
-    if (!validateAgainst(target, ["logs", "projects", "schedules", "errors", "all"])) {
+    if (!validateAgainst(target, ["projects", "schedules", "errors", "all"])) {
         LogStuff(
-            "Specify what to flush. Either 'logs', 'projects', 'schedules', 'errors', or 'all'.",
+            "Specify what to flush. Either 'projects', 'schedules', 'errors', or 'all'.",
             "warn",
         );
         return;
@@ -253,26 +222,22 @@ export async function FlushConfigFiles(target: UnknownString, force: boolean, si
 
     let file: string[];
 
-    if (target === "logs") file = [GetAppPath("LOGS")];
-    else if (target === "projects") file = [GetAppPath("MOTHERFKRS")];
+    if (target === "projects") file = [GetAppPath("MOTHERFKRS")];
     else if (target === "schedules") file = [GetAppPath("SCHEDULE")];
     else if (target === "errors") file = [GetAppPath("ERRORS")];
     else {
         file = [
-            GetAppPath("LOGS"),
             GetAppPath("MOTHERFKRS"),
             GetAppPath("SCHEDULE"),
             GetAppPath("ERRORS"),
         ];
     }
 
-    const fileSize = typeof file === "string"
-        ? Deno.statSync(file).size
-        : (file.map((item) => Deno.statSync(item).size)).reduce((acc, num) => acc + num, 0);
+    const fileSize = (await Promise.all(file.map((item) => Deno.stat(item)))).reduce((acc, num) => acc + num.size, 0);
 
     if (
-        !force &&
-        !Interrogate(
+        !force
+        && !Interrogate(
             `Are you sure you want to clean your ${target} file? You'll recover ${format(fileSize)}.`,
         )
     ) return;

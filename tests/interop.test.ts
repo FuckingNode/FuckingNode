@@ -19,8 +19,8 @@ Deno.test({
                 name: "my_project",
                 version: "0.1.0",
                 rm: "cargo",
-                perPlatProps: {
-                    cargo_edt: "2021",
+                plat: {
+                    edt: "2021",
                 },
                 deps: [
                     { name: "serde", ver: "1.0", rel: "univ:dep", src: "crates.io" },
@@ -51,38 +51,40 @@ Deno.test({
             {
                 name: "vuelto.pp.ua",
                 version: "v1.1.0",
-                rm: "golang",
-                perPlatProps: { cargo_edt: "__NTP" },
+                rm: "go",
+                plat: {
+                    edt: "1.18",
+                },
                 deps: [
                     {
                         name: "github.com/faiface/beep",
                         ver: "v1.1.0",
                         rel: "univ:dep",
-                        src: "pkg.go.dev",
+                        src: "github",
                     },
                     {
                         name: "github.com/go-gl/glfw/v3.3/glfw",
                         ver: "v0.0.0-20231124074035-2de0cf0c80af",
                         rel: "univ:dep",
-                        src: "pkg.go.dev",
+                        src: "github",
                     },
                     {
                         name: "github.com/hajimehoshi/go-mp3",
                         ver: "v0.3.0",
                         rel: "go:ind",
-                        src: "pkg.go.dev",
+                        src: "github",
                     },
                     {
                         name: "github.com/hajimehoshi/oto",
                         ver: "v0.7.1",
                         rel: "go:ind",
-                        src: "pkg.go.dev",
+                        src: "github",
                     },
                     {
                         name: "github.com/pkg/errors",
                         ver: "v0.9.1",
                         rel: "go:ind",
-                        src: "pkg.go.dev",
+                        src: "github",
                     },
                     {
                         name: "golang.org/x/exp",
@@ -131,7 +133,7 @@ Deno.test({
                 name: "test",
                 version: "0.59.123",
                 rm: "pnpm",
-                perPlatProps: { cargo_edt: "__NTP" },
+                plat: { edt: null },
                 deps: [
                     {
                         name: "eslint",
@@ -173,7 +175,7 @@ Deno.test({
                 name: "@zakahacecosas/string-utils",
                 version: "1.7.0",
                 rm: "deno",
-                perPlatProps: { cargo_edt: "__NTP" },
+                plat: { edt: null },
                 deps: [
                     {
                         name: "@std/fs",
@@ -193,8 +195,8 @@ const PKGGEN_TEST_FNCPF: FnCPF = {
     name: "test",
     version: "0.59.123",
     rm: "npm",
-    perPlatProps: {
-        cargo_edt: "__NTP",
+    plat: {
+        edt: "2021",
     },
     deps: [
         {
@@ -245,7 +247,7 @@ Deno.test({
     fn: () => {
         assertEquals(
             FkNodeInterop.Generators.Deno(PKGGEN_TEST_FNCPF, {
-                "lock": true,
+                lock: true,
             }),
             {
                 name: "test",
@@ -270,7 +272,7 @@ Deno.test({
                 },
             }),
             {
-                package: {
+                "package": {
                     name: "test",
                     version: "0.59.123",
                     edition: "2021",
@@ -280,11 +282,56 @@ Deno.test({
                 "dev-dependencies": {
                     typescript: "^4.4.3",
                 },
-                dependencies: {
+                "dependencies": {
                     eslint: "^7.32.0",
                 },
-                workspace: {
+                "workspace": {
                     members: [],
+                },
+            },
+        );
+    },
+});
+
+Deno.test({
+    name: "pkggen module generates cargo pkg file",
+    fn: () => {
+        assertEquals(
+            FkNodeInterop.Generators.Golang({
+                name: "test",
+                version: "1.1.0",
+                rm: "go",
+                deps: [{
+                    name: "golang.org/x/foobar",
+                    ver: "1.6",
+                    src: "pkg.go.dev",
+                    rel: "univ:dep",
+                }, {
+                    name: "golang.org/x/foo",
+                    ver: "1.6",
+                    src: "github",
+                    rel: "go:ind",
+                }],
+                ws: [],
+                plat: {
+                    edt: "1.25",
+                },
+                fknVer: "5.0.0",
+            }),
+            {
+                module: "test",
+                go: "1.25",
+                require: {
+                    "golang.org/x/foobar": {
+                        version: "1.6",
+                        src: "pkg.go.dev",
+                        indirect: false,
+                    },
+                    "golang.org/x/foo": {
+                        version: "1.6",
+                        src: "github",
+                        indirect: true,
+                    },
                 },
             },
         );

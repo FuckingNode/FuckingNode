@@ -40,6 +40,14 @@ export interface NodePkgFile extends GenericJsPkgFile {
         packages: string[];
         nohoist?: string[];
     };
+    private?: boolean;
+    license?: string;
+    author?: string | { name: string };
+    description?: string;
+    repository?: string;
+    bugs?: string;
+    type?: string;
+    contributors?: unknown[];
 }
 
 /**
@@ -50,6 +58,10 @@ export interface NodePkgFile extends GenericJsPkgFile {
 export interface DenoPkgFile extends GenericJsPkgFile {
     imports?: Record<string, string>;
     workspaces?: string[];
+    exports?: Record<string, string>;
+    fmt?: Record<string, string | number | boolean | string[]>;
+    lint?: unknown;
+    lock?: unknown;
 }
 
 /**
@@ -58,16 +70,16 @@ export interface DenoPkgFile extends GenericJsPkgFile {
  * @interface CargoPkgFile
  */
 export interface CargoPkgFile {
-    package?: {
+    "package"?: {
         name: string | { workspace: true };
         version: string | { workspace: true };
         /** If unclear, the Rust "edition" is the Rust version to be used. */
         edition?: string | { workspace: true };
     };
-    dependencies?: Record<string, CargoDependency>;
+    "dependencies"?: Record<string, CargoDependency>;
     "dev-dependencies"?: Record<string, CargoDependency>;
     "build-dependencies"?: Record<string, CargoDependency>;
-    workspace?: {
+    "workspace"?: {
         package?: {
             name: string;
             version: string;
@@ -76,6 +88,11 @@ export interface CargoPkgFile {
         };
         members?: string[];
     };
+    "license"?: string;
+    "authors"?: unknown[];
+    "description"?: string;
+    "repository"?: string;
+    "edition"?: string | { workspace: true };
 }
 
 /**
@@ -90,10 +107,12 @@ export interface GolangPkgFile {
     go: string;
     /** Equivalent to dependencies. For each module, key is the name and the source (github.com, pkg.go.dev...) at the same time. */
     require?: {
-        [moduleName: string]: { version: string; indirect?: boolean };
+        [moduleName: string]: { version: string; src?: "pkg.go.dev" | "github"; indirect?: boolean };
     };
 }
 
+// in order to implement modules, gotta make this global, instead of hardcoding types for supported platforms
+// anywhere where false or unsupported is a thing, make sure to make proper type guards
 interface GenericProjectEnvironment {
     /**
      * Path to the **root** of the project.
@@ -108,33 +127,37 @@ interface GenericProjectEnvironment {
      */
     settings: FullFkNodeYaml;
     /**
-     * Main file (`package.json`, `deno.json`, `Cargo.toml`...)
+     * Path to the main file (`package.json`, `deno.json`, `Cargo.toml`...)
      */
-    main: {
-        /**
-         * Path to the main file
-         *
-         * @type {string}
-         */
+    mainPath: string;
+    /**
+     * Contents of the main file (**FnCPF format**).
+     *
+     * @type {FnCPF}
+     */
+    mainCPF: FnCPF;
+    /**
+     * Name of the main file.
+     *
+     * @type {("package.json" | "deno.json" | "deno.jsonc" | "Cargo.toml" | "go.mod")}
+     */
+    mainName: "package.json" | "deno.json" | "deno.jsonc" | "Cargo.toml" | "go.mod";
+    /**
+     * Contents of the main file (**standard format**).
+     *
+     * @type {(NodePkgFile | DenoPkgFile | CargoPkgFile | GolangPkgFile)}
+     */
+    mainSTD: NodePkgFile | DenoPkgFile | CargoPkgFile | GolangPkgFile;
+    /** Names this project can be represented with. */
+    names: {
+        /** Path to the project, with colors and stuff. */
         path: string;
-        /**
-         * Name of the main file.
-         *
-         * @type {("package.json" | "deno.json" | "deno.jsonc" | "Cargo.toml" | "go.mod")}
-         */
-        name: "package.json" | "deno.json" | "deno.jsonc" | "Cargo.toml" | "go.mod";
-        /**
-         * Contents of the main file (**standard format**).
-         *
-         * @type {(NodePkgFile | DenoPkgFile | CargoPkgFile | GolangPkgFile)}
-         */
-        stdContent: NodePkgFile | DenoPkgFile | CargoPkgFile | GolangPkgFile;
-        /**
-         * Contents of the main file (**FnCPF format**).
-         *
-         * @type {FnCPF}
-         */
-        cpfContent: FnCPF;
+        /** Project's name as in `name` in `package.json` (or equiv). */
+        name: string;
+        /** Project's name as in `name` in `package.json` (or equiv) + package version as in `version`. */
+        nameVer: string;
+        /** `nameVer` + `path`. */
+        full: string;
     };
     /**
      * Project's lockfile
@@ -180,13 +203,17 @@ interface GenericProjectEnvironment {
          */
         base: MANAGER_GLOBAL;
         /**
-         * Exec command(s). `string[]` because it can be, e.g., `pnpm dlx`. Includes base.
+         * DLX execution commands. `string[]` because they can be like `pnpm dlx`, includes base. False for non-JS runtimes.
          */
-        exec: ["deno", "run"] | ["bunx"] | ["npx"] | ["pnpm", "dlx"] | ["yarn", "dlx"] | ["go", "run"] | ["cargo", "run"];
+        dlx: ["deno", "run"] | ["bunx"] | ["npx"] | ["pnpm", "dlx"] | ["yarn", "dlx"] | false;
         /**
-         * Run commands. `string[]` as it's always made of two parts. Includes base. Can be "__UNSUPPORTED" because of non-JS runtimes.
+         * File exec commands. `string[]`, includes base.
          */
-        run: ["deno", "task"] | ["npm", "run"] | ["bun", "run"] | ["pnpm", "run"] | ["yarn", "run"] | "__UNSUPPORTED";
+        file: ["deno", "run"] | ["bun"] | ["node"] | ["go", "run"] | ["cargo", "run"];
+        /**
+         * Script run commands. `string[]`, includes base. False for non-JS runtimes.
+         */
+        script: ["deno", "task"] | ["npm", "run"] | ["bun", "run"] | ["pnpm", "run"] | ["yarn", "run"] | false;
         /**
          * Update commands.
          */
@@ -194,7 +221,7 @@ interface GenericProjectEnvironment {
         /**
          * Clean commands.
          */
-        clean: string[][] | "__UNSUPPORTED";
+        clean: string[][] | false;
         /**
          * Audit commands.
          */
@@ -203,43 +230,37 @@ interface GenericProjectEnvironment {
             | ["audit", "--ignore-registry-errors", "--json"]
             | ["audit", "--json"]
             | ["audit", "--recursive", "--all", "--json"]
-            | "__UNSUPPORTED";
+            | false;
         /**
          * Package publish commands.
          */
-        publish: ["publish"] | ["publish", "--non-interactive"] | ["publish", "--check=all"] | "__UNSUPPORTED";
+        publish: ["publish"] | ["publish", "--non-interactive"] | ["publish", "--check=all"] | false;
         /**
          * Project startup commands.
          */
         start: "run" | "start";
     };
-    /**
-     * File paths to valid workspaces.
-     *
-     * @type {(string[])}
-     */
-    workspaces: string[];
 }
 
 interface NodeEnvironment extends GenericProjectEnvironment {
     runtime: "node";
     manager: "npm" | "pnpm" | "yarn";
-    main: GenericProjectEnvironment["main"] & { name: "package.json" };
+    mainName: "package.json";
+    mainSTD: NodePkgFile;
     commands: {
         base: "npm" | "pnpm" | "yarn";
-        exec: ["npx"] | ["pnpm", "dlx"] | ["yarn", "dlx"];
-        run: ["npm", "run"] | ["pnpm", "run"] | ["yarn", "run"];
+        dlx: ["npx"] | ["pnpm", "dlx"] | ["yarn", "dlx"];
+        file: ["node"];
+        script: ["npm", "run"] | ["pnpm", "run"] | ["yarn", "run"];
         update: ["update"] | ["upgrade"];
         clean:
             | [["dedupe"], ["prune"]]
             | [["clean"]]
-            | [["autoclean", "--force"]]
-            | "__UNSUPPORTED";
+            | [["autoclean", "--force"]];
         audit:
             | ["audit", "--ignore-registry-errors", "--json"]
             | ["audit", "--json"]
-            | ["audit", "--recursive", "--all", "--json"]
-            | "__UNSUPPORTED";
+            | ["audit", "--recursive", "--all", "--json"];
         publish: ["publish"] | ["publish", "--non-interactive"];
         start: "start";
     };
@@ -254,13 +275,15 @@ interface NodeEnvironment extends GenericProjectEnvironment {
 interface BunEnvironment extends GenericProjectEnvironment {
     runtime: "bun";
     manager: "bun";
-    main: GenericProjectEnvironment["main"] & { name: "package.json" };
+    mainName: "package.json";
+    mainSTD: NodePkgFile;
     commands: {
         base: "bun";
-        exec: ["bunx"];
-        run: ["bun", "run"];
+        dlx: ["bunx"];
+        file: ["bun"];
+        script: ["bun", "run"];
         update: ["update", "--save-text-lockfile"];
-        clean: "__UNSUPPORTED";
+        clean: false;
         audit: ["audit", "--json"];
         publish: ["publish"];
         start: "start";
@@ -276,53 +299,59 @@ interface BunEnvironment extends GenericProjectEnvironment {
 interface DenoEnvironment extends GenericProjectEnvironment {
     runtime: "deno";
     manager: "deno";
-    main: GenericProjectEnvironment["main"] & { name: "deno.json" | "deno.jsonc" };
+    mainName: "deno.json" | "deno.jsonc";
+    mainSTD: DenoPkgFile;
     commands: {
         base: "deno";
-        exec: ["deno", "run"];
-        run: ["deno", "task"];
+        dlx: ["deno", "run"];
+        file: ["deno", "run"];
+        script: ["deno", "task"];
         update: ["outdated", "--update"];
-        clean: "__UNSUPPORTED";
-        audit: "__UNSUPPORTED";
+        clean: false;
+        audit: false;
         publish: ["publish", "--check=all"];
         start: "run";
     };
+}
+
+interface CargoEnvironment extends GenericProjectEnvironment {
+    runtime: "rust";
+    manager: "cargo";
+    mainName: "Cargo.toml";
+    mainSTD: CargoPkgFile;
+    commands: {
+        base: "cargo";
+        dlx: false;
+        file: ["cargo", "run"];
+        script: false;
+        update: ["update"];
+        clean: [["clean"]];
+        audit: false;
+        publish: ["publish"];
+        start: "run";
+    };
     /**
-     * Path to `node_modules`.
+     * Path to `target`.
      *
      * @type {string}
      */
     hall_of_trash: string;
 }
 
-interface CargoEnvironment extends GenericProjectEnvironment {
-    runtime: "rust";
-    manager: "cargo";
-    main: GenericProjectEnvironment["main"] & { name: "Cargo.toml" };
-    commands: {
-        base: "cargo";
-        exec: ["cargo", "run"];
-        run: "__UNSUPPORTED";
-        update: ["update"];
-        clean: [["clean"]];
-        audit: "__UNSUPPORTED";
-        publish: ["publish"];
-        start: "run";
-    };
-}
-
 interface GolangEnvironment extends GenericProjectEnvironment {
     runtime: "golang";
     manager: "go";
-    main: GenericProjectEnvironment["main"] & { name: "go.mod" };
+    mainName: "go.mod";
+    mainSTD: GolangPkgFile;
     commands: {
         base: "go";
-        exec: ["go", "run"];
-        run: "__UNSUPPORTED";
+        dlx: false;
+        file: ["go", "run"];
+        script: false;
         update: ["get", "-u", "all"];
         clean: [["clean"], ["mod", "tidy"]];
-        audit: "__UNSUPPORTED";
-        publish: "__UNSUPPORTED";
+        audit: false;
+        publish: false;
         start: "run";
     };
 }
@@ -377,10 +406,8 @@ interface FnCPFDependency {
     rel: "univ:dep" | "univ:devD" | "go:ind" | "js:peer" | "rst:buildD";
     /**
      * Package source.
-     *
-     * @type {("npm" | "jsr" | "pkg.go.dev" | "crates.io")}
      */
-    src: "npm" | "jsr" | "pkg.go.dev" | "crates.io";
+    src: "npm" | "jsr" | "pkg.go.dev" | "crates.io" | "github";
 }
 
 /**
@@ -405,21 +432,15 @@ export interface FnCPF {
     /**
      * Runtime/Manager.
      *
-     * @type {("npm" | "pnpm" | "yarn" | "deno" | "bun" | "cargo" | "golang")}
+     * @type {("npm" | "pnpm" | "yarn" | "deno" | "bun" | "cargo" | "go")}
      */
-    rm: "npm" | "pnpm" | "yarn" | "deno" | "bun" | "cargo" | "golang";
+    rm: "npm" | "pnpm" | "yarn" | "deno" | "bun" | "cargo" | "go";
     /**
-     * Per platform props.
-     *
-     * @type {{
-     *         cargo: {
-     *             edition: string;
-     *         };
-     *     }}
+     * Platform props.
      */
-    perPlatProps: {
-        /** Rust edition. "__NTP" (Not This Platform) on other runtimes. */
-        cargo_edt: string | undefined | "__NTP";
+    plat: {
+        /** Rust edition in Cargo and Go version in Golang. `null` for other runtimes. */
+        edt: string | null;
     };
     /**
      * Dependencies.
@@ -440,4 +461,22 @@ export interface FnCPF {
      * @type {string}
      */
     fknVer: string;
+}
+
+type AnyEnv = NodeEnvironment | BunEnvironment | DenoEnvironment | CargoEnvironment | GolangEnvironment;
+
+export function TypeGuardForNodeBun(env: AnyEnv): env is NodeEnvironment | BunEnvironment {
+    return (env.runtime === "node" || env.runtime === "bun");
+}
+
+export function TypeGuardForJS(env: AnyEnv): env is NodeEnvironment | BunEnvironment | DenoEnvironment {
+    return (env.runtime === "node" || env.runtime === "bun" || env.runtime === "deno");
+}
+
+export function TypeGuardForDeno(env: AnyEnv): env is DenoEnvironment {
+    return (env.runtime === "deno");
+}
+
+export function TypeGuardForCargo(env: AnyEnv): env is CargoEnvironment {
+    return (env.runtime === "rust");
 }

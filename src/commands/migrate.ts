@@ -1,11 +1,11 @@
+import * as DenoJson from "../../deno.json" with { type: "json" };
 import { normalize, validate } from "@zakahacecosas/string-utils";
-import { FULL_NAME } from "../constants.ts";
 import { GetDateNow, GetElapsedTime } from "../functions/date.ts";
-import { CheckForPath, JoinPaths } from "../functions/filesystem.ts";
+import { JoinPaths } from "../functions/filesystem.ts";
 import { LogStuff, Notification } from "../functions/io.ts";
-import { GetProjectEnvironment, NameProject, SpotProject } from "../functions/projects.ts";
+import { GetProjectEnvironment } from "../functions/projects.ts";
 import type { MANAGER_JS, ProjectEnvironment } from "../types/platform.ts";
-import type { TheMigratorConstructedParams } from "./constructors/command.ts";
+import type { TheMigratorConstructedParams } from "./_interfaces.ts";
 import { FkNodeInterop } from "./interop/interop.ts";
 import { FknError } from "../functions/error.ts";
 
@@ -13,7 +13,7 @@ function handler(
     from: MANAGER_JS,
     to: MANAGER_JS,
     env: ProjectEnvironment,
-) {
+): void {
     try {
         if (env.runtime === "golang" || env.runtime === "rust") {
             throw new FknError(
@@ -27,10 +27,14 @@ function handler(
         LogStuff("Updating dependencies (1/6)...", "working");
         FkNodeInterop.Features.Update(env);
 
-        LogStuff("Removing node_modules (2/6)...", "working");
-        Deno.removeSync(env.hall_of_trash, {
-            recursive: true,
-        });
+        if (env.runtime !== "deno") {
+            LogStuff("Removing node_modules (2/6)...", "working");
+            Deno.removeSync(env.hall_of_trash, {
+                recursive: true,
+            });
+        } else {
+            LogStuff("Step 2/6 (removing node_modules) doesn't apply for Deno...", "bulb");
+        }
 
         Deno.chdir(env.root);
 
@@ -45,7 +49,7 @@ function handler(
         // i'm a damn genius
         LogStuff("Migrating versions from previous package file (3/6)...", "working");
         LogStuff("A copy will be made (package.json.bak), just in case", "wink");
-        if (env.main.path.endsWith("jsonc")) {
+        if (env.mainPath.endsWith("jsonc")) {
             LogStuff(
                 "Your deno.jsonc's comments (if any) WON'T be preserved in final package file, but WILL be present in the .bak file. Sorry bro.",
                 "bruh",
@@ -53,40 +57,27 @@ function handler(
         }
         const newPackageFile = from === "deno"
             ? FkNodeInterop.Generators.Deno(
-                env.main.cpfContent,
-                env.main.stdContent,
+                env.mainCPF,
+                env.mainSTD,
             )
             : FkNodeInterop.Generators.NodeBun(
-                env.main.cpfContent,
-                env.main.stdContent,
+                env.mainCPF,
+                env.mainSTD,
             );
         Deno.writeTextFileSync(
-            JoinPaths(env.root, `${env.main.name}.jsonc.bak`),
-            `// This is a backup of your previous project file. We (${FULL_NAME}) overwrote it at ${GetDateNow()}.\n${
-                JSON.stringify(env.main.stdContent)
+            JoinPaths(env.root, `${env.mainName}.jsonc.bak`),
+            `// This is a backup of your previous project file. We (FuckingNode v${DenoJson.default.version}) overwrote it at ${GetDateNow()}.\n${
+                JSON.stringify(env.mainSTD)
             }`,
         );
         Deno.writeTextFileSync(
-            env.main.path,
+            env.mainPath,
             JSON.stringify(newPackageFile),
         );
 
         LogStuff("Making a backup of your previous lockfile (4/6)...", "working");
         if (env.lockfile.path) {
-            if (env.lockfile.name === "bun.lockb" && CheckForPath(JoinPaths(env.root, "bun.lock"))) {
-                // handle case where bun.lockb was replaced with bun.lock
-                Deno.renameSync(env.lockfile.path, JoinPaths(env.root, "bun.lockb.bak"));
-                LogStuff(
-                    "Your bun.lockb file will be backed up and replaced with a text-based lockfile (bun.lock).",
-                    "bruh",
-                );
-            } else {
-                Deno.writeTextFileSync(
-                    JoinPaths(env.root, `${env.lockfile.name}.bak`),
-                    Deno.readTextFileSync(env.lockfile.path),
-                );
-            }
-            Deno.removeSync(env.lockfile.path);
+            Deno.renameSync(env.lockfile.path, JoinPaths(env.root, `${env.lockfile.name}.bak`));
         } else {
             LogStuff("No lockfile found, skipping backup.", "warn");
         }
@@ -100,7 +91,8 @@ function handler(
         LogStuff(`Migration threw an: ${e}`, "error");
     }
 }
-export default function TheMigrator(params: TheMigratorConstructedParams): void {
+
+export default async function TheMigrator(params: TheMigratorConstructedParams): Promise<void> {
     const { projectPath, wantedManager } = params;
     const startup = new Date();
 
@@ -121,8 +113,7 @@ export default function TheMigrator(params: TheMigratorConstructedParams): void 
         );
     }
 
-    const workingProject = SpotProject(projectPath);
-    const workingEnv = GetProjectEnvironment(workingProject);
+    const workingEnv = await GetProjectEnvironment(projectPath);
 
     if (!MANAGERS.includes(workingEnv.manager)) {
         throw new FknError(
@@ -131,15 +122,8 @@ export default function TheMigrator(params: TheMigratorConstructedParams): void 
         );
     }
 
-    if (!CheckForPath(workingEnv.main.path)) {
-        throw new FknError(
-            "Env__NoPkgFile",
-            "No package.json/deno.json(c) file found, cannot migrate. How will we install your modules without that file?",
-        );
-    }
-
     LogStuff(
-        `Migrating ${workingProject} to ${desiredManager} has a chance of messing your versions up.\nYour lockfile will be backed up and synced to ensure coherence.`,
+        `Migrating ${workingEnv.names.full} to ${desiredManager} has a chance of messing your versions up.\nYour lockfile will be backed up and synced to ensure coherence.`,
         "warn",
     );
 
@@ -149,7 +133,7 @@ export default function TheMigrator(params: TheMigratorConstructedParams): void 
         workingEnv,
     );
 
-    LogStuff(`That worked out! Enjoy using ${desiredManager} for ${NameProject(workingEnv.root, "all")}`);
+    LogStuff(`That worked out! Enjoy using ${desiredManager} for ${workingEnv.names.full}`);
     const elapsed = Date.now() - startup.getTime();
     Notification(
         `Your project was migrated!`,

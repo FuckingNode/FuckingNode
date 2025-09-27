@@ -1,18 +1,11 @@
-import { validateAgainst } from "@zakahacecosas/string-utils";
-import { ProjectEnvironment } from "../../types/platform.ts";
+import { type ProjectEnvironment, TypeGuardForCargo, TypeGuardForDeno, TypeGuardForNodeBun } from "../../types/platform.ts";
 import { LogStuff } from "../../functions/io.ts";
 import { parse } from "@std/semver";
 import { ColorString } from "../../functions/color.ts";
 
-export function RecommendedCommunityStandards(env: ProjectEnvironment) {
-    // deno-lint-ignore no-explicit-any
-    const content = env.main.stdContent as any;
-
-    const isNodeJs = validateAgainst(env.runtime, ["node", "bun"]);
-    const isDenoJs = env.runtime === "deno";
-
-    if (isNodeJs) {
-        const { version, private: isPrivate, license, author, contributors, description, repository, bugs, type } = content;
+export function RecommendedCommunityStandards(env: ProjectEnvironment): void {
+    if (TypeGuardForNodeBun(env)) {
+        const { version, private: isPrivate, license, author, contributors, description, repository, bugs, type } = env.mainSTD;
 
         LogStuff(
             isPrivate ? "This is a private project. Running generic checks." : "This is a public project. Running additional package checks.",
@@ -20,6 +13,7 @@ export function RecommendedCommunityStandards(env: ProjectEnvironment) {
         );
 
         try {
+            if (!version) throw "";
             parse(version);
             LogStuff("Version follows the SemVer format. Nice!", "tick");
         } catch {
@@ -62,11 +56,12 @@ export function RecommendedCommunityStandards(env: ProjectEnvironment) {
                 bugs ? "tick" : "error",
             );
         }
-    } else if (isDenoJs) {
+    } else if (TypeGuardForDeno(env)) {
         // this is very basic tbh, a deno.json doesn't have much
-        const { lint, fmt, lock, version } = content;
+        const { lint, fmt, lock, version } = env.mainSTD;
 
         try {
+            if (!version) throw "";
             parse(version);
             LogStuff("Version follows the SemVer format. Nice!", "tick");
         } catch {
@@ -84,9 +79,9 @@ export function RecommendedCommunityStandards(env: ProjectEnvironment) {
             lock ? `Found lockfile configurations. That's good!` : "Why did you disable the lockfile!?",
             lock ? "tick" : "bruh",
         );
-    } else {
+    } else if (TypeGuardForCargo(env)) {
         // in this case we know it's cargo
-        const { license, authors, description, repository, edition } = content;
+        const { license, authors, description, repository, edition } = env.mainSTD;
 
         LogStuff(
             license ? `${license} license, nice.` : "No license found. You should specify one!",

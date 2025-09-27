@@ -1,0 +1,33 @@
+[FIM]
+{
+    "main_name": "build.zig.zon",
+    "main_fmt": "matcher!",
+    "lock_name": null,
+    "rt_ident": "zig",
+    "rt_color": 23,
+    "mgr_cmd": "zig",
+    "commands": {
+        "exec": null,
+        "script": null,
+        "update": null,
+        "clean": null,
+        "audit": null,
+        "publish": null
+    },
+    "hard": [
+        "~/.cache/zig"
+    ]
+}
+
+[MSD]
+name|.name = "$"
+ver|.version = "$"
+
+[EXT]
+{
+    "name": "test-module",
+    "ver": "1.2.3",
+    "desc": "Test description of a module that, ideally, would add support for Zig.",
+}
+
+#1.0.0

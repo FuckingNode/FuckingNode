@@ -1,19 +1,13 @@
+import * as DenoJson from "../../deno.json" with { type: "json" };
 import { Commander } from "../functions/cli.ts";
 import { CheckForPath, JoinPaths, ParsePath } from "../functions/filesystem.ts";
-import { LogStuff } from "../functions/io.ts";
-import { GetProjectEnvironment, SpotProject } from "../functions/projects.ts";
-import { FULL_NAME } from "../constants.ts";
 import { normalize, normalizeArray, StringArray, validate } from "@zakahacecosas/string-utils";
 import { FknError } from "./error.ts";
-import { GIT_FILES } from "../types/misc.ts";
+import type { GIT_FILES } from "../types/misc.ts";
 import { ColorString } from "./color.ts";
 
-// * NOTE
-// * in this file, use Error instead of FknError, then capture all errors and return 1
-// * it's designed that way
-
 /** Runs a Git command with any args. ASSUMES AN ALREADY SPOTTED PATH. */
-function g(path: string, args: string[]) {
+function g(path: string, args: string[]): ReturnType<typeof Commander> {
     return Commander("git", ["-C", path, ...args]);
 }
 
@@ -25,28 +19,25 @@ function g(path: string, args: string[]) {
  */
 export function IsRepo(path: string): boolean {
     try {
-        const resolvedPath = SpotProject(path);
-
         // make sure we're in a repo
         const output = g(
-            resolvedPath,
+            path,
             [
                 "rev-parse",
                 "--is-inside-work-tree",
             ],
         );
         if (
-            !output.success ||
-            normalize(output.stdout ?? "", { strict: true, removeCliColors: true }) !== "true"
+            !output.success
+            || normalize(output.stdout, { strict: true, removeCliColors: true }) !== "true"
         ) return false; // anything unsuccessful means uncommitted changes
 
         return true;
     } catch (e) {
-        new FknError(
-            "Git__UE__IsRepo",
-            `An error happened validating if ${ParsePath(path)} is a Git repo: ${e}`,
+        throw new FknError(
+            "Git__IsRepo",
+            `Can't validate if ${ParsePath(path)} is a Git repo: ${e}`,
         );
-        return false;
     }
 }
 
@@ -58,25 +49,23 @@ export function IsRepo(path: string): boolean {
  */
 export function CanCommit(path: string): boolean | "nonAdded" {
     try {
-        const resolvedPath = SpotProject(path);
-
         // make sure we're in a repo
-        if (!IsRepo(resolvedPath)) return false;
+        if (!IsRepo(path)) return false;
 
         // check for uncommitted changes
-        const localChanges = g(resolvedPath, ["status"]);
+        const localChanges = g(path, ["status"]);
 
         if (
             (/nothing added to to commit but untracked files present|no changes added to commit/.test(localChanges.stdout ?? ""))
         ) return "nonAdded";
 
         if (
-            (/nothing to commit|working tree clean/.test(localChanges.stdout ?? "")) ||
-            !localChanges.success // anything that isn't 0 means something is in the tree
+            (/nothing to commit|working tree clean/.test(localChanges.stdout ?? ""))
+            || !localChanges.success // anything that isn't 0 means something is in the tree
         ) return false; // if anything happens we assume the tree isn't clean, just in case.
 
         // check if the local branch is behind the remote
-        const remoteStatus = g(resolvedPath, [
+        const remoteStatus = g(path, [
             "rev-list",
             "--count",
             "--left-only",
@@ -84,19 +73,17 @@ export function CanCommit(path: string): boolean | "nonAdded" {
         ]);
         if (!remoteStatus.stdout) return false; // if we can't get the remote status, we assume it's not clean
         if (
-            remoteStatus.success &&
-            parseInt(remoteStatus.stdout, 10) > 0
+            remoteStatus.success
+            && parseInt(remoteStatus.stdout, 10) > 0
         ) return false; // local branch is behind the remote, so we shouldn't change stuff
 
         return true; // clean working tree and up to date with remote, we can do whatever we want
     } catch (e) {
-        LogStuff(`An error happened validating the Git working tree: ${e}`, "error");
-        return false;
+        throw new FknError("Git__CanCommit", `An error happened validating the Git working tree: ${e}`);
     }
 }
-export function Commit(project: string, message: string, add: string[] | "all" | "none", avoid: string[]): 0 | 1 {
+export function Commit(path: string, message: string, add: string[] | "all" | "none", avoid: string[]): void {
     try {
-        const path = SpotProject(project);
         const toAdd = Array.isArray(add) ? add : add === "none" ? [] : add === "all" ? ["."] : [];
 
         if (toAdd.length > 0) {
@@ -104,7 +91,7 @@ export function Commit(project: string, message: string, add: string[] | "all" |
                 "add",
                 ...toAdd,
             ]);
-            if (!addOutput.success) throw new Error(addOutput.stdout);
+            if (!addOutput.success) throw `(git add): ${addOutput.stdout}`;
         }
 
         if (avoid.length > 0) {
@@ -113,7 +100,7 @@ export function Commit(project: string, message: string, add: string[] | "all" |
                 "--staged",
                 ...avoid,
             ]);
-            if (!restoreOutput.success) throw new Error(restoreOutput.stdout);
+            if (!restoreOutput.success) throw `(git restore): ${restoreOutput.stdout}`;
         }
 
         const commitOutput = g(
@@ -125,23 +112,20 @@ export function Commit(project: string, message: string, add: string[] | "all" |
             ],
         );
         if (!commitOutput.success) {
-            if (/nothing to commit|working tree clean/.test(commitOutput.stdout ?? "")) return 0;
-            throw new Error(commitOutput.stdout);
+            if (/nothing to commit|working tree clean/.test(commitOutput.stdout ?? "")) return;
+            throw `(git commit): ${commitOutput.stdout}`;
         }
-        return 0;
+        return;
     } catch (e) {
-        LogStuff(
-            `Error - could not create commit ${ColorString(message, "bold")} at ${ColorString(project, "bold")} because of error: ${e}`,
-            "error",
+        throw new FknError(
+            "Git__Commit",
+            `Couldn't create commit ${ColorString(message, "bold")} at ${ColorString(path, "bold")}: ${e}`,
         );
-        return 1;
     }
 }
-export function Push(project: string, branch: string | false): 0 | 1 {
+export function Push(path: string, branch: string | false): void {
     try {
-        const path = SpotProject(project);
-
-        const pushToBranch = branch === false ? [] : ["origin", branch.trim()];
+        const pushToBranch = branch === false ? [] : ["origin", branch];
 
         const pushOutput = g(
             path,
@@ -150,72 +134,43 @@ export function Push(project: string, branch: string | false): 0 | 1 {
                 ...pushToBranch,
             ],
         );
-        if (!pushOutput.success) {
-            throw new Error(pushOutput.stdout);
-        }
-        return 0;
+        if (!pushOutput.success) throw `(git push) ${pushOutput.stdout}`;
+        return;
     } catch (e) {
-        LogStuff(
-            `Error - could not push at ${ColorString(project, "bold")} because of error: ${e}`,
-            "error",
+        throw new FknError(
+            "Git__Push",
+            `Couldn't push at ${ColorString(path, "bold")}: ${e}`,
         );
-        return 1;
     }
 }
 /**
  * Make sure to `Commit()` changes to `.gitignore`.
  */
-export function AddToGitIgnore(project: string, toBeIgnored: string): 0 | 1 {
-    try {
-        const path = SpotProject(project);
-        const env = GetProjectEnvironment(path);
-        const gitIgnoreFile = JoinPaths(env.root, ".gitignore");
-        if (!CheckForPath(gitIgnoreFile)) {
-            Deno.writeTextFileSync(gitIgnoreFile, "");
-            LogStuff(
-                `Ignored ${toBeIgnored} successfully`,
-                "tick",
-            );
+export function AddToGitIgnore(path: string, toBeIgnored: string): void {
+    const gitIgnoreFile = JoinPaths(path, ".gitignore");
 
-            return 0;
-        }
-        const gitIgnoreContent = Deno.readTextFileSync(gitIgnoreFile);
+    const gitIgnoreContent = Deno.readTextFileSync(gitIgnoreFile).trim();
 
-        if (gitIgnoreContent.includes(toBeIgnored)) return 0;
+    if (gitIgnoreContent.includes(toBeIgnored)) return;
 
-        Deno.writeTextFileSync(
-            gitIgnoreFile,
-            `${gitIgnoreContent.endsWith("\n") ? "" : "\n"}# auto-added by ${FULL_NAME} release command\n${toBeIgnored}`,
-            {
-                append: true,
-            },
-        );
+    Deno.writeTextFileSync(
+        gitIgnoreFile,
+        `\n# auto-added by FuckingNode v${DenoJson.default.version} release command\n${toBeIgnored}`,
+        {
+            append: true,
+        },
+    );
 
-        LogStuff(
-            `Ignored ${toBeIgnored} successfully`,
-            "tick",
-        );
-
-        return 0;
-    } catch (e) {
-        LogStuff(
-            `Error - could not ignore file ${toBeIgnored} at ${ColorString(project, "bold")} because of error: ${e}`,
-            "error",
-        );
-
-        return 1;
-    }
+    return;
 }
-export function Tag(project: string, tag: string, push: boolean): 0 | 1 {
+
+export function Tag(path: string, tag: string, push: boolean): void {
     try {
-        const path = SpotProject(project);
         const tagOutput = g(path, [
             "tag",
             tag.trim(),
         ]);
-        if (!tagOutput.success) {
-            throw new Error(tagOutput.stdout);
-        }
+        if (!tagOutput.success) throw `(git tag) ${tagOutput.stdout}`;
         if (push) {
             const pushOutput = g(
                 path,
@@ -225,29 +180,24 @@ export function Tag(project: string, tag: string, push: boolean): 0 | 1 {
                     "--tags",
                 ],
             );
-            if (!pushOutput.success) {
-                throw new Error(pushOutput.stdout);
-            }
+            if (!pushOutput.success) throw `(git push) ${pushOutput.stdout}`;
         }
-        return 0;
+        return;
     } catch (e) {
-        LogStuff(
-            `Error - could not create tag ${tag} at ${ColorString(project, "bold")} because of error: ${e}`,
-            "error",
+        throw new FknError(
+            "Git__MkTag",
+            `Couldn't create tag ${tag} at ${ColorString(path, "bold")}: ${e}`,
         );
-
-        return 1;
     }
 }
 /**
  * Gets the latest tag for a project.
  *
- * @param project Project path. **Assumes it's parsed & spotted.**
- * @returns A string with the tag name, or `undefined` if an error happens.
+ * @param path Project path. **Assumes it's parsed & spotted.**
+ * @returns A string with the tag name.
  */
-export function GetLatestTag(project: string): string | undefined {
+export function GetLatestTag(path: string): string {
     try {
-        const path = SpotProject(project);
         const getTagOutput = g(
             path,
             [
@@ -256,24 +206,24 @@ export function GetLatestTag(project: string): string | undefined {
                 "--abbrev=0",
             ],
         );
-        if (!getTagOutput.success) {
-            throw new Error(getTagOutput.stdout);
-        }
-        if (!getTagOutput.stdout) {
-            throw new Error(`git describe --tags --abbrev=0 returned an undefined output for ${project}`);
-        }
+        if (!getTagOutput.success) throw `(git describe --tags --abbrev=0) ${getTagOutput.stdout}`;
         return getTagOutput.stdout; // describe --tags --abbrev=0 should return a string with nothing but the latest tag, so this will do
     } catch (e) {
-        LogStuff(
-            `Error - could not get latest tag at ${ColorString(project, "bold")} because of error: ${e}`,
-            "error",
+        throw new FknError(
+            "Git__GLTag",
+            `Couldn't get latest tag at ${ColorString(path, "bold")} because of error: ${e}`,
         );
-        return undefined;
     }
 }
-export function GetStagedFiles(project: string): string[] {
+/**
+ * Get all files that are staged.
+ *
+ * @export
+ * @param {string} path
+ * @returns {string[]}
+ */
+export function GetStagedFiles(path: string): string[] {
     try {
-        const path = SpotProject(project);
         const getFilesOutput = g(
             path,
             [
@@ -282,20 +232,78 @@ export function GetStagedFiles(project: string): string[] {
                 "--name-only",
             ],
         );
-        if (!getFilesOutput.success) throw new Error(getFilesOutput.stdout);
+        if (!getFilesOutput.success) throw `(git diff --cached --name-only) ${getFilesOutput.stdout}`;
         if (!validate(getFilesOutput.stdout)) return [];
         return normalizeArray(getFilesOutput.stdout.split("\n"), "soft");
     } catch (e) {
-        LogStuff(
-            `Error - could not get files ready for commit (staged) at ${ColorString(project, "bold")} because of error: ${e}`,
-            "error",
+        throw new FknError(
+            "Git__GStaged",
+            `Couldn't get files ready for commit (staged) at ${ColorString(path, "bold")}: ${e}`,
         );
-        return [];
     }
 }
-export function GetCommittableFiles(project: string): string[] {
+/**
+ * Undoes the last commit, keeping files in the stage area.
+ *
+ * @param {string} path
+ * @returns {void}
+ */
+export function UndoCommit(path: string): void {
     try {
-        const path = SpotProject(project);
+        const output = g(
+            path,
+            [
+                "reset",
+                "--soft",
+                "HEAD~1",
+            ],
+        );
+        if (!output.success) throw `(git reset --soft HEAD~1) ${output.stdout}`;
+        return;
+    } catch (e) {
+        throw new FknError(
+            "Git__Uncommit",
+            `Couldn't undo commit at ${ColorString(path, "bold")}: ${e}`,
+        );
+    }
+}
+/**
+ * Reads the last commit and returns important properties.
+ *
+ * @param {string} path
+ * @returns {{ message: string; hash: string; author: string; date: string }}
+ */
+export function ReadLastCommit(path: string): { message: string; hash: string; author: string; date: string } {
+    try {
+        const output = g(
+            path,
+            [
+                "log",
+                "-1",
+                '--pretty=format:"%B ¨ %h ¨ %an ¨ %ad"',
+            ],
+        );
+        if (!output.success) throw `(git log -1 --pretty=format:"%B ¨ %h ¨ %an ¨ %ad") ${output.stdout}`;
+        const data = output.stdout.split(" ¨ ");
+        if (!data[0]) throw `Missing name.`;
+        if (!data[1]) throw `Missing hash.`;
+        if (!data[2]) throw `Missing author.`;
+        if (!data[3]) throw `Missing date.`;
+        return {
+            message: data[0].replace('"', ""),
+            hash: data[1],
+            author: data[2],
+            date: data[3].replace('"', ""),
+        };
+    } catch (e) {
+        throw new FknError(
+            "Git__ReadCommit",
+            `Couldn't get files ready for commit (staged) at ${ColorString(path, "bold")}: ${e}`,
+        );
+    }
+}
+export function GetCommittableFiles(path: string): string[] {
+    try {
         const getFilesOutput = g(
             path,
             [
@@ -304,17 +312,15 @@ export function GetCommittableFiles(project: string): string[] {
                 "--porcelain",
             ],
         );
-        if (!getFilesOutput.success) throw new Error(getFilesOutput.stdout);
+        if (!getFilesOutput.success) throw `(git status -s --porcelain) ${getFilesOutput.stdout}`;
+        // empty string = no files
         if (!validate(getFilesOutput.stdout)) return [];
         return normalizeArray(getFilesOutput.stdout.split("\n"), "soft");
     } catch (e) {
-        LogStuff(
-            `Error - could not get files available for commit (created, deleted, or modified) at ${
-                ColorString(project, "bold")
-            } because of error: ${e}`,
-            "error",
+        throw new FknError(
+            "Git__GCommittable",
+            `Couldn't get modified (committable) files at ${ColorString(path, "bold")}: ${e}`,
         );
-        return [];
     }
 }
 /**
@@ -323,7 +329,7 @@ export function GetCommittableFiles(project: string): string[] {
  * @param project Project path. **Assumes it's parsed & spotted.**
  * @returns An object with the current branch and an array with all branch names.
  */
-export function GetBranches(project: string): { current: string; all: string[] } {
+export function GetBranches(project: string): { current: string | false; all: string[] } {
     try {
         const getBranchesOutput = g(
             project,
@@ -331,9 +337,7 @@ export function GetBranches(project: string): { current: string; all: string[] }
                 "branch",
             ],
         );
-        if (!getBranchesOutput.success) {
-            throw new Error(getBranchesOutput.stdout);
-        }
+        if (!getBranchesOutput.success) throw `(git branch) ${getBranchesOutput.stdout}`;
         if (!validate(getBranchesOutput.stdout)) {
             // fallback to status
             // this is an edge case for newly made repositories
@@ -343,9 +347,9 @@ export function GetBranches(project: string): { current: string; all: string[] }
                     "status",
                 ],
             );
-            if (!statusOutput.success) throw new Error(`${statusOutput.stdout}`);
+            if (!statusOutput.success) throw `(git status) ${statusOutput.stdout}`;
             const currentBranch = statusOutput.stdout?.split("\n")[0]?.split(" ")[2]?.trim();
-            if (!currentBranch) throw new Error("unable to get branch");
+            if (!currentBranch) throw `(unable to get current branch from output of 'git branch') ${statusOutput.stdout}`;
             return {
                 current: currentBranch,
                 all: [currentBranch],
@@ -358,15 +362,11 @@ export function GetBranches(project: string): { current: string; all: string[] }
                 .sortAlphabetically().normalize("soft").arr(),
         };
     } catch (e) {
-        LogStuff(
-            `Error - could not get branches at ${ColorString(project, "bold")} because of error: ${e}`,
-            "error",
-        );
-
-        return { current: "__ERROR", all: [] };
+        new FknError("Git__GBranches", `Couldn't get branches at ${ColorString(project, "bold")}.`).debug(String(e), true);
+        return { current: false, all: [] };
     }
 }
-export function Clone(repoUrl: string, clonePath: string): boolean {
+export function Clone(repoUrl: string, clonePath: string): void {
     try {
         const cloneOutput = Commander(
             "git",
@@ -376,14 +376,13 @@ export function Clone(repoUrl: string, clonePath: string): boolean {
                 clonePath,
             ],
         );
-        if (!cloneOutput.success) throw new Error(cloneOutput.stdout);
-        return true;
+        if (!cloneOutput.success) throw `(git clone) ${cloneOutput.stdout}`;
+        return;
     } catch (e) {
-        LogStuff(
-            `Error - could not clone ${ColorString(repoUrl, "bold")} to ${ColorString(clonePath, "bold")} because of error: ${e}`,
-            "error",
+        throw new FknError(
+            "Git__Clone",
+            `Couldn't clone ${ColorString(repoUrl, "bold")} to ${ColorString(clonePath, "bold")}: ${e}`,
         );
-        return false;
     }
 }
 /**
@@ -397,7 +396,7 @@ export function Clone(repoUrl: string, clonePath: string): boolean {
  * @param files An array of files to stage, or a special string.
  * @returns
  */
-export function StageFiles(project: string, files: GIT_FILES): "ok" | "nothingToStage" | "error" {
+export function StageFiles(project: string, files: GIT_FILES): "ok" | "nothingToStage" {
     try {
         if (files === "A") {
             const stageAllOutput = g(
@@ -407,7 +406,7 @@ export function StageFiles(project: string, files: GIT_FILES): "ok" | "nothingTo
                     "-A",
                 ],
             );
-            if (!stageAllOutput.success) throw new Error(stageAllOutput.stdout);
+            if (!stageAllOutput.success) throw `(git add -A) ${stageAllOutput.stdout}`;
             return "ok";
         }
         if (files === "!A") {
@@ -417,7 +416,7 @@ export function StageFiles(project: string, files: GIT_FILES): "ok" | "nothingTo
                     "reset",
                 ],
             );
-            if (!unstageAllOutput.success) throw new Error(unstageAllOutput.stdout);
+            if (!unstageAllOutput.success) throw `(git reset) ${unstageAllOutput.stdout}`;
             return "ok";
         }
         if (files === "S") return "ok";
@@ -428,20 +427,19 @@ export function StageFiles(project: string, files: GIT_FILES): "ok" | "nothingTo
 
         if (filesToStage.length === 0) return "nothingToStage";
 
-        const stageFilesOutput = g(
+        const stageOutput = g(
             project,
             [
                 "add",
                 ...filesToStage,
             ],
         );
-        if (!stageFilesOutput.success) throw new Error(stageFilesOutput.stdout);
+        if (!stageOutput.success) throw `(git add) ${stageOutput.stdout}`;
         return "ok";
     } catch (e) {
-        LogStuff(
-            `Error - could not stage files at ${ColorString(project, "bold")} because of error: ${e}`,
-            "error",
+        throw new FknError(
+            "Git__Stage",
+            `Couldn't stage files at ${ColorString(project, "bold")}: ${e}`,
         );
-        return "error";
     }
 }

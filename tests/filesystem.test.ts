@@ -15,7 +15,7 @@ Deno.test({
     name: "path list is parsed correctly",
     fn: () => {
         assertEquals(
-            ParsePathList(`${Deno.cwd()}\n${JoinPaths(Deno.cwd(), "test")}\n`),
+            ParsePathList(`${Deno.cwd()}\n\n\n${JoinPaths(Deno.cwd(), "test")}\n\n`),
             [
                 Deno.cwd(),
                 JoinPaths(Deno.cwd(), "test"),
@@ -26,7 +26,7 @@ Deno.test({
 
 Deno.test({
     name: "checks for paths and DIRs correctly",
-    fn: () => {
+    fn: async () => {
         assertEquals(
             CheckForPath(JoinPaths(Deno.cwd(), "fknode.yaml")),
             true,
@@ -38,12 +38,12 @@ Deno.test({
         );
 
         assertEquals(
-            CheckForDir(Deno.cwd()),
+            await CheckForDir(Deno.cwd()),
             "ValidButNotEmpty",
         );
 
         assertEquals(
-            CheckForPath(Deno.cwd()),
+            CheckForPath("."),
             true,
         );
     },

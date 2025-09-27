@@ -1,0 +1,8 @@
+[FEM]
+
+[LOG] This is a FuckingNode extension!
+[LOG] Running from ~CLIENT/VER (in Deno ~CLIENT/RT)
+[GET] :PROJECTS - >projects
+[LOG] Projects are: ${projects}
+[GET] :PROJECTS limit >ignored
+[LOG] Ignored projects are: ${ignored}

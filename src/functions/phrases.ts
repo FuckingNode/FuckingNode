@@ -3,14 +3,12 @@
  * Some of these are the kind of jokes only some people (mostly friends of mine) understand. Others are just really random (but real) phrases. But hey, any funny addition is, as I said, welcome.
  */
 
-import { APP_NAME } from "../constants/name.ts";
 import { GetAppPath } from "./config.ts";
-import { FWORDS } from "../constants/fwords.ts";
 
 const internalJokes = [
     "Dima definitely approves", // indeed he does
     "Sokora Seal of Approval", // and i'm proud of it
-    `(it's named this way because Node is ${FWORDS.FKN} annoying, not because I ${FWORDS.FK}ed it)`, // (someone really asked me)
+    `(it's named this way because Node is fucking annoying, not because I fucked it)`, // (someone really asked me)
     "Proudly made by ZakaHaceCosas (translates to 'ZakaMakesStuff')", // YOO
     "Proudly developed in Spain (the S is silent)", // elections here don't work, i swear
     "i should be studying chemistry and i'm writing random phrases for this thing", // real btw
@@ -81,7 +79,7 @@ const appRelatedJokes = [
     "using javascript to fix javascript (again)",
     "made in Deno, made for Node, made eating a Bun",
     "don't tell mommy i said the f-word",
-    `question: how do you end up downloading a CLI tool literally called '${APP_NAME.CASED}'?`,
+    "question: how do you end up downloading a CLI tool literally called 'FuckingNode'?",
     "fun fact: this started as a .ps1 script i used to automate cleaning of my own node_modules",
     "fun fact: it's not made in node",
     "(we need a better logo)",
@@ -92,9 +90,9 @@ const appRelatedJokes = [
 const brandingJokes = [
     "Make JavaScript great again!",
     "Make JavaScript great again! (not like it ever was)",
-    `${APP_NAME.CASED}/Deno/Bun/Golang/Rust, actually`,
-    `${FWORDS.FKN}JSRuntimesInGeneral, actually`,
-    `${APP_NAME.CASED}? More like ${FWORDS.FKN}Cool!`,
+    "FuckingNode/Deno/Bun/Golang/Rust, actually",
+    "FuckingJSRuntimesInGeneral, actually",
+    "FuckingNode? More like FuckingCool!",
 ];
 
 const quotes = [

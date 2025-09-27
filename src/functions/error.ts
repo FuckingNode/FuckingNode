@@ -1,12 +1,10 @@
 import { join } from "@std/path/join";
-import { APP_NAME } from "../constants/name.ts";
 import { ColorString } from "./color.ts";
 import type { GLOBAL_ERROR_CODES } from "../types/errors.ts";
 import { GetDateNow } from "./date.ts";
 import { type UnknownString, validate } from "@zakahacecosas/string-utils";
 import { FKNODE_SHALL_WE_DEBUG } from "../main.ts";
-import { FWORDS } from "../constants/fwords.ts";
-import { LOCAL_PLATFORM } from "../constants/platform.ts";
+import { LOCAL_PLATFORM } from "../platform.ts";
 import { stripAnsiCode } from "@std/fmt/colors";
 import { ALIASES } from "../commands/toolkit/git-url.ts";
 
@@ -36,12 +34,16 @@ export class FknError extends Error {
                 this.hint =
                     "Valid intensity levels are 'normal', 'hard', 'hard-only', 'maxim', and 'maxim-only'.\nIf you want to use flags without providing an intensity (e.g. 'clean --pretty'), prepend '-- --' to the command ('clean -- -- -pretty'). Run 'help clean' for more info onto what does each level do.";
                 break;
+            case "Cfg__InvalidCmdK":
+                this.hint =
+                    'Every command within a Cmd set needs to start with either "~" (SHELL SCRIPT), "$" (PROJECT SCRIPT), "=" (PROJECT FILE), or "<" (RAW EXEC).';
+                break;
             case "Env__CannotDetermine":
                 this.hint =
                     "To (manually) fix this, manually specify the package manager you use via the 'fknode.yaml' file, by adding the 'projectEnvOverride' field with the value of 'npm', 'pnpm', 'bun', 'deno', 'golang', or 'rust'.";
                 break;
             case "Os__NoEntity":
-                if (LOCAL_PLATFORM.SYSTEM === "windows") {
+                if (LOCAL_PLATFORM.SYSTEM === "msft") {
                     this.hint =
                         `Just in case it's a shell command (like 'echo' or 'ls') and you input it somewhere like 'buildCmd': it has to be preceded with 'powershell', as its passed as an argument to this executable.`;
                 }
@@ -53,10 +55,10 @@ export class FknError extends Error {
             case "Os__NoAppdataNoHome":
                 this.hint = `We tried to find ${
                     ColorString(
-                        LOCAL_PLATFORM.SYSTEM === "windows" ? "APPDATA env variable" : "XDG_CONFIG_HOME and HOME env variables",
+                        LOCAL_PLATFORM.SYSTEM === "msft" ? "APPDATA env variable" : "XDG_CONFIG_HOME and HOME env variables",
                         "bold",
                     )
-                } but failed, meaning config files cannot be created and the CLI can't work. Something seriously went ${FWORDS.MFLY} wrong. If these aren't the right environment variables for your system's config path (currently using APPDATA on Windows, /home/user/.config on macOS and Linux), please raise an issue on GitHub.`;
+                } but failed, meaning config files cannot be created and the CLI can't work. Something seriously went motherfuckingly wrong. If these aren't the right environment variables for your system's config path (currently using APPDATA on Windows, /home/user/.config on macOS and Linux), please raise an issue on GitHub.`;
                 break;
             case "External__Proj__NotFound":
                 this.hint = `Check for typos or a wrong name. Given input (either a project's name or a file path) wasn't found.`;
@@ -75,7 +77,7 @@ export class FknError extends Error {
                 break;
             case "Fs__UnparsablePath":
                 this.hint = `The given path was not found. Check for typos${
-                    LOCAL_PLATFORM.SYSTEM === "windows" ? "." : " or casing mistakes (you're on Linux mate, paths are case-sensitive)."
+                    LOCAL_PLATFORM.SYSTEM === "msft" ? "." : " or casing mistakes (you're on Linux mate, paths are case-sensitive)."
                 }`;
                 break;
             case "Env__SchrodingerLockfile":
@@ -97,6 +99,10 @@ export class FknError extends Error {
                 this.hint = `Provide a valid Git alias. These follow the PROVIDER:OWNER/REPO format, where PROVIDED is any of these:\n${
                     Object.keys(ALIASES).join(", ")
                 }`;
+                break;
+            case "Git__Forbidden":
+                this.hint =
+                    "Sensible files like .env or node_modules/ are intentionally banned from commits (to prevent a catastrophe). Please, manually unstage this file, then re-run without staging it (and preferably add it to .gitignore).";
                 break;
         }
         if (Error.captureStackTrace) Error.captureStackTrace(this, FknError);
@@ -134,27 +140,33 @@ export class FknError extends Error {
     public debug(debuggableContent: UnknownString, showWarn: boolean = true): void {
         // APPDATA! because if we're already debugging stuff we assume the CLI got to run
         // meaning that path does exist
-        const debugPath = join(LOCAL_PLATFORM.APPDATA!, APP_NAME.CLI, `${APP_NAME.CLI}-errors.log`);
+        // doesn't use GetAppPath just in case that's the thing erroring, you know
+        const debugPath = join(LOCAL_PLATFORM.APPDATA!, "fuckingnode", "fuckingnode-errors.log");
         const debuggableError = `\n
 ---
 # BEGIN FknERROR ${this.code} @ ${new Date().toISOString()}
 ---
-- INFO (so you know where you at)
+>>> INFO (so you know where you at)
 Timestamp      :  ${GetDateNow()},
 FknError code  :  ${this.code},
 Thrown message :  ${this.message},
 Thrown hint    :  ${this.hint},
-- STACK (so the dev knows where he at)
+>>> STACK (so the dev knows where he at)
 ${this.stack}
--
-below goes the debugged content dump. this could be, for example, an entire project main file, dumped here for reviewal. it could be a sh*t ton of stuff to read
-- DEBUGGABLE CONTENT (in most cases, what the CLI command that was executed returned, in case we were able to gather it)
+>>> DEBUGGABLE CONTENT
+below goes the debugged content dump (in most cases, what the CLI command that was executed returned).
+it may happen to be a sh*t ton of stuff to read.
+>>> BEGIN DEBUGGABLE CONTENT
 ${stripAnsiCode(debuggableContent ?? "UNKNOWN OUTPUT - No debuggableContent was provided, or it was empty.")}
----
+>>> END DEBUGGABLE CONTENT
 # END   FknERROR ${this.code} # GOOD LUCK FIXING THIS
 ---\n
-        `.trim();
-        if (showWarn) console.warn(ColorString(`For details about what happened, see last entry @ ${debugPath}`, "orange"));
+        `;
+        if (showWarn) {
+            console.warn(
+                ColorString(`An exception occurred. For details about what happened, see the last entry of ${debugPath}`, "orange"),
+            );
+        }
         Deno.writeTextFileSync(
             debugPath,
             debuggableError,
@@ -184,7 +196,7 @@ export function ErrorHandler(e: unknown): never {
         e.exit();
         Deno.exit(1); // (never reached, but without this line typescript doesn't shut up)
     }
-    const fk = ColorString(FWORDS.FK, "red", "bold");
+    const fk = ColorString("f*ck", "red", "bold");
     if (Error.isError(e)) {
         console.error(`${fk}! Something happened: ${e.message} (${e.cause})\n${e.stack}`);
         Deno.exit(1);

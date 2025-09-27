@@ -17,56 +17,28 @@ import TheSurrenderer from "./commands/surrender.ts";
 import TheSetuper from "./commands/setup.ts";
 import TheLauncher from "./commands/launch.ts";
 import TheBuilder from "./commands/build.ts";
+import TheTerminator from "./commands/terminate.ts";
+import TheUncommitter from "./commands/uncommit.ts";
 // other things
-import { APP_URLs, FULL_NAME } from "./constants.ts";
+import * as DenoJson from "../deno.json" with { type: "json" };
 import { LogStuff } from "./functions/io.ts";
-import { FreshSetup, GetAppPath, GetUserSettings } from "./functions/config.ts";
+import { FreshSetup, GetUserSettings } from "./functions/config.ts";
 import { DEBUG_LOG, ErrorHandler } from "./functions/error.ts";
-import type { TheCleanerConstructedParams } from "./commands/constructors/command.ts";
+import type { TheCleanerConstructedParams } from "./commands/_interfaces.ts";
 import { RunScheduledTasks } from "./functions/schedules.ts";
 import { normalize, testFlag, testFlags, type UnknownString, validate } from "@zakahacecosas/string-utils";
-import { AddProject, CleanupProjects, RemoveProject } from "./functions/projects.ts";
+import { CleanupProjects, GetAllProjects, ListManager } from "./functions/projects.ts";
 import { LaunchWebsite } from "./functions/http.ts";
 import { HINTS } from "./functions/phrases.ts";
-import { GetDateNow } from "./functions/date.ts";
-import { FWORDS } from "./constants/fwords.ts";
-import { APP_NAME } from "./constants/name.ts";
-import { ColorString } from "./functions/color.ts";
-import { LOCAL_PLATFORM } from "./constants/platform.ts";
+import { LOCAL_PLATFORM } from "./platform.ts";
+import { parse } from "@std/path";
+import { ParseFIM } from "./functions/modules/instructions.ts";
+import { RunFEM } from "./functions/modules/extensions.ts";
 
-// this is outside the main loop so it can be executed
-// without depending on other modules
-// yes i added this feature because of a breaking change i wasn't expecting
-
-// ps. i don't use LogStuff because if something broke, well, it might not work
-if (normalize(Deno.args[0] ?? "") === "something-fucked-up") {
-    console.log(
-        `This command will reset ${APP_NAME.CASED}'s settings, logs, and configs ENTIRELY (except for project list). Are you sure things ${FWORDS.FK}ed up that much?`,
-    );
-    const c = confirm("Confirm reset?");
-    if (c === true) {
-        const paths = [
-            GetAppPath("SCHEDULE"),
-            GetAppPath("SETTINGS"),
-            GetAppPath("ERRORS"),
-            GetAppPath("LOGS"),
-        ];
-
-        for (const path of paths) {
-            Deno.removeSync(path, { recursive: true });
-        }
-
-        console.log(`Done. Don't ${FWORDS.FK} up again this time.`);
-    } else {
-        console.log(`I knew it wasn't that ${FWORDS.FK}ed up...`);
-    }
-    Deno.exit(0);
-}
-
-async function init() {
-    FreshSetup();
+async function init(): Promise<void> {
+    await FreshSetup();
     await RunScheduledTasks();
-    CleanupProjects();
+    await CleanupProjects(GetAllProjects());
 }
 
 /** Normalized Deno.args */
@@ -87,6 +59,12 @@ function hasFlag(flag: string, allowQuickFlag: boolean, firstOnly: boolean = fal
     return testFlags(flags, flag, { allowQuickFlag, allowNonExactString: true });
 }
 
+function isNotFlag(arg: UnknownString): arg is string {
+    if (!validate(arg)) return false;
+    const str = normalize(arg, { preserveCase: true, strict: false, removeCliColors: true });
+    return !str.startsWith("-") && !str.startsWith("--");
+}
+
 if (hasFlag("help", true)) {
     try {
         await init();
@@ -99,30 +77,19 @@ if (hasFlag("help", true)) {
 }
 
 if (hasFlag("version", true, true) && !flags[1]) {
-    console.log(FULL_NAME, "built for", Deno.build.target);
-    console.log("Deno JavaScript runtime", Deno.version.deno, "| TypeScript", Deno.version.typescript, "| V8 Engine", Deno.version.v8);
-    console.log("Run 'fuckingnode about' for details.");
+    console.log(
+        `FuckingNode v${DenoJson.default.version} built for ${Deno.build.target}\nDeno JavaScript runtime ${Deno.version.deno} | TypeScript ${Deno.version.typescript} | V8 Engine ${Deno.version.v8}\nRun 'fuckingnode about' for details.`,
+    );
     Deno.exit(0);
 }
 
-function isNotFlag(arg: UnknownString): arg is string {
-    if (!validate(arg)) return false;
-    const str = normalize(arg, { preserveCase: true, strict: false, removeCliColors: true });
-    return !str.startsWith("-") && !str.startsWith("--");
-}
-
-async function main(command: UnknownString) {
+async function main(): Promise<void> {
     // debug commands
-    if (FKNODE_SHALL_WE_DEBUG || Deno.args[0]?.startsWith("FKNDBG")) {
-        console.log(ColorString("FKNDBG at " + GetDateNow(), "italic"));
-        console.log("FKNDBG Logs aren't stored into the .log file.");
-        console.log("-".repeat(37));
-    }
     if (Deno.args[0] === "FKNDBG_PROC") {
         console.log(
             "PROC NAME",
             new TextDecoder().decode(
-                LOCAL_PLATFORM.SYSTEM === "windows"
+                LOCAL_PLATFORM.SYSTEM === "msft"
                     ? new Deno.Command("powershell", {
                         args: ["Get-Process", "-Id", Deno.pid.toString()],
                     }).outputSync().stdout
@@ -140,18 +107,13 @@ async function main(command: UnknownString) {
         return;
     }
     if (Deno.args[0] === "FKNDBG_WHERE") {
-        console.log("AT", Deno.cwd());
-        console.log("FROM", Deno.execPath());
-        console.log("CONCRETELY", import.meta.url);
-        console.log("MAIN?", import.meta.main);
+        console.log("AT", Deno.cwd(), "\nFROM", Deno.execPath(), "\nCONCRETELY", import.meta.url, "\nMAIN?", import.meta.main);
         return;
     }
     if (Deno.args[0] === "FKNDBG_MEM") {
         const mem = Deno.memoryUsage();
         console.log("MEM USAGE:");
-        for (const [k, v] of Object.entries(mem)) {
-            console.log(`${k.padEnd(10)}: ${(v / 1024 / 1024).toFixed(2)} MB`);
-        }
+        for (const [k, v] of Object.entries(mem)) console.log(`${k.padEnd(10)}: ${(v / 1024 / 1024).toFixed(2)} MB`);
         return;
     }
     if (Deno.args[0] === "FKNDBG_WHO") {
@@ -161,17 +123,29 @@ async function main(command: UnknownString) {
         });
         return;
     }
-
-    if (!validate(command)) {
-        TheHelper({});
-        Deno.exit(0);
+    if (Deno.args[0] === "FKNDBG_ROOT") {
+        console.log(parse(Deno.execPath()).dir);
+        return;
     }
 
+    if (!validate(flags[0])) {
+        TheHelper({});
+        return;
+    }
+
+    // THIS IS A MESS BUT I GOT IT TO WORK, I BELIEVE
     DEBUG_LOG("FLAGS[1]", flags[1], isNotFlag(flags[1]));
-    const projectArg = (isNotFlag(flags[1])) ? flags[1] : 0 as const;
+    const i = () => flags.findIndex((f) => f.startsWith("-") && f !== "--projects");
+    const projectArg: string[] | 0 = flags[1] === "--projects"
+        ? flags.slice(2, i() === -1 ? undefined : (i()))
+        : (isNotFlag(flags[1]) ? [flags[1]] : 0 as const);
     DEBUG_LOG("PROJECT ARG IS", projectArg);
     DEBUG_LOG("FLAGS[2]", flags[2], isNotFlag(flags[2]));
-    const intensityArg = isNotFlag(flags[2]) ? flags[2] : GetUserSettings().defaultIntensity;
+    const intensityArg: string = flags[1] === "--projects"
+        ? (flags.includes("--intensity")
+            ? (flags[flags.indexOf("--intensity") + 1] || (GetUserSettings())["default-intensity"])
+            : (GetUserSettings())["default-intensity"])
+        : (isNotFlag(flags[2]) ? flags[2] : (GetUserSettings())["default-intensity"]);
     DEBUG_LOG("INTENSITY ARG IS", intensityArg);
 
     const cleanerArgs: TheCleanerConstructedParams = {
@@ -189,7 +163,7 @@ async function main(command: UnknownString) {
     };
 
     switch (
-        command.toLowerCase()
+        flags[0].toLowerCase()
     ) {
         case "clean":
             await TheCleaner(cleanerArgs);
@@ -217,16 +191,16 @@ async function main(command: UnknownString) {
             });
             break;
         case "list":
-            TheLister(flags[1]);
+            await TheLister(flags[1]);
             break;
         case "add":
-            AddProject(flags[1]);
+            await ListManager("add", flags.slice(1));
             break;
         case "remove":
-            RemoveProject(flags[1]);
+            await ListManager("rem", flags.slice(1));
             break;
         case "kickstart":
-            TheKickstarter({
+            await TheKickstarter({
                 gitUrl: flags[1],
                 path: flags[2],
                 manager: flags[3],
@@ -236,7 +210,7 @@ async function main(command: UnknownString) {
             await TheSettings({ args: flags.slice(1) });
             break;
         case "migrate":
-            TheMigrator({ projectPath: (flags[2] ?? Deno.cwd()), wantedManager: flags[1] });
+            await TheMigrator({ projectPath: (flags[2] ?? Deno.cwd()), wantedManager: flags[1] });
             break;
         case "self-update":
         case "upgrade":
@@ -244,16 +218,16 @@ async function main(command: UnknownString) {
             await TheUpdater({ silent: false });
             break;
         case "about":
-            TheAbouter();
+            await TheAbouter();
             break;
         case "build":
-            TheBuilder({
+            await TheBuilder({
                 project: (flags[1] ?? Deno.cwd()),
             });
             break;
         case "release":
         case "publish":
-            TheReleaser({
+            await TheReleaser({
                 version: flags[1],
                 project: (flags[2] ?? Deno.cwd()),
                 push: hasFlag("push", true),
@@ -265,7 +239,7 @@ async function main(command: UnknownString) {
             const indexB = flags.indexOf("-b");
             const indexElse = flags.indexOf("--");
             const filesEnd = indexBranch !== -1 ? indexBranch : (indexB !== -1 ? indexB : indexElse !== -1 ? indexElse : undefined);
-            TheCommitter({
+            await TheCommitter({
                 message: flags[1],
                 files: flags.slice(2, filesEnd),
                 branch: indexBranch !== -1 ? flags[indexBranch + 1] : (indexB !== -1 ? flags[indexB + 1] : undefined),
@@ -275,19 +249,51 @@ async function main(command: UnknownString) {
             });
             break;
         }
+        case "uncommit": {
+            await TheUncommitter();
+            break;
+        }
         case "surrender":
+        case "deprecate":
         case "give-up":
         case "i-give-up":
         case "its-over":
         case "i-really-hate":
-        // "im-done-with <project>" is wild LMAO
+        // these are the wildest imho:
         case "im-done-with":
-            TheSurrenderer({
+        case "nevermind":
+            await TheSurrenderer({
                 project: flags[1],
                 message: flags[2],
                 alternative: flags[3],
                 learnMoreUrl: flags[4],
-                isGitHub: hasFlag("github", false) || hasFlag("gh", false),
+                gfm: hasFlag("github", false) || hasFlag("gh", false),
+                glfm: hasFlag("gitlab", false) || hasFlag("gl", false),
+            });
+            break;
+        case "terminate":
+        case "ftl":
+        case "fuck-the-lang":
+        case "resign":
+        case "unnode":
+        case "undeno":
+        case "unbun":
+        case "unrust":
+        case "ungo":
+        case "seriously-fuck-node":
+            await TheTerminator({
+                runtime: (flags[0] === "unnode" || flags[0] === "seriously-fuck-node")
+                    ? "node"
+                    : flags[0] === "undeno"
+                    ? "deno"
+                    : flags[0] === "unbun"
+                    ? "bun"
+                    : flags[0] === "unrust"
+                    ? "rust"
+                    : flags[0] === "ungo"
+                    ? "go"
+                    : flags[1],
+                projectsToo: hasFlag("remove-all-motherfuckers-too", false, false),
             });
             break;
         case "setup":
@@ -299,17 +305,19 @@ async function main(command: UnknownString) {
             });
             break;
         case "launch":
-            TheLauncher({
+            await TheLauncher({
                 project: flags[1],
             });
             break;
+        case "cpf":
         case "export":
         case "gen-cpf":
         case "generate-cpf":
-            TheExporter({
+            await TheExporter({
                 project: (flags[1] ?? Deno.cwd()),
-                json: hasFlag("json", false),
+                jsonc: hasFlag("jsonc", false),
                 cli: hasFlag("cli", false),
+                export: hasFlag("export", false),
             });
             break;
         case "compat":
@@ -319,14 +327,24 @@ async function main(command: UnknownString) {
             });
             break;
         case "stats":
-            TheStatistics(flags[1]);
+            await TheStatistics(flags[1]);
             break;
         case "documentation":
         case "docs":
         case "web":
         case "website":
-            LogStuff(`Best documentation website for best CLI, live at ${APP_URLs.WEBSITE}`, "bulb");
-            LaunchWebsite(APP_URLs.WEBSITE);
+            LogStuff(`Best documentation website for best CLI, live at https://fuckingnode.github.io/`, "bulb");
+            LaunchWebsite("https://fuckingnode.github.io/");
+            break;
+        case "experimental-do-not-use-lmao--test-fim-parser":
+            if (!Deno.args[1]) return;
+            console.log(
+                ParseFIM(Deno.readTextFileSync(Deno.args[1])),
+            );
+            break;
+        case "experimental-do-not-use-lmao--test-fem-exec":
+            if (!Deno.args[1]) return;
+            await RunFEM(Deno.readTextFileSync(Deno.args[1]));
             break;
         case "github":
         case "repo":
@@ -334,13 +352,13 @@ async function main(command: UnknownString) {
         case "oss":
         case "gh":
             LogStuff(
-                `Free and open source, and free as in freedom, live at ${APP_URLs.WEBSITE}repo\n(The above URL is a redirect to GitHub.)`,
+                `Free and open source, and free as in freedom, live at https://fuckingnode.github.io/repo\n(The above URL is a redirect to GitHub.)`,
                 "bulb",
             );
-            LaunchWebsite(`${APP_URLs.WEBSITE}repo`);
+            LaunchWebsite(`https://fuckingnode.github.io/repo`);
             break;
         case "audit":
-            TheAuditer({
+            await TheAuditer({
                 project: flags[1] ?? null,
             });
             break;
@@ -367,18 +385,16 @@ async function main(command: UnknownString) {
             break;
         default:
             TheHelper({});
-            LogStuff(`You're seeing this because command '${command}' doesn't exist.`, undefined, ["orange", "italic"]);
+            LogStuff(`You're seeing this because command '${flags[0]}' doesn't exist.`, undefined, ["orange", "italic"]);
     }
-    Deno.exit(0);
 }
 
-// I SWEAR - THE FACT THAT THIS "IF" WAS MISSING MADE ALL THE TEST SUITE NOT WORK LMFAO
-// javascript is definitely... something
 if (import.meta.main) {
     try {
         await init();
 
-        await main(flags[0]);
+        await main();
+        Deno.exit(0);
     } catch (e) {
         ErrorHandler(e);
     }

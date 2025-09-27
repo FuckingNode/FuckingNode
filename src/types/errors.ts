@@ -1,6 +1,25 @@
 export const OS_ERRORS = ["Os__NoAppdataNoHome", "Os__NoEntity"] as const;
 export const FS_ERRORS = ["Fs__Unreal", "Fs__UnparsablePath", "Fs__DemandsEmptying", "Fs__DemandsDIR"] as const;
-export const GIT_ERRORS = ["Git__UE", "Git__UE__Commit", "Git__UE_Push", "Git__UE__IsRepo", "Git__NoBranchAA", "Git__NoBranch"] as const;
+export const CFG_ERRORS = ["Cfg__InvalidCmdK"] as const;
+export const GIT_ERRORS = [
+    "Git__GCommittable",
+    "Git__CanCommit",
+    "Git__Uncommit",
+    "Git__ReadCommit",
+    "Git__GBranches",
+    "Git__Ignore",
+    "Git__Commit",
+    "Git__Clone",
+    "Git__Push",
+    "Git__MkTag",
+    "Git__GLTag",
+    "Git__GStaged",
+    "Git__Stage",
+    "Git__IsRepo",
+    "Git__NoBranchAA",
+    "Git__Forbidden",
+    "Git__NoBranch",
+] as const;
 export const ENV_ERRORS = [
     "Env__MissingMotor",
     "Env__NoPkgFile",
@@ -21,7 +40,6 @@ export const PARAM_ERRORS = [
     "Param__WhateverUnprovided",
     "Param__TargetInvalid",
     "Param__CIntensityInvalid",
-    "Param__SetupInvalid",
     "Param__VerInvalid",
     "Param__GitTargetInvalid",
     "Param__GitTargetAliasInvalid",
@@ -30,9 +48,9 @@ export const INTEROP_ERRORS = [
     "Interop__PublishUnable",
     "Interop__MigrateUnable",
     "Interop__JSRunUnable",
+    "Interop__ReqParamLost",
 ] as const;
 export const INTERNAL_ERRORS = [
-    "Internal__NonexistentAppPath",
     "Internal__ImproperAssignment",
     "Internal__InvalidEmbedded",
     "Internal__Lazy",
@@ -41,6 +59,7 @@ export const EXTERNAL_ERRORS = ["External__Publish", "External__Setting__FavIde"
 
 type OS_ERROR_CODES = typeof OS_ERRORS[number];
 type FS_ERROR_CODES = typeof FS_ERRORS[number];
+type CFG_ERROR_CODES = typeof CFG_ERRORS[number];
 type GIT_ERROR_CODES = typeof GIT_ERRORS[number];
 type ENV_ERROR_CODES = typeof ENV_ERRORS[number];
 type TASK_ERROR_CODES = typeof TASK_ERRORS[number];
@@ -55,6 +74,7 @@ type EXTERNAL_ERROR_CODES = typeof EXTERNAL_ERRORS[number];
 export type GLOBAL_ERROR_CODES =
     | OS_ERROR_CODES
     | FS_ERROR_CODES
+    | CFG_ERROR_CODES
     | GIT_ERROR_CODES
     | ENV_ERROR_CODES
     | TASK_ERROR_CODES

@@ -8,15 +8,13 @@
  */
 
 import { normalize, normalizeArray, validate, validateAgainst } from "@zakahacecosas/string-utils";
-import type { MANAGER_NODE } from "../../types/platform.ts";
+import { type MANAGER_NODE, TypeGuardForNodeBun } from "../../types/platform.ts";
 import { Interrogate, LogStuff } from "../../functions/io.ts";
-import { FkNodeSecurityAudit, ParsedNodeReport } from "../../types/audit.ts";
-import { GetProjectEnvironment, NameProject, SpotProject } from "../../functions/projects.ts";
+import type { FkNodeSecurityAudit, ParsedNodeReport } from "../../types/audit.ts";
+import { GetProjectEnvironment } from "../../functions/projects.ts";
 import { Commander } from "../../functions/cli.ts";
-import { APP_NAME } from "../../constants/name.ts";
 import { DEBUG_LOG } from "../../functions/error.ts";
 import { VULNERABILITY_VECTORS } from "./vectors.ts";
-import { FWORDS } from "../../constants/fwords.ts";
 import { stripAnsiCode } from "@std/fmt/colors";
 import { ColorString } from "../../functions/color.ts";
 
@@ -152,7 +150,7 @@ function AnalyzeSecurityVectorKeywords(svKeywords: SV_KEYWORDS[]): string[] {
 
         if (has(keywordPair, VULNERABILITY_VECTORS.PRIVILEGES)) {
             questions.add(
-                "Does your project handle user authentication or session management? [V:ATH [SV:PRIV]]",
+                "Does your project have some sort of privilege system, or run as a desktop app with admin/sudo privileges? [V:ATH [SV:PRIV]]",
             );
         }
 
@@ -214,8 +212,8 @@ export function ParseNodeBunReport(jsonString: string, platform: MANAGER_NODE | 
         for (const _entry of report) {
             const entry = _entry.data.advisory;
             /** Compares major SemVer version of current version and fixed version. */
-            const impliesBreakingChanges = qps(entry.patched_versions) ===
-                qps(entry.vulnerable_versions);
+            const impliesBreakingChanges = qps(entry.patched_versions)
+                === qps(entry.vulnerable_versions);
 
             brokenDeps.push(impliesBreakingChanges);
             severities.push(entry.severity);
@@ -274,8 +272,8 @@ export function ParseNodeBunReport(jsonString: string, platform: MANAGER_NODE | 
 
         for (const entry of Object.values(report.advisories)) {
             /** Compares major SemVer version of current version and fixed version. */
-            const impliesBreakingChanges = qps(entry.findings[0]!.version) ===
-                qps(entry.patched_versions);
+            const impliesBreakingChanges = qps(entry.findings[0]!.version)
+                === qps(entry.patched_versions);
 
             advisories.push(entry.github_advisory_id);
             severities.push(entry.severity);
@@ -290,15 +288,10 @@ export function ParseNodeBunReport(jsonString: string, platform: MANAGER_NODE | 
     const questions = AnalyzeSecurityVectorKeywords(initialKws);
     let severity: "low" | "moderate" | "high" | "critical";
 
-    if (severities.includes("critical")) {
-        severity = "critical";
-    } else if (severities.includes("high")) {
-        severity = "high";
-    } else if (severities.includes("moderate")) {
-        severity = "moderate";
-    } else {
-        severity = "low";
-    }
+    if (severities.includes("critical")) severity = "critical";
+    else if (severities.includes("high")) severity = "high";
+    else if (severities.includes("moderate")) severity = "moderate";
+    else severity = "low";
 
     const breaking = brokenDeps.includes(true);
 
@@ -342,7 +335,7 @@ function askQuestion(
  * @param {string[]} questions Base questions.
  * @returns {FkNodeSecurityAudit}
  */
-export function InterrogateVulnerableProject(questions: string[]): Omit<
+function InterrogateVulnerableProject(questions: string[]): Omit<
     FkNodeSecurityAudit,
     "percentage"
 > {
@@ -366,7 +359,9 @@ export function InterrogateVulnerableProject(questions: string[]): Omit<
 
     const isTrue = (s: InterrogatoryResponse): boolean => validateAgainst(s, ["true+2", "true+1"]);
 
-    // TODO - add detailed questions for new vectors
+    // okay the fact I cared to make questions for everything is wild!
+    // TODO(@ZakaHaceCosas) im keeping a "TODO" comment here though, just as a reminder
+    // a small review would still be cool
     for (const question of questions) {
         const response = handleQuestion({ q: question, f: false, r: true, w: 1 });
 
@@ -436,6 +431,66 @@ export function InterrogateVulnerableProject(questions: string[]): Omit<
                 },
             );
         }
+        if (isTrue(response) && question.includes("V:INJ")) {
+            const out = handleQuestion({
+                q: "Is there any sensitive database? Like, one for an accounting system, or any database that holds sensitive data.",
+                f: true,
+                r: true,
+                w: 2,
+            });
+            handleQuestion({
+                q: "Is every database accessed with prepared statements everywhere? And not using direct string concatenation or other unsafe stuff anywhere.",
+                f: true,
+                r: false,
+                w: isTrue(out) ? 2 : 1,
+            });
+        }
+
+        if (isTrue(response) && question.includes("V:ATH [SV:AUTH]")) {
+            // eh... can't really think of anything for this
+        }
+        if (isTrue(response) && question.includes("V:ATH [SV:PRIV]")) {
+            const out = handleQuestion({
+                q: "Is said privilege always available or does it require escalation?",
+                f: true,
+                r: true,
+                w: 1,
+            });
+            if (isTrue(out)) {
+                handleQuestion({
+                    q: "Is said escalation user-dependant or user-available (Y), or only the program knows when to use it (N)?",
+                    f: true,
+                    r: true,
+                    w: 1,
+                });
+            }
+            handleQuestion({
+                q: "Are privileges total (admin access / sudo) (N) or fine-grained (Y)?",
+                f: true,
+                r: false,
+                w: 1,
+            });
+        }
+        if (isTrue(response) && question.includes("V:FLE")) {
+            handleQuestion({
+                q: "Is said file escaped or sanitized in any way?",
+                f: true,
+                r: false,
+                w: 2,
+            });
+            handleQuestion({
+                q: "Is said file read or executed by the project internally? (Non-risky operation like merely hashing the file does NOT count)",
+                f: true,
+                r: true,
+                w: 2,
+            });
+            handleQuestion({
+                q: "Is said file available for reading or executing by the user?",
+                f: true,
+                r: true,
+                w: 2,
+            });
+        }
     }
 
     const { positives, negatives } = responses.reduce(
@@ -474,7 +529,7 @@ function DisplayAudit(percentage: number): void {
     if (percentage < 20) {
         color = "bright-green";
         message =
-            `Seems like we're okay, one ${FWORDS.MFN} project less to take care of!\nNever forget the best risk is no risk - we still encourage you to fix the vulnerabilities if you can.`;
+            "Seems like we're okay, one fucking project less to take care of!\nNever forget the best risk is no risk - we still encourage you to fix the vulnerabilities if you can.";
     } else if (percentage >= 20 && percentage < 50) {
         color = "bright-yellow";
         message = `${ColorString("There is a potential risk", "bold")} of these vulnerabilities causing you a headache.\nWhile you ${
@@ -483,7 +538,7 @@ function DisplayAudit(percentage: number): void {
     } else {
         color = "red";
         message = `${
-            ColorString(`Oh ${FWORDS.FK}`, "bold")
+            ColorString(`Oh fuck`, "bold")
         }. This project really should get all vulnerabilities fixed.\nBreaking changes can hurt, but your app security's breaking hurts a lot more. ${
             ColorString("Please, fix this issue.", "bold")
         }`;
@@ -505,7 +560,7 @@ function DisplayAudit(percentage: number): void {
  * @param {ParsedNodeReport} bareReport Parsed npm audit.
  * @returns {FkNodeSecurityAudit}
  */
-export function AuditProject(bareReport: ParsedNodeReport): FkNodeSecurityAudit {
+function AuditProject(bareReport: ParsedNodeReport): FkNodeSecurityAudit {
     const { advisories, questions, severity } = bareReport;
 
     const totalAdvisories: number = advisories.length;
@@ -513,7 +568,7 @@ export function AuditProject(bareReport: ParsedNodeReport): FkNodeSecurityAudit 
     LogStuff(
         `\n===        FOUND VULNERABILITIES (${totalAdvisories.toString().padStart(3, "0")})        ===\n${
             ColorString(advisories.join(" & "), "bold")
-        }\n===    STARTING ${APP_NAME.CASED} SECURITY AUDIT    ===\n`,
+        }\n===    STARTING FUCKINGNODE SECURITY AUDIT    ===\n`,
     );
 
     LogStuff("Please answer these questions. We'll use your responses to evaluate this vulnerability:\n", "bulb");
@@ -545,14 +600,10 @@ export function AuditProject(bareReport: ParsedNodeReport): FkNodeSecurityAudit 
  * @param {string} project Path to project to be audited.
  * @returns {FkNodeSecurityAudit | 0 | 1}
  */
-export function PerformAuditing(project: string): FkNodeSecurityAudit | 0 | 1 {
-    const workingPath = SpotProject(project);
-    const env = GetProjectEnvironment(workingPath);
-    const name = NameProject(env.root, "name-ver");
-    // === "__UNSUPPORTED" already does the job, but typescript wants me to specify
+export async function PerformAuditing(project: string): Promise<FkNodeSecurityAudit | 0 | 1> {
+    const env = await GetProjectEnvironment(project);
     if (
-        env.commands.audit === "__UNSUPPORTED" || env.manager === "deno" || env.manager === "cargo" ||
-        env.manager === "go"
+        !TypeGuardForNodeBun(env)
     ) {
         LogStuff(
             `Audit is unsupported for ${env.manager.toUpperCase()} (${project}).`,
@@ -563,7 +614,7 @@ export function PerformAuditing(project: string): FkNodeSecurityAudit | 0 | 1 {
 
     Deno.chdir(env.root);
 
-    LogStuff(`Auditing ${name} [${ColorString(env.commands.audit.join(" "), "italic", "half-opaque")}]`, "working");
+    LogStuff(`Auditing ${env.names.nameVer} [${ColorString(env.commands.audit.join(" "), "italic", "half-opaque")}]`, "working");
     const res = Commander(
         env.commands.base,
         env.commands.audit,
@@ -571,7 +622,7 @@ export function PerformAuditing(project: string): FkNodeSecurityAudit | 0 | 1 {
 
     if (res.success) {
         LogStuff(
-            `Clear! There aren't any known vulnerabilities affecting ${name}.`,
+            `Clear! There aren't any known vulnerabilities affecting ${env.names.nameVer}.`,
             "tick",
         );
         return 0;
@@ -579,7 +630,7 @@ export function PerformAuditing(project: string): FkNodeSecurityAudit | 0 | 1 {
 
     if (!validate(res.stdout)) {
         LogStuff(
-            `An error occurred at ${name} and we weren't able to get the stdout. Unable to audit.`,
+            `An error occurred at ${env.names.nameVer} and we weren't able to get the stdout. Unable to audit.`,
             "error",
         );
         return 1;
@@ -587,5 +638,8 @@ export function PerformAuditing(project: string): FkNodeSecurityAudit | 0 | 1 {
 
     const audit = AuditProject(ParseNodeBunReport(res.stdout, env.manager));
 
-    return audit;
+    return {
+        ...audit,
+        name: env.names.nameVer,
+    };
 }

@@ -1,17 +1,15 @@
-import { GetProjectEnvironment, SpotProject } from "../functions/projects.ts";
+import { RunCmdSet } from "../functions/cmd-set.ts";
+import { GetProjectEnvironment } from "../functions/projects.ts";
 import { LaunchUserIDE } from "../functions/user.ts";
-import type { TheLauncherConstructedParams } from "./constructors/command.ts";
-import { FkNodeInterop } from "./interop/interop.ts";
+import type { TheLauncherConstructedParams } from "./_interfaces.ts";
 
-export default function TheLauncher(params: TheLauncherConstructedParams) {
-    const path = SpotProject(params.project ?? Deno.cwd());
-    const env = GetProjectEnvironment(path);
+export default async function TheLauncher(params: TheLauncherConstructedParams): Promise<void> {
+    const env = await GetProjectEnvironment(params.project);
 
-    Deno.chdir(path);
+    Deno.chdir(env.root);
     LaunchUserIDE();
 
-    if (env.settings.launchWithUpdate) {
-        FkNodeInterop.Features.Update(env);
-    }
-    FkNodeInterop.Features.Launch(env);
+    await RunCmdSet({ env, key: "launchCmd" });
+
+    return;
 }

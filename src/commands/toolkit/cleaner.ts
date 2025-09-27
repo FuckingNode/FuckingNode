@@ -1,9 +1,8 @@
-import { FULL_NAME, isDef } from "../../constants.ts";
+import * as DenoJson from "../../../deno.json" with { type: "json" };
 import { Commander, ManagerExists } from "../../functions/cli.ts";
-import { GetUserSettings } from "../../functions/config.ts";
 import { BulkRemove, CheckForPath, JoinPaths, ParsePath } from "../../functions/filesystem.ts";
 import { Interrogate, LogStuff } from "../../functions/io.ts";
-import { GetProjectEnvironment, NameProject, SpotProject, UnderstandProjectProtection } from "../../functions/projects.ts";
+import { GetProjectEnvironment, UnderstandProjectProtection } from "../../functions/projects.ts";
 import type { CleanerIntensity } from "../../types/config_params.ts";
 import type { LOCKFILE_GLOBAL, MANAGER_GLOBAL, ProjectEnvironment } from "../../types/platform.ts";
 import { FknError } from "../../functions/error.ts";
@@ -11,9 +10,42 @@ import { CanCommit, Commit } from "../../functions/git.ts";
 import type { RESULT } from "../clean.ts";
 import { sortAlphabetically, validate } from "@zakahacecosas/string-utils";
 import { FkNodeInterop } from "../interop/interop.ts";
-import { LOCAL_PLATFORM } from "../../constants/platform.ts";
-import { FWORDS } from "../../constants/fwords.ts";
+import { LOCAL_PLATFORM } from "../../platform.ts";
 import { ColorString } from "../../functions/color.ts";
+import type { CF_FKNODE_SETTINGS } from "../../types/config_files.ts";
+import { bold, red } from "@std/fmt/colors";
+
+/** Handles errors and short-circuiting. */
+function HandleErroring(
+    env: ProjectEnvironment | "hard",
+    errorCode: "updater" | "linter" | "prettifier" | "destroyer" | MANAGER_GLOBAL,
+    errors: string[] | null,
+    alwaysShortCircuit: boolean,
+): void {
+    if (env === "hard" || !errors) {
+        if (alwaysShortCircuit === false) return;
+        LogStuff(
+            `${
+                bold(red("SHORT CIRCUIT!"))
+            }\nAn error happened with hard cleanup of ${errorCode}.\nIt might not be critical, but you chose to always short circuit cleanup, which includes hard cleanup, so here we are.\nThe lines above "SHORT CIRCUIT!" should tell you what the error is (raise a GitHub issue if they don't).`,
+            "error",
+        );
+        Deno.exit(1);
+    }
+    if (alwaysShortCircuit === false && env.settings.cleanerShortCircuit === false) {
+        errors.push(errorCode);
+        return;
+    }
+    LogStuff(
+        `${bold(red("SHORT CIRCUIT!"))}\nAn error with the ${
+            bold(errorCode)
+        } happened with ${env.names.full}.\nIt might not be critical, but you chose to short circuit cleanup whenever an error happens with ${
+            alwaysShortCircuit ? "any" : "this"
+        } project, so here we are.\nThe lines above "SHORT CIRCUIT!" should tell you what the error is (raise a GitHub issue if they don't).`,
+        "error",
+    );
+    Deno.exit(1);
+}
 
 /**
  * All project cleaning features.
@@ -23,6 +55,7 @@ const ProjectCleaningFeatures = {
         projectName: string,
         env: ProjectEnvironment,
         errors: string[],
+        shortCircuit: boolean,
     ) => {
         Deno.chdir(env.root);
         LogStuff(
@@ -33,9 +66,9 @@ const ProjectCleaningFeatures = {
             const output = FkNodeInterop.Features.Update(env);
             if (output === true) LogStuff(`Updated dependencies for ${projectName}!`, "tick");
             return;
-        } catch {
-            LogStuff(`Failed to update deps for ${projectName}!`, "warn", "bright-yellow");
-            errors.push("updater");
+        } catch (e) {
+            LogStuff(`Failed to update deps for ${projectName}:${e}`, "warn", "bright-yellow");
+            HandleErroring(env, "updater", errors, shortCircuit);
             return;
         }
     },
@@ -45,7 +78,7 @@ const ProjectCleaningFeatures = {
     ) => {
         Deno.chdir(env.root);
         const { commands } = env;
-        if (commands.clean === "__UNSUPPORTED") return;
+        if (!commands.clean) return;
         LogStuff(
             `Cleaning ${projectName}.`,
             "working",
@@ -62,6 +95,7 @@ const ProjectCleaningFeatures = {
         projectName: string,
         env: ProjectEnvironment,
         errors: string[],
+        shortCircuit: boolean,
     ) => {
         Deno.chdir(env.root);
         LogStuff(
@@ -69,14 +103,12 @@ const ProjectCleaningFeatures = {
             "working",
         );
         try {
-            const output = FkNodeInterop.Features.Lint(
-                env,
-            );
+            const output = FkNodeInterop.Features.Lint(env);
             if (output === true) LogStuff(`Linted ${projectName}!`, "tick");
             return;
         } catch (e) {
             LogStuff(`Failed to lint ${projectName}: ${e}`, "warn", "bright-yellow");
-            errors.push("linter");
+            HandleErroring(env, "linter", errors, shortCircuit);
             return;
         }
     },
@@ -84,6 +116,7 @@ const ProjectCleaningFeatures = {
         projectName: string,
         env: ProjectEnvironment,
         errors: string[],
+        shortCircuit: boolean,
     ) => {
         Deno.chdir(env.root);
         LogStuff(
@@ -96,7 +129,7 @@ const ProjectCleaningFeatures = {
             return;
         } catch (e) {
             LogStuff(`Failed to pretty ${projectName}: ${e}`, "warn", "bright-yellow");
-            errors.push("prettifier");
+            HandleErroring(env, "prettifier", errors, shortCircuit);
             return;
         }
     },
@@ -105,13 +138,14 @@ const ProjectCleaningFeatures = {
         env: ProjectEnvironment,
         intensity: CleanerIntensity,
         errors: string[],
+        shortCircuit: boolean,
     ) => {
         Deno.chdir(env.root);
         try {
             if (!env.settings.destroy) return;
             if (
-                !env.settings.destroy.intensities.includes(intensity) &&
-                !env.settings.destroy.intensities.includes("*")
+                env.settings.destroy.intensities !== "*"
+                && !env.settings.destroy.intensities.includes(intensity)
             ) return;
             if (env.settings.destroy.targets.length === 0) return;
             for (const target of env.settings.destroy.targets) {
@@ -141,22 +175,23 @@ const ProjectCleaningFeatures = {
             return;
         } catch (e) {
             LogStuff(`Failed to destroy stuff at ${projectName}: ${e}`, "warn", "bright-yellow");
-            errors.push("destroyer");
+            HandleErroring(env, "destroyer", errors, shortCircuit);
             return;
         }
     },
     Commit: (
+        projectName: string,
         env: ProjectEnvironment,
         shouldUpdate: boolean,
         shouldLint: boolean,
         shouldPrettify: boolean,
     ) => {
-        if (!shouldUpdate && !shouldLint && !shouldPrettify) {
-            LogStuff("No actions to be committed.", "bruh");
-            return;
-        }
         if (env.settings.commitActions === false) {
             LogStuff("No committing allowed.", "bruh");
+            return;
+        }
+        if (!shouldUpdate && !shouldLint && !shouldPrettify) {
+            LogStuff("No actions to be committed.", "bruh");
             return;
         }
         if (!CanCommit(env.root)) {
@@ -164,9 +199,9 @@ const ProjectCleaningFeatures = {
             return;
         }
         Deno.chdir(env.root);
-        function getCommitMessage() {
+        function getCommitMessage(): string {
             if (
-                validate(env.settings.commitMessage) && !(isDef(env.settings.commitMessage))
+                env.settings.commitMessage !== false && validate(env.settings.commitMessage)
             ) {
                 return env.settings.commitMessage;
             }
@@ -178,13 +213,11 @@ const ProjectCleaningFeatures = {
             if (shouldPrettify) tasks.push("prettifying");
 
             const taskString = tasks.join(" and ");
-            return `Code ${taskString} tasks (Auto-generated by ${FULL_NAME})`;
+            return `Code ${taskString} tasks (Auto-generated by FuckingNode v${DenoJson.default.version})`;
         }
 
-        const success = Commit(ParsePath(env.root), getCommitMessage(), "all", []);
-        if (success === 1) {
-            LogStuff(`Committed your changes to ${NameProject(env.root, "name")}!`, "tick");
-        }
+        Commit(ParsePath(env.root), getCommitMessage(), "all", []);
+        LogStuff(`Committed your changes to ${projectName}!`, "tick");
         return;
     },
 };
@@ -192,35 +225,36 @@ const ProjectCleaningFeatures = {
 /**
  * Cleans a project.
  *
- * @param {string} projectInQuestion
  * @param {boolean} shouldUpdate
  * @param {boolean} shouldLint
  * @param {boolean} shouldPrettify
  * @param {boolean} shouldDestroy
  * @param {boolean} shouldCommit
  * @param {("normal" | "hard" | "maxim")} intensity
- * @returns {boolean}
+ * @param {ProjectEnvironment} env
+ * @param {CF_FKNODE_SETTINGS} settings
+ * @returns {Promise<{ protection: string | null; errors: string | null; }>}
  */
 export function PerformCleanup(
-    projectInQuestion: string,
     shouldUpdate: boolean,
     shouldLint: boolean,
     shouldPrettify: boolean,
     shouldDestroy: boolean,
     shouldCommit: boolean,
     intensity: "normal" | "hard" | "maxim",
+    env: ProjectEnvironment,
+    settings: CF_FKNODE_SETTINGS,
 ): {
     protection: string | null;
     errors: string | null;
 } {
-    const motherfuckerInQuestion = ParsePath(projectInQuestion);
-    const projectName = ColorString(NameProject(motherfuckerInQuestion, "name"), "bold");
-    const env = GetProjectEnvironment(motherfuckerInQuestion);
-
     const protections: string[] = [];
     const errors: string[] = [];
 
-    ([[shouldUpdate, "updater"], [shouldLint, "linter"], [shouldPrettify, "prettifier"], [shouldDestroy, "destroyer"], [true, "cleaner"]] as [
+    ([[shouldUpdate, "updater"], [shouldLint, "linter"], [shouldPrettify, "prettifier"], [shouldDestroy, "destroyer"], [
+        true,
+        "cleaner",
+    ]] as [
         boolean,
         "updater",
     ][]).forEach((v) => {
@@ -246,51 +280,56 @@ export function PerformCleanup(
         commit: shouldCommit || (env.settings.flagless?.flaglessCommit === true),
     };
 
-    if (env.commands.clean === "__UNSUPPORTED" && Object.values(whatShouldWeDo).every((v) => v === false)) {
+    if (!env.commands.clean && Object.values(whatShouldWeDo).every((v) => v === false)) {
         LogStuff(
-            `${projectName} will be skipped. ${
+            `${env.names.name} will be skipped. ${
                 ColorString(env.manager, "bold")
-            } has no cleanup commands and no other feature is being used here.`,
+            } has no cleanup commands and no other feature is being used here.\n`,
         );
     }
 
     if (doClean) {
         ProjectCleaningFeatures.Clean(
-            projectName,
+            env.names.name,
             env,
         );
     }
     if (whatShouldWeDo["update"]) {
         ProjectCleaningFeatures.Update(
-            projectName,
+            env.names.name,
             env,
             errors,
+            settings["always-short-circuit-cleanup"],
         );
     }
     if (whatShouldWeDo["lint"]) {
         ProjectCleaningFeatures.Lint(
-            projectName,
+            env.names.name,
             env,
             errors,
+            settings["always-short-circuit-cleanup"],
         );
     }
     if (whatShouldWeDo["pretty"]) {
         ProjectCleaningFeatures.Pretty(
-            projectName,
+            env.names.name,
             env,
             errors,
+            settings["always-short-circuit-cleanup"],
         );
     }
     if (whatShouldWeDo["destroy"]) {
         ProjectCleaningFeatures.Destroy(
-            projectName,
+            env.names.name,
             env,
             intensity,
             errors,
+            settings["always-short-circuit-cleanup"],
         );
     }
     if (whatShouldWeDo["commit"]) {
         ProjectCleaningFeatures.Commit(
+            env.names.name,
             env,
             whatShouldWeDo["update"],
             whatShouldWeDo["lint"],
@@ -309,7 +348,7 @@ export function PerformCleanup(
  *
  * @returns {void}
  */
-export function PerformHardCleanup(): void {
+export function PerformHardCleanup(shortCircuit: boolean): void {
     LogStuff(
         `Time for hard-pruning! ${ColorString("Wait patiently, please (caches will take a while to clean).", "italic")}`,
         "working",
@@ -340,8 +379,8 @@ export function PerformHardCleanup(): void {
             Commander("npm", npmHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (error) {
-            LogStuff("Failed!", "error");
-            LogStuff(error);
+            LogStuff(`Failed!\n${error}`, "error");
+            HandleErroring("hard", "npm", null, shortCircuit);
         }
     }
     if (ManagerExists("pnpm")) {
@@ -355,8 +394,8 @@ export function PerformHardCleanup(): void {
             Commander("pnpm", pnpmHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (error) {
-            LogStuff("Failed!", "error");
-            LogStuff(error);
+            LogStuff(`Failed!\n${error}`, "error");
+            HandleErroring("hard", "pnpm", null, shortCircuit);
         }
     }
     if (ManagerExists("yarn")) {
@@ -370,8 +409,8 @@ export function PerformHardCleanup(): void {
             Commander("yarn", yarnHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (error) {
-            LogStuff("Failed!", "error");
-            LogStuff(error);
+            LogStuff(`Failed!\n${error}`, "error");
+            HandleErroring("hard", "yarn", null, shortCircuit);
         }
     }
 
@@ -387,8 +426,8 @@ export function PerformHardCleanup(): void {
             Commander("bun", bunHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (error) {
-            LogStuff("Failed!", "error");
-            LogStuff(error);
+            LogStuff(`Failed!\n${error}`, "error");
+            HandleErroring("hard", "bun", null, shortCircuit);
         }
     }
 
@@ -403,8 +442,8 @@ export function PerformHardCleanup(): void {
             Commander("go", golangHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (error) {
-            LogStuff("Failed!", "error");
-            LogStuff(error);
+            LogStuff(`Failed!\n${error}`, "error");
+            HandleErroring("hard", "go", null, shortCircuit);
         }
     }
     /* if (ManagerExists("deno")) {
@@ -434,8 +473,8 @@ export function PerformHardCleanup(): void {
             // "maxim" one
             // epic.
         } catch (error) {
-            LogStuff("Failed!", "error");
-            LogStuff(error);
+            LogStuff(`Failed!\n${error}`, "error");
+            HandleErroring("hard", "deno", null, shortCircuit);
         }
     }
 
@@ -443,7 +482,7 @@ export function PerformHardCleanup(): void {
     if (ManagerExists("cargo")) {
         try {
             let path: string;
-            if (LOCAL_PLATFORM.SYSTEM === "windows") {
+            if (LOCAL_PLATFORM.SYSTEM === "msft") {
                 const envPath = Deno.env.get("USERPROFILE");
                 if (!envPath) throw "USERPROFILE is not defined in your environment variable set. Cannot clear caches.";
                 path = JoinPaths(envPath, ".cargo/registry");
@@ -459,12 +498,11 @@ export function PerformHardCleanup(): void {
             Deno.removeSync(path, { recursive: true });
             LogStuff("Done", "tick");
         } catch (error) {
-            if (error instanceof Deno.errors.NotFound) {
-                LogStuff("Apparently there's no Cargo registry cache.", "moon-face", "italic");
-                LogStuff("Done", "tick");
+            if (error instanceof Deno.errors.NotFound) LogStuff("Apparently there's no Cargo registry cache.", "moon-face", "italic");
+            else {
+                LogStuff(`Failed!\n${error}`, "error");
+                HandleErroring("hard", "cargo", null, shortCircuit);
             }
-            LogStuff("Failed!", "error");
-            LogStuff(error);
         }
     }
 
@@ -487,22 +525,19 @@ export async function PerformMaximCleanup(projects: string[]): Promise<void> {
     const trash = [];
 
     for (const project of projects) {
-        const workingProject = SpotProject(project);
-        const name = NameProject(workingProject, "name");
-        const env = GetProjectEnvironment(workingProject);
+        const env = await GetProjectEnvironment(project);
 
-        // TODO: add cargo target
-        if (env.runtime === "rust" || env.runtime === "golang") continue;
+        if (env.runtime === "golang" || env.runtime === "deno") continue;
 
-        if (!CheckForPath(env.hall_of_trash)) {
+        if (!(CheckForPath(env.hall_of_trash))) {
             LogStuff(
-                `Maxim pruning didn't find the node_modules DIR at ${name}. Skipping this ${FWORDS.MF}...`,
+                `No node_modules DIR found at ${env.names.name}. Skipping this motherfucker...`,
                 "bruh",
             );
-            return;
+            continue;
         }
         LogStuff(
-            `Will maxim prune for ${name}`,
+            `Maxim pruning for ${env.names.name}!!`,
             "trash",
         );
         // hall_of_trash path should be absolute
@@ -521,7 +556,7 @@ export async function PerformMaximCleanup(projects: string[]): Promise<void> {
  * @param {string} intensity
  * @returns {CleanerIntensity}
  */
-export function ValidateIntensity(intensity: string): CleanerIntensity {
+export function ValidateIntensity(intensity: string, settings: CF_FKNODE_SETTINGS): CleanerIntensity {
     const cleanedIntensity = intensity.trim().toLowerCase();
 
     if (!["hard", "hard-only", "normal", "maxim", "maxim-only", "--"].includes(cleanedIntensity)) {
@@ -529,32 +564,23 @@ export function ValidateIntensity(intensity: string): CleanerIntensity {
     }
 
     const workingIntensity = cleanedIntensity as CleanerIntensity | "--";
-    const defaultIntensity = GetUserSettings().defaultIntensity;
 
-    if (workingIntensity === "--") {
-        return defaultIntensity;
-    }
+    if (workingIntensity === "--") return settings["default-intensity"];
 
-    if (workingIntensity === "normal") {
-        return "normal";
-    }
+    if (workingIntensity === "normal") return "normal";
 
-    if (workingIntensity === "hard") {
-        return "hard";
-    }
+    if (workingIntensity === "hard") return "hard";
 
-    if (workingIntensity === "hard-only") {
-        return "hard-only";
-    }
+    if (workingIntensity === "hard-only") return "hard-only";
 
     if (workingIntensity === "maxim" || workingIntensity === "maxim-only") {
         const confirmMaxim = Interrogate(
             ' Are you sure you want to use maxim cleanup? It\'ll entirely remove "./node_modules" from all of your added projects.',
             "warn",
         );
-        return confirmMaxim ? workingIntensity : defaultIntensity;
+        return confirmMaxim ? workingIntensity : settings["default-intensity"];
     } else {
-        return defaultIntensity;
+        return settings["default-intensity"];
     }
 }
 
@@ -562,16 +588,10 @@ export function ValidateIntensity(intensity: string): CleanerIntensity {
  * Shows a report with the results of the cleanup.
  *
  * @param {RESULT[]} results
- * @returns {void}
  */
 export function ShowReport(results: RESULT[]): void {
-    console.log("");
     LogStuff("Report:\n", "chart");
-    const report: string[] = [];
-    for (const result of results) {
-        const name = NameProject(result.path, "name-ver");
-        const status = ColorString(result.status, "bold");
-        const elapsedTime = ColorString(result.elapsedTime, "italic");
+    const report: string[] = results.map((result) => {
         const protection = result.extras?.ignored
             ? ColorString(
                 `\n--> The above ${ColorString("was divinely protected from", "blue", "bold", "italic")} ${
@@ -587,25 +607,21 @@ export function ShowReport(results: RESULT[]): void {
             )
             : "";
 
-        const theResult = `${name} -> ${status}, taking ${elapsedTime}${protection}${errors}`;
-        report.push(theResult);
-    }
-    const sortedReport = sortAlphabetically(report).join("\n");
-    LogStuff(sortedReport, undefined);
-    console.log("");
+        return `${result.name} -> ${ColorString(result.status, "bold")}, taking ${
+            ColorString(result.elapsedTime, "italic")
+        }${protection}${errors}`;
+    });
     LogStuff(
-        `Cleaning completed at ${new Date().toLocaleString()}`,
+        `${sortAlphabetically(report).join("\n")}\n\n${ColorString(`Cleaning completed at ${new Date().toLocaleString()}`, "bright-green")}`,
         "tick",
-        "bright-green",
     );
 }
 
 /**
  * Resolves all lockfiles of a project.
  *
- * @async
  * @param {string} path
- * @returns {Promise<LOCKFILE_GLOBAL[]>} All lockfiles
+ * @returns {LOCKFILE_GLOBAL[]} All lockfiles
  */
 export function ResolveLockfiles(path: string): LOCKFILE_GLOBAL[] {
     const lockfiles: LOCKFILE_GLOBAL[] = [];
@@ -619,9 +635,7 @@ export function ResolveLockfiles(path: string): LOCKFILE_GLOBAL[] {
         "go.sum",
         "Cargo.lock",
     ];
-    for (const lockfile of possibleLockfiles) {
-        if (CheckForPath(JoinPaths(path, lockfile))) lockfiles.push(lockfile);
-    }
+    for (const lockfile of possibleLockfiles) if (CheckForPath(JoinPaths(path, lockfile))) lockfiles.push(lockfile);
     return lockfiles;
 }
 

@@ -30,12 +30,12 @@ export interface TheCleanerConstructedParams {
      *
      * @type {{
      *         intensity: string;
-     *         project: string | 0;
+     *         project: string[] | 0;
      *     }}
      */
     parameters: {
         intensity: string;
-        project: string | 0;
+        project: string[] | 0;
     };
 }
 
@@ -190,17 +190,23 @@ export interface TheExporterConstructedParams {
      */
     project: UnknownString;
     /**
-     * Whether to use JSON or not. If not, YAML is used.
+     * Whether to use JSONC or not. If not, YAML is used.
      *
      * @type {boolean}
      */
-    json: boolean;
+    jsonc: boolean;
     /**
      * Whether to output the file to the CLI too.
      *
      * @type {boolean}
      */
     cli: boolean;
+    /**
+     * Whether to export the FnCPF to a file.
+     *
+     * @type {boolean}
+     */
+    export: boolean;
 }
 
 /**
@@ -295,11 +301,17 @@ export interface TheSurrendererConstructedParams {
      */
     learnMoreUrl: UnknownString;
     /**
-     * Is it a GitHub repository? If true, GitHub's `> [!TAGS]` will be used for a prettier string.
+     * Whether to use GitHub flavored MarkDown.
      *
      * @type {?boolean}
      */
-    isGitHub?: boolean;
+    gfm?: boolean;
+    /**
+     * Whether to use GitLab flavored MarkDown.
+     *
+     * @type {?boolean}
+     */
+    glfm?: boolean;
 }
 
 /**
@@ -351,4 +363,25 @@ export interface TheLauncherConstructedParams {
      * @type {UnknownString}
      */
     project: UnknownString;
+}
+
+/**
+ * The Terminator
+ * @author ZakaHaceCosas
+ *
+ * @interface TheTerminatorConstructedParams
+ */
+export interface TheTerminatorConstructedParams {
+    /**
+     * Runtime to be terminated.
+     *
+     * @type {UnknownString}
+     */
+    runtime: UnknownString;
+    /**
+     * Whether to terminate projects too or not. Defaults to not.
+     *
+     * @type {boolean}
+     */
+    projectsToo: boolean;
 }

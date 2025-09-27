@@ -1,13 +1,15 @@
 import { Interrogate, LogStuff } from "../functions/io.ts";
-import { GetProjectEnvironment, NameProject } from "../functions/projects.ts";
-import type { TheCommitterConstructedParams } from "./constructors/command.ts";
+import { GetProjectEnvironment } from "../functions/projects.ts";
+import type { TheCommitterConstructedParams } from "./_interfaces.ts";
 import { CanCommit, Commit, GetBranches, GetCommittableFiles, GetStagedFiles, IsRepo, Push, StageFiles } from "../functions/git.ts";
 import { normalize, pluralOrNot, testFlag, validate } from "@zakahacecosas/string-utils";
-import { RunUserCmd, ValidateUserCmd } from "../functions/user.ts";
-import { GIT_FILES } from "../types/misc.ts";
+import type { GIT_FILES } from "../types/misc.ts";
 import { CheckForPath } from "../functions/filesystem.ts";
 import { FknError } from "../functions/error.ts";
 import { ColorString } from "../functions/color.ts";
+import { RunCmdSet, ValidateCmdSet } from "../functions/cmd-set.ts";
+
+const NOT_COMMITTABLE = [".env", ".env.local", ".sqlite", ".db", "node_modules", ".bak"];
 
 function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
     const canCommit = CanCommit(path);
@@ -23,8 +25,8 @@ function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
         return "ok"; // nothing to do, files alr staged
     }
     if (
-        Array.isArray(files) && files[0] !== "-A" && files.filter(validate).filter(CheckForPath).length === 0 &&
-        !testFlag(files[0] ?? "a", "keep", { allowNonExactString: true, allowQuickFlag: true, allowSingleDash: true })
+        Array.isArray(files) && files[0] !== "-A" && files.filter(validate).filter(CheckForPath).length === 0
+        && !testFlag(files[0] ?? "a", "keep", { allowNonExactString: true, allowQuickFlag: true, allowSingleDash: true })
     ) {
         LogStuff(
             `No files specified for committing. Specify any of the ${
@@ -51,7 +53,7 @@ function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
     }
 }
 
-export default function TheCommitter(params: TheCommitterConstructedParams) {
+export default async function TheCommitter(params: TheCommitterConstructedParams): Promise<void> {
     if (!validate(params.message)) {
         throw new FknError(
             "Param__WhateverUnprovided",
@@ -69,7 +71,7 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
         return;
     }
 
-    const env = GetProjectEnvironment(project);
+    const env = await GetProjectEnvironment(project);
     const prevStaged = GetStagedFiles(project);
 
     if (!params.keepStagedFiles) StageFiles(project, "!A");
@@ -79,30 +81,40 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
     if (params.keepStagedFiles) {
         LogStuff(`Keeping ${prevStaged.length} previously staged ${pluralOrNot("file", prevStaged.length)} for committing.`, "warn");
     }
+
     const staged = GetStagedFiles(project);
+    for (const f of staged) {
+        if (NOT_COMMITTABLE.some((s) => f.includes(s))) {
+            throw new FknError(
+                "Git__Forbidden",
+                `Forbidden file detected! '${f}' cannot be committed.`,
+            );
+        }
+    }
+
     LogStuff(
         `Staged${params.files[0] === "-A" ? " all files, totalling" : ""} ${staged.length} ${pluralOrNot("file", staged.length)} for commit:\n${
             staged
                 .slice(0, 7)
                 .map((file) => `${ColorString("- " + file, "bold", "white")}${prevStaged.includes(file) ? " (prev. staged, kept)" : ""}`)
                 .join("\n")
-        }${staged.length > 7 ? `\nand ${staged.length} more` : ""}`,
+        }${staged.length > 7 ? `\nand ${staged.length - 7} more` : ""}`,
         "tick",
         ["bold", "bright-green"],
     );
 
-    const commitCmd = ValidateUserCmd(env, "commitCmd");
+    const commitCmd = ValidateCmdSet({ env, key: "commitCmd" });
 
     const branches = GetBranches(project);
 
     const gitProps = {
-        fileCount: GetStagedFiles(project).length,
+        fileCount: staged.length,
         branch: (params.branch && !testFlag(params.branch, "push", { allowQuickFlag: true, allowSingleDash: true }))
-            ? branches.all.includes(normalize(params.branch)) ? params.branch : "__ERROR"
+            ? branches.all.includes(normalize(params.branch)) ? params.branch : false
             : branches.current,
     };
 
-    if (!validate(gitProps.branch) || gitProps.branch === "__ERROR") {
+    if (!gitProps.branch || !validate(gitProps.branch)) {
         throw new FknError(
             params.branch ? "Git__NoBranch" : "Git__NoBranchAA",
             params.branch
@@ -116,16 +128,8 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
     const actions: string[] = [];
 
     if (commitCmd !== null) {
-        // otherwise TS shows TypeError for whatever reason
-        const typed: string[] = env.commands.run as string[];
-
         actions.push(
-            `Run ${
-                ColorString(
-                    `${typed.join(" ")} ${commitCmd}`,
-                    "bold",
-                )
-            }`,
+            `Run your 'commitCmd' (${commitCmd.length} cmds)`,
         );
     }
 
@@ -134,26 +138,17 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
     const mBold = ColorString(params.message.trim(), "bold", "italic");
     const fCount = pluralOrNot("file", gitProps.fileCount);
 
-    actions.push(
-        actions.length === 0
-            ? `Commit ${fBold} ${fCount} to branch ${bBold} with message "${mBold}"`
-            : `If everything above went alright, commit ${fBold} ${fCount} to branch ${bBold} with message "${mBold}"`,
-    );
+    actions.push(`Commit ${fBold} ${fCount} to branch ${bBold} with message "${mBold}"`);
 
     if (params.push) {
         actions.push(
-            "If everything above went alright, push all commits to GitHub",
+            "Push all commits to remote",
         );
     }
 
     if (
         !params.y && !Interrogate(
-            `Heads up! We're about to take the following actions:\n\n${actions.join("\n")}\n\n- all of this at ${
-                NameProject(
-                    project,
-                    "all",
-                )
-            }\n`,
+            `Heads up! We're about to take the following actions:\n\n${actions.join("\n")}\n\n- all of this at ${env.names.full}\n`,
         )
     ) {
         LogStuff("Aborting commit.", "bruh");
@@ -162,15 +157,12 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
 
     // hear me out
     // 1. UNSTAGE their files (they probably won't even realize) so we can modify them
-    const toReStage = GetStagedFiles(project);
     const out = StageFiles(project, "!A");
-    if (out !== "ok") {
-        throw `Not OK code for staging handler.`;
-    }
+    if (out !== "ok") throw `No files to stage? This is likely an error somewhere.`;
 
     // 2. run their commitCmd over UNSTAGED, MODIFIABLE files
     try {
-        RunUserCmd({
+        await RunCmdSet({
             key: "commitCmd",
             env,
         });
@@ -187,8 +179,7 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
     // by this point we assume prev task succeeded
     // 3. RESTAGE the files like nothing happened
     // i'm genius developer fr fr
-
-    StageFiles(project, toReStage);
+    StageFiles(project, staged);
 
     // and now, commit :D
     Commit(
@@ -198,14 +189,11 @@ export default function TheCommitter(params: TheCommitterConstructedParams) {
         [],
     );
 
-    if (params.push) {
-        // push stuff to git
-        const pushOutput = Push(project, gitProps.branch);
-        if (pushOutput === 1) {
-            throw new FknError("Git__UE", `Git push failed unexpectedly.`);
-        }
-    }
+    if (params.push) Push(project, gitProps.branch);
 
-    LogStuff(`That worked out! Commit "${params.message}" should be live now.`, "tick", ["bold", "bright-green"]);
+    LogStuff(`That worked out! Commit "${params.message}" should be ${params.push ? "done and live" : "done"} now.`, "tick", [
+        "bold",
+        "bright-green",
+    ]);
     return;
 }

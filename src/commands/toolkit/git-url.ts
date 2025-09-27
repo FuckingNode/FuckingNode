@@ -42,15 +42,12 @@ export function GenerateGitUrl(str: UnknownString): {
             : splitted.length;
 
         const workingGitUrl = userForgotDotGit
-            ? (splitted.splice(0, splitIndex).filter((s) => s.trim() !== "").join(".") + ".git")
-            // still use .join() to handle repo..git or repo...git
+            ? (splitted.splice(0, splitIndex).filter((s) => s.trim() !== "").join(".") + ".git") // still use .join() to handle repo..git or repo...git
             : splitted.join(".");
 
         const strictGitUrlRegex = /^(https?:\/\/.*?\/)([^\/]+)\.git$/;
 
-        if (!strictGitUrlRegex.test(workingGitUrl)) {
-            throw new FknError("Param__GitTargetInvalid", `${str} is not a valid Git URL!`);
-        }
+        if (!strictGitUrlRegex.test(workingGitUrl)) throw new FknError("Param__GitTargetInvalid", `${str} is not a valid Git URL!`);
         if (userForgotDotGit) {
             LogStuff(
                 "Psst... You forgot '.git' at the end. No worries, we can still read it.",

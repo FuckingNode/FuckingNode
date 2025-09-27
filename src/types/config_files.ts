@@ -1,5 +1,7 @@
+import { validate } from "@zakahacecosas/string-utils";
 import type { CleanerIntensity } from "./config_params.ts";
-import { MANAGER_GLOBAL } from "./platform.ts";
+import type { NonEmptyArray } from "./misc.ts";
+import type { MANAGER_GLOBAL } from "./platform.ts";
 
 /**
  * Supported code editors.
@@ -17,43 +19,49 @@ export interface CF_FKNODE_SETTINGS {
      *
      * @type {number}
      */
-    updateFreq: number;
-    /**
-     * How often should the CLI clear log files.
-     *
-     * @type {number}
-     */
-    flushFreq: number;
+    "update-freq": number;
     /**
      * Default cleaner intensity, for running `clean` with no args.
      *
      * @type {CleanerIntensity}
      */
-    defaultIntensity: CleanerIntensity;
+    "default-intensity": CleanerIntensity;
     /**
      * User's favorite code editor.
      *
      * @type {SUPPORTED_EDITORS}
      */
-    favEditor: SUPPORTED_EDITORS;
+    "fav-editor": SUPPORTED_EDITORS;
     /**
      * Default package manager / runtime to use for features like `kickstart`.
      *
      * @type {MANAGER_GLOBAL}
      */
-    defaultManager: MANAGER_GLOBAL;
+    "default-manager": MANAGER_GLOBAL;
     /**
      * If true notifications are shown only if a task takes more than 30 seconds. Else, they're always shown.
      *
      * @type {boolean}
      */
-    thresholdNotifications: boolean;
+    "notification-threshold": boolean;
     /**
      * If true, notifications are shown for certain tasks upon completion.
      *
      * @type {boolean}
      */
-    showNotifications: boolean;
+    "notifications": boolean;
+    /**
+     * Duration, in milliseconds, of notifications' threshold.
+     *
+     * @type {number}
+     */
+    "notification-threshold-value": number;
+    /**
+     * Whether to always short-circuit cleanup on errors.
+     *
+     * @type {boolean}
+     */
+    "always-short-circuit-cleanup": boolean;
 }
 
 /**
@@ -74,57 +82,62 @@ export interface CF_FKNODE_SCHEDULE {
         latestVer: string;
         lastCheck: string;
     };
-    /**
-     * Log flushes.
-     *
-     * @type {{
-     *         lastFlush: string;
-     *     }}
-     */
-    flusher: {
-        lastFlush: string;
-    };
 }
 
-/**
- * An `fknode.yaml` file for configuring individual projects
- */
+/** A single `CmdSet` instruction. */
+export type CmdInstruction = `\$${string}` | `~${string}` | `=${string}`;
+export type ParsedCmdInstruction = { type: "<" | "~" | "$" | "="; cmd: NonEmptyArray<string> };
+export type CrossPlatformParsedCmdInstruction = {
+    msft: ParsedCmdInstruction | null;
+    posix: ParsedCmdInstruction | null;
+};
+// deno-lint-ignore explicit-module-boundary-types no-explicit-any
+export function IsCPCmdInstruction(a: any): a is CrossPlatformParsedCmdInstruction {
+    if (!a.msft && !a.posix) return false;
+    return ((typeof a.msft.type === "string" && validate(a.msft.type)) || (typeof a.posix.type === "string" && validate(a.posix.type)));
+}
+export type CmdSet = (CmdInstruction | { posix: CmdInstruction; msft: CmdInstruction })[];
+
+/** An `fknode.yaml` file for configuring individual projects */
 export type FkNodeYaml = Partial<FullFkNodeYaml>;
 
+/** Full specification of the `fknode.yaml` file, for configuring individual projects */
 export interface FullFkNodeYaml {
     /**
-     * Divine protection, basically to ignore stuff. Must always be an array.
+     * Divine protection, basically to ignore stuff. Must be an array of options, or `"*"`.
      *
-     * @type {(("updater" | "cleaner" | "linter" | "prettifier" | "destroyer")[] | "*" | "disabled")}
+     * @type {(("updater" | "cleaner" | "linter" | "prettifier" | "destroyer")[] | "*")}
      */
-    divineProtection: ("updater" | "cleaner" | "linter" | "prettifier" | "destroyer")[] | "*" | "disabled";
+    divineProtection: ("updater" | "cleaner" | "linter" | "prettifier" | "destroyer")[] | "*";
+    /** If true, the cleaner will short-circuit whenever an error happens on any task. Defaults to false. */
+    cleanerShortCircuit: boolean;
     /**
-     * If `--lint` is passed to `clean`, this script will be used to lint the project. It must be a runtime script (defined in `package.json` -> `scripts`), and must be a single word (no need for "npm run" prefix). `__USE_DEFAULT` overrides these rules (it's the default).
+     * If `--lint` is passed to `clean`, this script will be used to lint the project. It must be a runtime script (defined in `package.json` -> `scripts`), and must be a single word (no need for "npm run" prefix). `false` overrides these rules (it's the default).
      *
-     * @type {(string | "__USE_DEFAULT")}
+     * @type {(string | false)}
      */
-    lintCmd: string | "__USE_DEFAULT";
+    lintScript: string | false;
     /**
-     * If `--pretty` is passed to `clean`, this script will be used to prettify the project. It must be a runtime script (defined in `package.json` -> `scripts`), and must be a single word (no need for "npm run" prefix). `__USE_DEFAULT` overrides these rules (it's the default).
+     * If `--pretty` is passed to `clean`, this script will be used to prettify the project. It must be a runtime script (defined in `package.json` -> `scripts`), and must be a single word (no need for "npm run" prefix). `false` overrides these rules (it's the default).
      *
-     * @type {(string | "__USE_DEFAULT")}
+     * @type {(string | false)}
      */
-    prettyCmd: string | "__USE_DEFAULT";
+    prettyScript: string | false;
     /**
      * If provided, file paths in `targets` will be removed when `clean` is called with any of the `intensities`. If not provided defaults to `maxim` intensity and `node_modules` path. Specifying `targets` _without_ `node_modules` does not override it, meaning it'll always be cleaned.
      *
-     * @type {{
+     * @type {null | {
      *         intensities: (CleanerIntensity | "*")[],
      *         targets: string[]
      *     }}
      */
-    destroy: {
+    destroy: null | {
         /**
          * Intensities the destroyer should run at.
          *
-         * @type {(CleanerIntensity | "*")[]}
+         * @type {CleanerIntensity[] | "*"}
          */
-        intensities: (CleanerIntensity | "*")[];
+        intensities: CleanerIntensity[] | "*";
         /**
          * Targets to be destroyed. Must be paths either relative to the **root** of the project or absolute.
          *
@@ -139,17 +152,17 @@ export interface FullFkNodeYaml {
      */
     commitActions: boolean;
     /**
-     * If provided, if a commit is made (`commitActions`) this will be the commit message. If not provided a default message is used. `__USE_DEFAULT` indicates to use the default.
+     * If provided, if a commit is made (`commitActions`) this will be the commit message. If not provided a default message is used.
      *
-     * @type {(string | "__USE_DEFAULT")}
+     * @type {(string | false)}
      */
-    commitMessage: string | "__USE_DEFAULT";
+    commitMessage: string | false;
     /**
-     * If provided, uses the provided runtime script command for the updating stage, overriding the default command. Like `lintCmd` or `prettyCmd`, it must be a runtime script.
+     * If provided, uses the provided runtime script command for the updating stage, overriding the default command. Like `lintScript` or `prettyScript`, it must be a runtime script.
      *
-     * @type {(string | "__USE_DEFAULT")}
+     * @type {(string | false)}
      */
-    updateCmdOverride: string | "__USE_DEFAULT";
+    updaterOverride: string | false;
     /**
      * Flagless features.
      *
@@ -171,9 +184,9 @@ export interface FullFkNodeYaml {
     /**
      * A task (run) to be executed upon running the release command.
      *
-     * @type {string}
+     * @type {CmdSet | false}
      */
-    releaseCmd: string;
+    releaseCmd: CmdSet | false;
     /**
      * If true, releases will always use `dry-run`.
      *
@@ -181,41 +194,29 @@ export interface FullFkNodeYaml {
      */
     releaseAlwaysDry: boolean;
     /**
-     * A task (run) to be executed upon running the commit command.
+     * A CmdSet to be executed upon running the commit command.
      *
-     * @type {string}
+     * @type {CmdSet | false}
      */
-    commitCmd: string;
+    commitCmd: CmdSet | false;
     /**
-     * A task (run) to be executed upon running the launch command.
+     * A CmdSet to be executed upon running the launch command.
      *
-     * @type {string}
+     * @type {CmdSet | false}
      */
-    launchCmd: string;
-    /**
-     * A file to be executed when `launchCmd` is invoked. Only used for Deno, Cargo, and Golang.
-     *
-     * @type {string}
-     */
-    launchFile: string;
-    /**
-     * If true, dependencies for a project will be updated upon using `fklaunch` with it.
-     *
-     * @type {boolean}
-     */
-    launchWithUpdate: boolean;
+    launchCmd: CmdSet | false;
     /**
      * If specified, this will override FkNode's project environment inference.
      *
-     * @type {MANAGER_GLOBAL | "__USE_DEFAULT"}
+     * @type {MANAGER_GLOBAL | false}
      */
-    projectEnvOverride: MANAGER_GLOBAL | "__USE_DEFAULT";
+    projectEnvOverride: MANAGER_GLOBAL | false;
     /**
      * Command(s) to be executed when running the `build` command.
      *
-     * @type {string | "__DISABLE"}
+     * @type {CmdSet | false}
      */
-    buildCmd: string | "__DISABLE";
+    buildCmd: CmdSet | false;
     /**
      * If true, `buildCmd` is invoked before releasing.
      *
@@ -231,22 +232,18 @@ export interface FullFkNodeYaml {
  * @returns {obj is FkNodeYaml}
  */
 export function ValidateFkNodeYaml(
-    // deno-lint-ignore no-explicit-any
+    // deno-lint-ignore explicit-module-boundary-types no-explicit-any
     obj: any,
 ): obj is FkNodeYaml {
-    if (!obj || typeof obj !== "object") {
-        return false;
-    }
+    if (!obj || typeof obj !== "object") return false;
 
     if (
-        obj.divineProtection !== undefined &&
-        obj.divineProtection !== "*" &&
-        obj.divineProtection !== "disabled" &&
-        !(
-            Array.isArray(obj.divineProtection) &&
-            obj.divineProtection.every(
-                // deno-lint-ignore no-explicit-any
-                (item: any) => {
+        obj.divineProtection !== undefined
+        && obj.divineProtection !== "*"
+        && !(
+            Array.isArray(obj.divineProtection)
+            && obj.divineProtection.every(
+                (item: string) => {
                     return ["updater", "cleaner", "linter", "prettifier", "destroyer"].includes(item);
                 },
             )
@@ -256,29 +253,29 @@ export function ValidateFkNodeYaml(
     }
 
     if (
-        obj.lintCmd !== undefined && typeof obj.lintCmd !== "string"
+        obj.lintScript !== undefined && typeof obj.lintScript !== "string"
     ) {
         return false;
     }
 
     if (
-        obj.prettyCmd !== undefined && typeof obj.prettyCmd !== "string"
+        obj.prettyScript !== undefined && typeof obj.prettyScript !== "string"
     ) {
         return false;
     }
 
     if (obj.destroy !== undefined) {
         if (
-            typeof obj.destroy !== "object" ||
-            !Array.isArray(obj.destroy.targets) ||
-            !obj.destroy.targets.every(
+            typeof obj.destroy !== "object"
+            || !Array.isArray(obj.destroy.targets)
+            || !obj.destroy.targets.every(
                 // deno-lint-ignore no-explicit-any
                 (target: any) => typeof target === "string",
-            ) ||
-            !(
-                obj.destroy.intensities === "*" ||
-                (Array.isArray(obj.destroy.intensities) &&
-                    obj.destroy.intensities.every(
+            )
+            || !(
+                obj.destroy.intensities === "*"
+                || (Array.isArray(obj.destroy.intensities)
+                    && obj.destroy.intensities.every(
                         // deno-lint-ignore no-explicit-any
                         (intensity: any) => {
                             return ["normal", "hard", "hard-only", "maxim", "maxim-only", "*"].includes(intensity);
@@ -290,52 +287,38 @@ export function ValidateFkNodeYaml(
         }
     }
 
-    if (obj.commitActions !== undefined && typeof obj.commitActions !== "boolean") {
-        return false;
-    }
+    if (obj.commitActions !== undefined && typeof obj.commitActions !== "boolean") return false;
 
     if (
-        obj.commitMessage !== undefined &&
-        typeof obj.commitMessage !== "string"
+        obj.commitMessage !== undefined
+        && typeof obj.commitMessage !== "string"
     ) {
         return false;
     }
 
     if (
-        obj.updateCmdOverride !== undefined &&
-        typeof obj.updateCmdOverride !== "string"
+        obj.updaterOverride !== undefined
+        && typeof obj.updaterOverride !== "string"
     ) {
         return false;
     }
 
     if (obj.flagless !== undefined) {
-        if (typeof obj.flagless !== "object" || obj.flagless === null) {
-            return false;
-        }
+        if (typeof obj.flagless !== "object" || obj.flagless === null) return false;
 
         const validKeys = ["flaglessUpdate", "flaglessDestroy", "flaglessLint", "flaglessPretty", "flaglessCommit"];
-        for (const [key, value] of Object.entries(obj.flagless)) {
-            if (!validKeys.includes(key) || typeof value !== "boolean") {
-                return false;
-            }
-        }
+        for (const [key, value] of Object.entries(obj.flagless)) if (!validKeys.includes(key) || typeof value !== "boolean") return false;
     }
 
-    if (obj.releaseCmd !== undefined && typeof obj.releaseCmd !== "string") {
-        return false;
-    }
+    if (obj.commitCmd !== undefined && !Array.isArray(obj.commitCmd)) return false;
 
-    if (obj.releaseAlwaysDry !== undefined && typeof obj.releaseAlwaysDry !== "boolean") {
-        return false;
-    }
+    if (obj.releaseCmd !== undefined && !Array.isArray(obj.releaseCmd)) return false;
 
-    if (obj.commitCmd !== undefined && typeof obj.commitCmd !== "string") {
-        return false;
-    }
+    if (obj.buildCmd !== undefined && !Array.isArray(obj.buildCmd)) return false;
 
-    if (obj.launchCmd !== undefined && typeof obj.launchCmd !== "string") {
-        return false;
-    }
+    if (obj.launchCmd !== undefined && !Array.isArray(obj.launchCmd)) return false;
+
+    if (obj.releaseAlwaysDry !== undefined && typeof obj.releaseAlwaysDry !== "boolean") return false;
 
     return true;
 }

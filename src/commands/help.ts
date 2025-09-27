@@ -1,7 +1,6 @@
 import { normalize, spaceString } from "@zakahacecosas/string-utils";
-import { APP_NAME } from "../constants/name.ts";
 import { LogStuff } from "../functions/io.ts";
-import type { TheHelperConstructedParams } from "./constructors/command.ts";
+import type { TheHelperConstructedParams } from "./_interfaces.ts";
 import { ColorString } from "../functions/color.ts";
 
 type HelpItem = [string, string | null, string] | [string, string | null, string, boolean];
@@ -34,7 +33,7 @@ function formatCmdWithTitle(title: string, desc: string, obj: HelpItem[]): strin
     return `> ${ColorString(title, "bright-green", "bold")}\n\n>>> Details:\n\n${desc}\n\n>>> Parameters\n\n${formatCmd(obj)}\n`;
 }
 
-function projectReminder() {
+function projectReminder(): void {
     LogStuff(
         "Note: <project> is either a file path OR a project's name.\nIn places where we can assume the project is already added (like 'clean', 'remove', or 'stats'),\nyou can pass the project's name (as it appears in the package file) and it should be recognized.",
         undefined,
@@ -42,13 +41,13 @@ function projectReminder() {
     );
 }
 
-export default function TheHelper(params: TheHelperConstructedParams) {
+export default function TheHelper(params: TheHelperConstructedParams): void {
     const { query } = params;
 
     const USAGE = formatCmd([
         [
             ">>>",
-            `The ${APP_NAME.CASED} experience...`,
+            "The FuckingNode experience...",
             "Base commands:",
         ],
         [
@@ -74,7 +73,7 @@ export default function TheHelper(params: TheHelperConstructedParams) {
         [
             "kickstart",
             "<git-url> [path] [npm | pnpm | yarn | deno | bun]",
-            `Quickly clones a repo inside [path], installs deps, setups ${APP_NAME.CASED}, and launches your code editor.`,
+            "Quickly clones a repo inside [path], installs deps, setups FuckingNode, and launches your code editor.",
         ],
         [
             "commit",
@@ -123,7 +122,7 @@ export default function TheHelper(params: TheHelperConstructedParams) {
         ],
         [
             "export",
-            "[project] [--json] [--cli]",
+            "[project] [--jsonc] [--cli] [--export]",
             "Exports your project's CPF. Meant for debugging only.",
         ],
         [
@@ -149,7 +148,7 @@ export default function TheHelper(params: TheHelperConstructedParams) {
         [
             "about",
             null,
-            `Shows info about ${APP_NAME.CASED}.`,
+            "Shows info about FuckingNode.",
         ],
         [
             "tip",
@@ -174,7 +173,7 @@ export default function TheHelper(params: TheHelperConstructedParams) {
             LogStuff(
                 formatCmdWithTitle(
                     "'clean' will clean, lint, prettify,... all your projects.",
-                    `Recursively runs a set of tasks across all of your projects, depending on given flags and project configuration (via fknode.yaml).\nIt's our main feature, base for ${APP_NAME.CASED} saving you time.`,
+                    "Recursively runs a set of tasks across all of your projects, depending on given flags and project configuration (via fknode.yaml).\nIt's our main feature, base for FuckingNode saving you time.",
                     [
                         [
                             "<project | -->",
@@ -209,7 +208,7 @@ export default function TheHelper(params: TheHelperConstructedParams) {
                         [
                             "--commit, -c",
                             null,
-                            `Commit any changes made (via, e.g., --pretty or --update) only if all of these are true:\n- "commitActions" is set to true in your fknode.yaml.\n- Local working tree was clean before ${APP_NAME.CASED} touched it.\n- Local repo is not behind upstream.\nIt uses a default commit message; override it by setting "commitMessage" in your fknode.yaml.`,
+                            'Commit any changes made (via, e.g., --pretty or --update) only if all of these are true:\n- "commitActions" is set to true in your fknode.yaml.\n- Local working tree was clean before FuckingNode touched it.\n- Local repo is not behind upstream.\nIt uses a default commit message; override it by setting "commitMessage" in your fknode.yaml.',
                         ],
                     ],
                 ),
@@ -526,7 +525,7 @@ export default function TheHelper(params: TheHelperConstructedParams) {
             LogStuff(
                 formatCmdWithTitle(
                     "'export' lets you see your project's CPF, meant for debug",
-                    `The ${APP_NAME.CASED} Common Package File (FnCPF) is a fancy name for a common structure we convert all package files into.\nIt's useful to debug - as if this file shows content differences with your package file, there's likely a bug in our source code.`,
+                    "The FuckingNode Common Package File (FnCPF) is a fancy name for a common structure we convert all package files into.\nIt's useful to debug - as if this file shows content differences with your package file, there's likely a bug in our source code.",
                     [
                         [
                             "<project>",
@@ -534,14 +533,19 @@ export default function TheHelper(params: TheHelperConstructedParams) {
                             "Project to show the CPF for. Defaults to the current working directory.",
                         ],
                         [
-                            "--json",
+                            "--jsonc",
                             null,
-                            "Default format is YAML, use --json to use JSONC format instead.",
+                            "Default format is YAML, use --jsonc to use JSONC format instead.",
                         ],
                         [
                             "--cli",
                             null,
-                            "If passed, the output (which is written to a file btw), wil also be shown in the terminal.",
+                            "If passed, the output will also be shown in the terminal. It's always shown if not exporting.",
+                        ],
+                        [
+                            "--export",
+                            null,
+                            "If passed, the output will be written to a file instead of being shown in the terminal.",
                         ],
                     ],
                 ),
@@ -573,19 +577,21 @@ export default function TheHelper(params: TheHelperConstructedParams) {
             LogStuff("Checks for updates. Takes no arguments.\nAs of now, updates need to be installed manually. Data won't be lost.");
             break;
         case "about":
-            LogStuff("Shows a simple (but cool looking!) about screen. Takes no arguments.\nIncludes a bunch of info, and a randomized quote.");
+            LogStuff(
+                "Shows a simple (but cool looking!) about screen. Takes no arguments.\nIncludes a bunch of info, and a randomized quote.",
+            );
             break;
         case "tip":
             LogStuff("Shows a randomized pro-tip related to the app.");
             break;
         case "help":
             LogStuff(
-                `Usage: ${ColorString(APP_NAME.CLI, "bright-green")} <command> [params...]\n\n${USAGE}`,
+                `Usage: ${ColorString("fuckingnode", "bright-green")} <command> [params...]\n\n${USAGE}`,
             );
             break;
         default:
             LogStuff(
-                `Usage: ${ColorString(APP_NAME.CLI, "bright-green")} <command> [params...]\n\n${USAGE}\n`,
+                `Usage: ${ColorString("fuckingnode", "bright-green")} <command> [params...]\n\n${USAGE}\n`,
             );
             LogStuff(
                 "Run 'help <command-name>' to get help with a specific command.",

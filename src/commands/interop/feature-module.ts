@@ -1,11 +1,8 @@
-import { validateAgainst } from "@zakahacecosas/string-utils";
 import { Commander } from "../../functions/cli.ts";
 import { LogStuff, Notification } from "../../functions/io.ts";
-import type { ProjectEnvironment } from "../../types/platform.ts";
+import { type ProjectEnvironment, TypeGuardForJS, TypeGuardForNodeBun } from "../../types/platform.ts";
 import { DebugFknErr, FknError } from "../../functions/error.ts";
 import { FkNodeInterop } from "./interop.ts";
-import { isDef, isDis } from "../../constants.ts";
-import { NameProject } from "../../functions/projects.ts";
 import { GetAppPath } from "../../functions/config.ts";
 
 function HandleError(
@@ -33,11 +30,9 @@ function HandleError(
  */
 export const InteropedFeatures = {
     Lint: (env: ProjectEnvironment): boolean => {
-        const script = env.settings.lintCmd;
-
-        if (validateAgainst(env.runtime, ["bun", "node"])) {
-            if (isDef(script)) {
-                if (FkNodeInterop.PackageFileUtils.SpotDependency("eslint", env.main.cpfContent.deps) === undefined) {
+        if (TypeGuardForNodeBun(env)) {
+            if (env.settings.lintScript === false) {
+                if (FkNodeInterop.PackageFileUtils.SpotDependency("eslint", env.mainCPF.deps) === undefined) {
                     LogStuff(
                         "No linter was given (via fknode.yaml > lintCmd), hence defaulted to ESLint - but ESLint is not installed!",
                         "bruh",
@@ -46,9 +41,9 @@ export const InteropedFeatures = {
                 }
 
                 const output = Commander(
-                    env.commands.exec[0],
+                    env.commands.dlx[0],
                     [
-                        env.commands.exec[1],
+                        env.commands.dlx[1],
                         "eslint",
                         "--fix",
                         ".",
@@ -60,8 +55,8 @@ export const InteropedFeatures = {
                 return true;
             } else {
                 const output = Commander(
-                    env.commands.run[0],
-                    [env.commands.run[1], script],
+                    env.commands.script[0],
+                    [env.commands.script[1], env.settings.lintScript],
                 );
 
                 if (!output.success) HandleError("Task__Lint", output.stdout);
@@ -79,8 +74,8 @@ export const InteropedFeatures = {
             return false;
         } else if (env.runtime === "deno") {
             const output = Commander(
-                env.commands.run[0],
-                ["check", "."],
+                env.commands.base,
+                env.settings.lintScript === false ? ["check", "."] : [env.commands.script[1], env.settings.lintScript],
             );
 
             if (!output.success) HandleError("Task__Lint", output.stdout);
@@ -98,11 +93,11 @@ export const InteropedFeatures = {
         }
     },
     Pretty: (env: ProjectEnvironment): boolean => {
-        const script = env.settings.prettyCmd;
+        const script = env.settings.prettyScript;
 
-        if (validateAgainst(env.runtime, ["bun", "node"])) {
-            if (isDef(script)) {
-                if (FkNodeInterop.PackageFileUtils.SpotDependency("prettier", env.main.cpfContent.deps) === undefined) {
+        if (TypeGuardForNodeBun(env)) {
+            if (script === false) {
+                if (FkNodeInterop.PackageFileUtils.SpotDependency("prettier", env.mainCPF.deps) === undefined) {
                     LogStuff(
                         "No prettifier was given (via fknode.yaml > prettyCmd), hence defaulted to Prettier - but Prettier is not installed!",
                         "bruh",
@@ -111,9 +106,9 @@ export const InteropedFeatures = {
                 }
 
                 const output = Commander(
-                    env.commands.exec[0],
+                    env.commands.dlx[0],
                     [
-                        env.commands.exec[1],
+                        env.commands.dlx[1],
                         "prettier",
                         "--w",
                         ".",
@@ -125,20 +120,28 @@ export const InteropedFeatures = {
                 return true;
             } else {
                 const output = Commander(
-                    env.commands.run[0],
-                    [env.commands.run[1], script],
+                    env.commands.script[0],
+                    [env.commands.script[1], script],
                 );
 
                 if (!output.success) HandleError("Task__Pretty", output.stdout);
 
                 return true;
             }
-        } else {
-            // customization unsupported for all of these
-            // deno fmt settings should work from deno.json, tho
+        } else if (env.runtime === "deno") {
             const output = Commander(
                 env.commands.base,
-                env.runtime === "deno" ? ["fmt"] : ["fmt", "./..."],
+                env.settings.prettyScript === false ? ["fmt"] : [env.commands.script[1], env.settings.prettyScript],
+            );
+
+            if (!output.success) HandleError("Task__Pretty", output.stdout);
+
+            return true;
+        } else {
+            // custom script unsupported for these
+            const output = Commander(
+                env.commands.base,
+                ["fmt", "./..."],
             );
 
             if (!output.success) HandleError("Task__Pretty", output.stdout);
@@ -147,9 +150,9 @@ export const InteropedFeatures = {
         }
     },
     Update: (env: ProjectEnvironment): boolean => {
-        const script = env.settings.updateCmdOverride;
+        const script = env.settings.updaterOverride;
 
-        if (isDef(script)) {
+        if (script === false) {
             const output = Commander(
                 env.commands.base,
                 env.commands.update,
@@ -160,56 +163,19 @@ export const InteropedFeatures = {
             return true;
         }
 
-        if (validateAgainst(env.runtime, ["rust", "golang"])) {
+        if (!TypeGuardForJS(env)) {
             throw new FknError(
                 "Interop__JSRunUnable",
-                `${env.manager} does not support JavaScript-like "run" commands, however you've set updateCmdOverride in your fknode.yaml to ${script}. Since we don't know what you're doing, update task wont proceed for this project.`,
+                `${env.manager} does not support JavaScript-like "run" commands, however you've set updaterOverride in your fknode.yaml to ${script}. Since we don't know what you're doing, update task won't proceed for this project.`,
             );
-        } else {
-            const output = Commander(
-                env.commands.run[0],
-                [env.commands.run[1], script],
-            );
-
-            if (!output.success) HandleError("Task__Update", output.stdout);
-
-            return true;
-        }
-    },
-    Launch: (env: ProjectEnvironment): boolean => {
-        const script = env.settings.launchCmd;
-
-        if (isDis(script)) return true;
-
-        if (isDef(script)) {
-            if (validateAgainst(env.manager, ["go", "deno", "cargo"]) && !env.settings.launchFile) {
-                throw new FknError(
-                    "Task__Launch",
-                    `You tried to launch project ${
-                        NameProject(
-                            env.root,
-                            "name",
-                        )
-                    } without specifying a launchFile in your fknode.yaml. ${env.runtime} requires to specify what file to run.`,
-                );
-            }
-
-            const output = Commander(
-                env.commands.base,
-                validateAgainst(env.manager, ["go", "deno", "cargo"]) ? [env.commands.start, env.settings.launchFile] : [env.commands.start],
-            );
-
-            if (!output.success) HandleError("Task__Launch", output.stdout);
-
-            return true;
         }
 
         const output = Commander(
-            env.commands.run[0],
-            [env.commands.run[1], script],
+            env.commands.script[0],
+            [env.commands.script[1], script],
         );
 
-        if (!output.success) HandleError("Task__Launch", output.stdout);
+        if (!output.success) HandleError("Task__Update", output.stdout);
 
         return true;
     },

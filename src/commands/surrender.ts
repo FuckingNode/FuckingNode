@@ -1,39 +1,41 @@
-import { normalize, type UnknownString, validate } from "@zakahacecosas/string-utils";
-import { GetProjectEnvironment, RemoveProject, SpotProject } from "../functions/projects.ts";
-import type { TheSurrendererConstructedParams } from "./constructors/command.ts";
+import * as DenoJson from "../../deno.json" with { type: "json" };
+import { normalize, reveal, type UnknownString, validate } from "@zakahacecosas/string-utils";
+import { GetProjectEnvironment, RemoveProject } from "../functions/projects.ts";
+import type { TheSurrendererConstructedParams } from "./_interfaces.ts";
 import { Interrogate, LogStuff } from "../functions/io.ts";
-import { NameProject } from "../functions/projects.ts";
-import { APP_URLs, FULL_NAME } from "../constants.ts";
 import { Commit, GetBranches, Push } from "../functions/git.ts";
 import { CheckForPath, JoinPaths } from "../functions/filesystem.ts";
 import { FkNodeInterop } from "./interop/interop.ts";
-import { FknError } from "../functions/error.ts";
 import { ColorString } from "../functions/color.ts";
 
-const deprecationNotices = [
-    "# This project is no longer maintained\n\nThis repository is archived and will not receive updates or bug fixes.",
-    "# 🚨 Deprecation Notice\n\nThis project is deprecated and no longer actively supported. Use at your own risk.",
-    "# 🛑 No Longer Supported\n\nDevelopment has ceased, and this project is no longer maintained.",
-    "# ❗ Important: Project Deprecated\n\nThis repository is no longer maintained. Consider looking for alternatives.",
-    "# ⚠️ Project Sunset\n\nThis project has reached the end of its lifecycle and will not receive further updates.",
-    "# ⛔ Archived Repository\n\nThis project is no longer in active development and will not be updated.",
-    "# 🚫 End of Life\n\nThis project has reached end of life, it is deprecated and thus no longer supported.",
-    "# ❗ Deprecated Codebase\n\nThis project is outdated and should not be used for new developments.",
+const FULL_NAME = `FuckingNode v${DenoJson.default.version}`;
+
+const deprecationNotices: ((proj: string) => string)[] = [
+    (p) =>
+        `# This project is no longer maintained\n\nThis repository is archived and ${p} will not receive updates or bug fixes anymore. Sorry.`,
+    (p) =>
+        `# Deprecation notice\n\nThis project is deprecated and no longer actively supported. ${p} will not receive security patches or bug fixes anymore. **Use at your own risk.**`,
+    (p) => `# ${p} is no longer supported\n\nDevelopment has ceased, and the ${p} project is no longer maintained.`,
+    (p) => `# Project Sunset\n\n**${p} is being sunset**; it has reached the end of its lifecycle and will not receive further updates.`,
+    (p) => `# End of Life notice\n\nThis project, **${p}** has reached *End of Life* (EOL). It is deprecated and thus no longer supported.`,
 ];
 
-export default function TheSurrenderer(params: TheSurrendererConstructedParams) {
-    const project = SpotProject(params.project);
+// TODO(@ZakaHaceCosas): make this into a jsr package or something, idk
+function shuffle<T>(arr: T[]): T {
+    return arr[Math.floor(Math.random() * arr.length)]!;
+}
+
+export default async function TheSurrenderer(params: TheSurrendererConstructedParams): Promise<void> {
+    const env = await GetProjectEnvironment(params.project);
 
     if (
-        !(Interrogate(
-            `Are you 100% sure that ${NameProject(project, "all")} ${
-                ColorString("should be deprecated?\nThis is not something you can really undo...", "orange")
-            }`,
+        !Interrogate(
+            `Are you 100% sure that ${env.names.full} ${ColorString("should be deprecated?\nThis is not something you can undo!", "orange")}`,
             "warn",
-        ))
+        )
     ) return;
 
-    Deno.chdir(project);
+    Deno.chdir(env.root);
 
     function valid(str: UnknownString): str is string {
         if (!validate(str)) return false;
@@ -41,71 +43,62 @@ export default function TheSurrenderer(params: TheSurrendererConstructedParams) 
         return normalized !== "--" && normalized !== "-";
     }
 
-    const alternatives = valid(params.alternative)
-        ? `\n\nThe maintainer of this repository has provided the following alternative: ${params.alternative.trim()}`
-        : "";
+    const alternatives = valid(params.alternative) ? `\n\nThe following alternative(s) are recommended: ${params.alternative.trim()}` : "";
     const note = valid(params.message) ? `\n\nThis note was left by the maintainer of this repository: ${params.message.trim()}` : "";
     const learnMore = valid(params.learnMoreUrl)
-        ? `\n\nYou may find here additional information regarding this project's deprecation: ${params.learnMoreUrl.trim()}`
+        ? `\n\nYou may find here additional information regarding **${env.mainCPF.name}**'s deprecation: ${params.learnMoreUrl.trim()}`
         : "";
-    const bareMessage = deprecationNotices[Math.floor(Math.random() * deprecationNotices.length)] + note + alternatives +
-        learnMore +
-        `\n\n###### This project was _automatically deprecated_ using the ${FULL_NAME} CLI utility (found at [this repo](${APP_URLs.REPO})), and this message was auto-generated based on their input - so if something feels off, it might be because of that. Below proceeds the old README from this project, unedited\n${
+    const bareMessage = shuffle(deprecationNotices)(env.mainCPF.name) + note
+        + alternatives
+        + learnMore
+        + `\n\n###### This project was _automatically deprecated_ using the ${FULL_NAME} CLI utility (found at [this repo](https://github.com/FuckingNode/FuckingNode/)), and this message was generated from a template. If something feels off, it might be because of that. Below proceeds the old README from this project, unedited.\n${
             "-".repeat(30)
         }`;
+    const message = (params.gfm || params.glfm)
+        ? `${params.gfm ? "> [!CAUTION]" : ">>> [!warning] Caution"}\n${
+            bareMessage.split("\n").map((s) => params.gfm ? `> ${s}` : s).join("\n")
+        }\n${params.glfm ? ">>>\n" : ""}`
+        : bareMessage;
 
-    const message = params.isGitHub ? `> [!CAUTION]\n${bareMessage.split("\n").map((s) => `> ${s}`).join("\n")}\n` : bareMessage;
-    console.log("");
-    const confirmation = Interrogate(
-        `(IMPORTANT) Here's what we'll do:\n- Commit ALL UNCOMMITTED changes to the CURRENTLY SELECTED branch AND PUSH them\n- Add a note to your project's README (see below)\n- Once we're sure all your code is pushed, locally DELETE ALL THE PROJECT's FILES\n${
-            ColorString("Please confirm one last time that you wish to proceed", "bright-yellow")
-        }.\n\n--- MESSAGE TO BE PREPENDED TO README.md ---\n${message}`,
-        "heads-up",
-    );
     if (
-        confirmation === false
+        !Interrogate(
+            `(IMPORTANT) Here's what we'll do:\n- Commit ALL UNCOMMITTED changes to the CURRENTLY SELECTED branch AND PUSH them\n- Add a note to your project's README (see below)\n- Once we're sure all your code is pushed, locally DELETE ALL THE PROJECT's FILES\n${
+                ColorString("Please confirm one last time that you wish to proceed", "bright-yellow")
+            }.\n\n--- MESSAGE TO BE PREPENDED TO README.md ---\n${message}`,
+            "heads-up",
+        )
     ) return;
 
-    const commitOne = Commit(
-        project,
+    await reveal("3,2,1.", 500);
+
+    Commit(
+        env.root,
         `Add all uncommitted changes (automated by ${FULL_NAME})`,
         "all",
         [],
     );
 
-    if (commitOne === 1) throw new FknError("Git__UE__Commit", "Error committing all not added changes.");
-
-    const env = GetProjectEnvironment(project);
-
     const README = JoinPaths(env.root, "README.md");
 
     if (CheckForPath(README)) Deno.writeTextFileSync(README, `${message}\n${Deno.readTextFileSync(README)}`);
 
-    const commitTwo = Commit(
-        project,
+    Commit(
+        env.root,
         `Add deprecation notice (automated by ${FULL_NAME})`,
         "all",
         [],
     );
 
-    if (commitTwo === 1) throw new FknError("Git__UE__Commit", "Error committing README changes.");
-
     FkNodeInterop.Features.Update(env);
 
-    const commitThree = Commit(
-        project,
-        "Update dependencies one last time",
+    Commit(
+        env.root,
+        `Update dependencies one last time (automated by ${FULL_NAME})`,
         "all",
         [],
     );
 
-    if (commitThree === 1) throw new FknError("Git__UE__Commit", "Error committing last dependency update.");
-
-    const finalPush = Push(project, GetBranches(project).current);
-
-    if (finalPush === 1) {
-        throw new FknError("Git__UE_Push", "Error pushing changes.");
-    }
+    Push(env.root, GetBranches(env.root).current);
 
     LogStuff("Project deprecated successfully, sir.", "comrade", "red");
     const rem = Interrogate(
@@ -120,14 +113,10 @@ export default function TheSurrenderer(params: TheSurrendererConstructedParams) 
                 "warn",
             )
         ) return;
-        if (!CheckForPath(env.root)) {
-            throw new FknError(
-                "Fs__Unreal",
-                `Turns out the CLI cannot find the path to ${env.root}?`,
-            );
-        }
         Deno.removeSync(env.root, { recursive: true });
     }
+
+    await RemoveProject(env.root);
 
     LogStuff(
         `${
@@ -136,6 +125,4 @@ export default function TheSurrenderer(params: TheSurrendererConstructedParams) 
                 : "Okay. The deprecated source code is still where you left it."
         }\nYou should now head over to the GitHub repository -> Settings -> Archive, to make this even more official.\n\nPS. try harder next time; eventually you'll get a successful project that doesn't end up deprecated!`,
     );
-
-    RemoveProject(project);
 }

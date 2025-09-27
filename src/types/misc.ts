@@ -1,4 +1,4 @@
-import { UnknownString } from "@zakahacecosas/string-utils";
+import type { UnknownString } from "@zakahacecosas/string-utils";
 
 /**
  * Valid emojis
@@ -61,11 +61,6 @@ export interface GITHUB_RELEASE {
 }
 
 /**
- * A string preceded with "https://"
- */
-export type VALID_URL = `https://${string}`;
-
-/**
  * Colors that can be used to spice up the CLI's stdout.
  */
 export type VALID_COLORS =
@@ -89,3 +84,6 @@ export type VALID_COLORS =
  * Git file codes.
  */
 export type GIT_FILES = UnknownString[] | "A" | "!A" | "S";
+
+/** typescript just shut the hell up */
+export type NonEmptyArray<T> = [T, ...T[]];

@@ -1,12 +1,9 @@
 import type { VALID_COLORS, VALID_EMOJIS } from "../types/misc.ts";
-import { GetAppPath, GetUserSettings } from "./config.ts";
+import { GetUserSettings } from "./config.ts";
 import { stringify as stringifyYaml } from "@std/yaml";
-import { GetDateNow } from "./date.ts";
 import { Commander } from "./cli.ts";
-import { APP_NAME } from "../constants/name.ts";
-import { LOCAL_PLATFORM } from "../constants/platform.ts";
+import { LOCAL_PLATFORM } from "../platform.ts";
 import { ColorString } from "./color.ts";
-import { stripAnsiCode } from "@std/fmt/colors";
 
 /**
  * Appends an emoji at the beginning of a message.
@@ -16,7 +13,7 @@ import { stripAnsiCode } from "@std/fmt/colors";
  * @returns {string} The message with your emoji, e.g. `"😐 hi chat"`.
  */
 export function Emojify(message: string, emoji: VALID_EMOJIS): string {
-    function GetEmoji(emoji: VALID_EMOJIS) {
+    function GetEmoji(emoji: VALID_EMOJIS): string {
         switch (emoji) {
             case "danger":
                 return `🛑`;
@@ -68,13 +65,13 @@ export function Emojify(message: string, emoji: VALID_EMOJIS): string {
  * Logs a message to the standard output and saves it to a `.log` file.
  * @author ZakaHaceCosas
  *
- * @param {any} message The message to be logged.
+ * @param {unknown} message The message to be logged.
  * @param {?VALID_EMOJIS} [emoji] Additionally, add an emoji before the log.
  * @param {?(VALID_COLORS | VALID_COLORS[])} [color] Optionally, a color (or more) for the output.
  * @returns {void}
  */
 export function LogStuff(
-    // deno-lint-ignore no-explicit-any
+    // deno-lint-ignore explicit-module-boundary-types no-explicit-any
     message: any,
     emoji?: VALID_EMOJIS,
     color?: VALID_COLORS | VALID_COLORS[],
@@ -83,26 +80,12 @@ export function LogStuff(
         if (typeof message !== "string") message = String(message);
         const finalMessage = emoji ? Emojify(message, emoji) : message;
 
-        const plainMessage = stripAnsiCode(finalMessage);
-
-        const formattedMessage = `${GetDateNow()} / ${plainMessage}\n`
-            .replace(/\n{2,}/g, "\n"); // (fix for adding \n to messages that already have an \n for whatever reason)
-
         if (color) {
-            if (Array.isArray(color)) {
-                console.log(ColorString(finalMessage, ...color));
-            } else {
-                console.log(ColorString(finalMessage, color));
-            }
+            if (Array.isArray(color)) console.log(ColorString(finalMessage, ...color));
+            else console.log(ColorString(finalMessage, color));
         } else {
             console.log(finalMessage);
         }
-
-        Deno.writeTextFileSync(
-            GetAppPath("LOGS"),
-            formattedMessage,
-            { append: true },
-        );
     } catch (e) {
         throw `Error logging stuff: ${e}`;
     }
@@ -157,29 +140,29 @@ export function StringifyYaml(content: unknown): string {
  * @param {string} msg Main text.
  * @param {number} elapsed Elapsed time, for checking the threshold.
  */
-export function Notification(title: string, msg: string, elapsed: number): void {
+export function Notification(title: string, msg: string, elapsed?: number): void {
     const settings = GetUserSettings();
-    if (!settings.showNotifications) return;
-    if (settings.thresholdNotifications && elapsed < 30000) return;
+    if (!settings["notifications"]) return;
+    if ((elapsed && settings["notification-threshold"]) && elapsed < settings["notification-threshold-value"]) return;
     // NOTE: we should show our logo
     // requires to bundle it / add it to the installer script
     // on Windows, to write XML inside of the damn script :sob:
     // on macOS and Linux, idk what does it require, we'll find out
-    if (LOCAL_PLATFORM.SYSTEM === "windows") {
+    if (LOCAL_PLATFORM.SYSTEM === "msft") {
         Commander(
             "powershell",
             [
                 "-Command",
-                `[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null; ` +
-                `$template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02); ` +
-                `$template.GetElementsByTagName("text").Item(0).AppendChild($template.CreateTextNode("${title}")) > $null; ` +
-                `$template.GetElementsByTagName("text").Item(1).AppendChild($template.CreateTextNode("${msg}")) > $null; ` +
-                `$notification = [Windows.UI.Notifications.ToastNotification]::new($template); ` +
-                `$notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("${APP_NAME.CASED}"); ` +
-                `$notifier.Show($notification);`,
+                `[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null; `
+                + `$template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02); `
+                + `$template.GetElementsByTagName("text").Item(0).AppendChild($template.CreateTextNode("${title}")) > $null; `
+                + `$template.GetElementsByTagName("text").Item(1).AppendChild($template.CreateTextNode("${msg}")) > $null; `
+                + `$notification = [Windows.UI.Notifications.ToastNotification]::new($template); `
+                + `$notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("FuckingNode"); `
+                + `$notifier.Show($notification);`,
             ],
         );
-    } else if (LOCAL_PLATFORM.SYSTEM === "chad") {
+    } else if (LOCAL_PLATFORM.SYSTEM === "posix") {
         if (Deno.build.os === "darwin") {
             Commander(
                 "osascript",
