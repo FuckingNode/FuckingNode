@@ -150,7 +150,7 @@ function AnalyzeSecurityVectorKeywords(svKeywords: SV_KEYWORDS[]): string[] {
 
         if (has(keywordPair, VULNERABILITY_VECTORS.PRIVILEGES)) {
             questions.add(
-                "Does your project handle user authentication or session management? [V:ATH [SV:PRIV]]",
+                "Does your project have some sort of privilege system, or run as a desktop app with admin/sudo privileges? [V:ATH [SV:PRIV]]",
             );
         }
 
@@ -429,6 +429,66 @@ function InterrogateVulnerableProject(questions: string[]): Omit<
                     w: 2,
                 },
             );
+        }
+        if (isTrue(response) && question.includes("V:INJ")) {
+            const out = handleQuestion({
+                q: "Is there any sensitive database? Like, one for an accounting system, or any database that holds sensitive data.",
+                f: true,
+                r: true,
+                w: 2,
+            });
+            handleQuestion({
+                q: "Is every database accessed with prepared statements everywhere? And not using direct string concatenation or other unsafe stuff anywhere.",
+                f: true,
+                r: false,
+                w: isTrue(out) ? 2 : 1,
+            });
+        }
+
+        if (isTrue(response) && question.includes("V:ATH [SV:AUTH]")) {
+            // eh... can't really think of anything for this
+        }
+        if (isTrue(response) && question.includes("V:ATH [SV:PRIV]")) {
+            const out = handleQuestion({
+                q: "Is said privilege always available or does it require escalation?",
+                f: true,
+                r: true,
+                w: 1,
+            });
+            if (isTrue(out)) {
+                handleQuestion({
+                    q: "Is said escalation user-dependant or user-available (Y), or only the program knows when to use it (N)?",
+                    f: true,
+                    r: true,
+                    w: 1,
+                });
+            }
+            handleQuestion({
+                q: "Are privileges total (admin access / sudo) (N) or fine-grained (Y)?",
+                f: true,
+                r: false,
+                w: 1,
+            });
+        }
+        if (isTrue(response) && question.includes("V:FLE")) {
+            handleQuestion({
+                q: "Is said file escaped or sanitized in any way?",
+                f: true,
+                r: false,
+                w: 2,
+            });
+            handleQuestion({
+                q: "Is said file read or executed by the project internally? (Non-risky operation like merely hashing the file does NOT count)",
+                f: true,
+                r: true,
+                w: 2,
+            });
+            handleQuestion({
+                q: "Is said file available for reading or executing by the user?",
+                f: true,
+                r: true,
+                w: 2,
+            });
         }
     }
 
