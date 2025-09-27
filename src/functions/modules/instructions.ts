@@ -78,7 +78,7 @@ function GetKey(key: string, json: unknown): unknown {
     return i;
 }
 
-GetKey("foo", "bar");
+// GetKey("foo", "bar");
 // await GetProjectEnvironment("tests/environment/nodes");
 
 /** Returns all modules, using the ident file as the key. */

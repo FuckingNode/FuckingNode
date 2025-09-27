@@ -96,7 +96,3 @@ self.onmessage = (_ev) => {
 };
     `;
 }
-
-await RunFEM(
-    Deno.readTextFileSync("./my-extension.fknode"),
-);
