@@ -1,4 +1,3 @@
-divineProtection: disabled
 destroy:
     intensities: ["*"]
     targets:

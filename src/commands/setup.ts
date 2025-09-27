@@ -8,12 +8,13 @@ import { SETUPS, VISIBLE_SETUPS } from "./toolkit/setups.ts";
 import { normalize, table, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { FknError } from "../functions/error.ts";
 import { ColorString } from "../functions/color.ts";
+import { bold } from "@std/fmt/colors";
 
 export default async function TheSetuper(params: TheSetuperConstructedParams): Promise<void> {
     if (!validate(params.setup)) {
         LogStuff(table(VISIBLE_SETUPS));
         LogStuff(
-            `You didn't provide any argument, or provided invalid ones, so up here are all possible setups.`,
+            `You didn't provide any argument, or provided invalid ones, so up here are all possible setups.\nYou can filter setups by typing part of the name, e.g. 'setup license' to show all LICENSE setups.`,
         );
         return;
     }
@@ -28,10 +29,20 @@ export default async function TheSetuper(params: TheSetuperConstructedParams): P
     if (
         !setupToUse
     ) {
-        throw new FknError(
-            "Param__SetupInvalid",
-            `Given setup ${params.setup} is not valid! Choose from the list ${SETUPS.map((s) => s.name)}.`,
+        const matches = VISIBLE_SETUPS.filter((s) =>
+            normalize(s.Name).includes(normalize(params.setup)) || normalize(s.Description).includes(normalize(params.setup))
         );
+        if (matches.length === 0) {
+            LogStuff(
+                `You didn't provide a valid setup, and no setup matches ${bold(params.setup)}.\nRun setup with no arguments to list all setups.`,
+            );
+            return;
+        }
+        LogStuff(
+            table(matches),
+        );
+        LogStuff(`You didn't provide a valid setup. Above are all setups that match ${bold(params.setup)}.`);
+        return;
     }
 
     const contentToUse = (setupToUse.seek === "tsconfig.json" || setupToUse.seek === ".prettierrc")
