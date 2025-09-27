@@ -69,7 +69,8 @@ export function ParseFIM(ext: string): FKNInstructionModule {
     };
 }
 
-function GetKey(key: string, json: unknown): unknown {
+// exported for TS compiler to shut the hell up
+export function GetKey(key: string, json: unknown): unknown {
     if (typeof json !== "object") throw `Cannot get KEY ${key}. JSON-ish object is not an actual object (${typeof json})`;
     if (!json || json === undefined) throw `Cannot get KEY ${key}. JSON-ish object is null or undefined.`;
     // deno-lint-ignore no-explicit-any
