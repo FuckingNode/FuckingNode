@@ -24,12 +24,10 @@ from_tarball = { url = "https://somewhere.com/some_crate-1.0.0.tar.gz" }
 - [ ] Allow for spread commands, using --flags instead of plaintext for specific arguments, e.g. `fkn add path1 path2 path3` or `fkclean project1 project2 project3 --intensity=normal`.
   - [ ] Breaking ones: `--projects` (`clean`, `audit`), `--setups` (`setup`)
   - [x] Non-breaking ones: `fkadd ...projects`, `fkrem ...projects`
-- [x] Proper self-updating.
-  - [ ] Disable this feature if installed via a package manager.
 
 ## Chores & development
 
-- [ ] **Actually write some fucking tests.** TDD is the way to go.
+- [ ] **Actually write some (more) fucking tests.** TDD is the best way to go.
 - [ ] Cleanup the codebase (it's getting kinda messy ngl).
   - [x] Remove audit tests. That's actually _the only feature that shouldn't have a test suite._
   - [x] Fix Nix hashing.

@@ -9,7 +9,8 @@ import type { CF_FKNODE_SCHEDULE } from "../types/config_files.ts";
 import * as DenoJson from "../../deno.json" with { type: "json" };
 import { ColorString } from "../functions/color.ts";
 import { LOCAL_PLATFORM } from "../platform.ts";
-import { validate } from "@zakahacecosas/string-utils";
+import { validate, validateAgainst } from "@zakahacecosas/string-utils";
+import { parse as parsePath } from "@std/path";
 
 async function CheckUpdates(): Promise<CF_FKNODE_SCHEDULE | "rl"> {
     const scheduleFilePath = GetAppPath("SCHEDULE");
@@ -73,6 +74,11 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
         "bulb",
     );
     if (params.silent) return;
+    if (!validateAgainst(parsePath(Deno.execPath()).dir, ["C:\\FuckingNode", "/usr/local/fuckingnode"])) {
+        LogStuff(
+            "Installed from a package manager, please use said package manager to update FuckingNode.\nIf you didn't install from a package manager, then FuckingNode is running from an unknown, which is likely an installation error (or you moving it somewhere else).",
+        );
+    }
     LogStuff("Updating...", "package");
     const res = await fetch(
         `https://fuckingnode.github.io/install${LOCAL_PLATFORM.SSS}`,
