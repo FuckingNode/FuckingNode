@@ -76,9 +76,6 @@ export async function FreshSetup(repairSetts?: boolean): Promise<void> {
                     latestVer: DenoJson.default.version,
                     lastCheck: GetDateNow(),
                 },
-                flusher: {
-                    lastFlush: GetDateNow(),
-                },
             }),
             { create: true },
         ));
@@ -140,10 +137,6 @@ export function ChangeSetting(
             return LogStuff(`${value} is not valid. Enter one of: vscode, sublime, emacs, atom, notepad++, vscodium.`);
         }
         newSettings = { ...currentSettings, "fav-editor": value };
-    } else if (setting === "flush-freq") {
-        const flush = Math.ceil(Number(value));
-        if (!Number.isFinite(flush) || flush <= 0) return LogStuff(`${value} is not valid. Enter a valid number greater than 0.`);
-        newSettings = { ...currentSettings, "flush-freq": flush };
     } else if (setting === "notifications") {
         if (!validateAgainst(value, ["true", "false"])) return LogStuff(`${value} is not valid. Enter either 'true' or 'false'.`);
         newSettings = { ...currentSettings, notifications: value === "true" };
@@ -192,9 +185,6 @@ export function DisplaySettings(): void {
         }`,
         `Favorite code editor          | ${ColorString(settings["fav-editor"], "bright-green")}. ${
             ColorString("fav-editor", "half-opaque", "italic")
-        }`,
-        `Auto-flush log file           | Every ${ColorString(settings["flush-freq"], "bright-green")} days. ${
-            ColorString("flush-freq", "half-opaque", "italic")
         }`,
         `Send system notifications     | ${ColorString(settings["notifications"] ? "Enabled" : "Disabled", "bright-green")}. ${
             ColorString("notifications", "half-opaque", "italic")

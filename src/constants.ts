@@ -7,7 +7,6 @@ import type { CF_FKNODE_SETTINGS, FullFkNodeYaml } from "./types/config_files.ts
  */
 export const DEFAULT_SETTINGS: CF_FKNODE_SETTINGS = {
     "update-freq": 5,
-    "flush-freq": 14,
     "default-intensity": "normal",
     "fav-editor": "vscode",
     "default-manager": "npm",

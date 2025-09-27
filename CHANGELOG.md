@@ -88,6 +88,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - (Breaking) Removed the `something-fucked-up` command.
 - Removed emojis from `surrender` templates. They're not too professional, you know.
 - Removed some ASCII arts from `about`.
+- Removed the `flush-freq` settings. It's not used anymore as no log file exists.
 
 <!-- Once V5 is done, take the benchmark set and run it on V4.3.0 and compare results. Log the improvement here. -->
 

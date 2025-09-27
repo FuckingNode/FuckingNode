@@ -21,12 +21,6 @@ export interface CF_FKNODE_SETTINGS {
      */
     "update-freq": number;
     /**
-     * How often should the CLI clear log files.
-     *
-     * @type {number}
-     */
-    "flush-freq": number;
-    /**
      * Default cleaner intensity, for running `clean` with no args.
      *
      * @type {CleanerIntensity}
@@ -87,16 +81,6 @@ export interface CF_FKNODE_SCHEDULE {
     updater: {
         latestVer: string;
         lastCheck: string;
-    };
-    /**
-     * Log flushes.
-     *
-     * @type {{
-     *         lastFlush: string;
-     *     }}
-     */
-    flusher: {
-        lastFlush: string;
     };
 }
 

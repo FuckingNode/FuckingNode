@@ -1,6 +1,6 @@
 import TheUpdater from "../commands/updater.ts";
 import type { CF_FKNODE_SCHEDULE } from "../types/config_files.ts";
-import { FlushConfigFiles, GetAppPath, GetUserSettings } from "./config.ts";
+import { GetAppPath, GetUserSettings } from "./config.ts";
 import { GetDateNow, ParseDate } from "./date.ts";
 import { parse as parseYaml } from "@std/yaml";
 import { StringifyYaml } from "./io.ts";
@@ -23,12 +23,6 @@ export async function RunScheduledTasks(): Promise<void> {
                 ParseDate(scheduleFile.updater.lastCheck),
             ),
         },
-        flusher: {
-            last: scheduleFile.flusher.lastFlush,
-            diff: CalculateDifference(
-                ParseDate(scheduleFile.flusher.lastFlush),
-            ),
-        },
     };
 
     if (dates.updater.diff >= settings["update-freq"]) {
@@ -42,17 +36,6 @@ export async function RunScheduledTasks(): Promise<void> {
         await TheUpdater({
             silent: true,
         });
-        Deno.writeTextFileSync(scheduleFilePath, StringifyYaml(updatedScheduleFile));
-    }
-
-    if (dates.flusher.diff >= settings["flush-freq"]) {
-        const updatedScheduleFile: CF_FKNODE_SCHEDULE = {
-            ...scheduleFile,
-            flusher: {
-                lastFlush: GetDateNow(),
-            },
-        };
-        await FlushConfigFiles("logs", true, true);
         Deno.writeTextFileSync(scheduleFilePath, StringifyYaml(updatedScheduleFile));
     }
 }
