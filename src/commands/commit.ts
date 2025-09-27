@@ -98,7 +98,7 @@ export default async function TheCommitter(params: TheCommitterConstructedParams
                 .slice(0, 7)
                 .map((file) => `${ColorString("- " + file, "bold", "white")}${prevStaged.includes(file) ? " (prev. staged, kept)" : ""}`)
                 .join("\n")
-        }${staged.length > 7 ? `\nand ${staged.length} more` : ""}`,
+        }${staged.length > 7 ? `\nand ${staged.length - 7} more` : ""}`,
         "tick",
         ["bold", "bright-green"],
     );
@@ -138,15 +138,11 @@ export default async function TheCommitter(params: TheCommitterConstructedParams
     const mBold = ColorString(params.message.trim(), "bold", "italic");
     const fCount = pluralOrNot("file", gitProps.fileCount);
 
-    actions.push(
-        actions.length === 0
-            ? `Commit ${fBold} ${fCount} to branch ${bBold} with message "${mBold}"`
-            : `If everything above went alright, commit ${fBold} ${fCount} to branch ${bBold} with message "${mBold}"`,
-    );
+    actions.push(`Commit ${fBold} ${fCount} to branch ${bBold} with message "${mBold}"`);
 
     if (params.push) {
         actions.push(
-            "If everything above went alright, push all commits to GitHub",
+            "Push all commits to remote",
         );
     }
 
@@ -162,7 +158,7 @@ export default async function TheCommitter(params: TheCommitterConstructedParams
     // hear me out
     // 1. UNSTAGE their files (they probably won't even realize) so we can modify them
     const out = StageFiles(project, "!A");
-    if (out !== "ok") throw `Not OK code for staging handler.`;
+    if (out !== "ok") throw `No files to stage? This is likely an error somewhere.`;
 
     // 2. run their commitCmd over UNSTAGED, MODIFIABLE files
     try {
