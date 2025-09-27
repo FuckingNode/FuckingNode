@@ -28,9 +28,7 @@ import { ColorString } from "./color.ts";
  * @returns {string[]} The list of projects.
  */
 export function GetAllProjects(ignored?: false | "limit" | "exclude"): string[] {
-    const content = Deno.readTextFileSync(GetAppPath("MOTHERFKRS"));
-    DEBUG_LOG("GetAllProjects CALLED", ignored ? "WITH IGNORANCE PARAM" : "WITH NO IGNORANCE", "FROM\n", new Error("STACK TRACE").stack);
-    const list = ParsePathList(content);
+    const list = ParsePathList(Deno.readTextFileSync(GetAppPath("MOTHERFKRS")));
 
     if (!ignored) return list;
 
@@ -557,10 +555,6 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
     const root = await SpotProject(path);
     const settings: FullFkNodeYaml = GetProjectSettings(root);
 
-    /* if (settings.projectEnvOverride && settings.projectEnvOverride.startsWith("node:")) {
-        return await GetProjectEnvironmentFromNode(root, settings);
-    } */
-
     const workspaces = GetWorkspaces(root);
 
     const paths = {
@@ -1003,12 +997,12 @@ export async function SpotProject(name: UnknownString): Promise<string> {
  * Cleans up projects that are invalid and probably we won't be able to clean.
  */
 export async function CleanupProjects(allProjects: string[]): Promise<void> {
-    const listOfRemovals: { project: string; issue: PROJECT_ERROR_CODES }[] = [];
+    const listOfRemovals: string[] = [];
 
     await Promise.all(
         allProjects.map(async (project) => {
             const issue = await ValidateProject(project, allProjects, true);
-            if (issue !== true) listOfRemovals.push({ project, issue });
+            if (issue !== true) listOfRemovals.push(project);
         }),
     );
 
@@ -1016,7 +1010,7 @@ export async function CleanupProjects(allProjects: string[]): Promise<void> {
 
     DEBUG_LOG("INVALIDATED", listOfRemovals);
 
-    for (const { project } of listOfRemovals) await RemoveProject(project, false);
+    for (const project of listOfRemovals) await RemoveProject(project, false);
 
     Deno.writeTextFileSync(
         GetAppPath("MOTHERFKRS"),

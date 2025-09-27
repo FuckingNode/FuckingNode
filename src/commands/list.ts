@@ -1,6 +1,5 @@
 import { LogStuff } from "../functions/io.ts";
 import { GetAllProjects, GetProjectEnvironment } from "../functions/projects.ts";
-import { DEBUG_LOG } from "../functions/error.ts";
 import { sortAlphabetically, testFlag, type UnknownString, validate } from "@zakahacecosas/string-utils";
 import { ColorString } from "../functions/color.ts";
 
@@ -13,7 +12,6 @@ async function ListProjects(
     ignore: "limit" | "exclude" | false,
 ): Promise<void> {
     const list = GetAllProjects(ignore);
-    DEBUG_LOG("FULL PROJECT LIST", list);
     if (list.length === 0) {
         if (ignore === "limit") {
             LogStuff(
@@ -37,14 +35,13 @@ async function ListProjects(
     }
 
     const message: string = ignore === "limit"
-        ? `Here are the motherfuckers you added (and ignored) so far:\n`
+        ? `Here are the motherfuckers you added (and ignored) so far:\n\n`
         : ignore === "exclude"
-        ? `Here are the motherfuckers you added (and haven't ignored) so far:\n`
-        : `Here are the motherfuckers you added so far:\n`;
-    const promises = await Promise.all(
+        ? `Here are the motherfuckers you added (and haven't ignored) so far:\n\n`
+        : `Here are the motherfuckers you added so far:\n\n`;
+    const toPrint = (await Promise.all(
         list.map((entry) => GetProjectEnvironment(entry)),
-    );
-    const toPrint = promises.map((env) => {
+    )).map((env) => {
         if (ignore === "limit") {
             return `${env.names.full} (${
                 ColorString(
@@ -56,24 +53,14 @@ async function ListProjects(
         return env.names.full;
     });
 
-    LogStuff(message, "bulb");
-    LogStuff(sortAlphabetically(toPrint).join("\n"));
+    LogStuff(message + sortAlphabetically(toPrint).join("\n"), "bulb");
 
     return;
 }
 
 export default async function TheLister(arg: UnknownString): Promise<void> {
-    if (!validate(arg)) {
-        await ListProjects(
-            false,
-        );
-        return;
-    }
-
-    let ignoreParam: false | "limit" | "exclude" = false;
-    if (testFlag(arg, "ignored")) ignoreParam = "limit";
-    else if (testFlag(arg, "alive")) ignoreParam = "exclude";
     await ListProjects(
-        ignoreParam,
+        validate(arg) ? (testFlag(arg, "ignored") ? "limit" : testFlag(arg, "alive") ? "exclude" : false) : false,
     );
+    return;
 }

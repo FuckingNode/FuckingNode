@@ -51,8 +51,7 @@ const flags = Deno.args.map((arg) =>
 );
 
 export const FKNODE_SHALL_WE_DEBUG = import.meta.main === false ? false : Deno.env.get("FKNODE_SHALL_WE_DEBUG") === "yeah";
-DEBUG_LOG("Initialized FKNODE_SHALL_WE_DEBUG constant (ENTRY POINT)");
-DEBUG_LOG("ARGS", flags);
+DEBUG_LOG("Initialized FKNODE_SHALL_WE_DEBUG constant WITH ARGS", flags);
 
 function hasFlag(flag: string, allowQuickFlag: boolean, firstOnly: boolean = false): boolean {
     if (firstOnly === true) return testFlag(flags[0] ?? "", flag, { allowQuickFlag, allowNonExactString: true });
@@ -134,19 +133,15 @@ async function main(): Promise<void> {
     }
 
     // THIS IS A MESS BUT I GOT IT TO WORK, I BELIEVE
-    DEBUG_LOG("FLAGS[1]", flags[1], isNotFlag(flags[1]));
     const i = () => flags.findIndex((f) => f.startsWith("-") && f !== "--projects");
     const projectArg: string[] | 0 = flags[1] === "--projects"
         ? flags.slice(2, i() === -1 ? undefined : (i()))
         : (isNotFlag(flags[1]) ? [flags[1]] : 0 as const);
-    DEBUG_LOG("PROJECT ARG IS", projectArg);
-    DEBUG_LOG("FLAGS[2]", flags[2], isNotFlag(flags[2]));
     const intensityArg: string = flags[1] === "--projects"
         ? (flags.includes("--intensity")
             ? (flags[flags.indexOf("--intensity") + 1] || (GetUserSettings())["default-intensity"])
             : (GetUserSettings())["default-intensity"])
         : (isNotFlag(flags[2]) ? flags[2] : (GetUserSettings())["default-intensity"]);
-    DEBUG_LOG("INTENSITY ARG IS", intensityArg);
 
     const cleanerArgs: TheCleanerConstructedParams = {
         flags: {

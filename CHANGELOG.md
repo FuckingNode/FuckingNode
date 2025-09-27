@@ -26,32 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Added more questions to `audit` for improved accuracy.
 - Added support for custom `lintScript` and `prettyScript` (prev. `lintCmd` and `prettyCmd`) for Deno.
 - While experimental, undocumented, and very very far from complete, FuckingNode 5 exposes for testing purposes an extension runner we're working on for the next major release.
-
-- Added several changes to improve the CLI's performance.
-  - FuckingNode runs some checks every time before actually running. _Just_ parallelizing them made the entire CLI much, MUCH faster.
-  - Bulk adding projects (via glob patterns) was also parallelized. Made it 5% faster.
-  - Git-related and project environment-related operations used to check for filepaths _twice_, this duplication was removed.
-    - For example, checking if a project has an active Git repo is now over 10 times faster.
-  - Optimized config filepaths.
-    - Removed a useless lowercasing call when getting any path.
-    - A string conversion needed for the project's list file happened whenever _any_ path was queried, now it only happens when we query that specific file.
-    - All paths were initialized when querying any path, now only the base one (needed) is.
-  - Removed useless file existence checks where we already know a file exists.
-  - Removed some useless object mutations.
-  - "Naming a project" (when we show its name with colors and stuff) is actually a somewhat expensive operation. We slightly optimized it + removed duplicate calls.
-    - Where possible, the overhead was moved to getting a project's environment (as otherwise this is done _twice_ from the naming flow), reducing workload. Not everywhere we can do this, though.
-  - `settings flush` should now be a few milliseconds faster (removed useless array check + parallelized filesize recovery calculations).
-  - Avoided unnecessary checks for spotting project paths.
-  - Removed duplicate calls to check for staged files via `commit`.
-  - Removed `logs.log`, removing a ton of file writes.
-  - Parallelized reading cleanup results for showing you the final report, very slightly speeding it up.
-  - Removed unnecessary array conversions and operations for parsing a project's `divineProtection` setting, as well as avoiding parsing entirely if the setting is not defined.
-  - Differentiating certain frequently queried settings (like on what runtime a project runs, for compatibility) was actually done through somewhat expensive operation with "sentinel strings" (`#disable`(cmd), `__DISABLE`(cfg), `__USE_DEFAULT`(cfg), and other values you could actually set in your `fknode.yaml`). They were replaced with proper type guards + strings were replaced with booleans (primitives, more efficient), as such slightly improving performance.
-  - Update some strings so they don't "name the project", reducing operations.
-  - Parallelized workspace lookup when adding a project.
-  - Optimized I/O, there were operations making several calls to `console.log`, when a single call (with `\n`s) is more efficient.
-  - Also removed useless `String.trim()` calls.
-  - Remove duplicate and unused properties from project environment objects.
+- Added several changes to improve the CLI's performance by a lot.
 
 ### Changed
 
