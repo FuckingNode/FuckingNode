@@ -1,10 +1,12 @@
 import { reveal, validateAgainst } from "@zakahacecosas/string-utils";
 import type { TheTerminatorConstructedParams } from "./_interfaces.ts";
 import { FknError } from "../functions/error.ts";
-import { Interrogate, LogStuff } from "../functions/io.ts";
+import { Interrogate, LogStuff, Notification } from "../functions/io.ts";
 import { bold, italic } from "@std/fmt/colors";
 import { LOCAL_PLATFORM } from "../platform.ts";
 import { Get } from "../functions/embed.ts";
+import { GetAllProjects, GetProjectEnvironment } from "../functions/projects.ts";
+import { BulkRemove } from "../functions/filesystem.ts";
 
 export default async function TheTerminator(params: TheTerminatorConstructedParams): Promise<void> {
     if (!validateAgainst(params.runtime, ["node", "deno", "bun", "rust", "go"])) {
@@ -17,7 +19,7 @@ export default async function TheTerminator(params: TheTerminatorConstructedPara
     await reveal("HOLD UP!");
 
     await reveal(
-        "This feature makes it more efficient to remove an runtime from your local system (by taking care of leftovers and caches for you).",
+        "This feature makes it more efficient to remove a runtime from your local system (by taking care of leftovers and caches for you).",
         5,
     );
     await reveal(
@@ -38,7 +40,28 @@ export default async function TheTerminator(params: TheTerminatorConstructedPara
         return;
     }
 
-    await reveal("3 2 1.", 500);
+    const projects = (await Promise.all(GetAllProjects().map((p) => GetProjectEnvironment(p)))).filter((proj) =>
+        proj.runtime === params.runtime
+    );
+
+    if (params.projectsToo) {
+        if (
+            !Interrogate(
+                bold(
+                    `YOU'VE SPECIFIED TO REMOVE ALL PROJECTS THAT USE THIS LANGUAGE TOO!\nWe're talking of\n\n${
+                        projects.map((p) => p.names.full).join("\n")
+                    }\n\nTHESE WILL BE ENTIRELY REMOVED FROM YOUR LOCAL MACHINE, YOU WON'T BE ABLE TO UNDO THAT!\nPlease confirm you wish to proceed.`,
+                ),
+                "warn",
+            )
+        ) {
+            LogStuff("Got it. No action taken.", "tick-clear", ["bright-green"]);
+            return;
+        }
+        LogStuff("You chose it.", "warn");
+    }
+
+    await reveal("3, 2, 1.", 400);
 
     LogStuff(`STEP 1: Uninstalling the program.\n${italic("Prompts for UAC on Windows.")}`, "working");
 
@@ -50,6 +73,19 @@ export default async function TheTerminator(params: TheTerminatorConstructedPara
 
     const output = await new Deno.Command(LOCAL_PLATFORM.SHELL, { args: [file] }).spawn().output();
 
-    if (output.success) LogStuff(`Done! No more ${params.runtime} programming I guess.`, "tick");
-    LogStuff("Something went wrong. Check above.", "error");
+    if (output.success) LogStuff(`Done! No more ${params.runtime} programming I guess.`, "tick", "bright-green");
+    else {
+        LogStuff("Something went wrong. Check above.", "error");
+        Deno.exit(1);
+    }
+
+    if (!params.projectsToo) return;
+
+    LogStuff("Now, onto removing your projects...", "warn");
+    Notification("Last chance to stop project removal", "You should be 101% sure you pushed your code, or really sure you want it gone.");
+    await reveal("7, 6, 5, 4, 3, 2, 1.", 400);
+
+    await BulkRemove(projects.map((p) => p.root));
+
+    LogStuff("Done.", "tick-clear", "bright-green");
 }

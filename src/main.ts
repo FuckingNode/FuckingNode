@@ -285,8 +285,7 @@ async function main(command: UnknownString): Promise<void> {
                     : command === "ungo"
                     ? "go"
                     : flags[1],
-                // TODO(@ZakaHaceCosas)
-                projectsToo: false, //hasFlag("remove-all-motherfuckers-too", false, false),
+                projectsToo: hasFlag("remove-all-motherfuckers-too", false, false),
             });
             break;
         case "setup":
