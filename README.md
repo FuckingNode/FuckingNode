@@ -4,8 +4,8 @@
     <img src="https://fuckingnode.github.io/fkn_logo.webp" alt="FuckingNode Logo" height=150>
     </a>
 </p>
-<h1 align="center">The f*cking chaos of maintaining<br/>JavaScript projects ends here</h1>
-<h3 align="center">Because dev life is messy enough</h3>
+<h1 align="center">FuckingNode</h1>
+<h3 align="center">The fucking chaos of maintaining JavaScript projects ends here</h3>
 
 <div align="center">
 
@@ -106,8 +106,8 @@ Refer to our [user manual](https://fuckingnode.github.io/manual) to learn everyt
 
 ---
 
-We hope your motherf\*cking projects don't give you that much headache.
+We hope your motherfucking projects don't give you that much headache.
 
 If you find any issue with the CLI, raise an issue (or make a PR which would be awesome :smile:).
 
-Download F\*ckingNode now and go write some F\*ckingCool code.
+Download FuckingNode now and go write some FuckingCool code.
