@@ -137,3 +137,14 @@ Deno.bench({
         });
     },
 }); */
+
+Deno.bench({
+    name: "simply execute the root",
+    warmup: 350,
+    fn: () => {
+        new Deno.Command(
+            "deno",
+            { args: ["-A", "./src/main.ts"] },
+        ).outputSync();
+    },
+});

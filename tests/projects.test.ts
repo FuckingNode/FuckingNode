@@ -40,6 +40,6 @@ Deno.test({
 Deno.test({
     name: "validates projects",
     fn: async () => {
-        assertEquals(await ValidateProject(".", true), true);
+        assertEquals(await ValidateProject(".", [Deno.cwd()], true), true);
     },
 });

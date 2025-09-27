@@ -27,7 +27,7 @@ import { DEBUG_LOG, ErrorHandler } from "./functions/error.ts";
 import type { TheCleanerConstructedParams } from "./commands/_interfaces.ts";
 import { RunScheduledTasks } from "./functions/schedules.ts";
 import { normalize, testFlag, testFlags, type UnknownString, validate } from "@zakahacecosas/string-utils";
-import { CleanupProjects, ListManager } from "./functions/projects.ts";
+import { CleanupProjects, GetAllProjects, ListManager } from "./functions/projects.ts";
 import { LaunchWebsite } from "./functions/http.ts";
 import { HINTS } from "./functions/phrases.ts";
 import { LOCAL_PLATFORM } from "./platform.ts";
@@ -38,7 +38,7 @@ import { RunFEM } from "./functions/modules/extensions.ts";
 async function init(): Promise<void> {
     await FreshSetup();
     await RunScheduledTasks();
-    await CleanupProjects();
+    await CleanupProjects(GetAllProjects());
 }
 
 /** Normalized Deno.args */

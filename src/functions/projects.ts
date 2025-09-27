@@ -29,7 +29,7 @@ import { ColorString } from "./color.ts";
  */
 export function GetAllProjects(ignored?: false | "limit" | "exclude"): string[] {
     const content = Deno.readTextFileSync(GetAppPath("MOTHERFKRS"));
-    DEBUG_LOG("GetAllProjects CALLED", ignored ? "WITH IGNORANCE PARAM" : "WITH NO IGNORANCE");
+    DEBUG_LOG("GetAllProjects CALLED", ignored ? "WITH IGNORANCE PARAM" : "WITH NO IGNORANCE", "FROM\n", new Error("STACK TRACE").stack);
     const list = ParsePathList(content);
 
     if (!ignored) return list;
@@ -95,10 +95,11 @@ export async function AddProject(
         );
     }
 
+    const list = GetAllProjects();
     try {
         const env = await GetProjectEnvironment(workingEntry);
 
-        const validation = await ValidateProject(workingEntry, false);
+        const validation = await ValidateProject(workingEntry, list, false);
 
         if (validation !== true) {
             if (validation === "IsDuplicate") LogStuff(`${env.names.full} is already added! No need to re-add it.`, "bruh");
@@ -168,7 +169,7 @@ export async function AddProject(
 
         const workspaces = (await Promise.all(
             ws.map(async (w) => {
-                return { w, isValid: await ValidateProject(w, false) === true };
+                return { w, isValid: await ValidateProject(w, list, false) === true };
             }),
         ))
             .filter(({ isValid }) => isValid)
@@ -419,7 +420,7 @@ export function UnderstandProjectProtection(settings: FkNodeYaml, options: {
  * @param {boolean} existing True if you're validating an existing project, false if it's a new one to be added.
  * @returns {Promise<true | PROJECT_ERROR_CODES>} True if it's valid, a `PROJECT_ERROR_CODES` otherwise.
  */
-export async function ValidateProject(entry: string, existing: boolean): Promise<true | PROJECT_ERROR_CODES> {
+export async function ValidateProject(entry: string, allProjects: string[], existing: boolean): Promise<true | PROJECT_ERROR_CODES> {
     if (!CheckForPath(entry)) return "NotFound";
     // await GetProjectEnvironment() already does some validations by itself, so we can just use it here
     try {
@@ -434,7 +435,7 @@ export async function ValidateProject(entry: string, existing: boolean): Promise
 
     const cleanEntry = normalize(entry);
 
-    const isDuplicate = (GetAllProjects()).filter(
+    const isDuplicate = allProjects.filter(
         (item) => normalize(item) === cleanEntry,
     ).length > (existing ? 1 : 0);
 
@@ -1001,14 +1002,12 @@ export async function SpotProject(name: UnknownString): Promise<string> {
 /**
  * Cleans up projects that are invalid and probably we won't be able to clean.
  */
-export async function CleanupProjects(): Promise<void> {
+export async function CleanupProjects(allProjects: string[]): Promise<void> {
     const listOfRemovals: { project: string; issue: PROJECT_ERROR_CODES }[] = [];
-
-    const allProjects = GetAllProjects();
 
     await Promise.all(
         allProjects.map(async (project) => {
-            const issue = await ValidateProject(project, true);
+            const issue = await ValidateProject(project, allProjects, true);
             if (issue !== true) listOfRemovals.push({ project, issue });
         }),
     );
