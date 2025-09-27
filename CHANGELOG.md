@@ -21,8 +21,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Added spreading to `add` and `remove`, allowing you to `fkadd project1 project2 project3` from one command.
 - Added removal of `target/` on Rust projects for maxim cleanup.
 - Added more setups to `setup`.
-- Added several changes to improve the CLI's performance.
 - Added the ability to make the cleaner immediately stop upon an error instead of collecting them as "statistics", via both project settings and global settings. Global setting affects hard-cleanup too.
+- While experimental, undocumented, and very very far from complete, FuckingNode 5 exposes for testing purposes an extension runner we're working on for the next major release.
+
+- Added several changes to improve the CLI's performance.
 - Added support for custom `lintScript` and `prettyScript` (prev. `lintCmd` and `prettyCmd`) for Deno.
   - FuckingNode runs some checks every time before actually running. _Just_ parallelizing them made the entire CLI much, MUCH faster.
   - Bulk adding projects (via glob patterns) was also parallelized. Made it 5% faster.

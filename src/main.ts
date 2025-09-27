@@ -32,6 +32,8 @@ import { LaunchWebsite } from "./functions/http.ts";
 import { HINTS } from "./functions/phrases.ts";
 import { LOCAL_PLATFORM } from "./platform.ts";
 import { parse } from "@std/path";
+import { ParseFIM } from "./functions/modules/instructions.ts";
+import { RunFEM } from "./functions/modules/extensions.ts";
 
 async function init(): Promise<void> {
     await FreshSetup();
@@ -326,6 +328,16 @@ async function main(command: UnknownString): Promise<void> {
         case "website":
             LogStuff(`Best documentation website for best CLI, live at https://fuckingnode.github.io/`, "bulb");
             LaunchWebsite("https://fuckingnode.github.io/");
+            break;
+        case "experimental-do-not-use-lmao--test-fim-parser":
+            if (!Deno.args[1]) return;
+            console.log(
+                ParseFIM(Deno.readTextFileSync(Deno.args[1])),
+            );
+            break;
+        case "experimental-do-not-use-lmao--test-fem-exec":
+            if (!Deno.args[1]) return;
+            await RunFEM(Deno.readTextFileSync(Deno.args[1]));
             break;
         case "github":
         case "repo":
