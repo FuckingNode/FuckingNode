@@ -22,7 +22,8 @@ from_tarball = { url = "https://somewhere.com/some_crate-1.0.0.tar.gz" }
 ## Better UX
 
 - [ ] Allow for spread commands, using --flags instead of plaintext for specific arguments, e.g. `fkn add path1 path2 path3` or `fkclean project1 project2 project3 --intensity=normal`.
-  - [ ] Breaking ones: `--projects` (`clean`, `audit`), `--setups` (`setup`)
+  - [x] Breaking one: `--projects` (`clean`)
+    - [ ] `--projects` (`audit`) and `--setups` (`setup`) delayed until V5.1
   - [x] Non-breaking ones: `fkadd ...projects`, `fkrem ...projects`
 
 ## Chores & development

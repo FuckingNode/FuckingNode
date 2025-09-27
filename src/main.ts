@@ -83,7 +83,7 @@ if (hasFlag("version", true, true) && !flags[1]) {
     Deno.exit(0);
 }
 
-async function main(command: UnknownString): Promise<void> {
+async function main(): Promise<void> {
     // debug commands
     if (Deno.args[0] === "FKNDBG_PROC") {
         console.log(
@@ -128,16 +128,24 @@ async function main(command: UnknownString): Promise<void> {
         return;
     }
 
-    if (!validate(command)) {
+    if (!validate(flags[0])) {
         TheHelper({});
         return;
     }
 
+    // THIS IS A MESS BUT I GOT IT TO WORK, I BELIEVE
     DEBUG_LOG("FLAGS[1]", flags[1], isNotFlag(flags[1]));
-    const projectArg = (isNotFlag(flags[1])) ? flags[1] : 0 as const;
+    const i = () => flags.findIndex((f) => f.startsWith("-") && f !== "--projects");
+    const projectArg: string[] | 0 = flags[1] === "--projects"
+        ? flags.slice(2, i() === -1 ? undefined : (i()))
+        : (isNotFlag(flags[1]) ? [flags[1]] : 0 as const);
     DEBUG_LOG("PROJECT ARG IS", projectArg);
     DEBUG_LOG("FLAGS[2]", flags[2], isNotFlag(flags[2]));
-    const intensityArg = isNotFlag(flags[2]) ? flags[2] : (GetUserSettings())["default-intensity"];
+    const intensityArg: string = flags[1] === "--projects"
+        ? (flags.includes("--intensity")
+            ? (flags[flags.indexOf("--intensity") + 1] || (GetUserSettings())["default-intensity"])
+            : (GetUserSettings())["default-intensity"])
+        : (isNotFlag(flags[2]) ? flags[2] : (GetUserSettings())["default-intensity"]);
     DEBUG_LOG("INTENSITY ARG IS", intensityArg);
 
     const cleanerArgs: TheCleanerConstructedParams = {
@@ -155,7 +163,7 @@ async function main(command: UnknownString): Promise<void> {
     };
 
     switch (
-        command.toLowerCase()
+        flags[0].toLowerCase()
     ) {
         case "clean":
             await TheCleaner(cleanerArgs);
@@ -274,15 +282,15 @@ async function main(command: UnknownString): Promise<void> {
         case "ungo":
         case "seriously-fuck-node":
             await TheTerminator({
-                runtime: (command === "unnode" || command === "seriously-fuck-node")
+                runtime: (flags[0] === "unnode" || flags[0] === "seriously-fuck-node")
                     ? "node"
-                    : command === "undeno"
+                    : flags[0] === "undeno"
                     ? "deno"
-                    : command === "unbun"
+                    : flags[0] === "unbun"
                     ? "bun"
-                    : command === "unrust"
+                    : flags[0] === "unrust"
                     ? "rust"
-                    : command === "ungo"
+                    : flags[0] === "ungo"
                     ? "go"
                     : flags[1],
                 projectsToo: hasFlag("remove-all-motherfuckers-too", false, false),
@@ -377,7 +385,7 @@ async function main(command: UnknownString): Promise<void> {
             break;
         default:
             TheHelper({});
-            LogStuff(`You're seeing this because command '${command}' doesn't exist.`, undefined, ["orange", "italic"]);
+            LogStuff(`You're seeing this because command '${flags[0]}' doesn't exist.`, undefined, ["orange", "italic"]);
     }
 }
 
@@ -385,7 +393,7 @@ if (import.meta.main) {
     try {
         await init();
 
-        await main(flags[0]);
+        await main();
         Deno.exit(0);
     } catch (e) {
         ErrorHandler(e);

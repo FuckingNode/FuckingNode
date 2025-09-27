@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Added an `--export` option to `export`; if not provided the default behavior is to just show it in terminal instead of writing it.
 - Added a 3 second countdown to `surrender`, giving you time to rethink and quit the program.
 - Added spreading to `add` and `remove`, allowing you to `fkadd project1 project2 project3` from one command.
+- Added spreading to `clean` too, so you can use `--projects` to cleanup several projects at once. When not using it, behavior should not break.
 - Added removal of `target/` on Rust projects for maxim cleanup.
 - Added more setups to `setup`.
 - Added the ability to make the cleaner immediately stop upon an error instead of collecting them as "statistics", via both project settings and global settings. Global setting affects hard-cleanup too.
@@ -77,6 +78,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Fixed `migrate` and maxim cleanup wrongly attempting to remove `node_modules` from Deno projects.
 - Fixed `commit` showing a wrong number in the "and N more" string.
 - Fixed Cargo hard cleanup showing both the success and error messages when an error happens.
+- Fixed `clean` being error-prone when cleaning specific projects.
 
 ### Removed
 

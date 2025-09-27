@@ -30,8 +30,8 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
         return;
     }
 
-    // read all projects
-    const projects = project === 0 ? GetAllProjects() : [project];
+    // read all projects (naming is kinda misleading lmao sorry)
+    const projects = project === 0 ? GetAllProjects() : project;
 
     if (realIntensity === "maxim-only") {
         await PerformMaximCleanup(projects);
@@ -60,7 +60,7 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
         const env = await GetProjectEnvironment(project);
         const projectName = env.names.nameVer;
         try {
-            Deno.chdir(project);
+            Deno.chdir(env.root);
 
             LogStuff(
                 `Cleaning the ${projectName} motherfucker...`,

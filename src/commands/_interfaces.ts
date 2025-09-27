@@ -30,12 +30,12 @@ export interface TheCleanerConstructedParams {
      *
      * @type {{
      *         intensity: string;
-     *         project: string | 0;
+     *         project: string[] | 0;
      *     }}
      */
     parameters: {
         intensity: string;
-        project: string | 0;
+        project: string[] | 0;
     };
 }
 
