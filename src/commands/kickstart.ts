@@ -75,8 +75,13 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
     const env = await AddProject(Deno.cwd());
 
     // if there's no env the error should've already been reported
-    // TODO(@ZakaHaceCosas): what if a rootless monorepo?
-    if (!env) return;
+    if (env === "aborted" || env === "error") return;
+    if (env === "glob" || env === "rootless") {
+        LogStuff(
+            "Hold up, this project is a (probably rootless) monorepo. Kickstart can't handle it well.\nThe project cloned successfully, but dependencies weren't installed.",
+        );
+        return;
+    }
 
     const initialManager = validateAgainst(manager, ["npm", "pnpm", "yarn", "deno", "bun"]) ? manager : env.manager;
 

@@ -59,26 +59,22 @@ export function GetAllProjects(ignored?: false | "limit" | "exclude"): string[] 
 /**
  * Adds a new project.
  *
- * TODO(@ZakaHaceCosas): make this reliably return the ProjectEnv of the added project
- * LEFT: rootless monorepos
- * we still need to rethink workspace handling overall
- *
  * @async
  * @param {UnknownString} entry Path to the project.
  * @param {boolean} [glob=false] Whether a glob pattern is being used.
- * @returns {Promise<ProjectEnvironment | undefined>} `ProjectEnvironment` of the added project (`void` if a glob pattern is used OR if an error happens).
+ * @returns {Promise<ProjectEnvironment | "rootless" | "added" | "aborted" | "error" | "glob">} `ProjectEnvironment` of the added project, or a string code.
  */
 export async function AddProject(
     entry: UnknownString,
     glob: boolean = false,
-): Promise<ProjectEnvironment | void> {
+): Promise<ProjectEnvironment | "rootless" | "aborted" | "error" | "glob"> {
     if (validate(entry) && isGlob(entry)) {
         await Promise.all(
             globSync(entry)
                 .filter((f) => Deno.statSync(f).isDirectory)
                 .map((p) => AddProject(p, true)),
         );
-        return;
+        return "glob";
     }
 
     const workingEntry = validate(entry) ? ParsePath(entry) : Deno.cwd();
@@ -127,7 +123,7 @@ export async function AddProject(
                     "error",
                 );
             }
-            return;
+            return "error";
         }
 
         if (env.mainCPF.ws.length === 0) {
@@ -140,13 +136,15 @@ export async function AddProject(
         const addWorkspaces = Interrogate(
             `Hey! This looks like a fucking monorepo. We've found these workspaces:\n\n${
                 workspaceString.join("\n")
-            }.\n\nShould we add them to your list as well?\nWe recommend this to keep all your code clean - ${
-                ColorString("HOWEVER", "bold")
-            } if your linter and prettifier are already setup from the root to handle all workspace members, it's actually better to skip this.`,
+            }.\n\nShould we add them to your list as well?\nWe recommend this if each workspace has its own scripts. If your scripts are already setup from the root to handle all workspace members, it's actually better to reject this.`,
         );
 
         if (!addWorkspaces) {
             addTheEntry(env.names.full, env.runtime);
+            LogStuff(
+                `Added workspace root as a project!`,
+                "tick-clear",
+            );
             return env;
         }
 
@@ -161,17 +159,13 @@ export async function AddProject(
     } catch (e) {
         if (e instanceof FknError && glob) {
             LogStuff(`Couldn't add ${workingEntry}. Maybe it's not a project. Skipping it...`, undefined, ["italic", "half-opaque"]);
-            return;
+            return "error";
         }
         if (!(e instanceof FknError) || e.code !== "Env__PkgFileUnparsable") throw e;
 
         const ws = GetWorkspaces(workingEntry);
         if (ws.length === 0) throw e;
 
-        // TODO(@ZakaHaceCosas) (V5) - known issue: workspaces tend to lack lockfiles
-        // possible fix would be to skip that check and pass to them a default env override of the parent's env
-        // would probably force us to tell workspaces from parents apart in projects list
-        // hence this TODO is for V5, this solution (best imho) requires a huge breaking change (projects list)
         const workspaces = (await Promise.all(
             ws.map(async (w) => {
                 return { w, isValid: await ValidateProject(w, false) === true };
@@ -186,16 +180,16 @@ export async function AddProject(
                 "There are some workspaces here, but they're all already added.",
                 "bruh",
             );
-            return;
+            return "rootless";
         }
 
-        const addWorkspaces = Interrogate(
-            `Hey! This looks like a rootless monorepo. We've found these workspaces:\n\n${
-                workspaces.join("\n")
-            }.\n\nShould we add them to your list so they're all cleaned?`,
-        );
-
-        if (!addWorkspaces) return;
+        if (
+            !Interrogate(
+                `Hey! This looks like a rootless monorepo. We've found these workspaces:\n\n${
+                    workspaces.join("\n")
+                }.\n\nShould we add them all to your list as individual projects so they're all cleaned?`,
+            )
+        ) return "aborted";
 
         const allEntries = [workingEntry, ...workspaces].join("\n") + "\n";
         Deno.writeTextFileSync(GetAppPath("MOTHERFKRS"), allEntries, { append: true });
@@ -204,6 +198,7 @@ export async function AddProject(
             `Added all of your projects. Many motherfuckers less to care about!`,
             "tick-clear",
         );
+        return "rootless";
     }
 }
 

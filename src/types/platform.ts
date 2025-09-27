@@ -111,8 +111,8 @@ export interface GolangPkgFile {
     };
 }
 
-// TODO(@ZakaHaceCosas): make this global, instead of hardcoding types for supported platforms
-//anywhere where false or unsupported is a thing, make sure to make proper type guards
+// in order to implement modules, gotta make this global, instead of hardcoding types for supported platforms
+// anywhere where false or unsupported is a thing, make sure to make proper type guards
 interface GenericProjectEnvironment {
     /**
      * Path to the **root** of the project.
