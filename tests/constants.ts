@@ -24,9 +24,7 @@ const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
         settings: {
             ...DEFAULT_FKNODE_YAML,
             destroy: {
-                intensities: [
-                    "*",
-                ],
+                intensities: "*",
                 targets: [
                     "node_modules/",
                 ],

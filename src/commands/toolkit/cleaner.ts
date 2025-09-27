@@ -1,6 +1,5 @@
 import * as DenoJson from "../../../deno.json" with { type: "json" };
 import { Commander, ManagerExists } from "../../functions/cli.ts";
-import { GetUserSettings } from "../../functions/config.ts";
 import { BulkRemove, CheckForPath, JoinPaths, ParsePath } from "../../functions/filesystem.ts";
 import { Interrogate, LogStuff } from "../../functions/io.ts";
 import { GetProjectEnvironment, UnderstandProjectProtection } from "../../functions/projects.ts";
@@ -13,6 +12,40 @@ import { sortAlphabetically, validate } from "@zakahacecosas/string-utils";
 import { FkNodeInterop } from "../interop/interop.ts";
 import { LOCAL_PLATFORM } from "../../platform.ts";
 import { ColorString } from "../../functions/color.ts";
+import type { CF_FKNODE_SETTINGS } from "../../types/config_files.ts";
+import { bold, red } from "@std/fmt/colors";
+
+/** Handles errors and short-circuiting. */
+function HandleErroring(
+    env: ProjectEnvironment | "hard",
+    errorCode: "updater" | "linter" | "prettifier" | "destroyer" | MANAGER_GLOBAL,
+    errors: string[] | null,
+    alwaysShortCircuit: boolean,
+): void {
+    if (env === "hard" || !errors) {
+        if (alwaysShortCircuit === false) return;
+        LogStuff(
+            `${
+                bold(red("SHORT CIRCUIT!"))
+            }\nAn error happened with hard cleanup of ${errorCode}.\nIt might not be critical, but you chose to always short circuit cleanup, which includes hard cleanup, so here we are.\nThe lines above "SHORT CIRCUIT!" should tell you what the error is (raise a GitHub issue if they don't).`,
+            "error",
+        );
+        Deno.exit(1);
+    }
+    if (alwaysShortCircuit === false && env.settings.cleanerShortCircuit === false) {
+        errors.push(errorCode);
+        return;
+    }
+    LogStuff(
+        `${bold(red("SHORT CIRCUIT!"))}\nAn error with the ${
+            bold(errorCode)
+        } happened with ${env.names.full}.\nIt might not be critical, but you chose to short circuit cleanup whenever an error happens with ${
+            alwaysShortCircuit ? "any" : "this"
+        } project, so here we are.\nThe lines above "SHORT CIRCUIT!" should tell you what the error is (raise a GitHub issue if they don't).`,
+        "error",
+    );
+    Deno.exit(1);
+}
 
 /**
  * All project cleaning features.
@@ -22,6 +55,7 @@ const ProjectCleaningFeatures = {
         projectName: string,
         env: ProjectEnvironment,
         errors: string[],
+        shortCircuit: boolean,
     ) => {
         Deno.chdir(env.root);
         LogStuff(
@@ -32,9 +66,9 @@ const ProjectCleaningFeatures = {
             const output = FkNodeInterop.Features.Update(env);
             if (output === true) LogStuff(`Updated dependencies for ${projectName}!`, "tick");
             return;
-        } catch {
-            LogStuff(`Failed to update deps for ${projectName}!`, "warn", "bright-yellow");
-            errors.push("updater");
+        } catch (e) {
+            LogStuff(`Failed to update deps for ${projectName}:${e}`, "warn", "bright-yellow");
+            HandleErroring(env, "updater", errors, shortCircuit);
             return;
         }
     },
@@ -61,6 +95,7 @@ const ProjectCleaningFeatures = {
         projectName: string,
         env: ProjectEnvironment,
         errors: string[],
+        shortCircuit: boolean,
     ) => {
         Deno.chdir(env.root);
         LogStuff(
@@ -68,14 +103,12 @@ const ProjectCleaningFeatures = {
             "working",
         );
         try {
-            const output = FkNodeInterop.Features.Lint(
-                env,
-            );
+            const output = FkNodeInterop.Features.Lint(env);
             if (output === true) LogStuff(`Linted ${projectName}!`, "tick");
             return;
         } catch (e) {
             LogStuff(`Failed to lint ${projectName}: ${e}`, "warn", "bright-yellow");
-            errors.push("linter");
+            HandleErroring(env, "linter", errors, shortCircuit);
             return;
         }
     },
@@ -83,6 +116,7 @@ const ProjectCleaningFeatures = {
         projectName: string,
         env: ProjectEnvironment,
         errors: string[],
+        shortCircuit: boolean,
     ) => {
         Deno.chdir(env.root);
         LogStuff(
@@ -95,7 +129,7 @@ const ProjectCleaningFeatures = {
             return;
         } catch (e) {
             LogStuff(`Failed to pretty ${projectName}: ${e}`, "warn", "bright-yellow");
-            errors.push("prettifier");
+            HandleErroring(env, "prettifier", errors, shortCircuit);
             return;
         }
     },
@@ -104,13 +138,14 @@ const ProjectCleaningFeatures = {
         env: ProjectEnvironment,
         intensity: CleanerIntensity,
         errors: string[],
+        shortCircuit: boolean,
     ) => {
         Deno.chdir(env.root);
         try {
             if (!env.settings.destroy) return;
             if (
-                !env.settings.destroy.intensities.includes(intensity)
-                && !env.settings.destroy.intensities.includes("*")
+                env.settings.destroy.intensities !== "*"
+                && !env.settings.destroy.intensities.includes(intensity)
             ) return;
             if (env.settings.destroy.targets.length === 0) return;
             for (const target of env.settings.destroy.targets) {
@@ -140,7 +175,7 @@ const ProjectCleaningFeatures = {
             return;
         } catch (e) {
             LogStuff(`Failed to destroy stuff at ${projectName}: ${e}`, "warn", "bright-yellow");
-            errors.push("destroyer");
+            HandleErroring(env, "destroyer", errors, shortCircuit);
             return;
         }
     },
@@ -196,6 +231,8 @@ const ProjectCleaningFeatures = {
  * @param {boolean} shouldDestroy
  * @param {boolean} shouldCommit
  * @param {("normal" | "hard" | "maxim")} intensity
+ * @param {ProjectEnvironment} env
+ * @param {CF_FKNODE_SETTINGS} settings
  * @returns {Promise<{ protection: string | null; errors: string | null; }>}
  */
 export function PerformCleanup(
@@ -206,6 +243,7 @@ export function PerformCleanup(
     shouldCommit: boolean,
     intensity: "normal" | "hard" | "maxim",
     env: ProjectEnvironment,
+    settings: CF_FKNODE_SETTINGS,
 ): {
     protection: string | null;
     errors: string | null;
@@ -261,6 +299,7 @@ export function PerformCleanup(
             env.names.name,
             env,
             errors,
+            settings["always-short-circuit-cleanup"],
         );
     }
     if (whatShouldWeDo["lint"]) {
@@ -268,6 +307,7 @@ export function PerformCleanup(
             env.names.name,
             env,
             errors,
+            settings["always-short-circuit-cleanup"],
         );
     }
     if (whatShouldWeDo["pretty"]) {
@@ -275,6 +315,7 @@ export function PerformCleanup(
             env.names.name,
             env,
             errors,
+            settings["always-short-circuit-cleanup"],
         );
     }
     if (whatShouldWeDo["destroy"]) {
@@ -283,6 +324,7 @@ export function PerformCleanup(
             env,
             intensity,
             errors,
+            settings["always-short-circuit-cleanup"],
         );
     }
     if (whatShouldWeDo["commit"]) {
@@ -306,7 +348,7 @@ export function PerformCleanup(
  *
  * @returns {void}
  */
-export function PerformHardCleanup(): void {
+export function PerformHardCleanup(shortCircuit: boolean): void {
     LogStuff(
         `Time for hard-pruning! ${ColorString("Wait patiently, please (caches will take a while to clean).", "italic")}`,
         "working",
@@ -337,8 +379,8 @@ export function PerformHardCleanup(): void {
             Commander("npm", npmHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (error) {
-            LogStuff("Failed!", "error");
-            LogStuff(error);
+            LogStuff(`Failed!\n${error}`, "error");
+            HandleErroring("hard", "npm", null, shortCircuit);
         }
     }
     if (ManagerExists("pnpm")) {
@@ -352,8 +394,8 @@ export function PerformHardCleanup(): void {
             Commander("pnpm", pnpmHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (error) {
-            LogStuff("Failed!", "error");
-            LogStuff(error);
+            LogStuff(`Failed!\n${error}`, "error");
+            HandleErroring("hard", "pnpm", null, shortCircuit);
         }
     }
     if (ManagerExists("yarn")) {
@@ -367,8 +409,8 @@ export function PerformHardCleanup(): void {
             Commander("yarn", yarnHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (error) {
-            LogStuff("Failed!", "error");
-            LogStuff(error);
+            LogStuff(`Failed!\n${error}`, "error");
+            HandleErroring("hard", "yarn", null, shortCircuit);
         }
     }
 
@@ -384,8 +426,8 @@ export function PerformHardCleanup(): void {
             Commander("bun", bunHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (error) {
-            LogStuff("Failed!", "error");
-            LogStuff(error);
+            LogStuff(`Failed!\n${error}`, "error");
+            HandleErroring("hard", "bun", null, shortCircuit);
         }
     }
 
@@ -400,8 +442,8 @@ export function PerformHardCleanup(): void {
             Commander("go", golangHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (error) {
-            LogStuff("Failed!", "error");
-            LogStuff(error);
+            LogStuff(`Failed!\n${error}`, "error");
+            HandleErroring("hard", "go", null, shortCircuit);
         }
     }
     /* if (ManagerExists("deno")) {
@@ -431,8 +473,8 @@ export function PerformHardCleanup(): void {
             // "maxim" one
             // epic.
         } catch (error) {
-            LogStuff("Failed!", "error");
-            LogStuff(error);
+            LogStuff(`Failed!\n${error}`, "error");
+            HandleErroring("hard", "deno", null, shortCircuit);
         }
     }
 
@@ -456,12 +498,11 @@ export function PerformHardCleanup(): void {
             Deno.removeSync(path, { recursive: true });
             LogStuff("Done", "tick");
         } catch (error) {
-            if (error instanceof Deno.errors.NotFound) {
-                LogStuff("Apparently there's no Cargo registry cache.", "moon-face", "italic");
-                LogStuff("Done", "tick");
+            if (error instanceof Deno.errors.NotFound) LogStuff("Apparently there's no Cargo registry cache.", "moon-face", "italic");
+            else {
+                LogStuff(`Failed!\n${error}`, "error");
+                HandleErroring("hard", "cargo", null, shortCircuit);
             }
-            LogStuff("Failed!", "error");
-            LogStuff(error);
         }
     }
 
@@ -515,7 +556,7 @@ export async function PerformMaximCleanup(projects: string[]): Promise<void> {
  * @param {string} intensity
  * @returns {CleanerIntensity}
  */
-export function ValidateIntensity(intensity: string): CleanerIntensity {
+export function ValidateIntensity(intensity: string, settings: CF_FKNODE_SETTINGS): CleanerIntensity {
     const cleanedIntensity = intensity.trim().toLowerCase();
 
     if (!["hard", "hard-only", "normal", "maxim", "maxim-only", "--"].includes(cleanedIntensity)) {
@@ -523,9 +564,8 @@ export function ValidateIntensity(intensity: string): CleanerIntensity {
     }
 
     const workingIntensity = cleanedIntensity as CleanerIntensity | "--";
-    const defaultIntensity = (GetUserSettings())["default-intensity"];
 
-    if (workingIntensity === "--") return defaultIntensity;
+    if (workingIntensity === "--") return settings["default-intensity"];
 
     if (workingIntensity === "normal") return "normal";
 
@@ -538,9 +578,9 @@ export function ValidateIntensity(intensity: string): CleanerIntensity {
             ' Are you sure you want to use maxim cleanup? It\'ll entirely remove "./node_modules" from all of your added projects.',
             "warn",
         );
-        return confirmMaxim ? workingIntensity : defaultIntensity;
+        return confirmMaxim ? workingIntensity : settings["default-intensity"];
     } else {
-        return defaultIntensity;
+        return settings["default-intensity"];
     }
 }
 

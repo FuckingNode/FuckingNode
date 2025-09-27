@@ -147,6 +147,9 @@ export function ChangeSetting(
     } else if (setting === "notifications") {
         if (!validateAgainst(value, ["true", "false"])) return LogStuff(`${value} is not valid. Enter either 'true' or 'false'.`);
         newSettings = { ...currentSettings, notifications: value === "true" };
+    } else if (setting === "always-short-circuit-cleanup") {
+        if (!validateAgainst(value, ["true", "false"])) return LogStuff(`${value} is not valid. Enter either 'true' or 'false'.`);
+        newSettings = { ...currentSettings, "always-short-circuit-cleanup": value === "true" };
     } else if (setting === "notification-threshold") {
         if (!validateAgainst(value, ["true", "false"])) return LogStuff(`${value} is not valid. Enter either 'true' or 'false'.`);
         newSettings = { ...currentSettings, "notification-threshold": value === "true" };
@@ -202,6 +205,9 @@ export function DisplaySettings(): void {
         `Notification threshold        | ${ColorString(settings["notification-threshold-value"], "bright-green")} milliseconds. ${
             ColorString("notification-threshold", "half-opaque", "italic")
         }`,
+        `Cleanup error behavior?       | ${
+            ColorString(settings["always-short-circuit-cleanup"] ? "Short-circuit" : "Continue", "bright-green")
+        } ${ColorString("always-short-circuit-cleanup", "half-opaque", "italic")}`,
     ].join("\n");
 
     LogStuff(`${ColorString("Your current settings are:", "bright-yellow")}\n---\n${formattedSettings}`, "bulb");

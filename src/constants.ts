@@ -14,6 +14,7 @@ export const DEFAULT_SETTINGS: CF_FKNODE_SETTINGS = {
     "notifications": true,
     "notification-threshold": false,
     "notification-threshold-value": 10000,
+    "always-short-circuit-cleanup": false,
 };
 
 /**
@@ -23,15 +24,10 @@ export const DEFAULT_SETTINGS: CF_FKNODE_SETTINGS = {
  */
 export const DEFAULT_FKNODE_YAML: FullFkNodeYaml = {
     divineProtection: [],
+    cleanerShortCircuit: false,
     lintScript: false,
     prettyScript: false,
-    destroy: {
-        intensities: ["maxim"],
-        targets: [
-            "dist/",
-            "out/",
-        ],
-    },
+    destroy: null,
     commitActions: false,
     commitMessage: false,
     commitCmd: false,

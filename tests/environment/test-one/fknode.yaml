@@ -5,7 +5,6 @@ flagless:
     flaglessPretty: true
     flaglessCommit: false
 destroy:
-    intensities:
-        - "*"
+    intensities: "*"
     targets:
         - "node_modules/" # bad practice

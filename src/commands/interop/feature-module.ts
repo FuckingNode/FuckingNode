@@ -30,10 +30,8 @@ function HandleError(
  */
 export const InteropedFeatures = {
     Lint: (env: ProjectEnvironment): boolean => {
-        const script = env.settings.lintScript;
-
         if (TypeGuardForNodeBun(env)) {
-            if (script === false) {
+            if (env.settings.lintScript === false) {
                 if (FkNodeInterop.PackageFileUtils.SpotDependency("eslint", env.mainCPF.deps) === undefined) {
                     LogStuff(
                         "No linter was given (via fknode.yaml > lintCmd), hence defaulted to ESLint - but ESLint is not installed!",
@@ -58,7 +56,7 @@ export const InteropedFeatures = {
             } else {
                 const output = Commander(
                     env.commands.script[0],
-                    [env.commands.script[1], script],
+                    [env.commands.script[1], env.settings.lintScript],
                 );
 
                 if (!output.success) HandleError("Task__Lint", output.stdout);
@@ -77,7 +75,7 @@ export const InteropedFeatures = {
         } else if (env.runtime === "deno") {
             const output = Commander(
                 env.commands.base,
-                ["check", "."],
+                env.settings.lintScript === false ? ["check", "."] : [env.commands.script[1], env.settings.lintScript],
             );
 
             if (!output.success) HandleError("Task__Lint", output.stdout);
@@ -130,12 +128,20 @@ export const InteropedFeatures = {
 
                 return true;
             }
-        } else {
-            // customization unsupported for all of these
-            // deno fmt settings should work from deno.json, tho
+        } else if (env.runtime === "deno") {
             const output = Commander(
                 env.commands.base,
-                env.runtime === "deno" ? ["fmt"] : ["fmt", "./..."],
+                env.settings.prettyScript === false ? ["fmt"] : [env.commands.script[1], env.settings.prettyScript],
+            );
+
+            if (!output.success) HandleError("Task__Pretty", output.stdout);
+
+            return true;
+        } else {
+            // custom script unsupported for these
+            const output = Commander(
+                env.commands.base,
+                ["fmt", "./..."],
             );
 
             if (!output.success) HandleError("Task__Pretty", output.stdout);

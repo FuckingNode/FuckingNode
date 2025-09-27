@@ -62,6 +62,12 @@ export interface CF_FKNODE_SETTINGS {
      * @type {number}
      */
     "notification-threshold-value": number;
+    /**
+     * Whether to always short-circuit cleanup on errors.
+     *
+     * @type {boolean}
+     */
+    "always-short-circuit-cleanup": boolean;
 }
 
 /**
@@ -108,11 +114,10 @@ export function IsCPCmdInstruction(a: any): a is CrossPlatformParsedCmdInstructi
 }
 export type CmdSet = (CmdInstruction | { posix: CmdInstruction; msft: CmdInstruction })[];
 
-/**
- * An `fknode.yaml` file for configuring individual projects
- */
+/** An `fknode.yaml` file for configuring individual projects */
 export type FkNodeYaml = Partial<FullFkNodeYaml>;
 
+/** Full specification of the `fknode.yaml` file, for configuring individual projects */
 export interface FullFkNodeYaml {
     /**
      * Divine protection, basically to ignore stuff. Must be an array of options, or `"*"`.
@@ -120,6 +125,8 @@ export interface FullFkNodeYaml {
      * @type {(("updater" | "cleaner" | "linter" | "prettifier" | "destroyer")[] | "*")}
      */
     divineProtection: ("updater" | "cleaner" | "linter" | "prettifier" | "destroyer")[] | "*";
+    /** If true, the cleaner will short-circuit whenever an error happens on any task. Defaults to false. */
+    cleanerShortCircuit: boolean;
     /**
      * If `--lint` is passed to `clean`, this script will be used to lint the project. It must be a runtime script (defined in `package.json` -> `scripts`), and must be a single word (no need for "npm run" prefix). `false` overrides these rules (it's the default).
      *
@@ -135,18 +142,18 @@ export interface FullFkNodeYaml {
     /**
      * If provided, file paths in `targets` will be removed when `clean` is called with any of the `intensities`. If not provided defaults to `maxim` intensity and `node_modules` path. Specifying `targets` _without_ `node_modules` does not override it, meaning it'll always be cleaned.
      *
-     * @type {{
+     * @type {null | {
      *         intensities: (CleanerIntensity | "*")[],
      *         targets: string[]
      *     }}
      */
-    destroy: {
+    destroy: null | {
         /**
          * Intensities the destroyer should run at.
          *
-         * @type {(CleanerIntensity | "*")[]}
+         * @type {CleanerIntensity[] | "*"}
          */
-        intensities: (CleanerIntensity | "*")[];
+        intensities: CleanerIntensity[] | "*";
         /**
          * Targets to be destroyed. Must be paths either relative to the **root** of the project or absolute.
          *

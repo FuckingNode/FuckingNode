@@ -1,7 +1,7 @@
 # this is the real config for this repo
 # for learning about this, head to https://fuckingnode.github.io/manual/fknode-yaml
 destroy:
-    intensities: ["*"]
+    intensities: "*"
     targets:
         - "dist"
 commitCmd:
@@ -15,3 +15,4 @@ buildCmd:
     - ~"echo ''"
     - ~ls
     - ="src/types/misc.ts --args"
+cleanerShortCircuit: true

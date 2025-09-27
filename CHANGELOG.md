@@ -22,6 +22,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Added removal of `target/` on Rust projects for maxim cleanup.
 - Added more setups to `setup`.
 - Added several changes to improve the CLI's performance.
+- Added the ability to make the cleaner immediately stop upon an error instead of collecting them as "statistics", via both project settings and global settings. Global setting affects hard-cleanup too.
+- Added support for custom `lintScript` and `prettyScript` (prev. `lintCmd` and `prettyCmd`) for Deno.
   - FuckingNode runs some checks every time before actually running. _Just_ parallelizing them made the entire CLI much, MUCH faster.
   - Bulk adding projects (via glob patterns) was also parallelized. Made it 5% faster.
   - Git-related and project environment-related operations used to check for filepaths _twice_, this duplication was removed.
@@ -55,6 +57,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - (Breaking) Now `export` expects `--jsonc` and not `--json` to be passed, matching the output filetype.
 - (Breaking) FnCPF spec slightly changed. Starting with V5 this spec will be publicly documented.
 - (Breaking) Annoyingly (but to avoid confusion), the default package manager is now `npm`.
+- (Breaking) Now, to use the destroyer with all intensities, use just `"*"` and not an array containing `"*"`.
 - Now Git errors should be much more properly handled and reported.
 - Now the error dump file should be more readable.
 - Now `surrender` templates will take your project's name and use it within the template.
@@ -69,6 +72,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Fixed a typo in `export`'s help entry.
 - Fixed `migrate` and maxim cleanup wrongly attempting to remove `node_modules` from Deno projects.
 - Fixed `commit` showing a wrong number in the "and N more" string.
+- Fixed Cargo hard cleanup showing both the success and error messages when an error happens.
 
 ### Removed
 

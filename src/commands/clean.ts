@@ -4,6 +4,7 @@ import type { TheCleanerConstructedParams } from "./_interfaces.ts";
 import { PerformCleanup, PerformHardCleanup, PerformMaximCleanup, ShowReport, ValidateIntensity } from "./toolkit/cleaner.ts";
 import type { CleanerIntensity } from "../types/config_params.ts";
 import { GetElapsedTime } from "../functions/date.ts";
+import { GetUserSettings } from "../functions/config.ts";
 
 export type RESULT = {
     name: string;
@@ -21,10 +22,11 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
     const { intensity, project } = params.parameters;
 
     const startup = new Date();
-    const realIntensity: CleanerIntensity = ValidateIntensity(intensity);
+    const settings = GetUserSettings();
+    const realIntensity: CleanerIntensity = ValidateIntensity(intensity, settings);
 
     if (realIntensity === "hard-only") {
-        PerformHardCleanup();
+        PerformHardCleanup(settings["always-short-circuit-cleanup"]);
         return;
     }
 
@@ -72,6 +74,7 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
                 commit,
                 realIntensity,
                 env,
+                settings,
             );
 
             const result: RESULT = {
@@ -101,7 +104,7 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
         }
     }
 
-    if (realIntensity === "hard" || realIntensity === "maxim") PerformHardCleanup();
+    if (realIntensity === "hard" || realIntensity === "maxim") PerformHardCleanup(settings["always-short-circuit-cleanup"]);
     if (realIntensity === "maxim") await PerformMaximCleanup(projects);
 
     LogStuff(
