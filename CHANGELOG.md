@@ -19,6 +19,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Added an `--export` option to `export`; if not provided the default behavior is to just show it in terminal instead of writing it.
 - Added a 3 second countdown to `surrender`, giving you time to rethink and quit the program.
 - Added spreading to `add` and `remove`, allowing you to `fkadd project1 project2 project3` from one command.
+- Added removal of `target/` on Rust projects for maxim cleanup.
+- Added more setups to `setup`.
 - Added several changes to improve the CLI's performance.
   - FuckingNode runs some checks every time before actually running. _Just_ parallelizing them made the entire CLI much, MUCH faster.
   - Bulk adding projects (via glob patterns) was also parallelized. Made it 5% faster.
@@ -57,6 +59,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Now the error dump file should be more readable.
 - Now `surrender` templates will take your project's name and use it within the template.
 - Now the `about` command plays a typewriter animation.
+- Now `setup` will search for setups instead of throwing an error when typing an invalid setup name.
 
 ### Fixed
 

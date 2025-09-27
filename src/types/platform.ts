@@ -330,6 +330,12 @@ interface CargoEnvironment extends GenericProjectEnvironment {
         publish: ["publish"];
         start: "run";
     };
+    /**
+     * Path to `target`.
+     *
+     * @type {string}
+     */
+    hall_of_trash: string;
 }
 
 interface GolangEnvironment extends GenericProjectEnvironment {

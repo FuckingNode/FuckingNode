@@ -2,6 +2,11 @@ import { createSourceFile, forEachChild, isImportDeclaration, ScriptTarget } fro
 import { extname, join, parse } from "@std/path";
 import { validateAgainst } from "@zakahacecosas/string-utils";
 
+// WHAT'S UP
+// in future versions I want this to check for dependencies that are never imported
+// so we can remove them for the user (excluding anything they want to explicitly keep)
+// i'm a bit lazy so this'll come on a later release, for now it's unused
+
 /**
  * Gets all imports from a JavaScript/TypeScript project.
  *

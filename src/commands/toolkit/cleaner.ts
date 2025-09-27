@@ -486,8 +486,7 @@ export async function PerformMaximCleanup(projects: string[]): Promise<void> {
     for (const project of projects) {
         const env = await GetProjectEnvironment(project);
 
-        // TODO(@ZakaHaceCosas) add cargo target
-        if (env.runtime === "rust" || env.runtime === "golang" || env.runtime === "deno") continue;
+        if (env.runtime === "golang" || env.runtime === "deno") continue;
 
         if (!(CheckForPath(env.hall_of_trash))) {
             LogStuff(

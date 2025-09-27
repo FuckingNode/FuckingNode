@@ -776,6 +776,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
                 publish: ["publish"],
                 start: "run",
             },
+            hall_of_trash: JoinPaths(root, "target"),
         };
     }
     if (settings.projectEnvOverride === "deno" || isDeno) {

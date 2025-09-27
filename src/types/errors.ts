@@ -40,7 +40,6 @@ export const PARAM_ERRORS = [
     "Param__WhateverUnprovided",
     "Param__TargetInvalid",
     "Param__CIntensityInvalid",
-    "Param__SetupInvalid",
     "Param__VerInvalid",
     "Param__GitTargetInvalid",
     "Param__GitTargetAliasInvalid",
