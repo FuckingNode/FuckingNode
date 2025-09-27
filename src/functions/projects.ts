@@ -260,9 +260,8 @@ export async function RemoveProject(
 
 /** Manages the project list by adding or removing projects. */
 export async function ListManager(action: "add" | "rem", paths: string[]): Promise<void> {
-    // TODO(@ZakaHaceCosas) WHY DOESN'T IT SHOW OUTPUT WHEN RUNNING FKADD WITH NO DOT
-    // dedupe
-    const projects = new Set(paths).values().toArray();
+    // dedupe if needed
+    const projects = paths.length === 0 ? ["."] : new Set(paths).values().toArray();
     if (action === "add") await Promise.all(projects.map((p) => AddProject(p)));
     else await Promise.all(projects.map((p) => RemoveProject(p)));
 }
