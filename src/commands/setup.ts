@@ -1,16 +1,16 @@
 import { CheckForPath, GetTextIndentSize, JoinPaths } from "../functions/filesystem.ts";
 import { Interrogate, LogStuff, StringifyYaml } from "../functions/io.ts";
-import { deepMerge, NameProject } from "../functions/projects.ts";
+import { deepMerge } from "../functions/projects.ts";
 import type { TheSetuperConstructedParams } from "./_interfaces.ts";
 import { parse as parseYaml } from "@std/yaml";
 import { parse as parseJsonc } from "@std/jsonc";
 import { SETUPS, VISIBLE_SETUPS } from "./toolkit/setups.ts";
-import { normalize, table, validate, validateAgainst } from "@zakahacecosas/string-utils";
+import { mergeLines, normalize, table, validate } from "@zakahacecosas/string-utils";
 import { FknError } from "../functions/error.ts";
 import { ColorString } from "../functions/color.ts";
 import { bold } from "@std/fmt/colors";
 
-export default async function TheSetuper(params: TheSetuperConstructedParams): Promise<void> {
+export default function TheSetuper(params: TheSetuperConstructedParams): void {
     if (!validate(params.setup)) {
         LogStuff(table(VISIBLE_SETUPS));
         LogStuff(
@@ -51,20 +51,18 @@ export default async function TheSetuper(params: TheSetuperConstructedParams): P
         ? parseYaml(setupToUse.content)
         : setupToUse.content;
     const path = JoinPaths(project, setupToUse.seek);
-    const status = CheckForPath(path)
-        ? validateAgainst(setupToUse.seek, [".prettierrc", "fknode.yaml", "tsconfig.json"]) ? "Merge" : "Over"
-        : "New";
+    const status = CheckForPath(path) ? (setupToUse.seek === "LICENSE" ? "Over" : "Merge") : "New";
 
     const setupName = `${ColorString(setupToUse.name, "bold")} ${ColorString(setupToUse.seek, "italic")}`;
 
     if (
         !(Interrogate(
-            `Should we add the ${setupName} file to ${await NameProject(project, "name")}?${
+            `Should we add the ${setupName} file to ${bold(project)}?${
                 status === "New"
                     ? ""
                     : status === "Merge"
                     ? `\nNote: Your existing ${setupToUse.seek} will be merged with this template. Comments won't be preserved and duplications might happen!`
-                    : `\nImportant: Your existing ${setupToUse.seek} will be overwritten!`
+                    : "\nImportant: Your existing LICENSE file will be overwritten!"
             }`,
         ))
     ) {
@@ -77,13 +75,11 @@ export default async function TheSetuper(params: TheSetuperConstructedParams): P
     if (status === "Merge") {
         const fileContent = Deno.readTextFileSync(path);
         if (setupToUse.seek === "tsconfig.json" || setupToUse.seek === ".prettierrc") {
-            const parsedContent = parseJsonc(fileContent);
-            finalContent = JSON.stringify(deepMerge(contentToUse, parsedContent), undefined, GetTextIndentSize(fileContent));
+            finalContent = JSON.stringify(deepMerge(contentToUse, parseJsonc(fileContent)), undefined, GetTextIndentSize(fileContent));
         } else if (setupToUse.seek === "fknode.yaml") {
-            const parsedContent = parseYaml(fileContent);
-            finalContent = StringifyYaml(deepMerge(contentToUse, parsedContent));
+            finalContent = StringifyYaml(deepMerge(contentToUse, parseYaml(fileContent)));
         } else {
-            finalContent = `${fileContent}\n${contentToUse}`;
+            finalContent = mergeLines(fileContent, contentToUse as string);
         }
     } else {
         finalContent = setupToUse.seek === "fknode.yaml"
@@ -99,11 +95,9 @@ export default async function TheSetuper(params: TheSetuperConstructedParams): P
     );
 
     LogStuff("Done!", "tick");
-    if (setupToUse.seek === "LICENSE" && !setupToUse.name.includes("gpl")) {
+    if (setupToUse.seek === "LICENSE" && (setupToUse.name.includes("mit") || setupToUse.name.includes("bsd"))) {
         LogStuff(
-            `Check your LICENSE file at the ${
-                setupToUse.name.includes("mit") ? "top" : "bottom"
-            } of the file!\nYou need to replace [YYYY] and [AUTHOR] with valid data.`,
+            `Check your LICENSE file at the top of the file!\nYou need to update the template to show a valid year and author/copyright holder.`,
         );
     }
 }

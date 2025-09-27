@@ -290,7 +290,7 @@ async function main(command: UnknownString): Promise<void> {
         case "setup":
         case "configure":
         case "preset":
-            await TheSetuper({
+            TheSetuper({
                 setup: flags[1],
                 project: flags[2],
             });
