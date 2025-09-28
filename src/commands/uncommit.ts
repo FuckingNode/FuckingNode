@@ -25,9 +25,9 @@ export default async function TheUncommitter(): Promise<void> {
     UndoCommit(project);
 
     LogStuff(
-        `Undid commit ${data.hash} (${bold(data.message)}, by ${
+        `Undid commit ${data.hash} (${bold(data.message.trim())}, by ${
             italic(data.author)
-        } at ${data.date})\n\nMake any modifications to the existing files now.\nUse regular git commands (git add / git remove) to stage/unstage files.\nOnce done, come to this terminal and hit 'Y',\n    we'll run your commitCmd (if any) and re-make the commit with the same message and files (unless changed) as before.\n    (you may hit 'n' as well, result will be the same)\n`,
+        } at ${data.date})\n\nMake any modifications to the existing files now.\nUse regular git commands (git add / git remove) from a separate terminal to stage/unstage files.\nOnce done, come to this terminal and hit 'Y',\n    we'll run your commitCmd (if any) and re-make the commit with the same message and files (unless changed) as before.\nYou may hit 'n' as well, result will be the same.\n`,
     );
     confirm("waiting for you to hit 'Y'");
 
