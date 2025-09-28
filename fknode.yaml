@@ -10,9 +10,11 @@ commitActions: false
 prettyScript: "good"
 buildCmd:
     # this is for testing, we don't really build with this
-    - { msft: ~echo 'Running from Windows!', posix: ~"echo 'Running from Linux!'" }
+    - { msft: ~Write-Host 'Running from Windows!', posix: ~"echo 'Running from Linux!'" }
     - ~echo 'test'
     - ~"echo ''"
     - ~ls
+    - $good
     - ="src/types/misc.ts --args"
+    - <powershell -c 'echo raw exec'
 cleanerShortCircuit: true

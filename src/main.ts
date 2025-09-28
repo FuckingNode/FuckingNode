@@ -267,8 +267,11 @@ async function main(): Promise<void> {
             });
             break;
         case "terminate":
-        case "ftl":
         case "fuck-the-lang":
+        case "ftl":
+        case "fuck-the-runtime":
+        case "ftr":
+        case "never-again-using":
         case "resign":
         case "unnode":
         case "undeno":

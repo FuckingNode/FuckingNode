@@ -11,7 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 
 - Added a new, common interface for command automation (`commitCmd`, `launchCmd`, etc...). Now everything runs the on `CmdSets`, which are much more powerful + are also consistent across cmds.
-- Added a new `terminate` command (with many aliases) that uninstalls a language (literally) and removes leftovers, if any.
+- Added a new `terminate` command (with many aliases) that uninstalls a runtime (literally) and removes leftovers, if any.
 - Added an option to customize (in milliseconds) the threshold for notifications.
 - Added the option to use GLFM instead of GFM for `surrender` (via `--gitlab/-gl`).
 - Added `deprecate` and `nevermind` as aliases to `surrender`.

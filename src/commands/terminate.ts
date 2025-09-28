@@ -48,7 +48,7 @@ export default async function TheTerminator(params: TheTerminatorConstructedPara
         if (
             !Interrogate(
                 bold(
-                    `YOU'VE SPECIFIED TO REMOVE ALL PROJECTS THAT USE THIS LANGUAGE TOO!\nWe're talking of\n\n${
+                    `YOU'VE SPECIFIED TO REMOVE ALL PROJECTS THAT USE THIS RUNTIME/LANGUAGE TOO!\nWe're talking of\n\n${
                         projects.map((p) => p.names.full).join("\n")
                     }\n\nTHESE WILL BE ENTIRELY REMOVED FROM YOUR LOCAL MACHINE, YOU WON'T BE ABLE TO UNDO THAT!\nPlease confirm you wish to proceed.`,
                 ),
@@ -84,6 +84,8 @@ export default async function TheTerminator(params: TheTerminatorConstructedPara
     LogStuff("Now, onto removing your projects...", "warn");
     Notification("Last chance to stop project removal", "You should be 101% sure you pushed your code, or really sure you want it gone.");
     await reveal("7, 6, 5, 4, 3, 2, 1.", 400);
+
+    LogStuff("STEP 2: Removing the projects", "working");
 
     await BulkRemove(projects.map((p) => p.root));
 

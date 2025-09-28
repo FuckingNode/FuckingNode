@@ -18,7 +18,7 @@ type Parameters = { key: "commitCmd" | "releaseCmd" | "buildCmd" | "launchCmd"; 
 
 function ValidateCallback(v: CmdInstruction): ParsedCmdInstruction | null {
     const type = v.charAt(0);
-    if (!validateAgainst(type, ["$", "~", "="])) throw new FknError("Cfg__InvalidCmdK", `Cmd "${v}" is not properly typed.`);
+    if (!validateAgainst(type, ["$", "~", "=", "<"])) throw new FknError("Cfg__InvalidCmdK", `Cmd "${v}" is not properly typed.`);
     const __cmd: string = v.slice(1).trim();
     const _cmd: string = __cmd.startsWith('"') ? __cmd.slice(1, -1) : __cmd;
     const cmd: string[] = _cmd.split(" ").filter(validate);
@@ -81,7 +81,7 @@ export async function RunCmdSet(params: Parameters): Promise<void> {
         const cmdString = command.cmd.join(" ");
         const cmdTypeString = command.type === "~" ? "Command" : command.type === "=" ? "File" : "Script";
         LogStuff(
-            `Running command ${cmdIndex}/${cmdSet.length} | ${ColorString(cmdString, "half-opaque", "italic")}\n`,
+            `Running Cmd ${cmdIndex}/${cmdSet.length} | ${cmdTypeString} / ${ColorString(cmdString, "half-opaque", "italic")}\n`,
             undefined,
             "bold",
         );

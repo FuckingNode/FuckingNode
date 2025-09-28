@@ -14,7 +14,7 @@ Deno.test({
             [{
                 msft: {
                     cmd: [
-                        "echo",
+                        "Write-Host",
                         "'Running",
                         "from",
                         "Windows!'",
@@ -49,10 +49,24 @@ Deno.test({
                 type: "~",
             }, {
                 cmd: [
+                    "good",
+                ],
+                type: "$",
+            }, {
+                cmd: [
                     "src/types/misc.ts",
                     "--args",
                 ],
                 type: "=",
+            }, {
+                cmd: [
+                    "powershell",
+                    "-c",
+                    "'echo",
+                    "raw",
+                    "exec'",
+                ],
+                type: "<",
             }],
         );
     },

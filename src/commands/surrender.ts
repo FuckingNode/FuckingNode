@@ -12,7 +12,7 @@ const FULL_NAME = `FuckingNode v${DenoJson.default.version}`;
 
 const deprecationNotices: ((proj: string) => string)[] = [
     (p) =>
-        `# This project is no longer maintained\n\nThis repository is archived and ${p} will not receive updates or bug fixes anymore. Sorry.`,
+        `# This project is no longer maintained\n\nThis repository is archived and **${p}** will not receive updates or bug fixes anymore. Sorry.`,
     (p) =>
         `# Deprecation notice\n\nThis project is deprecated and no longer actively supported. ${p} will not receive security patches or bug fixes anymore. **Use at your own risk.**`,
     (p) => `# ${p} is no longer supported\n\nDevelopment has ceased, and the ${p} project is no longer maintained.`,

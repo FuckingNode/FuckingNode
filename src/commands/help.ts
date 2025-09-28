@@ -16,13 +16,13 @@ function formatCmd(obj: HelpItem[]): string {
         const params: string = thingy[1]
             ? ColorString(thingy[1], "bold", "italic", "half-opaque")
             : ColorString("(No parameters)", "italic", "half-opaque");
-        const desc: string = thingy[2].replaceAll("\n", "\n" + spaceString(" ", 0, 19))
+        const desc: string = thingy[2].replaceAll("\n", "\n" + spaceString(" ", 0, 32))
             .replace(new RegExp("--[^\\s]+", "gim"), (match) => ColorString(match, "orange", "bold"))
             .replace(new RegExp("\<[^\\s]+\>", "gim"), (match) => ColorString(match, "pink", "bold"))
             .replace(new RegExp("'[^\\s]+'", "gim"), (match) => ColorString(match, "orange", "bold"));
 
         strings.push(
-            `${spaceString(cmd, 0, 20 - (thingy[0].length))}${desc}${((thingy[3] ?? false) === true) ? `\n${params}` : ""}`,
+            `${spaceString(cmd, 0, 33 - (thingy[0].length))}${desc}${((thingy[3] ?? false) === true) ? `\n${params}` : ""}`,
         );
     }
 
@@ -176,7 +176,7 @@ export default function TheHelper(params: TheHelperConstructedParams): void {
                     "Recursively runs a set of tasks across all of your projects, depending on given flags and project configuration (via fknode.yaml).\nIt's our main feature, base for FuckingNode saving you time.",
                     [
                         [
-                            "<(projects)>",
+                            "<project | -- | ...projects>",
                             null,
                             "Project to be cleaned. Set to '--' to bulk-clean all added projects.\nRun with no args to bulk-clean all projects, too.\nRun with --projects followed by a spreading list to clean many but not all projects.\nWhen spreading, intensity must go after an --intensity flag and before any feature flags.",
                         ],
@@ -339,18 +339,18 @@ export default function TheHelper(params: TheHelperConstructedParams): void {
         case "terminate":
             LogStuff(
                 formatCmdWithTitle(
-                    "'terminate' lets you remove a language, literally.",
+                    "'terminate' lets you remove a runtime, literally.",
                     "This commands uninstalls the chosen runtime (and all package managers in the case of NodeJS).\nIt also tries its best at removing leftovers.\nIf chosen (though discouraged), it can remove from your disk all projects written in said lang.",
                     [
                         [
-                            "<language>",
+                            "<runtime>",
                             null,
-                            "Language to be removed, either 'node', 'deno', 'bun', 'go', or 'rust'.",
+                            "Runtime to be removed, either 'node', 'deno', 'bun', 'go', or 'rust'.",
                         ],
                         [
                             "[--remove-all-motherfuckers-too]",
                             null,
-                            "Be careful with this!\nRemoves from your disk any project written in the language to be removed.",
+                            "Be careful with this!\nRemoves from your disk any project written in the runtime to be removed.",
                         ],
                     ],
                 ),

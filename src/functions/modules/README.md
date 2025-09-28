@@ -9,6 +9,6 @@ This is code that I haven't touched in a while, it's not good, not finished, not
 
 ---
 
-> FYI, Instruction Modules are like language support packs and Extension Modules are, you guessed it, extensions.
+> FYI, Instruction Modules are like language/runtime support packs and Extension Modules are, you guessed it, extensions.
 
 Note: Sometimes they're called modules (more logical name) and sometimes they're called "nodes". Calling them Nodes is less clear, but fits in way better by giving back a meaning to "FuckingNode", which supporting Rust doesn't make that much sense of a name now. Final name remains undecided, despite this README using "modules".

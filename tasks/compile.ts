@@ -48,10 +48,11 @@ const ALL_COMMANDS = Object.entries(TARGETS).map(([key, [target, output]]: [stri
         "--allow-run",
         // used for an easter egg that requires OS uptime
         "--allow-sys=osUptime",
-        "--include",
         // include setups
+        "--include",
         "./src/commands/toolkit/setups",
         // include uninstallers
+        "--include",
         "./src/commands/terminators",
         "--target",
         target,
@@ -84,7 +85,7 @@ const ALL_COMMANDS = Object.entries(TARGETS).map(([key, [target, output]]: [stri
     };
 });
 
-for (const CMD of ALL_COMMANDS) CMD.compileCmd.outputSync();
+for (const CMD of ALL_COMMANDS) await CMD.compileCmd.spawn().output();
 
 if (release) {
     const hashes: Record<
