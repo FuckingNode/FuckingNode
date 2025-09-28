@@ -99,14 +99,18 @@ if (release) {
         win64: "",
     };
 
+    const decoder = new TextDecoder();
+
     for (const CMD of ALL_COMMANDS) {
         const hashing = CMD.hashCmd.outputSync();
         const hash = new TextDecoder().decode(hashing.stdout).trim();
         hashes[CMD.target] = hash;
-        console.log(CMD.target, "HASH", hash);
+        console.log("> Hashed", CMD.target);
+        console.log(decoder.decode(hashing.stdout), decoder.decode(hashing.stderr));
         Deno.writeTextFileSync("dist/konbini.hash.yaml", StringifyYaml(hashes));
-        CMD.signCmd.outputSync();
-        console.log("Signed", CMD.target);
+        const signing = CMD.signCmd.outputSync();
+        console.log("> Signed", CMD.target);
+        console.log(decoder.decode(signing.stdout), decoder.decode(signing.stderr));
     }
 
     console.log(
