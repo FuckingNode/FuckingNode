@@ -78,17 +78,27 @@ export default function TheHelper(params: TheHelperConstructedParams): void {
         [
             "commit",
             "<message> [branch] [--push]",
-            `Makes a commit with the given <message> only if a specific task succeeds, (to [branch], if specified).`,
+            "Makes a commit with the given <message> only if a specific task succeeds, (to [branch], if specified).",
+        ],
+        [
+            "uncommit",
+            null,
+            "Takes the last commit in the CWD and helps you modify it.",
         ],
         [
             "release",
             "<project> <version> [--push] [--dry]",
-            `Releases a new <version> of the given <project> as an npm or jsr package, only if a specified task succeeds.`,
+            "Releases a new <version> of the given <project> as an npm or jsr package, only if a specified task succeeds.",
         ],
         [
             "surrender",
             "<project> [message] [alternative] [learn-more-url] [--github]",
-            `Deprecates a <project>, optional leaving a [message], an [alternative], and a [learn-more-url].`,
+            "Deprecates a <project>, optional leaving a [message], an [alternative], and a [learn-more-url].",
+        ],
+        [
+            "terminate",
+            "<runtime> [--remove-all-motherfuckers-too]",
+            "Uninstalls a runtime and removes leftovers, and optionally, all projects written for it.",
         ],
         [
             "audit",
@@ -504,6 +514,22 @@ export default function TheHelper(params: TheHelperConstructedParams): void {
                             "--yes",
                             null,
                             "By default we show a confirmation to ensure you want to proceed.\nRun with --yes to skip this confirmation.",
+                        ],
+                    ],
+                ),
+            );
+            break;
+        case "uncommit":
+            LogStuff(
+                formatCmdWithTitle(
+                    "'uncommit' undoes a commit (storing its title and contents), and lets you modify it.",
+                    "This will undo the commit and track its files, so you can edit it.\nFuckingNode will hang until you hit any key, so it can remake the commit.\nIf a commitCmd exists it'll re-run it as 'commit' would do.\nKeep in mind you should not quit FuckingNode during the process or things will kinda fuck up.",
+                    // TODO(@ZakaHaceCosas): this ain't optimal
+                    [
+                        [
+                            "Takes no parameters!",
+                            null,
+                            "",
                         ],
                     ],
                 ),
