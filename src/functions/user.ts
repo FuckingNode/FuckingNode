@@ -3,6 +3,7 @@ import { FknError } from "./error.ts";
 import { Commander } from "./cli.ts";
 import type { CF_FKNODE_SETTINGS } from "../types/config_files.ts";
 import { GetUserSettings } from "./config.ts";
+import { LOCAL_PLATFORM } from "../platform.ts";
 
 export function LaunchUserIDE(): void {
     const IDE: CF_FKNODE_SETTINGS["fav-editor"] = (GetUserSettings())["fav-editor"];
@@ -34,7 +35,11 @@ export function LaunchUserIDE(): void {
             break;
     }
 
-    const out = Commander(executionCommand, ["."]);
+    // TODO(@ZakaHaceCosas) do all editors point to a shell script or a file?
+    // Deno wants me to run from a shell to use .bat or .cmd, which didn't happen before
+    // idk if deno changed behavior or vscode changed to a .cmd but whatever
+    // also uh would a file work anyway from here? i think so, but yeah gotta watch out for this
+    const out = Commander(LOCAL_PLATFORM.SHELL, [executionCommand, "."]);
     if (!out.success) throw new Error(`Error launching ${IDE}: ${out.stdout}`);
     return;
 }
