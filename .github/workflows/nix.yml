@@ -19,4 +19,4 @@ jobs:
 
             - name: Get hashes for Nix
               run: |
-                nix run .#hashes
+                  nix run .#hashes

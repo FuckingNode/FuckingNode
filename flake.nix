@@ -23,10 +23,10 @@
 
 
     sha256s = {
-     "aarch64-linux" = "008dfrwvqa05pq5vgnadiisjfb2rcq77681fjzzy20pj1sn6a1xm";
-     "x86_64-linux" = "1yald25yyy20rbsk7hc008gnifdn3vn26xribrw9mijrjrm985j4";
-     "x86_64-darwin" = "0nj115daz51mc31xcjwwrqlfx3fqar9sa9amw05nqkaznacwfi90";
-     "aarch64-darwin" = "18dm67xgvn03ssixw7idnmrxb1ps0a80zvpi5i44nf2447iz2g82";
+      "aarch64-linux" = "14fmq09ci1nmvr2867rac7iim25y87xbylx8vs2skbavqf7x87b9";
+      "x86_64-linux" = "09q6rp5k1sdnmlsls65fban0hk90sh9dvl0gc43796v1jybavjsm";
+      "x86_64-darwin" = "1gidl0hi88c0bhm5nbldgkikddwamrmfqxj2pshw51xvyi2chs2r";
+      "aarch64-darwin" = "033aaxf7pf8m1jvp91glrlf9n85qrm5b3h4gf867vrssxhx9hq6y";
     };
 
   in {

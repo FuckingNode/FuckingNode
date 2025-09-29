@@ -8,11 +8,11 @@ This document describes how FuckingNode schedules releases. We want releases to 
 
 Types are as in SemVer.
 
-| Type | Frequency | Includes |
-| :-- | :-- | :-- |
-| **Patch** | Every month's 1st, 2nd, and 3rd saturday. | Only fixes and performance improvements. No behavioral changes (unless explicitly required to fix an issue). |
-| **Minor**  | Every month's last friday. If a patch was immediately needed, it'd follow on sunday, not saturday. | New features or non-breaking features. Behavioral changes or "unnoticeably breaking" changes may happen. |
-| **Major**  | Unscheduled. | Big, breaking changes. |
+| Type      | Frequency                                                                                          | Includes                                                                                                     |
+| :-------- | :------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------- |
+| **Patch** | Every month's 1st, 2nd, and 3rd saturday.                                                          | Only fixes and performance improvements. No behavioral changes (unless explicitly required to fix an issue). |
+| **Minor** | Every month's last friday. If a patch was immediately needed, it'd follow on sunday, not saturday. | New features or non-breaking features. Behavioral changes or "unnoticeably breaking" changes may happen.     |
+| **Major** | Unscheduled.                                                                                       | Big, breaking changes.                                                                                       |
 
 We define "unnoticeably breaking" changes as changes that are _breaking by definition_ but not _breaking in practice_. For example, changing a fixed or "predictable" form of output (like cleanup report or an error code) is _breaking by definition_ (as, for example, if someone had a tool that captures FuckingNode's output for whatever purpose, said changes would break compatibility), however in practice these changes are small enough to be considered "unnoticeable".
 
