@@ -172,7 +172,7 @@ const qps = (s: string): string => s.replaceAll(">", "").replaceAll("<", "").rep
  *
  * Notes:
  * - npm and pnpm offer statistics, but yarn doesn't; only reason we don't offer vulnerability count (update: it does, but in a separate JSON, so they're hard to gather)
- * - overall yarn JSON is a f\*\*king piece of sh\*t that makes the entire code of this function worse (please deprecate yarn and migrate everyone to pnpm)
+ * - overall yarn is a fucking piece of shit for using JSONL which makes the entire code of this function worse (please deprecate yarn and migrate everyone to bun)
  *
  * @param {string} jsonString Report string (JSON PLEASE).
  * @param {MANAGER_NODE} platform Package manager used for the report.

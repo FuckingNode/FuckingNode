@@ -1,6 +1,6 @@
-# F\*ckingNode Security Policy
+# FuckingNode Security Policy
 
-Keeping software secure can be a f\*cking headache. While this CLI tool might look like a simple automating tool, it ships to production with access to filesystem read and write, environment variable access, networking access, command execution access, and system information access, so **security is actually important**.
+Keeping software secure can be a fucking headache. While this CLI tool might look like a simple automating tool, it ships to production with access to filesystem read and write, environment variable access, networking access, command execution access, and system information access, so **security is actually important**.
 
 ## Reporting a Vulnerability
 
