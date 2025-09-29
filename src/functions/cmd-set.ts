@@ -20,7 +20,9 @@ function ValidateCallback(v: CmdInstruction): ParsedCmdInstruction | null {
     const type = v.charAt(0);
     if (!validateAgainst(type, ["$", "~", "=", "<"])) throw new FknError("Cfg__InvalidCmdK", `Cmd "${v}" is not properly typed.`);
     const __cmd: string = v.slice(1).trim();
-    const _cmd: string = __cmd.startsWith('"') ? __cmd.slice(1, -1) : __cmd;
+    const _cmd: string = ((__cmd.startsWith('"') && __cmd.endsWith('"')) || __cmd.startsWith("'") && __cmd.endsWith("'"))
+        ? __cmd.slice(1, -1)
+        : __cmd;
     const cmd: string[] = _cmd.split(" ").filter(validate);
     if (cmd.length < 1) return null;
     return {

@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - Fixed migrate doing some duplicate validations.
+- Fixed Cmds properly ignoring double quotes but not single quotes.
+- Fixed Cmds removing the last character if only the first one was a quote.
 - Fixed some errors (especially interop/golang ones) being inconsistent or lacking info in the error message.
 
 ## [5.0.0] (28-09-2025)
