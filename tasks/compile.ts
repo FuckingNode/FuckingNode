@@ -114,7 +114,6 @@ if (release) {
     }
 
     console.log(
-        "Don't forget hashing Nix releases! From Linux or WSL, run:",
-        "nix run .#hashes --extra-experimental-features nix-command --extra-experimental-features flakes",
+        "Don't forget hashing Nix releases!\nUpdate version number on flake.nix, push, then run the Nix hash action grab the hashes and commit again..",
     );
 }
