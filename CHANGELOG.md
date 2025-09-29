@@ -6,6 +6,13 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
+## [5.0.1] (Unreleased; 04-10-2025)
+
+### Fixed
+
+- Fixed migrate doing some duplicate validations.
+- Fixed some errors (especially interop/golang ones) being inconsistent or lacking info in the error message.
+
 ## [5.0.0] (28-09-2025)
 
 ### Added

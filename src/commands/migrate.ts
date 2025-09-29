@@ -1,5 +1,5 @@
 import * as DenoJson from "../../deno.json" with { type: "json" };
-import { normalize, validate } from "@zakahacecosas/string-utils";
+import { normalize, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { GetDateNow, GetElapsedTime } from "../functions/date.ts";
 import { JoinPaths } from "../functions/filesystem.ts";
 import { LogStuff, Notification } from "../functions/io.ts";
@@ -8,6 +8,7 @@ import type { MANAGER_JS, ProjectEnvironment } from "../types/platform.ts";
 import type { TheMigratorConstructedParams } from "./_interfaces.ts";
 import { FkNodeInterop } from "./interop/interop.ts";
 import { FknError } from "../functions/error.ts";
+import { TypeGuardForJS } from "../types/platform.ts";
 
 function handler(
     from: MANAGER_JS,
@@ -15,12 +16,7 @@ function handler(
     env: ProjectEnvironment,
 ): void {
     try {
-        if (env.runtime === "golang" || env.runtime === "rust") {
-            throw new FknError(
-                "Internal__ImproperAssignment",
-                "This shouldn't have happened (internal error) - NonJS environment assigned JS-only task (migrate).",
-            );
-        }
+        if (!TypeGuardForJS(env)) return;
 
         LogStuff("Please wait (this will take a while)...", "working");
 
@@ -105,8 +101,8 @@ export default async function TheMigrator(params: TheMigratorConstructedParams):
 
     const desiredManager = normalize(wantedManager);
 
-    const MANAGERS = ["pnpm", "npm", "yarn", "deno", "bun"];
-    if (!MANAGERS.includes(normalize(desiredManager))) {
+    const MANAGERS = ["pnpm", "npm", "yarn", "deno", "bun"] as const;
+    if (!validateAgainst(desiredManager, MANAGERS)) {
         throw new FknError(
             "Param__TargetInvalid",
             "Target isn't a valid package manager. Only JS environments (NodeJS, Deno, Bun) support migrate.",
@@ -114,8 +110,7 @@ export default async function TheMigrator(params: TheMigratorConstructedParams):
     }
 
     const workingEnv = await GetProjectEnvironment(projectPath);
-
-    if (!MANAGERS.includes(workingEnv.manager)) {
+    if (!TypeGuardForJS(workingEnv)) {
         throw new FknError(
             "Interop__MigrateUnable",
             `${workingEnv.manager} is not a runtime we can migrate from. Only JS environments (NodeJS, Deno, Bun) support migrate.`,
@@ -128,8 +123,8 @@ export default async function TheMigrator(params: TheMigratorConstructedParams):
     );
 
     handler(
-        workingEnv.manager as MANAGER_JS,
-        desiredManager as MANAGER_JS,
+        workingEnv.manager,
+        desiredManager,
         workingEnv,
     );
 

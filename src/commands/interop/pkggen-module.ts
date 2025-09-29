@@ -73,7 +73,7 @@ export const Generators: {
     Golang: (cpf: FnCPF): GolangPkgFile => {
         if (!cpf.plat.edt) {
             throw new FknError(
-                "Interop__ReqParamLost",
+                "Env__PkgFileUnparsable",
                 `Required parameter 'go 1.X.X' (CPF equiv: 'plat.edt') not present in FnCPF. Attempt to generate GolangPkgFile failed.`,
             );
         }
@@ -82,7 +82,12 @@ export const Generators: {
             module: cpf.name,
             go: cpf.plat.edt,
             require: Object.fromEntries(cpf.deps.map((d) => {
-                if (d.src !== "pkg.go.dev" && d.src !== "github") throw `Invalid src for Go dep ${d}`;
+                if (d.src !== "pkg.go.dev" && d.src !== "github") {
+                    throw new FknError(
+                        "Env__PkgFileUnparsable",
+                        `No source for Golang dependency ${d} (at module ${cpf.name}).`,
+                    );
+                }
                 return [d.name, {
                     version: d.ver,
                     indirect: d.rel === "go:ind",

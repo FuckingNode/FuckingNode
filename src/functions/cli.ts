@@ -46,11 +46,9 @@ export function Commander(
             success: process.success,
             stdout: `${decoder.decode(process.stdout)}\n${decoder.decode(process.stderr)}`.trim(),
         };
-    } catch (error) {
-        if (error instanceof Deno.errors.NotFound && error.message.toLowerCase().includes("failed to spawn")) {
-            throw new FknError("Os__NoEntity", `We attempted to run a shell / CLI command (${main}), but your OS wasn't able find it.`);
-        }
-        throw error;
+    } catch (e) {
+        if (!(e instanceof Deno.errors.NotFound)) throw e;
+        throw new FknError("Os__NoEntity", `We attempted to run a shell / CLI command (${main}), but your OS wasn't able find it.`);
     }
 }
 

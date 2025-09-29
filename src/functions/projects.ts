@@ -240,15 +240,12 @@ export async function RemoveProject(
         }
         return;
     } catch (e) {
-        if (e instanceof FknError && e.code === "External__Proj__NotFound") {
-            LogStuff(
-                `That project doesn't exist.\nAnother typo? We took: ${entry} (=> ${workingEntry})`,
-                "error",
-            );
-            Deno.exit(1);
-        } else {
-            throw e;
-        }
+        if (!(e instanceof FknError) || e.code !== "External__Proj__NotFound") throw e;
+        LogStuff(
+            `That project doesn't exist.\nAnother typo? We took: ${entry} (=> ${workingEntry})`,
+            "error",
+        );
+        Deno.exit(1);
     }
 }
 
@@ -426,8 +423,8 @@ export async function ValidateProject(entry: string, allProjects: string[], exis
 
         if (!env.mainCPF.name) return "NoName";
         if (!env.mainCPF.version) return "NoVersion";
-    } catch (error) {
-        if (error instanceof FknError && error.code === "Env__SchrodingerLockfile") return "TooManyLockfiles";
+    } catch (e) {
+        if (e instanceof FknError && e.code === "Env__SchrodingerLockfile") return "TooManyLockfiles";
         else return "CantGetProjectEnv";
     }
 

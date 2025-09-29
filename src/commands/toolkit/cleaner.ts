@@ -378,8 +378,8 @@ export function PerformHardCleanup(shortCircuit: boolean): void {
             LogStuff(`Running ${ColorString(npmHardPruneArgs.join(" "), "italic")}`, undefined, ["bold", "half-opaque"]);
             Commander("npm", npmHardPruneArgs);
             LogStuff("Done", "tick");
-        } catch (error) {
-            LogStuff(`Failed!\n${error}`, "error");
+        } catch (e) {
+            LogStuff(`Failed!\n${e}`, "error");
             HandleErroring("hard", "npm", null, shortCircuit);
         }
     }
@@ -393,8 +393,8 @@ export function PerformHardCleanup(shortCircuit: boolean): void {
             LogStuff(`Running ${ColorString(pnpmHardPruneArgs.join(" "), "italic")}`, undefined, ["bold", "half-opaque"]);
             Commander("pnpm", pnpmHardPruneArgs);
             LogStuff("Done", "tick");
-        } catch (error) {
-            LogStuff(`Failed!\n${error}`, "error");
+        } catch (e) {
+            LogStuff(`Failed!\n${e}`, "error");
             HandleErroring("hard", "pnpm", null, shortCircuit);
         }
     }
@@ -408,8 +408,8 @@ export function PerformHardCleanup(shortCircuit: boolean): void {
             LogStuff(`Running ${ColorString(yarnHardPruneArgs.join(" "), "italic")}`, undefined, ["bold", "half-opaque"]);
             Commander("yarn", yarnHardPruneArgs);
             LogStuff("Done", "tick");
-        } catch (error) {
-            LogStuff(`Failed!\n${error}`, "error");
+        } catch (e) {
+            LogStuff(`Failed!\n${e}`, "error");
             HandleErroring("hard", "yarn", null, shortCircuit);
         }
     }
@@ -425,8 +425,8 @@ export function PerformHardCleanup(shortCircuit: boolean): void {
             LogStuff(`Running ${ColorString(bunHardPruneArgs.join(" "), "italic")}`, undefined, ["bold", "half-opaque"]);
             Commander("bun", bunHardPruneArgs);
             LogStuff("Done", "tick");
-        } catch (error) {
-            LogStuff(`Failed!\n${error}`, "error");
+        } catch (e) {
+            LogStuff(`Failed!\n${e}`, "error");
             HandleErroring("hard", "bun", null, shortCircuit);
         }
     }
@@ -441,8 +441,8 @@ export function PerformHardCleanup(shortCircuit: boolean): void {
             LogStuff(`Running ${ColorString(golangHardPruneArgs.join(" "), "italic")}`, undefined, ["bold", "half-opaque"]);
             Commander("go", golangHardPruneArgs);
             LogStuff("Done", "tick");
-        } catch (error) {
-            LogStuff(`Failed!\n${error}`, "error");
+        } catch (e) {
+            LogStuff(`Failed!\n${e}`, "error");
             HandleErroring("hard", "go", null, shortCircuit);
         }
     }
@@ -472,8 +472,8 @@ export function PerformHardCleanup(shortCircuit: boolean): void {
             // yet we're doing from the "hard" preset and not the
             // "maxim" one
             // epic.
-        } catch (error) {
-            LogStuff(`Failed!\n${error}`, "error");
+        } catch (e) {
+            LogStuff(`Failed!\n${e}`, "error");
             HandleErroring("hard", "deno", null, shortCircuit);
         }
     }
@@ -484,7 +484,7 @@ export function PerformHardCleanup(shortCircuit: boolean): void {
             let path: string;
             if (LOCAL_PLATFORM.SYSTEM === "msft") {
                 const envPath = Deno.env.get("USERPROFILE");
-                if (!envPath) throw "USERPROFILE is not defined in your environment variable set. Cannot clear caches.";
+                if (!envPath) throw "USERPROFILE is not defined in your environment variable set. Cannot clear Cargo caches.";
                 path = JoinPaths(envPath, ".cargo/registry");
             } else {
                 path = ParsePath("~/.cargo/registry");
@@ -497,10 +497,10 @@ export function PerformHardCleanup(shortCircuit: boolean): void {
             LogStuff(`Deleting ${ColorString(path, "italic")}`, undefined, ["bold", "half-opaque"]);
             Deno.removeSync(path, { recursive: true });
             LogStuff("Done", "tick");
-        } catch (error) {
-            if (error instanceof Deno.errors.NotFound) LogStuff("Apparently there's no Cargo registry cache.", "moon-face", "italic");
+        } catch (e) {
+            if (e instanceof Deno.errors.NotFound) LogStuff("Apparently there's no Cargo registry cache.", "moon-face", "italic");
             else {
-                LogStuff(`Failed!\n${error}`, "error");
+                LogStuff(`Failed!\n${e}`, "error");
                 HandleErroring("hard", "cargo", null, shortCircuit);
             }
         }

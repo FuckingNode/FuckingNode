@@ -48,13 +48,17 @@ export const INTEROP_ERRORS = [
     "Interop__PublishUnable",
     "Interop__MigrateUnable",
     "Interop__JSRunUnable",
-    "Interop__ReqParamLost",
 ] as const;
 export const INTERNAL_ERRORS = [
-    "Internal__ImproperAssignment",
     "Internal__InvalidEmbedded",
     "Internal__Lazy",
 ] as const;
+// TODO(@ZakaHaceCosas):
+// for V5.1 remove this category and organize these errors
+// Publish merges w/ Task__Publish
+// FavIde becomes Cfg__Setting__FavIDE
+// * Cfg__CmdK... becomes Cfg__FknYaml__CmdK...
+// External__Proj_NotFound becomes Env__NotFound
 export const EXTERNAL_ERRORS = ["External__Publish", "External__Setting__FavIde", "External__Proj__NotFound"] as const;
 
 type OS_ERROR_CODES = typeof OS_ERRORS[number];

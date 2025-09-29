@@ -162,7 +162,12 @@ export const PackageFileParsers = {
 
             Object.entries(parsedContent.require ?? []).map(
                 ([k, v]) => {
-                    if (!v.src) throw `No src for Golang dep ${v}`;
+                    if (!v.src) {
+                        throw new FknError(
+                            "Env__PkgFileUnparsable",
+                            `No source for Golang dependency ${v} (at module ${parsedContent.module}).`,
+                        );
+                    }
                     deps.push(
                         {
                             name: k,

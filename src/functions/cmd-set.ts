@@ -121,24 +121,24 @@ export async function RunCmdSet(params: Parameters): Promise<void> {
             if (normalize(out.stdout).length === 0) LogStuff("No output received.", undefined, ["half-opaque", "italic"]);
             else LogStuff(out.stdout);
             LogStuff("\nDone!\n", undefined, "bold");
-        } catch (error) {
+        } catch (e) {
             Notification(
                 `Your ${params.key} failed!`,
                 `${cmdTypeString}#${cmdIndex} "${cmdString}" failed, so we've halted execution.`,
                 30000,
             );
-            if (typeof error === "string") {
+            if (typeof e === "string") {
                 DebugFknErr(
                     errorCode,
                     `${cmdTypeString} "${cmdString}" has failed (#${cmdIndex} in '${params.key}' sequence). We've halted execution. Error log, if any, was dumped into ${
                         GetAppPath("ERRORS")
                     }.`,
-                    error,
+                    e,
                     false,
                 );
             }
             // halt execution, especially to avoid releases
-            ErrorHandler(error);
+            ErrorHandler(e);
         }
     }
 
