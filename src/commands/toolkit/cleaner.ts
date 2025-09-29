@@ -13,7 +13,7 @@ import { FkNodeInterop } from "../interop/interop.ts";
 import { LOCAL_PLATFORM } from "../../platform.ts";
 import { ColorString } from "../../functions/color.ts";
 import type { CF_FKNODE_SETTINGS } from "../../types/config_files.ts";
-import { bold, red } from "@std/fmt/colors";
+import { bold, italic, red } from "@std/fmt/colors";
 
 /** Handles errors and short-circuiting. */
 function HandleErroring(
@@ -148,6 +148,10 @@ const ProjectCleaningFeatures = {
                 && !env.settings.destroy.intensities.includes(intensity)
             ) return;
             if (env.settings.destroy.targets.length === 0) return;
+            LogStuff(
+                `Destroying stuff at ${projectName}.`,
+                "working",
+            );
             for (const target of env.settings.destroy.targets) {
                 if (target === "node_modules" && intensity === "maxim") continue; // avoid removing this thingy twice
                 const path = ParsePath(JoinPaths(env.root, target));
@@ -162,8 +166,8 @@ const ProjectCleaningFeatures = {
                         // using ColorString instead of the 3rd arg is on purpose
                         // emojis in italic look WEIRD
                         LogStuff(
-                            ColorString(`No need to destroy ${ColorString(path, "bold")}: it does not exist.`, "italic"),
-                            "tick",
+                            ColorString(`No need to destroy ${bold(path)}: it does not exist.`),
+                            "skip",
                         );
                         continue;
                     }
@@ -280,14 +284,6 @@ export function PerformCleanup(
         commit: shouldCommit || (env.settings.flagless?.flaglessCommit === true),
     };
 
-    if (!env.commands.clean && Object.values(whatShouldWeDo).every((v) => v === false)) {
-        LogStuff(
-            `${env.names.name} will be skipped. ${
-                ColorString(env.manager, "bold")
-            } has no cleanup commands and no other feature is being used here.\n`,
-        );
-    }
-
     if (doClean) {
         ProjectCleaningFeatures.Clean(
             env.names.name,
@@ -337,6 +333,18 @@ export function PerformCleanup(
         );
     }
 
+    if (!env.commands.clean && Object.values(whatShouldWeDo).every((v) => v === false)) {
+        LogStuff(
+            `${env.names.name} will be skipped. ${bold(env.manager)} has no cleanup commands and no other feature is being used here.\n`,
+            "skip",
+        );
+    } else {
+        LogStuff(
+            `Cleaned ${env.names.name}!\n`,
+            "tick",
+        );
+    }
+
     return {
         protection: protections.length === 0 ? null : protections.map((s) => s.toUpperCase()).join(" & "),
         errors: errors.length === 0 ? null : errors.map((s) => s.toUpperCase()).join(" & "),
@@ -350,7 +358,7 @@ export function PerformCleanup(
  */
 export function PerformHardCleanup(shortCircuit: boolean): void {
     LogStuff(
-        `Time for hard-pruning! ${ColorString("Wait patiently, please (caches will take a while to clean).", "italic")}`,
+        `Time for hard-pruning! ${italic("Wait patiently, please (caches will take a while to clean).")}`,
         "working",
     );
 
@@ -375,7 +383,7 @@ export function PerformHardCleanup(shortCircuit: boolean): void {
                 "package",
                 "red",
             );
-            LogStuff(`Running ${ColorString(npmHardPruneArgs.join(" "), "italic")}`, undefined, ["bold", "half-opaque"]);
+            LogStuff(`Running ${italic(npmHardPruneArgs.join(" "))}`, undefined, ["bold", "half-opaque"]);
             Commander("npm", npmHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (e) {
@@ -390,7 +398,7 @@ export function PerformHardCleanup(shortCircuit: boolean): void {
                 "package",
                 "bright-yellow",
             );
-            LogStuff(`Running ${ColorString(pnpmHardPruneArgs.join(" "), "italic")}`, undefined, ["bold", "half-opaque"]);
+            LogStuff(`Running ${italic(pnpmHardPruneArgs.join(" "))}`, undefined, ["bold", "half-opaque"]);
             Commander("pnpm", pnpmHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (e) {
@@ -405,7 +413,7 @@ export function PerformHardCleanup(shortCircuit: boolean): void {
                 "package",
                 "purple",
             );
-            LogStuff(`Running ${ColorString(yarnHardPruneArgs.join(" "), "italic")}`, undefined, ["bold", "half-opaque"]);
+            LogStuff(`Running ${italic(yarnHardPruneArgs.join(" "))}`, undefined, ["bold", "half-opaque"]);
             Commander("yarn", yarnHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (e) {
@@ -422,7 +430,7 @@ export function PerformHardCleanup(shortCircuit: boolean): void {
                 "pink",
             );
             Commander("bun", ["init", "-y"]); // placebo
-            LogStuff(`Running ${ColorString(bunHardPruneArgs.join(" "), "italic")}`, undefined, ["bold", "half-opaque"]);
+            LogStuff(`Running ${italic(bunHardPruneArgs.join(" "))}`, undefined, ["bold", "half-opaque"]);
             Commander("bun", bunHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (e) {
@@ -438,7 +446,7 @@ export function PerformHardCleanup(shortCircuit: boolean): void {
                 "package",
                 "cyan",
             );
-            LogStuff(`Running ${ColorString(golangHardPruneArgs.join(" "), "italic")}`, undefined, ["bold", "half-opaque"]);
+            LogStuff(`Running ${italic(golangHardPruneArgs.join(" "))}`, undefined, ["bold", "half-opaque"]);
             Commander("go", golangHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (e) {
@@ -465,7 +473,7 @@ export function PerformHardCleanup(shortCircuit: boolean): void {
                 "package",
                 "bright-blue",
             );
-            LogStuff(`Deleting ${ColorString(denoDir, "italic")}`, undefined, ["bold", "half-opaque"]);
+            LogStuff(`Deleting ${italic(denoDir)}`, undefined, ["bold", "half-opaque"]);
             Deno.removeSync(denoDir);
             LogStuff("Done", "tick");
             // the CLI calls this kind of behaviors "maxim" cleanup
@@ -494,7 +502,7 @@ export function PerformHardCleanup(shortCircuit: boolean): void {
                 "package",
                 "orange",
             );
-            LogStuff(`Deleting ${ColorString(path, "italic")}`, undefined, ["bold", "half-opaque"]);
+            LogStuff(`Deleting ${italic(path)}`, undefined, ["bold", "half-opaque"]);
             Deno.removeSync(path, { recursive: true });
             LogStuff("Done", "tick");
         } catch (e) {
@@ -590,30 +598,25 @@ export function ValidateIntensity(intensity: string, settings: CF_FKNODE_SETTING
  * @param {RESULT[]} results
  */
 export function ShowReport(results: RESULT[]): void {
-    LogStuff("Report:\n", "chart");
     const report: string[] = results.map((result) => {
         const protection = result.extras?.ignored
-            ? ColorString(
-                `\n--> The above ${ColorString("was divinely protected from", "blue", "bold", "italic")} ${
-                    ColorString(result.extras?.ignored, "bold")
-                }`,
-                "italic",
+            ? italic(
+                `\n--> The above ${ColorString("was divinely protected from", "blue", "bold", "italic")} ${bold(result.extras.ignored)}`,
             )
             : "";
         const errors = result.extras?.failed
-            ? ColorString(
-                `\n--> The above ${ColorString("faced errors with", "bold", "red", "italic")} ${ColorString(result.extras?.failed, "bold")}`,
-                "italic",
+            ? italic(
+                `\n--> The above ${ColorString("faced errors with", "bold", "red", "italic")} ${bold(result.extras.failed)}`,
             )
             : "";
 
-        return `${result.name} -> ${ColorString(result.status, "bold")}, taking ${
-            ColorString(result.elapsedTime, "italic")
-        }${protection}${errors}`;
+        return `${result.name} -> ${bold(result.status)}, taking ${italic(result.elapsedTime)}${protection}${errors}`;
     });
     LogStuff(
-        `${sortAlphabetically(report).join("\n")}\n\n${ColorString(`Cleaning completed at ${new Date().toLocaleString()}`, "bright-green")}`,
-        "tick",
+        `Report\n\n${sortAlphabetically(report).join("\n")}\n\n${
+            ColorString(`Cleaning completed at ${new Date().toLocaleString()}`, "bright-green")
+        }`,
+        "chart",
     );
 }
 

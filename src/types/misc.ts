@@ -21,7 +21,8 @@ export type VALID_EMOJIS =
     | "trash"
     | "chart"
     | "wink"
-    | "comrade";
+    | "comrade"
+    | "skip";
 
 /**
  * A GitHub release asset.

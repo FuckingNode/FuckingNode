@@ -1,24 +1,27 @@
 # Benchmarks
 
-Benchmarks were taken on the last commit of each tag.
+Benchmarks above `---` were taken on the last commit of each tag.
 
 ## V5.0.0
 
-| benchmark               | time/iter (avg) | iter/s | (min … max)           | p75      | p99      | p995     |
-| ----------------------- | --------------- | ------ | --------------------- | -------- | -------- | -------- |
-| lister                  | 62.9 ms         | 15.9   | ( 59.5 ms … 69.2 ms)  | 64.9 ms  | 69.2 ms  | 69.2 ms  |
-| lister (ignored)        | 62.4 ms         | 16.0   | ( 59.0 ms … 66.6 ms)  | 65.1 ms  | 66.6 ms  | 66.6 ms  |
-| remover                 | 3.3 ms          | 301.0  | ( 2.8 ms … 4.3 ms)    | 3.5 ms   | 4.3 ms   | 4.3 ms   |
-| adder                   | 23.1 ms         | 43.4   | ( 21.4 ms … 26.5 ms)  | 23.3 ms  | 26.5 ms  | 26.5 ms  |
-| bulk adder              | 41.7 ms         | 24.0   | ( 37.4 ms … 49.8 ms)  | 44.7 ms  | 49.8 ms  | 49.8 ms  |
-| git check for repo      | 56.6 ms         | 17.6   | ( 54.7 ms … 58.3 ms)  | 57.4 ms  | 58.3 ms  | 58.3 ms  |
-| git get branches        | 61.0 ms         | 16.4   | ( 59.1 ms … 63.6 ms)  | 62.1 ms  | 63.6 ms  | 63.6 ms  |
-| git get latest tag      | 79.9 ms         | 12.5   | ( 75.9 ms … 88.5 ms)  | 80.8 ms  | 88.5 ms  | 88.5 ms  |
-| name a project          | 284.0 µs        | 3,522  | (246.8 µs … 32.5 ms)  | 252.2 µs | 327.3 µs | 512.7 µs |
-| get project env         | 8.9 ms          | 112.4  | ( 8.6 ms … 10.6 ms)   | 9.0 ms   | 10.6 ms  | 10.6 ms  |
-| stats                   | 9.1 ms          | 109.7  | ( 8.9 ms … 10.1 ms)   | 9.2 ms   | 10.1 ms  | 10.1 ms  |
-| report                  | 373.1 µs        | 2,680  | (344.5 µs … 1.0 ms)   | 376.3 µs | 591.9 µs | 737.1 µs |
-| simply execute the root | 320.4 ms        | 3.1    | (311.6 ms … 334.7 ms) | 326.7 ms | 334.7 ms | 334.7 ms |
+| benchmark                        | time/iter (avg) | iter/s  | (min … max)           | p75      | p99      | p995     |
+| -------------------------------- | --------------- | ------- | --------------------- | -------- | -------- | -------- |
+| lister                           | 62.9 ms         | 15.9    | ( 59.5 ms … 69.2 ms)  | 64.9 ms  | 69.2 ms  | 69.2 ms  |
+| lister (ignored)                 | 62.4 ms         | 16.0    | ( 59.0 ms … 66.6 ms)  | 65.1 ms  | 66.6 ms  | 66.6 ms  |
+| remover                          | 3.3 ms          | 301.0   | ( 2.8 ms … 4.3 ms)    | 3.5 ms   | 4.3 ms   | 4.3 ms   |
+| adder                            | 23.1 ms         | 43.4    | ( 21.4 ms … 26.5 ms)  | 23.3 ms  | 26.5 ms  | 26.5 ms  |
+| bulk adder                       | 41.7 ms         | 24.0    | ( 37.4 ms … 49.8 ms)  | 44.7 ms  | 49.8 ms  | 49.8 ms  |
+| git check for repo               | 56.6 ms         | 17.6    | ( 54.7 ms … 58.3 ms)  | 57.4 ms  | 58.3 ms  | 58.3 ms  |
+| git get branches                 | 61.0 ms         | 16.4    | ( 59.1 ms … 63.6 ms)  | 62.1 ms  | 63.6 ms  | 63.6 ms  |
+| git get latest tag               | 79.9 ms         | 12.5    | ( 75.9 ms … 88.5 ms)  | 80.8 ms  | 88.5 ms  | 88.5 ms  |
+| name a project                   | 284.0 µs        | 3,522   | (246.8 µs … 32.5 ms)  | 252.2 µs | 327.3 µs | 512.7 µs |
+| get project env                  | 8.9 ms          | 112.4   | ( 8.6 ms … 10.6 ms)   | 9.0 ms   | 10.6 ms  | 10.6 ms  |
+| stats                            | 9.1 ms          | 109.7   | ( 8.9 ms … 10.1 ms)   | 9.2 ms   | 10.1 ms  | 10.1 ms  |
+| report                           | 373.1 µs        | 2,680   | (344.5 µs … 1.0 ms)   | 376.3 µs | 591.9 µs | 737.1 µs |
+| simply execute the root          | 320.4 ms        | 3.1     | (311.6 ms … 334.7 ms) | 326.7 ms | 334.7 ms | 334.7 ms |
+| ---                              | ---             | ---     | ---                   | ---      | ---      | ---      |
+| formatting a string (loop-based) | 1.8 µs          | 547,800 | ( 1.7 µs … 3.3 µs)    | 1.8 µs   | 3.3 µs   | 3.3 µs   |
+| formatting a string (func-based) | 1.7 µs          | 578,600 | ( 1.7 µs … 2.1 µs)    | 1.7 µs   | 2.1 µs   | 2.1 µs   |
 
 ## V4.3.0
 

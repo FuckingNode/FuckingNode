@@ -108,7 +108,7 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
     if (realIntensity === "maxim") await PerformMaximCleanup(projects);
 
     LogStuff(
-        projects.length > 1 ? `All your motherfucking projects have been cleaned!` : `Your motherfucking project has been cleaned!`,
+        projects.length > 1 ? `All your motherfucking projects have been cleaned!` : `Your motherfucking project has been cleaned!\n`,
         "tick",
         "bright-green",
     );

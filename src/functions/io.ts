@@ -13,7 +13,7 @@ import { ColorString } from "./color.ts";
  * @returns {string} The message with your emoji, e.g. `"😐 hi chat"`.
  */
 export function Emojify(message: string, emoji: VALID_EMOJIS): string {
-    function GetEmoji(emoji: VALID_EMOJIS): string {
+    const emojiString = function (emoji: VALID_EMOJIS): string {
         switch (emoji) {
             case "danger":
                 return `🛑`;
@@ -38,6 +38,8 @@ export function Emojify(message: string, emoji: VALID_EMOJIS): string {
                 return `🚨`;
             case "working":
                 return `🔄`;
+            case "skip":
+                return `⏩`;
             case "moon-face":
                 return `🌚`;
             case "bruh":
@@ -52,13 +54,10 @@ export function Emojify(message: string, emoji: VALID_EMOJIS): string {
                 return `😉`;
             case "comrade":
                 return `🫡`;
-            default:
-                return "";
         }
-    }
+    }(emoji).normalize("NFC");
 
-    const emojiString = GetEmoji(emoji).normalize("NFC");
-    return emojiString === "" ? message : `${emojiString} ${message}`;
+    return `${emojiString} ${message}`;
 }
 
 /**

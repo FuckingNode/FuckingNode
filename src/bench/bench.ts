@@ -1,7 +1,9 @@
+import { blue, bold, dim, italic } from "@std/fmt/colors";
 import type { RESULT } from "../commands/clean.ts";
 import TheLister from "../commands/list.ts";
 import TheStatistics from "../commands/stats.ts";
 import { ShowReport } from "../commands/toolkit/cleaner.ts";
+import { ColorString } from "../functions/color.ts";
 import { GetAppPath } from "../functions/config.ts";
 import { GetBranches, GetLatestTag, IsRepo } from "../functions/git.ts";
 import { AddProject, GetProjectEnvironment, NameProject, RemoveProject } from "../functions/projects.ts";
@@ -146,5 +148,27 @@ Deno.bench({
             "deno",
             { args: ["-A", "./src/main.ts"] },
         ).outputSync();
+    },
+});
+
+Deno.bench({
+    only: true,
+    name: "formatting a string (loop-based)",
+    fn: () => {
+        ColorString(
+            "foo",
+            "bold",
+            "italic",
+            "half-opaque",
+            "blue",
+        );
+    },
+});
+
+Deno.bench({
+    only: true,
+    name: "formatting a string (func-based)",
+    fn: () => {
+        bold(italic(dim(blue("foo"))));
     },
 });
