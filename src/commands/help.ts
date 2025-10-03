@@ -29,8 +29,8 @@ function formatCmd(obj: HelpItem[]): string {
     return strings.join("\n\n");
 }
 
-function formatCmdWithTitle(title: string, desc: string, obj: HelpItem[]): string {
-    return `> ${ColorString(title, "bright-green", "bold")}\n\n>>> Details:\n\n${desc}\n\n>>> Parameters\n\n${formatCmd(obj)}\n`;
+function formatCmdWithTitle(title: string, desc: string, obj: HelpItem[] | null): string {
+    return `> ${ColorString(title, "bright-green", "bold")}\n\n>>> Details:\n\n${desc}${obj ? `\n\n>>> Parameters\n\n${formatCmd(obj)}\n` : ""}`;
 }
 
 function projectReminder(): void {
@@ -524,14 +524,7 @@ export default function TheHelper(params: TheHelperConstructedParams): void {
                 formatCmdWithTitle(
                     "'uncommit' undoes a commit (storing its title and contents), and lets you modify it.",
                     "This will undo the commit and track its files, so you can edit it.\nFuckingNode will hang until you hit any key, so it can remake the commit.\nIf a commitCmd exists it'll re-run it as 'commit' would do.\nKeep in mind you should not quit FuckingNode during the process or things will kinda fuck up.",
-                    // TODO(@ZakaHaceCosas): this ain't optimal
-                    [
-                        [
-                            "Takes no parameters!",
-                            null,
-                            "",
-                        ],
-                    ],
+                    null,
                 ),
             );
             break;

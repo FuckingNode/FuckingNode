@@ -653,9 +653,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
         );
     }
 
-    const lockfiles = ResolveLockfiles(root);
-
-    if (lockfiles.length > 1) {
+    if (ResolveLockfiles(root).length > 1) {
         throw new FknError(
             "Env__SchrodingerLockfile",
             `Multiple lockfiles found in ${
@@ -663,8 +661,6 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             }. This is a bad practice and does not let us properly infer the package manager to use.`,
         );
     }
-
-    DEBUG_LOG("Is? (G,R,D,B,Y,P,N)", isGo, isRust, isDeno, isBun, isYarn, isPnpm, isNpm, "(isNode?)", isNode);
 
     const mainPath = isGo
         ? paths.golang.pkg
