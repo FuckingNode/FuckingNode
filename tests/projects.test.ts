@@ -1,5 +1,5 @@
-import { GetProjectEnvironment, NameProject, SpotProject, ValidateProject } from "../src/functions/projects.ts";
-import { assertEquals } from "@std/assert";
+import { AddProject, GetProjectEnvironment, NameProject, SpotProject, ValidateProject } from "../src/functions/projects.ts";
+import { assert, assertEquals } from "@std/assert";
 import { TEST_ONE } from "./constants.ts";
 import { DEFAULT_FKNODE_YAML } from "../src/constants.ts";
 import { parse as parseYaml } from "@std/yaml";
@@ -11,6 +11,13 @@ Deno.test({
     fn: async () => {
         const env = await GetProjectEnvironment(TEST_ONE.root);
         assertEquals(env, TEST_ONE);
+    },
+});
+
+Deno.test({
+    name: "adds projects accordingly",
+    fn: async () => {
+        assert((await AddProject(".")) !== "error");
     },
 });
 
