@@ -25,19 +25,21 @@ Whether a change is small enough or not to fit within this definition is determi
 >
 > If the date of a minor release arrives and there's just patch-only changes ready to be shipped, then the minor release is skipped _but the patch isn't_, releasing said patch-only release on a sunday, as you'd expect from this schedule.
 
-On a diagram, the schedule would look like this (assuming no release is skipped by under-demand-only rule).
+## Schedule diagram
+
+On a diagram, our schedule look like this.
 
 ```mermaid
 gantt
     title FuckingNode release schedule
     dateFormat  DD-MM-YYYY
     section Patches
-    Patch 1 M1 :done, 04-10-2025, 7d
-    Patch 2 M1 :done, 11-10-2025, 7d
-    Patch 3 M1 :done, 18-10-2025, 7d
-    Patch 4 M1 :done, 25-10-2025, 7d
-    Optional patch :crit, 02-11-2025, 6d
-    Patch 1 M2 :done, 08-11-2025, 7d
+    Patch 1 OCT25 :done, 04-10-2025, 7d
+    Patch 2 OCT25 :active, 11-10-2025, 7d
+    Patch 3 OCT25 :active, 18-10-2025, 7d
+    Patch 4 OCT25 :active, 25-10-2025, 7d
+    %% Extra patch :crit, 02-11-2025, 6d
+    Patch 1 NOV25 :active, 08-11-2025, 7d
     section Minor
-    Minor release :active, 31-10-2025, 8d
+    Minor for OCT25 :milestone, 31-10-2025, 8d
 ```
