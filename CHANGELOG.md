@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Changed
 
 - Now output for the cleaner command looks more organized and consistent.
+- Now, if for whatever reason you kickstart a project in an already added path (which is rare), kickstart won't exit and it'll finish setup.
 
 ### Fixed
 

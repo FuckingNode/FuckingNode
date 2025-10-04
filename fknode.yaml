@@ -9,7 +9,8 @@ commitCmd:
 commitActions: false
 prettyScript: "good"
 buildCmd:
-    # this is for testing, we don't really build with this
+    # we don't really build with this
+    # we could, it's capable enough, but we use it for testing
     - { msft: ~Write-Host 'Running from Windows!', posix: ~"echo 'Running from Linux!'" }
     - ~echo 'test'
     - ~"echo ''"

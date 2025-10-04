@@ -100,8 +100,11 @@ export async function AddProject(
         const validation = await ValidateProject(workingEntry, list, false);
 
         if (validation !== true) {
-            if (validation === "IsDuplicate") LogStuff(`${env.names.full} is already added! No need to re-add it.`, "bruh");
-            else if (validation === "NoName") {
+            if (validation === "IsDuplicate") {
+                LogStuff(`${env.names.full} is already added! No need to re-add it.`, "bruh");
+                return env;
+            }
+            if (validation === "NoName") {
                 LogStuff(
                     `Error adding ${env.names.full}: no name!\nSee how the project's name is missing? We can't work with that, we need a name to identify the project.\nPlease set "name" in your package file to something valid.`,
                     "error",
