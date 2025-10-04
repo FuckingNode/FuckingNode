@@ -8,8 +8,22 @@ import { Commander } from "./cli.ts";
  * @returns {void}
  */
 export function LaunchWebsite(url: string): void {
-    Commander(
-        LOCAL_PLATFORM.SYSTEM === "msft" ? "start" : "open",
-        [url],
-    );
+    if (LOCAL_PLATFORM.SYSTEM === "msft") {
+        Commander(
+            LOCAL_PLATFORM.SHELL,
+            [
+                "-c",
+                "start",
+                url,
+            ],
+        );
+    } else {
+        Commander(
+            "open",
+            [
+                url,
+            ],
+        );
+    }
+    return;
 }

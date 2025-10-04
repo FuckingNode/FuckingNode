@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Fixed Cmds removing the last character if only the first one was a quote.
 - Fixed some errors (especially interop/golang ones) being inconsistent or lacking info in the error message.
 - Fixed `terminate` not removing Deno and Bun from PATH.
+- Fixed website launch not working on Windows.
 
 ## [5.0.0] (28-09-2025)
 
