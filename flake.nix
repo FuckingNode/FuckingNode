@@ -21,12 +21,11 @@
       "aarch64-darwin" = "https://github.com/FuckingNode/FuckingNode/releases/download/${version}/FuckingNode-macos_arm";
     };
 
-
     sha256s = {
-      "aarch64-linux" = "14fmq09ci1nmvr2867rac7iim25y87xbylx8vs2skbavqf7x87b9";
-      "x86_64-linux" = "09q6rp5k1sdnmlsls65fban0hk90sh9dvl0gc43796v1jybavjsm";
-      "x86_64-darwin" = "1gidl0hi88c0bhm5nbldgkikddwamrmfqxj2pshw51xvyi2chs2r";
-      "aarch64-darwin" = "033aaxf7pf8m1jvp91glrlf9n85qrm5b3h4gf867vrssxhx9hq6y";
+      "aarch64-linux" = "0ancr9rbzdjix6zb8q3l4vsdmkm8khd8p21bpchmkgrkwhgfl6ac";
+      "x86_64-linux" = "06rx1r8isf63bylccdspdngnwqljpyn9r7j4h7k0l054xmx85s5a";
+      "x86_64-darwin" = "0pivib5jkym8ffpw50wshrvfj1jgqa95ax20jjpzl7fa9lqy8z61";
+      "aarch64-darwin" = "1grm3j45cmr1x64y4b63wc1g95a94v61m11xhk3s5mg53byq2vb9";
     };
 
   in {
@@ -65,7 +64,7 @@
 
       version="${version}"
       echo $version
-      base_url="https://github.com/FuckingNode/FuckingNode/releases/download/$version"
+      base_url="https://github.com/FuckingNode/FuckingNode/releases/download/${version}"
 
       declare -A urls=(
         ["x86_64-linux"]="$base_url/FuckingNode-linux64"
