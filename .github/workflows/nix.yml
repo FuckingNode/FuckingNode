@@ -3,7 +3,7 @@ name: Nix hash
 on: workflow_dispatch
 
 permissions:
-  contents: read
+    contents: read
 jobs:
     build:
         runs-on: ubuntu-latest
