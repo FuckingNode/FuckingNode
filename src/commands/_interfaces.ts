@@ -100,6 +100,12 @@ export interface TheUpdaterConstructedParams {
      * @type {boolean}
      */
     silent: boolean;
+    /**
+     * If true, forcedly updates the CLI. Use for debug.
+     *
+     * @type {boolean}
+     */
+    force: boolean;
 }
 
 /**

@@ -35,6 +35,7 @@ export async function RunScheduledTasks(): Promise<void> {
         };
         await TheUpdater({
             silent: true,
+            force: false,
         });
         Deno.writeTextFileSync(scheduleFilePath, StringifyYaml(updatedScheduleFile));
     }

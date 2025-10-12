@@ -6,6 +6,16 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
+## [5.0.2] (Unreleased; 18-10-2025)
+
+### Added
+
+- Added `--force` flag to `update` to force a reinstall.
+
+### Fixed
+
+- Fixed the updater not properly working on Windows. As a side effect, it'll launch a separate PowerShell instance for updating itself.
+
 ## [5.0.1] (04-10-2025)
 
 ### Changed

@@ -9,7 +9,7 @@ import type { CF_FKNODE_SCHEDULE } from "../types/config_files.ts";
 import * as DenoJson from "../../deno.json" with { type: "json" };
 import { ColorString } from "../functions/color.ts";
 import { LOCAL_PLATFORM } from "../platform.ts";
-import { validate, validateAgainst } from "@zakahacecosas/string-utils";
+import { validateAgainst } from "@zakahacecosas/string-utils";
 import { parse as parsePath } from "@std/path";
 
 async function CheckUpdates(): Promise<CF_FKNODE_SCHEDULE | "rl"> {
@@ -61,16 +61,18 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
 
     const { latestVer } = needsToUpdate.updater;
 
-    if (compare(parse(DenoJson.default.version), parse(latestVer)) >= 0) {
+    if ((compare(parse(DenoJson.default.version), parse(latestVer)) >= 0) && !params.force) {
         if (params.silent) return;
         LogStuff(`You're up to date! ${ColorString(DenoJson.default.version, "bright-green")} is the latest.`, "tick");
         return;
     }
 
     LogStuff(
-        `There's a new version! ${ColorString(latestVer, "bright-green")}. You're on ${
-            ColorString(DenoJson.default.version, "green")
-        }, by the way.`,
+        params.force
+            ? "Forced update/reinstall."
+            : `There's a new version! ${ColorString(latestVer, "bright-green")}. You're on ${
+                ColorString(DenoJson.default.version, "green")
+            }, by the way.`,
         "bulb",
     );
     if (params.silent) return;
@@ -83,21 +85,37 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
     const res = await fetch(
         `https://fuckingnode.github.io/install${LOCAL_PLATFORM.SSS}`,
     );
-    const path = Deno.makeTempFileSync({ suffix: LOCAL_PLATFORM.SSS });
+    const path = Deno.makeTempFileSync({ prefix: "UPDATE-FKN", suffix: LOCAL_PLATFORM.SSS });
     Deno.writeFileSync(
         path,
         await res.bytes(),
     );
-    await new Deno.Command(
-        LOCAL_PLATFORM.SHELL,
-        {
-            args: [
-                LOCAL_PLATFORM.SYSTEM === "msft" ? "-File" : undefined,
-                path,
-                Deno.pid.toString(),
-            ].filter(validate),
-        },
-    ).spawn().output();
-    LogStuff(`You're now up to date! Congrats and welcome to ${ColorString(latestVer, "bright-green")}.`, "tick");
+    if (LOCAL_PLATFORM.SYSTEM === "msft") {
+        await new Deno.Command(
+            LOCAL_PLATFORM.SHELL,
+            {
+                args: [
+                    "-File",
+                    path,
+                    Deno.pid.toString(),
+                ],
+            },
+        ).spawn().output();
+    } else {
+        await new Deno.Command(
+            LOCAL_PLATFORM.SHELL,
+            {
+                args: [
+                    path,
+                    Deno.pid.toString(),
+                ],
+                detached: true,
+            },
+        ).spawn().output();
+    }
+    LogStuff(
+        `Updating to ${ColorString(latestVer, "bright-green")}. A separate terminal should've popped up and started downloading the update.`,
+        "tick",
+    );
     return;
 }

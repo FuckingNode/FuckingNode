@@ -210,7 +210,7 @@ async function main(): Promise<void> {
         case "self-update":
         case "upgrade":
         case "update":
-            await TheUpdater({ silent: false });
+            await TheUpdater({ silent: false, force: hasFlag("force", true) });
             break;
         case "about":
             await TheAbouter();

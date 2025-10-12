@@ -35,7 +35,7 @@ gantt
     dateFormat  DD-MM-YYYY
     section Patches
     Patch 1 OCT25 :done, 04-10-2025, 7d
-    Patch 2 OCT25 :active, 11-10-2025, 7d
+    (Skipped) OCT25 :done, 11-10-2025, 7d
     Patch 3 OCT25 :active, 18-10-2025, 7d
     Patch 4 OCT25 :active, 25-10-2025, 7d
     %% Extra patch :crit, 02-11-2025, 6d
