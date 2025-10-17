@@ -38,11 +38,11 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
     }
 
     LogStuff("Let's kickstart! Wait a moment please...", "tick-clear", ["bright-green", "bold"]);
-    LogStuff(`Cloning repo from ${bold(repoUrl)}`);
+    LogStuff(`Cloning repo from ${bold(repoUrl)}`, "working");
 
     Clone(repoUrl, clonePath);
 
-    LogStuff("Cloned!");
+    LogStuff("Cloned it!", "tick-clear");
 
     Deno.chdir(clonePath);
 
@@ -50,7 +50,7 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
 
     if (lockfiles.length === 0) {
         if (validateAgainst(manager, ["npm", "pnpm", "yarn", "bun", "deno", "cargo", "go"])) {
-            LogStuff("This project lacks a lockfile. We'll generate an empty one then populate it.", "warn");
+            LogStuff("This project lacks a lockfile. We'll generate an empty one, then let the package manager populate it.", "warn");
             Deno.writeTextFileSync(
                 JoinPaths(Deno.cwd(), NameLockfile(manager)),
                 "",
@@ -101,21 +101,30 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
     }
 
     LogStuff(
-        `Installation began using ${bold(managerToUse)}. Have a coffee meanwhile!`,
-        "tick-clear",
+        `Installation began using ${bold(managerToUse)} ${
+            ManagerExists(initialManager)
+                ? "(default)"
+                : ManagerExists(env.manager)
+                ? "(fallback, project's default)."
+                : "(fallback, settings default)"
+        }. Have a coffee meanwhile!`,
+        "working",
     );
 
     if (managerToUse === "go") FkNodeInterop.Installers.Golang(Deno.cwd());
     else if (managerToUse === "cargo") FkNodeInterop.Installers.Cargo(Deno.cwd());
     else FkNodeInterop.Installers.UniJs(Deno.cwd(), managerToUse);
 
-    LogStuff(`Great! ${env.names.nameVer} is now setup. Enjoy!`, "tick-clear");
+    LogStuff(
+        `Great! ${env.names.nameVer} is now setup and ready for use. Your IDE will now launch.\nGo write some fucking good code!`,
+        "tick-clear",
+    );
 
     LaunchUserIDE();
 
     const elapsed = Date.now() - startup.getTime();
     Notification(
-        `Kickstart successful!`,
+        "Kickstart successful!",
         `Your project is ready. It took ${GetElapsedTime(startup)}. Go write some fucking good code!`,
         elapsed,
     );
