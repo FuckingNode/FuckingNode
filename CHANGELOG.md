@@ -11,9 +11,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 
 - Added `--force` flag to `update` to force a reinstall.
+- Added the ability to use `fkcommit` with any repo, even if not a supported stack.
+  - If stack is unsupported (not JS/Go/Rust), `fknode.yaml` won't work and neither will `commitCmd`. We might address this on the next release.
+
+### Changed
+
+- Installer shell scripts will no longer ask for confirmation before adding `fk`-shortcuts, they just will proceed.
 
 ### Fixed
 
+- Fixed CmdSets not properly handling `null` values in Cmd objects.
+- Fixed the CLI crashing when unable to send Linux notifications instead of silently failing (as expected).
 - Fixed the updater not properly working on Windows. As a side effect, it'll launch a separate PowerShell instance for updating itself.
 - Fixed the output of `kickstart` not being fully consistent. As a side addition, it now tells you whether it's installing with the package manager you expected or with a fallback (and what type of fallback).
 

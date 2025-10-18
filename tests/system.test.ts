@@ -1,6 +1,6 @@
 import { assertThrows } from "@std/assert/throws";
 import { LOCAL_PLATFORM } from "../src/platform.ts";
-import { Commander, ManagerExists } from "../src/functions/cli.ts";
+import { Commander } from "../src/functions/cli.ts";
 import { assertEquals } from "@std/assert";
 import { CheckForDir, CheckForPath, JoinPaths, ParsePath, ParsePathList } from "../src/functions/filesystem.ts";
 import { Notification } from "../src/functions/io.ts";
@@ -54,24 +54,27 @@ Deno.test({
     },
 });
 
-Deno.test({
-    name: "detects all managers and runtimes",
-    fn: () => {
-        assertEquals(ManagerExists("npm"), true);
-        assertEquals(ManagerExists("pnpm"), true);
-        assertEquals(ManagerExists("yarn"), true);
-        assertEquals(ManagerExists("deno"), true);
-        assertEquals(ManagerExists("bun"), true);
-        assertEquals(ManagerExists("go"), true);
-        assertEquals(ManagerExists("cargo"), true);
-    },
-});
+// known to work and not needed, not every contributor has the 5 things
+// Deno.test({
+//     name: "detects all managers and runtimes",
+//     fn: () => {
+//         assertEquals(ManagerExists("npm"), true);
+//         assertEquals(ManagerExists("pnpm"), true);
+//         assertEquals(ManagerExists("yarn"), true);
+//         assertEquals(ManagerExists("deno"), true);
+//         assertEquals(ManagerExists("bun"), true);
+//         assertEquals(ManagerExists("go"), true);
+//         assertEquals(ManagerExists("cargo"), true);
+//     },
+// });
 
 Deno.test({
     name: "commander returns output",
     fn: () => {
-        const out = Commander(LOCAL_PLATFORM.SHELL, ["echo", "hi"]);
-        assertEquals(out, { success: true, stdout: "hi" });
+        assertEquals(LOCAL_PLATFORM.SYSTEM === "msft" ? Commander(LOCAL_PLATFORM.SHELL, ["echo", "hi"]) : Commander("echo", ["hi"]), {
+            success: true,
+            stdout: "hi",
+        });
         assertThrows(() => Commander("i don't exist", []));
     },
 });

@@ -2,6 +2,7 @@ import { DEFAULT_FKNODE_YAML } from "../src/constants.ts";
 import { JoinPaths, ParsePath } from "../src/functions/filesystem.ts";
 import type { ProjectEnvironment } from "../src/types/platform.ts";
 import * as DenoJson from "../deno.json" with { type: "json" };
+import { normalize } from "@std/path";
 
 // CONSTANTS
 export const CONSTANTS = {
@@ -15,11 +16,12 @@ const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
     ONE: {
         root: ParsePath(`${CONSTANTS.ENV_PATH}/test-one`),
         names: {
-            full:
-                "\x1b[92m\x1b[1ma.js\x1b[22m\x1b[39m@\x1b[35m1.0.0\x1b[39m \x1b[2m\x1b[3mC:\\Users\\Zaka\\proyectitos\\FuckingNode\\tests\\environment\\test-one\x1b[23m\x1b[22m",
+            full: `\x1b[92m\x1b[1ma.js\x1b[22m\x1b[39m@\x1b[35m1.0.0\x1b[39m \x1b[2m\x1b[3m${
+                normalize(JoinPaths(Deno.cwd(), "tests/environment/test-one"))
+            }\x1b[23m\x1b[22m`,
             name: "\x1b[92m\x1b[1ma.js\x1b[22m\x1b[39m",
             nameVer: "\x1b[92m\x1b[1ma.js\x1b[22m\x1b[39m@\x1b[35m1.0.0\x1b[39m",
-            path: "\x1b[2m\x1b[3mC:\\Users\\Zaka\\proyectitos\\FuckingNode\\tests\\environment\\test-one\x1b[23m\x1b[22m",
+            path: `\x1b[2m\x1b[3m${normalize(JoinPaths(Deno.cwd(), "tests/environment/test-one"))}\x1b[23m\x1b[22m`,
         },
         settings: {
             ...DEFAULT_FKNODE_YAML,

@@ -171,22 +171,17 @@ export function Notification(title: string, msg: string, elapsed?: number): void
                 ],
             );
         } else {
-            const out = Commander(
-                "command",
-                [
-                    "-v",
+            try {
+                Commander(
                     "notify-send",
-                ],
-            );
-            // cannot notify
-            if (!out.success) return;
-            Commander(
-                "notify-send",
-                [
-                    title,
-                    msg,
-                ],
-            );
+                    [
+                        title,
+                        msg,
+                    ],
+                );
+            } catch {
+                // cannot notify
+            }
         }
     }
 }

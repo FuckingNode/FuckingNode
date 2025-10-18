@@ -59,14 +59,17 @@ Deno.test({
                 ],
                 type: "=",
             }, {
-                cmd: [
-                    "powershell",
-                    "-c",
-                    "'echo",
-                    "raw",
-                    "exec'",
-                ],
-                type: "<",
+                msft: {
+                    cmd: [
+                        "powershell",
+                        "-c",
+                        "'echo",
+                        "raw",
+                        "exec'",
+                    ],
+                    type: "<",
+                },
+                posix: null,
             }],
         );
     },

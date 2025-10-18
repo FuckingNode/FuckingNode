@@ -8,6 +8,7 @@ import { CheckForPath } from "../functions/filesystem.ts";
 import { FknError } from "../functions/error.ts";
 import { ColorString } from "../functions/color.ts";
 import { RunCmdSet, ValidateCmdSet } from "../functions/cmd-set.ts";
+import type { ProjectEnvironment } from "../types/platform.ts";
 
 const NOT_COMMITTABLE = [".env", ".env.local", ".sqlite", ".db", "node_modules", ".bak"];
 
@@ -71,7 +72,12 @@ export default async function TheCommitter(params: TheCommitterConstructedParams
         return;
     }
 
-    const env = await GetProjectEnvironment(project);
+    let env: ProjectEnvironment | string;
+    try {
+        env = await GetProjectEnvironment(project);
+    } catch {
+        env = project;
+    }
     const prevStaged = GetStagedFiles(project);
 
     if (!params.keepStagedFiles) StageFiles(project, "!A");
@@ -103,7 +109,7 @@ export default async function TheCommitter(params: TheCommitterConstructedParams
         ["bold", "bright-green"],
     );
 
-    const commitCmd = ValidateCmdSet({ env, key: "commitCmd" });
+    const commitCmd = typeof env === "string" ? null : ValidateCmdSet({ env, key: "commitCmd" });
 
     const branches = GetBranches(project);
 
@@ -148,7 +154,9 @@ export default async function TheCommitter(params: TheCommitterConstructedParams
 
     if (
         !params.y && !Interrogate(
-            `Heads up! We're about to take the following actions:\n\n${actions.join("\n")}\n\n- all of this at ${env.names.full}\n`,
+            `Heads up! We're about to take the following actions:\n\n${actions.join("\n")}\n\n- all of this at ${
+                typeof env === "string" ? env : env.names.full
+            }\n`,
         )
     ) {
         LogStuff("Aborting commit.", "bruh");
@@ -161,19 +169,21 @@ export default async function TheCommitter(params: TheCommitterConstructedParams
     if (out !== "ok") throw `No files to stage? This is likely an error somewhere.`;
 
     // 2. run their commitCmd over UNSTAGED, MODIFIABLE files
-    try {
-        await RunCmdSet({
-            key: "commitCmd",
-            env,
-        });
-    } catch {
-        LogStuff(
-            `${
-                ColorString("Your commitCmd failed. For your safety, we've aborted the commit.", "bold")
-            }\nCheck above for your test suite's (or whatever your commitCmd is) output.`,
-            "error",
-        );
-        return;
+    if (typeof env !== "string") {
+        try {
+            await RunCmdSet({
+                key: "commitCmd",
+                env,
+            });
+        } catch {
+            LogStuff(
+                `${
+                    ColorString("Your commitCmd failed. For your safety, we've aborted the commit.", "bold")
+                }\nCheck above for your test suite's (or whatever your commitCmd is) output.`,
+                "error",
+            );
+            return;
+        }
     }
 
     // by this point we assume prev task succeeded

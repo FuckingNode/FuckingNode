@@ -85,7 +85,7 @@ export interface CF_FKNODE_SCHEDULE {
 }
 
 /** A single `CmdSet` instruction. */
-export type CmdInstruction = `\$${string}` | `~${string}` | `=${string}`;
+export type CmdInstruction = `\$${string}` | `~${string}` | `=${string}` | `<${string}` | null;
 export type ParsedCmdInstruction = { type: "<" | "~" | "$" | "="; cmd: NonEmptyArray<string> };
 export type CrossPlatformParsedCmdInstruction = {
     msft: ParsedCmdInstruction | null;

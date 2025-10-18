@@ -17,6 +17,7 @@ import { LOCAL_PLATFORM } from "../platform.ts";
 type Parameters = { key: "commitCmd" | "releaseCmd" | "buildCmd" | "launchCmd"; env: ProjectEnvironment };
 
 function ValidateCallback(v: CmdInstruction): ParsedCmdInstruction | null {
+    if (v === null) return null;
     const type = v.charAt(0);
     if (!validateAgainst(type, ["$", "~", "=", "<"])) throw new FknError("Cfg__InvalidCmdK", `Cmd "${v}" is not properly typed.`);
     const __cmd: string = v.slice(1).trim();
@@ -36,6 +37,7 @@ export function ValidateCmdSet(params: Parameters): (ParsedCmdInstruction | Cros
     if (!rawSet) return null;
 
     const set = Object.values(rawSet).map((v) => {
+        if (v === null) return null;
         if (typeof v === "object") {
             return {
                 msft: ValidateCallback(v.msft),
