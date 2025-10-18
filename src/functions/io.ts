@@ -172,6 +172,9 @@ export function Notification(title: string, msg: string, elapsed?: number): void
             );
         } else {
             try {
+                // at least on KDE neon, this doesn't come by default
+                // yet other apps do send notifications 😭
+                // TODO(@ZakaHaceCosas): find out how to make this work
                 Commander(
                     "notify-send",
                     [

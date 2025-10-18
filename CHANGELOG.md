@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Fixed CmdSets not properly handling `null` values in Cmd objects.
 - Fixed the CLI crashing when unable to send Linux notifications instead of silently failing (as expected).
+- Fixed user IDE (at least VSCode) not launching on Linux.
 - Fixed the updater not properly working on Windows. As a side effect, it'll launch a separate PowerShell instance for updating itself.
 - Fixed the output of `kickstart` not being fully consistent. As a side addition, it now tells you whether it's installing with the package manager you expected or with a fallback (and what type of fallback).
 

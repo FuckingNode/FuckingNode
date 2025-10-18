@@ -38,8 +38,8 @@ export function LaunchUserIDE(): void {
     // TODO(@ZakaHaceCosas) do all editors point to a shell script or a file?
     // Deno wants me to run from a shell to use .bat or .cmd, which didn't happen before
     // idk if deno changed behavior or vscode changed to a .cmd but whatever
-    // also uh would a file work anyway from here? i think so, but yeah gotta watch out for this
-    const out = Commander(LOCAL_PLATFORM.SHELL, [executionCommand, "."]);
+    // ALSO this only happens on Windows apparently??
+    const out = LOCAL_PLATFORM.SYSTEM === "msft" ? Commander(LOCAL_PLATFORM.SHELL, [executionCommand, "."]) : Commander(executionCommand, ["."]);
     if (!out.success) throw new Error(`Error launching ${IDE}: ${out.stdout}`);
     return;
 }
