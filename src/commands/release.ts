@@ -177,7 +177,7 @@ export default async function TheReleaser(params: TheReleaserConstructedParams):
 
     // publish the package
     const publishOutput = Commander(env.commands.base, env.commands.publish);
-    if (!publishOutput.success) throw new FknError("External__Publish", `Publish command failed: ${publishOutput.stdout}`);
+    if (!publishOutput.success) throw new FknError("Task__Release", `Publish command failed: ${publishOutput.stdout}`);
 
     LogStuff(`That worked out! ${params.version} should be live now.`, "tick", ["bold", "bright-green"]);
     return;

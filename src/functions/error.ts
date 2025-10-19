@@ -38,7 +38,7 @@ export class FknError extends Error {
                 this.hint =
                     "Valid intensity levels are 'normal', 'hard', 'hard-only', 'maxim', and 'maxim-only'.\nIf you want to use flags without providing an intensity (e.g. 'clean --pretty'), prepend '-- --' to the command ('clean -- -- -pretty'). Run 'help clean' for more info onto what does each level do.";
                 break;
-            case "Cfg__InvalidCmdK":
+            case "Cfg__FknYaml__InvalidCmdK":
                 this.hint =
                     'Every command within a Cmd set needs to start with either "~" (SHELL SCRIPT), "$" (PROJECT SCRIPT), "=" (PROJECT FILE), or "<" (RAW EXEC).';
                 break;
@@ -64,7 +64,7 @@ export class FknError extends Error {
                     )
                 } but failed, meaning config files cannot be created and the CLI can't work. Something seriously went motherfuckingly wrong. If these aren't the right environment variables for your system's config path (currently using APPDATA on Windows, /home/user/.config on macOS and Linux), please raise an issue on GitHub.`;
                 break;
-            case "External__Proj__NotFound":
+            case "Env__NotFound":
                 this.hint = `Check for typos or a wrong name. Given input (either a project's name or a file path) wasn't found.`;
                 break;
             case "Env__PkgFileUnparsable":

@@ -19,7 +19,7 @@ type Parameters = { key: "commitCmd" | "releaseCmd" | "buildCmd" | "launchCmd"; 
 function ValidateCallback(v: CmdInstruction): ParsedCmdInstruction | null {
     if (v === null) return null;
     const type = v.charAt(0);
-    if (!validateAgainst(type, ["$", "~", "=", "<"])) throw new FknError("Cfg__InvalidCmdK", `Cmd "${v}" is not properly typed.`);
+    if (!validateAgainst(type, ["$", "~", "=", "<"])) throw new FknError("Cfg__FknYaml__InvalidCmdK", `Cmd "${v}" is not properly typed.`);
     const __cmd: string = v.slice(1).trim();
     const _cmd: string = ((__cmd.startsWith('"') && __cmd.endsWith('"')) || __cmd.startsWith("'") && __cmd.endsWith("'"))
         ? __cmd.slice(1, -1)

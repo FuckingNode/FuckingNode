@@ -250,7 +250,7 @@ export async function RemoveProject(
         }
         return;
     } catch (e) {
-        if (!(e instanceof FknError) || e.code !== "External__Proj__NotFound") throw e;
+        if (!(e instanceof FknError) || e.code !== "Env__NotFound") throw e;
         LogStuff(
             `That project doesn't exist.\nAnother typo? We took: ${entry} (=> ${workingEntry})`,
             "error",
@@ -1028,7 +1028,7 @@ export async function SpotProject(name: UnknownString): Promise<string> {
         if (toSpot === projectName) return project;
     }
 
-    throw new FknError("External__Proj__NotFound", `'${workingProject}' does not exist.`);
+    throw new FknError("Env__NotFound", `'${workingProject}' does not exist.`);
 }
 
 /**

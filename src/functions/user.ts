@@ -9,7 +9,7 @@ export function LaunchUserIDE(): void {
     const IDE: CF_FKNODE_SETTINGS["fav-editor"] = (GetUserSettings())["fav-editor"];
 
     if (!validateAgainst(IDE, ["vscode", "sublime", "emacs", "notepad++", "atom", "vscodium"])) {
-        throw new FknError("External__Setting__FavIde", `${IDE} is not a supported editor! Cannot launch it.`);
+        throw new FknError("Cfg__User__FavIDE", `${IDE} is not a supported editor! Cannot launch it.`);
     }
 
     let executionCommand: "subl" | "code" | "emacs" | "notepad++" | "codium" | "atom";

@@ -14,6 +14,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Added runtime-agnosticness to `build`.
 - Added runtime-agnosticness to CmdSets, so they can be used anywhere.
 
+### Changed
+
+- Now some FknError codes were moved, removing the `External__` category.
+
 ### Fixed
 
 - Fixed `build` not properly handling errors.
