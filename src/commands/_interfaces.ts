@@ -369,6 +369,12 @@ export interface TheLauncherConstructedParams {
      * @type {UnknownString}
      */
     project: UnknownString;
+    /**
+     * If true, the IDE won't be launched and only the launchCmd will run.
+     *
+     * @type {boolean}
+     */
+    noIDE: boolean;
 }
 
 /**

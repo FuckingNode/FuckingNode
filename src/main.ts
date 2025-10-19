@@ -305,6 +305,7 @@ async function main(): Promise<void> {
         case "launch":
             await TheLauncher({
                 project: flags[1],
+                noIDE: hasFlag("no-ide", false, false),
             });
             break;
         case "cpf":
@@ -390,7 +391,6 @@ async function main(): Promise<void> {
 if (import.meta.main) {
     try {
         await init();
-
         await main();
         Deno.exit(0);
     } catch (e) {

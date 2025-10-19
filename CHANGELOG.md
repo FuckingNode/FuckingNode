@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## Unreleased
 
+### Added
+
+- Added the ability to `fklaunch` with `--no-ide` so the IDE doesn't start up.
+
 ### Fixed
 
 - Fixed `build` not properly handling errors.
