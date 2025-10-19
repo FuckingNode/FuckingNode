@@ -368,6 +368,35 @@ export type ProjectEnvironment =
     | CargoEnvironment
     | GolangEnvironment;
 
+/**
+ * A conservative variant of the ProjectEnv.
+ *
+ * Less informative, but technically agnostic.
+ */
+export type ConservativeProjectEnvironment = {
+    root: string;
+    settings: FullFkNodeYaml;
+    manager: "(INTEROP)";
+    commands: {
+        base: false;
+        dlx: false;
+        file: false;
+        script: false;
+        update: false;
+        clean: false;
+        audit: false;
+        publish: false;
+        start: false;
+    };
+    names: {
+        full: string;
+        name: string;
+    };
+    mainCPF: {
+        name: string;
+    };
+};
+
 // lockfile types
 export type LOCKFILE_NODE = "package-lock.json" | "pnpm-lock.yaml" | "yarn.lock";
 export type LOCKFILE_ANTINODE = "deno.lock" | "bun.lockb" | "bun.lock";

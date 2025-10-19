@@ -1,6 +1,6 @@
 import { normalize, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { DebugFknErr, ErrorHandler, FknError } from "./error.ts";
-import type { ProjectEnvironment } from "../types/platform.ts";
+import type { ConservativeProjectEnvironment, ProjectEnvironment } from "../types/platform.ts";
 import { Commander } from "./cli.ts";
 import { GetAppPath } from "./config.ts";
 import { LogStuff, Notification } from "./io.ts";
@@ -14,7 +14,7 @@ import type { NonEmptyArray } from "../types/misc.ts";
 import { LOCAL_PLATFORM } from "../platform.ts";
 import { bold, dim, italic } from "@std/fmt/colors";
 
-type Parameters = { key: "commitCmd" | "releaseCmd" | "buildCmd" | "launchCmd"; env: ProjectEnvironment };
+type Parameters = { key: "commitCmd" | "releaseCmd" | "buildCmd" | "launchCmd"; env: ProjectEnvironment | ConservativeProjectEnvironment };
 
 function ValidateCallback(v: CmdInstruction): ParsedCmdInstruction | null {
     if (v === null) return null;
@@ -77,7 +77,7 @@ export async function RunCmdSet(params: Parameters): Promise<void> {
         if (!command) {
             // non-CP instructions do get filtered for null values, so we can be sure
             // this is only null when a CPCmdInstruction isn't defined for us
-            LogStuff(`Command #${cmdIndex} in sequence is platform specific, and not for you.`, "warn");
+            LogStuff(`Command #${cmdIndex} in sequence is platform specific, and not for you.\n`, "warn");
             continue;
         }
         const cmdString = command.cmd.join(" ");
@@ -92,18 +92,25 @@ export async function RunCmdSet(params: Parameters): Promise<void> {
                     `${params.env.manager} does not support JavaScript-like "run" commands, however you've set ${params.key} in your fknode.yaml to ${cmdString}. Since we don't know what you're doing, this task won't proceed for this project.`,
                 );
             }
+            if (params.env.commands.file === false && command.type === "=") {
+                throw new FknError(
+                    "Interop__FileRunUnable",
+                    `${params.env.manager} does not support running code files, however you've set ${params.key} in your fknode.yaml to ${cmdString}. Since we don't know what you're doing, this task won't proceed for this project.`,
+                );
+            }
             const pref = command.type === "<" ? command.cmd[0] : command.type === "$"
-                // @ts-expect-error TS type inference isn't working here
-                // and idk how to type guard this
+                // @ts-expect-error: TS type inference can't tell that this IS validated above
                 ? params.env.commands.script[0]
                 : command.type === "="
+                // @ts-expect-error: same here
                 ? params.env.commands.file[0]
                 : LOCAL_PLATFORM.SHELL;
             const expr = [
                 command.type === "<" ? undefined : command.type === "$"
-                    // @ts-expect-error same as above
+                    // @ts-expect-error: same as above
                     ? params.env.commands.script[1]
                     : command.type === "="
+                    // @ts-expect-error: yet again
                     ? params.env.commands.file[1]
                     : "-c",
             ];

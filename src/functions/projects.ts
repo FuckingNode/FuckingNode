@@ -3,7 +3,13 @@ import { parse as parseToml } from "@std/toml";
 import { parse as parseJsonc } from "@std/jsonc";
 import { expandGlobSync } from "@std/fs";
 import { DEFAULT_FKNODE_YAML } from "../constants.ts";
-import type { CargoPkgFile, NodePkgFile, ProjectEnvironment, UnderstoodProjectProtection } from "../types/platform.ts";
+import type {
+    CargoPkgFile,
+    ConservativeProjectEnvironment,
+    NodePkgFile,
+    ProjectEnvironment,
+    UnderstoodProjectProtection,
+} from "../types/platform.ts";
 import { CheckForPath, JoinPaths, ParsePath, ParsePathList } from "./filesystem.ts";
 import { Interrogate, LogStuff } from "./io.ts";
 import { DEBUG_LOG, FknError } from "../functions/error.ts";
@@ -17,9 +23,10 @@ import { internalGolangRequireLikeStringParser } from "../commands/interop/parse
 import { normalize, normalizeArray, type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { ResolveLockfiles } from "../commands/toolkit/cleaner.ts";
 import { isGlob } from "@std/path/is-glob";
-import { joinGlobs, normalizeGlob } from "@std/path";
+import { joinGlobs, normalizeGlob, parse } from "@std/path";
 import { globSync } from "node:fs";
 import { ColorString } from "./color.ts";
+import { bold, dim, italic, white } from "@std/fmt/colors";
 
 /**
  * Gets all the users projects and returns their absolute root paths as a `string[]`.
@@ -275,7 +282,7 @@ export async function NameProject(
     wanted?: "name" | "name-colorless" | "path" | "name-ver" | "all",
 ): Promise<string> {
     const workingPath = ParsePath(path);
-    const formattedPath = ColorString(workingPath, "italic", "half-opaque");
+    const formattedPath = italic(dim(workingPath));
 
     try {
         const env = await GetProjectEnvironment(workingPath);
@@ -643,7 +650,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
     ) {
         throw new FknError(
             "Env__NoPkgFile",
-            `No main file present (package.json, deno.json, Cargo.toml...) at ${ColorString(root, "bold")}.`,
+            `No main file present (package.json, deno.json, Cargo.toml...) at ${bold(root)}.`,
         );
     }
 
@@ -955,6 +962,41 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
         "Env__CannotDetermine",
         `Failed to determine the environment of '${root}'. We attempt to infer by all means possible the pkg manager of a project but sometimes fail. We kindly ask you to report this as an issue at https://github.com/FuckingNode/FuckingNode/ so we can fix it.`,
     );
+}
+
+export async function ConservativelyGetProjectEnvironment(path: UnknownString): Promise<ProjectEnvironment | ConservativeProjectEnvironment> {
+    try {
+        return await GetProjectEnvironment(path);
+    } catch (e) {
+        if (!(e instanceof FknError)) throw e;
+        if (e.code !== "Env__CannotDetermine" && e.code !== "Env__NoPkgFile") throw e;
+        const root = await SpotProject(path);
+        const settings: FullFkNodeYaml = GetProjectSettings(root);
+        const inferredName = parse(root).name;
+        return {
+            root,
+            settings,
+            manager: "(INTEROP)",
+            commands: {
+                audit: false,
+                base: false,
+                clean: false,
+                dlx: false,
+                file: false,
+                publish: false,
+                script: false,
+                start: false,
+                update: false,
+            },
+            names: {
+                full: italic(dim(root)),
+                name: bold(white(inferredName)),
+            },
+            mainCPF: {
+                name: inferredName,
+            },
+        };
+    }
 }
 
 /**

@@ -1,11 +1,11 @@
-import { GetProjectEnvironment } from "../functions/projects.ts";
+import { ConservativelyGetProjectEnvironment } from "../functions/projects.ts";
 import type { TheBuilderConstructedParams } from "./_interfaces.ts";
 import { LogStuff, Notification } from "../functions/io.ts";
 import { GetElapsedTime } from "../functions/date.ts";
 import { RunCmdSet, ValidateCmdSet } from "../functions/cmd-set.ts";
 
 export default async function TheBuilder(params: TheBuilderConstructedParams): Promise<void> {
-    const env = await GetProjectEnvironment(params.project);
+    const env = await ConservativelyGetProjectEnvironment(params.project);
 
     Deno.chdir(env.root);
 

@@ -3,7 +3,11 @@ import { assertEquals } from "@std/assert";
 import * as DenoJson from "../deno.json" with { type: "json" };
 import { CONSTANTS } from "./constants.ts";
 import { JoinPaths } from "../src/functions/filesystem.ts";
-import type { FnCPF } from "../src/types/platform.ts";
+import type { ConservativeProjectEnvironment, FnCPF } from "../src/types/platform.ts";
+import { ConservativelyGetProjectEnvironment } from "../src/functions/projects.ts";
+import { join, parse } from "@std/path";
+import { DEFAULT_FKNODE_YAML } from "../src/constants.ts";
+import { bold, dim, italic, white } from "@std/fmt/colors";
 
 Deno.test({
     name: "interop layer manages cargo pkg file",
@@ -332,6 +336,40 @@ Deno.test({
                         src: "github",
                         indirect: true,
                     },
+                },
+            },
+        );
+    },
+});
+
+Deno.test({
+    name: "unsupported stack (lua) is handled conservatively",
+    fn: async () => {
+        const inferredName = parse(join(Deno.cwd(), "tests/environment/unsupported")).name;
+        assertEquals(
+            (await ConservativelyGetProjectEnvironment("./tests/environment/unsupported")) as ConservativeProjectEnvironment,
+            {
+                root: join(Deno.cwd(), "tests/environment/unsupported"),
+                manager: "(INTEROP)",
+                settings: {
+                    ...DEFAULT_FKNODE_YAML,
+                    buildCmd: ["~echo test"],
+                },
+                names: {
+                    full: italic(dim(join(Deno.cwd(), "tests/environment/unsupported"))),
+                    name: bold(white(inferredName)),
+                },
+                mainCPF: { name: inferredName },
+                commands: {
+                    base: false,
+                    dlx: false,
+                    file: false,
+                    script: false,
+                    update: false,
+                    clean: false,
+                    audit: false,
+                    publish: false,
+                    start: false,
                 },
             },
         );

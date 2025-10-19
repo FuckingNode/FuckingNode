@@ -30,6 +30,10 @@ export class FknError extends Error {
         this.name = "FknError";
         this.code = code;
         switch (this.code) {
+            case "Interop__FileRunUnable":
+                this.hint =
+                    "You're likely taking advantage of certain features being agnostic, making us unable to tell how to run a file.\nBest fix is to use the RAW EXEC (<) CmdKey and manually type the file run command of this project's stack.";
+                break;
             case "Param__CIntensityInvalid":
                 this.hint =
                     "Valid intensity levels are 'normal', 'hard', 'hard-only', 'maxim', and 'maxim-only'.\nIf you want to use flags without providing an intensity (e.g. 'clean --pretty'), prepend '-- --' to the command ('clean -- -- -pretty'). Run 'help clean' for more info onto what does each level do.";

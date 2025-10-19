@@ -1,11 +1,11 @@
 import { RunCmdSet, ValidateCmdSet } from "../functions/cmd-set.ts";
 import { LogStuff } from "../functions/io.ts";
-import { GetProjectEnvironment } from "../functions/projects.ts";
+import { ConservativelyGetProjectEnvironment } from "../functions/projects.ts";
 import { LaunchUserIDE } from "../functions/user.ts";
 import type { TheLauncherConstructedParams } from "./_interfaces.ts";
 
 export default async function TheLauncher(params: TheLauncherConstructedParams): Promise<void> {
-    const env = await GetProjectEnvironment(params.project);
+    const env = await ConservativelyGetProjectEnvironment(params.project);
 
     Deno.chdir(env.root);
     if (!params.noIDE) LaunchUserIDE();

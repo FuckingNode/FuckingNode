@@ -11,11 +11,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 
 - Added the ability to `fklaunch` with `--no-ide` so the IDE doesn't start up.
+- Added runtime-agnosticness to `build`.
+- Added runtime-agnosticness to CmdSets, so they can be used anywhere.
 
 ### Fixed
 
 - Fixed `build` not properly handling errors.
 - Fixed CmdSets crashing if either `msft` or `posix` isn't explicitly defined. It now assumes the value is null.
+- Fixed `compat` compatibility table being out of date.
+- Fixed `launch` and `commit` not being _actually_ agnostic, and made runtime-agnostic features more reliable overall.
 
 ## [5.0.2] (18-10-2025)
 

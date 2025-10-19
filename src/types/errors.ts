@@ -47,6 +47,7 @@ export const PARAM_ERRORS = [
 export const INTEROP_ERRORS = [
     "Interop__PublishUnable",
     "Interop__MigrateUnable",
+    "Interop__FileRunUnable",
     "Interop__JSRunUnable",
 ] as const;
 export const INTERNAL_ERRORS = [

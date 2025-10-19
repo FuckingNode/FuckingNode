@@ -1,5 +1,5 @@
 import { Interrogate, LogStuff } from "../functions/io.ts";
-import { GetProjectEnvironment } from "../functions/projects.ts";
+import { ConservativelyGetProjectEnvironment } from "../functions/projects.ts";
 import type { TheCommitterConstructedParams } from "./_interfaces.ts";
 import { CanCommit, Commit, GetBranches, GetCommittableFiles, GetStagedFiles, IsRepo, Push, StageFiles } from "../functions/git.ts";
 import { normalize, pluralOrNot, testFlag, validate } from "@zakahacecosas/string-utils";
@@ -7,7 +7,6 @@ import type { GIT_FILES } from "../types/misc.ts";
 import { CheckForPath } from "../functions/filesystem.ts";
 import { FknError } from "../functions/error.ts";
 import { RunCmdSet, ValidateCmdSet } from "../functions/cmd-set.ts";
-import type { ProjectEnvironment } from "../types/platform.ts";
 import { bold, italic, white } from "@std/fmt/colors";
 
 const NOT_COMMITTABLE = [".env", ".env.local", ".sqlite", ".db", "node_modules", ".bak"];
@@ -72,12 +71,7 @@ export default async function TheCommitter(params: TheCommitterConstructedParams
         return;
     }
 
-    let env: ProjectEnvironment | string;
-    try {
-        env = await GetProjectEnvironment(project);
-    } catch {
-        env = project;
-    }
+    const env = await ConservativelyGetProjectEnvironment(project);
     const prevStaged = GetStagedFiles(project);
 
     if (!params.keepStagedFiles) StageFiles(project, "!A");
@@ -109,7 +103,7 @@ export default async function TheCommitter(params: TheCommitterConstructedParams
         ["bold", "bright-green"],
     );
 
-    const commitCmd = typeof env === "string" ? null : ValidateCmdSet({ env, key: "commitCmd" });
+    const commitCmd = ValidateCmdSet({ env, key: "commitCmd" });
 
     const branches = GetBranches(project);
 
@@ -153,9 +147,7 @@ export default async function TheCommitter(params: TheCommitterConstructedParams
 
     if (
         !params.y && !Interrogate(
-            `Heads up! We're about to take the following actions:\n\n${actions.join("\n")}\n\n- all of this at ${
-                typeof env === "string" ? env : env.names.full
-            }\n`,
+            `Heads up! We're about to take the following actions:\n\n${actions.join("\n")}\n\n- all of this at ${env.names.full}\n`,
         )
     ) {
         LogStuff("Aborting commit.", "bruh");
