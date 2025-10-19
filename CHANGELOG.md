@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - Fixed `build` not properly handling errors.
+- Fixed CmdSets crashing if either `msft` or `posix` isn't explicitly defined. It now assumes the value is null.
 
 ## [5.0.2] (18-10-2025)
 

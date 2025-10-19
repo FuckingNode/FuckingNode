@@ -3,7 +3,6 @@ import { DebugFknErr, ErrorHandler, FknError } from "./error.ts";
 import type { ProjectEnvironment } from "../types/platform.ts";
 import { Commander } from "./cli.ts";
 import { GetAppPath } from "./config.ts";
-import { ColorString } from "./color.ts";
 import { LogStuff, Notification } from "./io.ts";
 import {
     type CmdInstruction,
@@ -13,6 +12,7 @@ import {
 } from "../types/config_files.ts";
 import type { NonEmptyArray } from "../types/misc.ts";
 import { LOCAL_PLATFORM } from "../platform.ts";
+import { bold, dim, italic } from "@std/fmt/colors";
 
 type Parameters = { key: "commitCmd" | "releaseCmd" | "buildCmd" | "launchCmd"; env: ProjectEnvironment };
 
@@ -40,8 +40,8 @@ export function ValidateCmdSet(params: Parameters): (ParsedCmdInstruction | Cros
         if (v === null) return null;
         if (typeof v === "object") {
             return {
-                msft: ValidateCallback(v.msft),
-                posix: ValidateCallback(v.posix),
+                msft: v.msft ? ValidateCallback(v.msft) : null,
+                posix: v.posix ? ValidateCallback(v.posix) : null,
             };
         } else {
             return ValidateCallback(v);
@@ -60,9 +60,7 @@ export async function RunCmdSet(params: Parameters): Promise<void> {
     Deno.chdir(params.env.root);
 
     LogStuff(
-        `Running your ${params.key}!`,
-        undefined,
-        "bold",
+        bold(`Running your ${params.key}!`),
     );
 
     const errorCode = params.key === "buildCmd"
@@ -85,9 +83,7 @@ export async function RunCmdSet(params: Parameters): Promise<void> {
         const cmdString = command.cmd.join(" ");
         const cmdTypeString = command.type === "~" ? "Command" : command.type === "=" ? "File" : "Script";
         LogStuff(
-            `Running Cmd ${cmdIndex}/${cmdSet.length} | ${cmdTypeString} / ${ColorString(cmdString, "half-opaque", "italic")}\n`,
-            undefined,
-            "bold",
+            bold(`Running Cmd ${cmdIndex}/${cmdSet.length} | ${cmdTypeString} / ${italic(dim(cmdString))}\n`),
         );
         try {
             if (params.env.commands.script === false && command.type === "$") {
@@ -122,9 +118,9 @@ export async function RunCmdSet(params: Parameters): Promise<void> {
                 LogStuff(out.stdout ?? "(No stdout/stderr was written by the command)");
                 throw out.stdout;
             }
-            if (normalize(out.stdout).length === 0) LogStuff("No output received.", undefined, ["half-opaque", "italic"]);
+            if (normalize(out.stdout).length === 0) LogStuff(dim(italic("No output received.")));
             else LogStuff(out.stdout);
-            LogStuff("\nDone!\n", undefined, "bold");
+            LogStuff(bold("\nDone!\n"));
         } catch (e) {
             Notification(
                 `Your ${params.key} failed!`,
