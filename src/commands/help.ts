@@ -2,6 +2,7 @@ import { normalize, spaceString } from "@zakahacecosas/string-utils";
 import { LogStuff } from "../functions/io.ts";
 import type { TheHelperConstructedParams } from "./_interfaces.ts";
 import { ColorString } from "../functions/color.ts";
+import { bold, brightGreen, brightYellow, dim, italic } from "@std/fmt/colors";
 
 type HelpItem = [string, string | null, string] | [string, string | null, string, boolean];
 
@@ -13,9 +14,7 @@ function formatCmd(obj: HelpItem[]): string {
             thingy[0],
             thingy[0] === ">>>" ? "bright-green" : ["export", "compat"].includes(thingy[0]) ? "cyan" : "bright-blue",
         );
-        const params: string = thingy[1]
-            ? ColorString(thingy[1], "bold", "italic", "half-opaque")
-            : ColorString("(No parameters)", "italic", "half-opaque");
+        const params: string = thingy[1] ? bold(italic(dim(thingy[1]))) : italic(dim("(No parameters)"));
         const desc: string = thingy[2].replaceAll("\n", "\n" + spaceString(" ", 0, 32))
             .replace(new RegExp("--[^\\s]+", "gim"), (match) => ColorString(match, "orange", "bold"))
             .replace(new RegExp("\<[^\\s]+\>", "gim"), (match) => ColorString(match, "pink", "bold"))
@@ -625,17 +624,16 @@ export default function TheHelper(params: TheHelperConstructedParams): void {
             break;
         case "help":
             LogStuff(
-                `Usage: ${ColorString("fuckingnode", "bright-green")} <command> [params...]\n\n${USAGE}`,
+                `Usage: ${brightGreen("fuckingnode")} <command> [params...]\n\n${USAGE}`,
             );
             break;
         default:
             LogStuff(
-                `Usage: ${ColorString("fuckingnode", "bright-green")} <command> [params...]\n\n${USAGE}\n`,
+                `Usage: ${brightGreen("fuckingnode")} <command> [params...]\n\n${USAGE}\n`,
             );
             LogStuff(
-                "Run 'help <command-name>' to get help with a specific command.",
+                brightYellow("Run 'help <command-name>' to get help with a specific command."),
                 "bulb",
-                "bright-yellow",
             );
             break;
     }

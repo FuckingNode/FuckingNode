@@ -1,69 +1,70 @@
 import { normalize, table, validate } from "@zakahacecosas/string-utils";
 import { LogStuff } from "../functions/io.ts";
 import type { TheCompaterConstructedParams } from "./_interfaces.ts";
-import { ColorString } from "../functions/color.ts";
+import { bold, brightBlue, brightGreen, brightRed, brightYellow } from "@std/fmt/colors";
 
-const labels = {
-    y: ColorString("Yes", "bright-green"),
-    n: ColorString("No", "red"),
-    p: ColorString("Partial", "bright-yellow"),
-};
+const y = brightGreen("Yes");
+const n = brightRed("No");
+const p = brightYellow("Partial");
+const a = brightBlue("(Agnostic)");
 
 const featureCompatibility = [
-    { Feature: "Cleanup", NodeJS: labels.y, Deno: labels.p, Bun: labels.p, Go: labels.p, Cargo: labels.p },
-    { Feature: "Kickstart", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
-    { Feature: "Commit", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.p, Cargo: labels.p },
-    { Feature: "Release", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.n, Cargo: labels.y },
-    { Feature: "Stats", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.p, Cargo: labels.y },
-    { Feature: "Surrender", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
-    { Feature: "Setup", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
-    { Feature: "Audit", NodeJS: labels.y, Deno: labels.n, Bun: labels.y, Go: labels.n, Cargo: labels.n },
-    { Feature: "Launch", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
+    { Feature: "Cleanup", NodeJS: y, Deno: p, Bun: p, Go: p, Cargo: p },
+    { Feature: "Kickstart", NodeJS: y, Deno: y, Bun: y, Go: y, Cargo: y },
+    { Feature: "Commit", NodeJS: a, Deno: a, Bun: a, Go: a, Cargo: a },
+    { Feature: "Uncommit", NodeJS: a, Deno: a, Bun: a, Go: a, Cargo: a },
+    { Feature: "Release", NodeJS: y, Deno: y, Bun: y, Go: n, Cargo: y },
+    { Feature: "Stats", NodeJS: y, Deno: y, Bun: y, Go: p, Cargo: y },
+    { Feature: "Surrender", NodeJS: y, Deno: y, Bun: y, Go: y, Cargo: y },
+    { Feature: "Setup", NodeJS: a, Deno: a, Bun: a, Go: a, Cargo: a },
+    { Feature: "Audit", NodeJS: y, Deno: n, Bun: y, Go: n, Cargo: n },
+    { Feature: "Launch", NodeJS: a, Deno: a, Bun: a, Go: a, Cargo: a },
+    { Feature: "Terminate", NodeJS: p, Deno: p, Bun: p, Go: y, Cargo: y },
 ];
 
 const advancedFeatureCompatibility = [
-    { Option: "Lint", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
-    { Option: "Pretty", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
-    { Option: "Destroy", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
-    { Option: "Update", NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
+    { Option: "Lint", NodeJS: y, Deno: y, Bun: y, Go: y, Cargo: y },
+    { Option: "Pretty", NodeJS: y, Deno: y, Bun: y, Go: y, Cargo: y },
+    { Option: "Destroy", NodeJS: y, Deno: y, Bun: y, Go: y, Cargo: y },
+    { Option: "Update", NodeJS: y, Deno: y, Bun: y, Go: y, Cargo: y },
 ];
 
 const kickstartCompatibility = [
-    { NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
+    { NodeJS: y, Deno: y, Bun: y, Go: y, Cargo: y },
 ];
 
 const launchCompatibility = [
-    { NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.y, Cargo: labels.y },
+    { NodeJS: y, Deno: y, Bun: y, Go: y, Cargo: y },
 ];
 
 const commitCompatibility = [
-    { NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.p, Cargo: labels.p },
+    { NodeJS: y, Deno: y, Bun: y, Go: p, Cargo: p },
 ];
 
 const releaseCompatibility = [
-    { NodeJS: labels.y, Deno: labels.y, Bun: labels.y, Go: labels.n, Cargo: labels.n },
+    { NodeJS: y, Deno: y, Bun: y, Go: n, Cargo: n },
 ];
 
 const auditCompatibility = [
-    { NodeJS: labels.y, Deno: labels.n, Bun: labels.y, Go: labels.n, Cargo: labels.n },
+    { NodeJS: y, Deno: n, Bun: y, Go: n, Cargo: n },
 ];
 
 const migrateCompatibility = [
-    { From: "NodeJS", To: "Deno", Supported: labels.y },
-    { From: "NodeJS", To: "Bun", Supported: labels.y },
-    { From: "Deno", To: "NodeJS", Supported: labels.y },
-    { From: "Bun", To: "NodeJS", Supported: labels.y },
+    { From: "NodeJS", To: "Deno", Supported: y },
+    { From: "NodeJS", To: "Bun", Supported: y },
+    { From: "Deno", To: "NodeJS", Supported: y },
+    { From: "Bun", To: "NodeJS", Supported: y },
     { From: "---", To: "---", Supported: "---" },
-    { From: "NodeJS / npm", To: "pnpm / yarn", Supported: labels.y },
-    { From: "NodeJS / pnpm", To: "npm / yarn", Supported: labels.y },
-    { From: "NodeJS / yarn", To: "npm / pnpm", Supported: labels.y },
+    { From: "NodeJS / npm", To: "pnpm / yarn", Supported: y },
+    { From: "NodeJS / pnpm", To: "npm / yarn", Supported: y },
+    { From: "NodeJS / yarn", To: "npm / pnpm", Supported: y },
 ];
 
 function overallSupport(): void {
     LogStuff("OVERALL SUPPORT ---");
     LogStuff(table(featureCompatibility));
     LogStuff(
-        "For specific compatibility details, run 'compat' followed by any of these: cleaner, kickstart, release, migrate, commit, audit, launch.",
+        "'Yes', 'No', 'Partial' indicate the obvious.\n'(Agnostic)' indicates that the feature runs anywhere, even if not listed here.\n\nFor specific compatibility details, run 'compat' followed by any of these:\ncleaner, kickstart, release, migrate, commit, audit, launch.",
     );
     return;
 }
@@ -71,7 +72,7 @@ function overallSupport(): void {
 export default function TheCompater(params: TheCompaterConstructedParams): void {
     LogStuff(
         `${
-            ColorString("This table shows feature compatibility across environments.", "bold")
+            bold("This table shows feature compatibility across environments.")
         }\nMore details available at https://fuckingnode.github.io/crossruntime`,
         "bulb",
     );

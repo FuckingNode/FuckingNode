@@ -11,6 +11,7 @@ import { stringify as stringifyToml } from "@std/toml/stringify";
 import { GetTextIndentSize } from "../functions/filesystem.ts";
 import { ColorString } from "../functions/color.ts";
 import { RunCmdSet, ValidateCmdSet } from "../functions/cmd-set.ts";
+import { bold, red, white } from "@std/fmt/colors";
 
 export default async function TheReleaser(params: TheReleaserConstructedParams): Promise<void> {
     if (!validate(params.version)) throw new FknError("Param__VerInvalid", "No version specified!");
@@ -37,8 +38,8 @@ export default async function TheReleaser(params: TheReleaserConstructedParams):
     const buildCmd = ValidateCmdSet({ env, key: "buildCmd" });
 
     const actions: string[] = [
-        `${ColorString(`Update your ${ColorString(env.mainName, "bold")}'s`, "white")} "version" field`,
-        `Create a ${ColorString(`${env.mainName}.bak`, "bold")} file, and add it to .gitignore`,
+        `${white(`Update your ${bold(env.mainName)}'s`)} "version" field`,
+        `Create a ${bold(`${env.mainName}.bak`)} file, and add it to .gitignore`,
     ];
     if (buildCmd && env.settings.buildForRelease) {
         actions.push(
@@ -52,13 +53,13 @@ export default async function TheReleaser(params: TheReleaserConstructedParams):
     }
     if (canUseGit) {
         actions.push(
-            `${ColorString(`Commit ${ColorString(params.version, "bold")} to Git`, "white")}`,
-            `Create a Git tag ${ColorString(params.version, "bold")}`,
+            `${white(`Commit ${bold(params.version)} to Git`)}`,
+            `Create a Git tag ${bold(params.version)}`,
         );
         if (params.push) {
             actions.push(
                 `Push one commit to GitHub ${
-                    ColorString("adding ALL of your uncommitted content alongside our changes", "bold")
+                    bold("adding ALL of your uncommitted content alongside our changes")
                 }, and push the created tag too`,
             );
         }
@@ -66,9 +67,8 @@ export default async function TheReleaser(params: TheReleaserConstructedParams):
     if (params.push && !canUseGit) LogStuff("--push was specified, but you're not in a Git repo, so it'll be ignored.\n");
     if (!(params.dry === true || env.settings.releaseAlwaysDry === true)) {
         actions.push(
-            ColorString(
+            red(
                 `Publish your changes to ${ColorString(env.runtime === "deno" ? "JSR" : env.runtime === "rust" ? "crates.is" : "npm", "bold")}`,
-                "red",
             ),
         );
     }

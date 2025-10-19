@@ -4,7 +4,7 @@ import { PerformAuditing } from "./toolkit/auditer.ts";
 import type { FkNodeSecurityAudit } from "../types/audit.ts";
 import type { TheAuditerConstructedParams } from "./_interfaces.ts";
 import { normalize, testFlag, validate } from "@zakahacecosas/string-utils";
-import { ColorString } from "../functions/color.ts";
+import { bold } from "@std/fmt/colors";
 
 export default async function TheAuditer(params: TheAuditerConstructedParams): Promise<void> {
     const { project } = params;
@@ -33,7 +33,7 @@ export default async function TheAuditer(params: TheAuditerConstructedParams): P
         }
 
         const reportDetails = report.map((item) => {
-            const string = `${item.audit.name} # ${ColorString(`${item.audit.percentage.toFixed(2)}%`, "bold")} risk factor`;
+            const string = `${item.audit.name} # ${bold(`${item.audit.percentage.toFixed(2)}%`)} risk factor`;
             return string;
         });
         if (reportDetails.length === 0) {

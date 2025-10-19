@@ -7,6 +7,7 @@ import { Commit, GetBranches, Push } from "../functions/git.ts";
 import { CheckForPath, JoinPaths } from "../functions/filesystem.ts";
 import { FkNodeInterop } from "./interop/interop.ts";
 import { ColorString } from "../functions/color.ts";
+import { brightYellow } from "@std/fmt/colors";
 
 const FULL_NAME = `FuckingNode v${DenoJson.default.version}`;
 
@@ -63,7 +64,7 @@ export default async function TheSurrenderer(params: TheSurrendererConstructedPa
     if (
         !Interrogate(
             `(IMPORTANT) Here's what we'll do:\n- Commit ALL UNCOMMITTED changes to the CURRENTLY SELECTED branch AND PUSH them\n- Add a note to your project's README (see below)\n- Once we're sure all your code is pushed, locally DELETE ALL THE PROJECT's FILES\n${
-                ColorString("Please confirm one last time that you wish to proceed", "bright-yellow")
+                brightYellow("Please confirm one last time that you wish to proceed")
             }.\n\n--- MESSAGE TO BE PREPENDED TO README.md ---\n${message}`,
             "heads-up",
         )

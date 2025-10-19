@@ -15,7 +15,6 @@ buildCmd:
     - ~echo 'test'
     - ~"echo ''"
     - ~ls
-    - $good
     - ="src/types/misc.ts --args"
-    - { msft: <powershell -c 'echo raw exec', posix: null }
+    - msft: <powershell -c 'echo raw exec'
 cleanerShortCircuit: true

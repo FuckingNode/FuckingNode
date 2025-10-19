@@ -4,7 +4,7 @@ import { GetProjectEnvironment } from "../functions/projects.ts";
 import { JoinPaths } from "../functions/filesystem.ts";
 import { LogStuff, StringifyYaml } from "../functions/io.ts";
 import { GetDateNow } from "../functions/date.ts";
-import { ColorString } from "../functions/color.ts";
+import { bold } from "@std/fmt/colors";
 
 export default async function TheExporter(params: TheExporterConstructedParams): Promise<void> {
     const env = await GetProjectEnvironment(params.project);
@@ -26,7 +26,7 @@ export default async function TheExporter(params: TheExporterConstructedParams):
     }
     if (params.cli || !params.export) LogStuff(cpfString);
     LogStuff(
-        params.export ? `${ColorString(outFileName, "bold")} file written successfully.` : "There's this project's FnCPF.",
+        params.export ? `${bold(outFileName)} file written successfully.` : "There's this project's FnCPF.",
         "tick",
         "bright-green",
     );

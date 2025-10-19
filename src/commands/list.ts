@@ -1,7 +1,7 @@
 import { LogStuff } from "../functions/io.ts";
 import { GetAllProjects, GetProjectEnvironment } from "../functions/projects.ts";
 import { sortAlphabetically, testFlag, type UnknownString, validate } from "@zakahacecosas/string-utils";
-import { ColorString } from "../functions/color.ts";
+import { bold } from "@std/fmt/colors";
 
 /**
  * Lists all projects.
@@ -44,9 +44,8 @@ async function ListProjects(
     )).map((env) => {
         if (ignore === "limit") {
             return `${env.names.full} (${
-                ColorString(
+                bold(
                     Array.isArray(env.settings.divineProtection) ? env.settings.divineProtection.join(" and ") : "Everything!",
-                    "bold",
                 )
             })\n`;
         }

@@ -6,9 +6,9 @@ import { normalize, pluralOrNot, testFlag, validate } from "@zakahacecosas/strin
 import type { GIT_FILES } from "../types/misc.ts";
 import { CheckForPath } from "../functions/filesystem.ts";
 import { FknError } from "../functions/error.ts";
-import { ColorString } from "../functions/color.ts";
 import { RunCmdSet, ValidateCmdSet } from "../functions/cmd-set.ts";
 import type { ProjectEnvironment } from "../types/platform.ts";
+import { bold, italic, white } from "@std/fmt/colors";
 
 const NOT_COMMITTABLE = [".env", ".env.local", ".sqlite", ".db", "node_modules", ".bak"];
 
@@ -30,9 +30,9 @@ function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
         && !testFlag(files[0] ?? "a", "keep", { allowNonExactString: true, allowQuickFlag: true, allowSingleDash: true })
     ) {
         LogStuff(
-            `No files specified for committing. Specify any of the ${
-                ColorString(GetCommittableFiles(path).length, "bold")
-            } modified files (run '${ColorString('fkcommit "message" file1 folder/file2', "bold")}').`,
+            `No files specified for committing. Specify any of the ${bold(GetCommittableFiles(path).length.toString())} modified files (run '${
+                bold('fkcommit "message" file1 folder/file2...')
+            }').`,
             "bruh",
         );
         return "abort";
@@ -102,7 +102,7 @@ export default async function TheCommitter(params: TheCommitterConstructedParams
         `Staged${params.files[0] === "-A" ? " all files, totalling" : ""} ${staged.length} ${pluralOrNot("file", staged.length)} for commit:\n${
             staged
                 .slice(0, 7)
-                .map((file) => `${ColorString("- " + file, "bold", "white")}${prevStaged.includes(file) ? " (prev. staged, kept)" : ""}`)
+                .map((file) => `${white(bold("- " + file))}${prevStaged.includes(file) ? " (prev. staged, kept)" : ""}`)
                 .join("\n")
         }${staged.length > 7 ? `\nand ${staged.length - 7} more` : ""}`,
         "tick",
@@ -139,12 +139,11 @@ export default async function TheCommitter(params: TheCommitterConstructedParams
         );
     }
 
-    const fBold = ColorString(gitProps.fileCount, "bold");
-    const bBold = ColorString(gitProps.branch, "bold");
-    const mBold = ColorString(params.message.trim(), "bold", "italic");
-    const fCount = pluralOrNot("file", gitProps.fileCount);
+    const fBold = bold(gitProps.fileCount.toString());
+    const bBold = bold(gitProps.branch);
+    const mBold = bold(italic(params.message.trim()));
 
-    actions.push(`Commit ${fBold} ${fCount} to branch ${bBold} with message "${mBold}"`);
+    actions.push(`Commit ${fBold} ${pluralOrNot("file", gitProps.fileCount)} to branch ${bBold} with message "${mBold}"`);
 
     if (params.push) {
         actions.push(
@@ -177,9 +176,7 @@ export default async function TheCommitter(params: TheCommitterConstructedParams
             });
         } catch {
             LogStuff(
-                `${
-                    ColorString("Your commitCmd failed. For your safety, we've aborted the commit.", "bold")
-                }\nCheck above for your test suite's (or whatever your commitCmd is) output.`,
+                `${bold("Your commitCmd failed. For your safety, we've aborted the commit.")}\nCheck above for your commitCmd's output.`,
                 "error",
             );
             return;
