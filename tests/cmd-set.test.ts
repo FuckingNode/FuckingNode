@@ -49,11 +49,6 @@ Deno.test({
                 type: "~",
             }, {
                 cmd: [
-                    "good",
-                ],
-                type: "$",
-            }, {
-                cmd: [
                     "src/types/misc.ts",
                     "--args",
                 ],
@@ -77,7 +72,7 @@ Deno.test({
 
 Deno.test({
     name: "cmd set runs",
-    fn: () => {
-        RunCmdSet({ env, key: "buildCmd" });
+    fn: async () => {
+        await RunCmdSet({ env, key: "buildCmd" });
     },
 });

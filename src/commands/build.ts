@@ -20,16 +20,14 @@ export default async function TheBuilder(params: TheBuilderConstructedParams): P
 
     LogStuff(`There we go, time to build ${env.names.name}`, "tick-clear", "green");
 
-    RunCmdSet({ env, key: "buildCmd" });
+    await RunCmdSet({ env, key: "buildCmd" });
 
     LogStuff(`That worked out! ${env.names.name} should be built now.`, "tick", ["bold", "bright-green"]);
-
-    const elapsed = Date.now() - startup.getTime();
 
     Notification(
         "Build completed!",
         `Your build of ${env.mainCPF.name} succeeded! Elapsed ${GetElapsedTime(startup)}.`,
-        elapsed,
+        Date.now() - startup.getTime(),
     );
 
     return;
