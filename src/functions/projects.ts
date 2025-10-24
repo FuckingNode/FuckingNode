@@ -6,6 +6,7 @@ import { DEFAULT_FKNODE_YAML } from "../constants.ts";
 import type {
     CargoPkgFile,
     ConservativeProjectEnvironment,
+    FnCPF,
     NodePkgFile,
     ProjectEnvironment,
     UnderstoodProjectProtection,
@@ -27,6 +28,7 @@ import { joinGlobs, normalizeGlob, parse } from "@std/path";
 import { globSync } from "node:fs";
 import { ColorString } from "./color.ts";
 import { bold, dim, italic, white } from "@std/fmt/colors";
+import type { VALID_COLORS } from "../types/misc.ts";
 
 /**
  * Gets all the users projects and returns their absolute root paths as a `string[]`.
@@ -110,17 +112,6 @@ export async function AddProject(
             if (validation === "IsDuplicate") {
                 LogStuff(`${env.names.full} is already added! No need to re-add it.`, "bruh");
                 return env;
-            }
-            if (validation === "NoName") {
-                LogStuff(
-                    `Error adding ${env.names.full}: no name!\nSee how the project's name is missing? We can't work with that, we need a name to identify the project.\nPlease set "name" in your package file to something valid.`,
-                    "error",
-                );
-            } else if (validation === "NoVersion") {
-                LogStuff(
-                    `Error adding ${env.names.full}: no version!\nWhile not too frequently used, we internally require your project to have a version field.\nPlease set "version" in your package file to something valid.`,
-                    "error",
-                );
             } else if (validation === "NoPkgFile") {
                 LogStuff(
                     `Error adding ${env.names.full}: no package file!\nIs this even the path to a JavaScript project? No package.json, no deno.json; not even go.mod or Cargo.toml found.`,
@@ -198,7 +189,7 @@ export async function AddProject(
                     workspaces.join("\n")
                 }.\n\nShould we add them all to your list as individual projects so they're all cleaned?`,
             )
-        ) return "aborted";
+        ) return await GetProjectEnvironment(workingEntry);
 
         const allEntries = [workingEntry, ...workspaces].join("\n") + "\n";
         Deno.writeTextFileSync(GetAppPath("MOTHERFKRS"), allEntries, { append: true });
@@ -282,19 +273,18 @@ export async function NameProject(
     wanted?: "name" | "name-colorless" | "path" | "name-ver" | "all",
 ): Promise<string> {
     const workingPath = ParsePath(path);
-    const formattedPath = italic(dim(workingPath));
 
     try {
         const env = await GetProjectEnvironment(workingPath);
 
-        if (wanted === "all") return env.names.full;
-        else if (wanted === "name") return env.names.name;
-        else if (wanted === "path") return formattedPath;
-        else if (wanted === "name-colorless") return env.mainCPF.name;
-        else return env.names.nameVer;
+        if (wanted === "all") return (env.names.full);
+        else if (wanted === "name") return (env.names.name);
+        else if (wanted === "path") return env.names.path;
+        else if (wanted === "name-colorless") return (env.mainCPF.name ?? workingPath);
+        else return (env.names.nameVer);
     } catch {
         // (needed to prevent crashes from invalid projects or not found paths)
-        return formattedPath;
+        return italic(dim(workingPath));
     }
 }
 
@@ -429,10 +419,7 @@ export async function ValidateProject(entry: string, allProjects: string[], exis
     if (!CheckForPath(entry)) return "NotFound";
     // await GetProjectEnvironment() already does some validations by itself, so we can just use it here
     try {
-        const env = await GetProjectEnvironment(entry);
-
-        if (!env.mainCPF.name) return "NoName";
-        if (!env.mainCPF.version) return "NoVersion";
+        await GetProjectEnvironment(entry);
     } catch (e) {
         if (e instanceof FknError && e.code === "Env__SchrodingerLockfile") return "TooManyLockfiles";
         else return "CantGetProjectEnv";
@@ -549,6 +536,16 @@ export function GetWorkspaces(path: string): string[] {
         LogStuff(`Error looking for workspaces: ${e}`, "error");
         return [];
     }
+}
+
+function ColorizeRuntime(cpf: FnCPF, runtimeColor: VALID_COLORS, root: string): { path: string; name: string; nameVer: string; full: string } {
+    const formattedPath = ColorString(root, "italic", "half-opaque");
+    return {
+        path: formattedPath,
+        name: cpf.name ? ColorString(cpf.name, "bold", runtimeColor) : formattedPath,
+        nameVer: cpf.name ? `${ColorString(cpf.name, "bold", runtimeColor)}@${ColorString(cpf.version, "purple")}` : formattedPath,
+        full: cpf.name ? `${ColorString(cpf.name, "bold", runtimeColor)}@${ColorString(cpf.version, "purple")} ${formattedPath}` : formattedPath,
+    };
 }
 
 /**
@@ -686,8 +683,6 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
 
     const { PackageFileParsers } = FkNodeInterop;
 
-    const formattedPath = ColorString(root, "italic", "half-opaque");
-
     if (settings.projectEnvOverride === "go" || isGo) {
         let goTag: string | undefined = undefined;
 
@@ -709,12 +704,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             mainName: "go.mod",
             mainSTD: PackageFileParsers.Golang.STD(mainString),
             mainCPF: cpf,
-            names: {
-                path: formattedPath,
-                name: ColorString(cpf.name, "bold", runtimeColor),
-                nameVer: `${ColorString(cpf.name, "bold", runtimeColor)}@${ColorString(cpf.version, "purple")}`,
-                full: `${ColorString(cpf.name, "bold", runtimeColor)}@${ColorString(cpf.version, "purple")} ${formattedPath}`,
-            },
+            names: ColorizeRuntime(cpf, runtimeColor, root),
             lockfile: {
                 name: "go.sum",
                 path: paths.golang.lock,
@@ -745,12 +735,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             mainName: "Cargo.toml",
             mainSTD: PackageFileParsers.Cargo.STD(mainString),
             mainCPF: cpf,
-            names: {
-                path: formattedPath,
-                name: ColorString(cpf.name, "bold", runtimeColor),
-                nameVer: `${ColorString(cpf.name, "bold", runtimeColor)}@${ColorString(cpf.version, "purple")}`,
-                full: `${ColorString(cpf.name, "bold", runtimeColor)}@${ColorString(cpf.version, "purple")} ${formattedPath}`,
-            },
+            names: ColorizeRuntime(cpf, runtimeColor, root),
             lockfile: {
                 name: "Cargo.lock",
                 path: paths.rust.lock,
@@ -782,12 +767,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             mainName: pathChecks.deno["jsonc"] ? "deno.jsonc" : "deno.json",
             mainSTD: PackageFileParsers.Deno.STD(mainString),
             mainCPF: cpf,
-            names: {
-                path: formattedPath,
-                name: ColorString(cpf.name, "bold", runtimeColor),
-                nameVer: `${ColorString(cpf.name, "bold", runtimeColor)}@${ColorString(cpf.version, "purple")}`,
-                full: `${ColorString(cpf.name, "bold", runtimeColor)}@${ColorString(cpf.version, "purple")} ${formattedPath}`,
-            },
+            names: ColorizeRuntime(cpf, runtimeColor, root),
             lockfile: {
                 name: "deno.lock",
                 path: paths.deno.lock,
@@ -818,12 +798,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             mainName: "package.json",
             mainSTD: PackageFileParsers.NodeBun.STD(mainString),
             mainCPF: cpf,
-            names: {
-                path: formattedPath,
-                name: ColorString(cpf.name, "bold", runtimeColor),
-                nameVer: `${ColorString(cpf.name, "bold", runtimeColor)}@${ColorString(cpf.version, "purple")}`,
-                full: `${ColorString(cpf.name, "bold", runtimeColor)}@${ColorString(cpf.version, "purple")} ${formattedPath}`,
-            },
+            names: ColorizeRuntime(cpf, runtimeColor, root),
             lockfile: {
                 name: pathChecks.bun["lockb"] ? "bun.lockb" : "bun.lock",
                 path: paths.bun.lock,
@@ -856,12 +831,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             mainName: "package.json",
             mainSTD: parseJsonc(mainString) as NodePkgFile,
             mainCPF: cpf,
-            names: {
-                path: formattedPath,
-                name: ColorString(cpf.name, "bold", runtimeColor),
-                nameVer: `${ColorString(cpf.name, "bold", runtimeColor)}@${ColorString(cpf.version, "purple")}`,
-                full: `${ColorString(cpf.name, "bold", runtimeColor)}@${ColorString(cpf.version, "purple")} ${formattedPath}`,
-            },
+            names: ColorizeRuntime(cpf, runtimeColor, root),
             lockfile: {
                 name: "yarn.lock",
                 path: paths.node.lockYarn,
@@ -893,12 +863,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             mainName: "package.json",
             mainSTD: PackageFileParsers.NodeBun.STD(mainString),
             mainCPF: cpf,
-            names: {
-                path: formattedPath,
-                name: ColorString(cpf.name, "bold", runtimeColor),
-                nameVer: `${ColorString(cpf.name, "bold", runtimeColor)}@${ColorString(cpf.version, "purple")}`,
-                full: `${ColorString(cpf.name, "bold", runtimeColor)}@${ColorString(cpf.version, "purple")} ${formattedPath}`,
-            },
+            names: ColorizeRuntime(cpf, runtimeColor, root),
             lockfile: {
                 name: "pnpm-lock.yaml",
                 path: paths.node.lockPnpm,
@@ -931,12 +896,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             mainName: "package.json",
             mainSTD: PackageFileParsers.NodeBun.STD(mainString),
             mainCPF: cpf,
-            names: {
-                path: formattedPath,
-                name: ColorString(cpf.name, "bold", runtimeColor),
-                nameVer: `${ColorString(cpf.name, "bold", runtimeColor)}@${ColorString(cpf.version, "purple")}`,
-                full: `${ColorString(cpf.name, "bold", runtimeColor)}@${ColorString(cpf.version, "purple")} ${formattedPath}`,
-            },
+            names: ColorizeRuntime(cpf, runtimeColor, root),
             lockfile: {
                 name: "package-lock.json",
                 path: paths.node.lockNpm,

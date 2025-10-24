@@ -49,7 +49,7 @@ export default async function TheSurrenderer(params: TheSurrendererConstructedPa
     const learnMore = valid(params.learnMoreUrl)
         ? `\n\nYou may find here additional information regarding **${env.mainCPF.name}**'s deprecation: ${params.learnMoreUrl.trim()}`
         : "";
-    const bareMessage = shuffle(deprecationNotices)(env.mainCPF.name) + note
+    const bareMessage = shuffle(deprecationNotices)(env.mainCPF.name ?? "this project") + note
         + alternatives
         + learnMore
         + `\n\n###### This project was _automatically deprecated_ using the ${FULL_NAME} CLI utility (found at [this repo](https://github.com/FuckingNode/FuckingNode/)), and this message was generated from a template. If something feels off, it might be because of that. Below proceeds the old README from this project, unedited.\n${

@@ -74,7 +74,13 @@ export const Generators: {
         if (!cpf.plat.edt) {
             throw new FknError(
                 "Env__PkgFileUnparsable",
-                `Required parameter 'go 1.X.X' (CPF equiv: 'plat.edt') not present in FnCPF. Attempt to generate GolangPkgFile failed.`,
+                "Required parameter 'go 1.X.X' (CPF equiv: 'plat.edt') not present in FnCPF. Attempt to generate GolangPkgFile failed.",
+            );
+        }
+        if (!cpf.name) {
+            throw new FknError(
+                "Env__PkgFileUnparsable",
+                "Required parameter 'module X' (CPF equiv: 'name') not present in FnCPF. Attempt to generate GolangPkgFile failed.",
             );
         }
 

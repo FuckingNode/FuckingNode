@@ -3,13 +3,13 @@
  * @author ZakaHaceCosas
  */
 
+import { isObject } from "../../functions/projects.ts";
 import { normalize, type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import type { CargoPkgFile, DenoPkgFile, FnCPF, GolangPkgFile, MANAGER_JS, NodePkgFile } from "../../types/platform.ts";
 import * as DenoJson from "../../../deno.json" with { type: "json" };
 import { FknError } from "../../functions/error.ts";
 import { parse as parseToml } from "@std/toml";
 import { parse as parseJsonc } from "@std/jsonc";
-import { FkNodeInterop } from "./interop.ts";
 
 /**
  * gets a Golang require-like string:
@@ -102,38 +102,30 @@ const internalParsers = {
             require,
         };
 
-        if (!FkNodeInterop.BareValidators.Golang(toReturn)) {
-            throw new FknError("Env__PkgFileUnparsable", `Given go.mod contents are unparsable.`);
-        }
+        if (!isObject(toReturn)) throw new FknError("Env__PkgFileUnparsable", "Given go.mod contents are unparsable.");
 
         return toReturn;
     },
     CargoPkgFile: (content: string): CargoPkgFile => {
         const toReturn = parseToml(content);
 
-        if (!FkNodeInterop.BareValidators.Cargo(toReturn)) {
-            throw new FknError("Env__PkgFileUnparsable", `Given Cargo.toml contents are unparsable.`);
-        }
+        if (!isObject(toReturn)) throw new FknError("Env__PkgFileUnparsable", "Given Cargo.toml contents are unparsable.");
 
         return toReturn;
     },
     NodeBunPkgFile: (content: string): NodePkgFile => {
         const toReturn = parseJsonc(content);
 
-        if (!FkNodeInterop.BareValidators.NodeBun(toReturn)) {
-            throw new FknError("Env__PkgFileUnparsable", `Given package.json contents are unparsable.`);
-        }
+        if (!isObject(toReturn)) throw new FknError("Env__PkgFileUnparsable", "Given package.json contents are unparsable.");
 
-        return toReturn;
+        return toReturn as NodePkgFile;
     },
     DenoPkgFile: (content: string): DenoPkgFile => {
         const toReturn = parseJsonc(content);
 
-        if (!FkNodeInterop.BareValidators.Deno(toReturn)) {
-            throw new FknError("Env__PkgFileUnparsable", `Given deno.json/deno.jsonc contents are unparsable.`);
-        }
+        if (!isObject(toReturn)) throw new FknError("Env__PkgFileUnparsable", "Given deno.json/deno.jsonc contents are unparsable.");
 
-        return toReturn;
+        return toReturn as DenoPkgFile;
     },
 };
 
@@ -258,13 +250,6 @@ export const PackageFileParsers = {
         CPF: (content: string, rt: Exclude<MANAGER_JS, "deno">, ws: string[]): FnCPF => {
             const parsedContent = internalParsers.NodeBunPkgFile(content);
 
-            if (!parsedContent.name) {
-                throw new FknError(
-                    "Env__PkgFileUnparsable",
-                    "Invalid package.json file. Your project doesn't have the 'name' field.",
-                );
-            }
-
             const deps: FnCPF["deps"] = [];
             function processNodeDependencies(
                 depsObject: NodePkgFile["dependencies"] | undefined,
@@ -296,13 +281,6 @@ export const PackageFileParsers = {
         STD: internalParsers.DenoPkgFile,
         CPF: (content: string, ws: string[]): FnCPF => {
             const parsedContent = internalParsers.DenoPkgFile(content);
-
-            if (!parsedContent.name) {
-                throw new FknError(
-                    "Env__PkgFileUnparsable",
-                    "Invalid package.json file. Your project doesn't have the 'name' field.",
-                );
-            }
 
             const denoImportRegex = /^(?<source>[a-z]+):(?<package>@[a-zA-Z0-9_\-/]+)@(?<version>[~^<>=]*\d+\.\d+\.\d+)$/;
             // regex not mine. deno uses platform:@scope/package@version imports so we gotta do that.

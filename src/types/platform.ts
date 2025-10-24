@@ -23,8 +23,8 @@ export type CargoDependency = string | { version: string; optional?: boolean; fe
  * @interface GenericJsPkgFile
  */
 export interface GenericJsPkgFile {
-    name?: string;
-    version?: string;
+    name?: string | undefined;
+    version?: string | undefined;
 }
 
 /**
@@ -71,8 +71,8 @@ export interface DenoPkgFile extends GenericJsPkgFile {
  */
 export interface CargoPkgFile {
     "package"?: {
-        name: string | { workspace: true };
-        version: string | { workspace: true };
+        name?: string | { workspace: true } | undefined;
+        version?: string | { workspace: true } | undefined;
         /** If unclear, the Rust "edition" is the Rust version to be used. */
         edition?: string | { workspace: true };
     };
@@ -451,7 +451,7 @@ export interface FnCPF {
      *
      * @type {string}
      */
-    name: string;
+    name: string | undefined;
     /**
      * Package version. Must follow the SemVer format.
      *
