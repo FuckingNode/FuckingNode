@@ -1,4 +1,4 @@
-import { normalize, validate, validateAgainst } from "@zakahacecosas/string-utils";
+import { normalize, unquote, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { DebugFknErr, ErrorHandler, FknError } from "./error.ts";
 import type { ConservativeProjectEnvironment, ProjectEnvironment } from "../types/platform.ts";
 import { Commander } from "./cli.ts";
@@ -12,23 +12,21 @@ import {
 } from "../types/config_files.ts";
 import type { NonEmptyArray } from "../types/misc.ts";
 import { LOCAL_PLATFORM } from "../platform.ts";
-import { bold, dim, italic } from "@std/fmt/colors";
+import { bold, brightYellow, dim, italic } from "@std/fmt/colors";
 
 type Parameters = { key: "commitCmd" | "releaseCmd" | "buildCmd" | "launchCmd"; env: ProjectEnvironment | ConservativeProjectEnvironment };
 
 function ValidateCallback(v: CmdInstruction): ParsedCmdInstruction | null {
-    if (v === null) return null;
+    if (!v) return null;
     const type = v.charAt(0);
     if (!validateAgainst(type, ["$", "~", "=", "<"])) throw new FknError("Cfg__FknYaml__InvalidCmdK", `Cmd "${v}" is not properly typed.`);
-    const __cmd: string = v.slice(1).trim();
-    const _cmd: string = ((__cmd.startsWith('"') && __cmd.endsWith('"')) || __cmd.startsWith("'") && __cmd.endsWith("'"))
-        ? __cmd.slice(1, -1)
-        : __cmd;
-    const cmd: string[] = _cmd.split(" ").filter(validate);
-    if (cmd.length < 1) return null;
+    const cmdArray = unquote(v.slice(1))
+        .split(" ")
+        .filter(validate);
+    if (!cmdArray.length) return null;
     return {
         type,
-        cmd: cmd as NonEmptyArray<string>,
+        cmd: cmdArray as NonEmptyArray<string>,
     };
 }
 
@@ -37,31 +35,59 @@ export function ValidateCmdSet(params: Parameters): (ParsedCmdInstruction | Cros
     if (!rawSet) return null;
 
     const set = Object.values(rawSet).map((v) => {
-        if (v === null) return null;
+        if (!v) return null;
         if (typeof v === "object") {
             return {
                 msft: v.msft ? ValidateCallback(v.msft) : null,
                 posix: v.posix ? ValidateCallback(v.posix) : null,
             };
-        } else {
-            return ValidateCallback(v);
         }
+        return ValidateCallback(v);
     }).filter((i) => i !== null);
 
-    return set.length === 0 ? null : set;
+    return set.length ? set : null;
 }
 
-// we plan to make this support paralleled cmds, so keep it awaited
-// deno-lint-ignore require-await
+async function ExecCmd(pref: string, expr: string[], detach: boolean): Promise<ReturnType<typeof Commander>> {
+    // TODO(@ZakaHaceCosas): this can cause race conditions
+    if (detach) {
+        const child = new Deno.Command(pref, { args: expr }).spawn();
+
+        let success = 0;
+
+        const signalHandler = (signal: "SIGTERM" | "SIGINT" | "SIGBREAK") => {
+            console.log(italic(`\n(FKN: caught manual exit signal ${signal}.)`));
+            child.kill(signal);
+            success = 1;
+        };
+
+        Deno.addSignalListener("SIGINT", () => signalHandler("SIGINT"));
+        Deno.addSignalListener("SIGTERM", () => signalHandler("SIGTERM"));
+        if (LOCAL_PLATFORM.SYSTEM === "msft") {
+            Deno.addSignalListener("SIGBREAK", () => signalHandler("SIGBREAK"));
+        }
+
+        const out = await child.output();
+        return {
+            stdout: "",
+            success: success === 1 ? true : out.success,
+        };
+    } else {
+        return Commander(
+            pref,
+            expr,
+        );
+    }
+}
+
+// TODO(@ZakaHaceCosas): we plan to make this support paralleled cmds too
 export async function RunCmdSet(params: Parameters): Promise<void> {
     const cmdSet = ValidateCmdSet(params);
     if (!cmdSet) return;
 
     Deno.chdir(params.env.root);
 
-    LogStuff(
-        bold(`Running your ${params.key}!`),
-    );
+    LogStuff(bold(`Running your ${params.key}!`));
 
     const errorCode = params.key === "buildCmd"
         ? "Task__Build"
@@ -81,9 +107,14 @@ export async function RunCmdSet(params: Parameters): Promise<void> {
             continue;
         }
         const cmdString = command.cmd.join(" ");
+        const detach = cmdString.slice(0, 2) === ";;";
         const cmdTypeString = command.type === "~" ? "Command" : command.type === "=" ? "File" : "Script";
         LogStuff(
-            bold(`Running Cmd ${cmdIndex}/${cmdSet.length} | ${cmdTypeString} / ${italic(dim(cmdString))}\n`),
+            bold(
+                `Running Cmd ${cmdIndex}/${cmdSet.length} | ${detach ? "Detached " + cmdTypeString.toLowerCase() : cmdTypeString} / ${
+                    italic(dim(cmdString))
+                }\n${detach ? bold(brightYellow("Heads up: detached cmds are a work-in-progress and might fail")) + "\n" : ""}`,
+            ),
         );
         try {
             if (params.env.commands.script === false && command.type === "$") {
@@ -114,13 +145,15 @@ export async function RunCmdSet(params: Parameters): Promise<void> {
                     ? params.env.commands.file[1]
                     : "-c",
             ];
-            if (command.type === "<") expr.push(...command.cmd.slice(1));
-            else if (command.type === "~") expr.push(command.cmd.join(" "));
-            else expr.push(...command.cmd);
-            const out = Commander(
-                pref,
-                expr,
-            );
+            const cmd = detach ? [command.cmd[0].replace(";;", ""), ...(command.cmd.slice(1))] : command.cmd;
+            if (command.type === "<") expr.push(...cmd.slice(1));
+            else if (command.type === "~") expr.push(cmd.join(" "));
+            else expr.push(...cmd);
+            const _out = await ExecCmd(pref, expr, detach);
+            const out = {
+                success: _out.success,
+                stdout: detach ? italic("(FKN: detached execution terminated.)") : _out.stdout as string,
+            };
             if (!out.success) {
                 LogStuff(out.stdout ?? "(No stdout/stderr was written by the command)");
                 throw out.stdout;

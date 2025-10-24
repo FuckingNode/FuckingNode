@@ -17,4 +17,6 @@ buildCmd:
     - ~ls
     - ="src/types/misc.ts --args"
     - msft: <powershell -c 'echo raw exec'
+    #- posix: ~;;echo "hit ctrl+c" && tail -f /dev/null
+    #- posix: ~;;echo "don't hit anything" && sleep 2
 cleanerShortCircuit: true

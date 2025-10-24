@@ -13,6 +13,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Added the ability to `fklaunch` with `--no-ide` so the IDE doesn't start up.
 - Added runtime-agnosticness to `build`.
 - Added runtime-agnosticness to CmdSets, so they can be used anywhere.
+- Added detachable Cmds to CmdSets. These detach from the main process, showing live output on their own and taking input; perfect for `startCmd` where you might expect a dev server like React's or anything similar to appear and accept input.
+  - **Detaching is unstable, though.** Process handling is a bit rushed and strange bugs have found to happen _rarely_. We'll try to polish the thing in future patches.
 
 ### Changed
 
@@ -27,6 +29,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Fixed `launch` and `commit` not being _actually_ agnostic, and made runtime-agnostic features more reliable overall.
 - Fixed error logs having so much unnecessary whitespace.
 - Fixed kickstart exiting mid-process when working with a rootless monorepo
+- Fixed a bug where defining only the `posix` property in a Cmd object would error.
 
 ## [5.0.2] (18-10-2025)
 

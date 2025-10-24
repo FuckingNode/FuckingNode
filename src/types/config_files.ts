@@ -94,7 +94,8 @@ export type CrossPlatformParsedCmdInstruction = {
 // deno-lint-ignore explicit-module-boundary-types no-explicit-any
 export function IsCPCmdInstruction(a: any): a is CrossPlatformParsedCmdInstruction {
     if (!a.msft && !a.posix) return false;
-    return ((typeof a.msft.type === "string" && validate(a.msft.type)) || (typeof a.posix.type === "string" && validate(a.posix.type)));
+    return ((a.msft && a.msft.type && typeof a.msft.type === "string" && validate(a.msft.type))
+        || (a.posix && a.posix.type && typeof a.posix.type === "string" && validate(a.posix.type)));
 }
 export type CmdSet = (CmdInstruction | { posix: CmdInstruction; msft: CmdInstruction })[];
 
