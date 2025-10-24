@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Fixed CmdSets crashing if either `msft` or `posix` isn't explicitly defined. It now assumes the value is null.
 - Fixed `compat` compatibility table being out of date.
 - Fixed `launch` and `commit` not being _actually_ agnostic, and made runtime-agnostic features more reliable overall.
+- Fixed error logs having so much unnecessary whitespace.
 
 ## [5.0.2] (18-10-2025)
 

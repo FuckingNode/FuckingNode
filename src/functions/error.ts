@@ -146,8 +146,7 @@ export class FknError extends Error {
         // meaning that path does exist
         // doesn't use GetAppPath just in case that's the thing erroring, you know
         const debugPath = join(LOCAL_PLATFORM.APPDATA!, "fuckingnode", "fuckingnode-errors.log");
-        const debuggableError = `\n
----
+        const debuggableError = `---
 # BEGIN FknERROR ${this.code} @ ${new Date().toISOString()}
 ---
 >>> INFO (so you know where you at)
@@ -164,8 +163,7 @@ it may happen to be a sh*t ton of stuff to read.
 ${stripAnsiCode(debuggableContent ?? "UNKNOWN OUTPUT - No debuggableContent was provided, or it was empty.")}
 >>> END DEBUGGABLE CONTENT
 # END   FknERROR ${this.code} # GOOD LUCK FIXING THIS
----\n
-        `;
+---\n`;
         if (showWarn) {
             console.warn(
                 ColorString(`An exception occurred. For details about what happened, see the last entry of ${debugPath}`, "orange"),
