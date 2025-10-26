@@ -9,7 +9,7 @@ import { Interrogate, LogStuff, StringifyYaml } from "./io.ts";
 import { type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { format } from "@std/fmt/bytes";
 import { LOCAL_PLATFORM } from "../platform.ts";
-import { ColorString } from "./color.ts";
+import { brightGreen, brightYellow, dim, italic } from "@std/fmt/colors";
 
 /**
  * Returns file paths for all config files the app uses.
@@ -173,34 +173,29 @@ export function ChangeSetting(
 export function DisplaySettings(): void {
     const settings = GetUserSettings();
 
-    const formattedSettings = [
-        `Check for updates             | Every ${ColorString(settings["update-freq"], "bright-green")} days. ${
-            ColorString("update-freq", "half-opaque", "italic")
+    LogStuff(
+        `${brightYellow("Your current settings are:")}\n---\n${
+            [
+                `Check for updates               | Every ${brightGreen(settings["update-freq"].toString())} days. ${dim(italic("update-freq"))}`,
+                `Default cleaner intensity       | ${brightGreen(settings["default-intensity"])}. ${dim(italic("default-intensity"))}`,
+                `Default package manager         | ${brightGreen(settings["default-manager"])}. ${dim(italic("default-manager"))}`,
+                `Favorite code editor            | ${brightGreen(settings["fav-editor"])}. ${dim(italic("fav-editor"))}`,
+                `Send system notifications       | ${brightGreen(settings["notifications"] ? "Enabled" : "Disabled")}. ${
+                    dim(italic("notifications"))
+                }`,
+                `Threshold notifications?        | ${brightGreen(settings["notification-threshold"] ? "Enabled" : "Disabled")}. ${
+                    dim(italic("notification-threshold"))
+                }`,
+                `Notification threshold          | ${brightGreen(settings["notification-threshold-value"].toString())} milliseconds. ${
+                    dim(italic("notification-threshold"))
+                }`,
+                `Short circuit on cleanup error? | ${brightGreen(settings["always-short-circuit-cleanup"] ? "Enabled" : "Disabled")}. ${
+                    dim(italic("always-short-circuit-cleanup"))
+                }`,
+            ].join("\n")
         }`,
-        `Default cleaner intensity     | ${ColorString(settings["default-intensity"], "bright-green")}. ${
-            ColorString("default-intensity", "half-opaque", "italic")
-        }`,
-        `Default package manager       | ${ColorString(settings["default-manager"], "bright-green")}. ${
-            ColorString("default-manager", "half-opaque", "italic")
-        }`,
-        `Favorite code editor          | ${ColorString(settings["fav-editor"], "bright-green")}. ${
-            ColorString("fav-editor", "half-opaque", "italic")
-        }`,
-        `Send system notifications     | ${ColorString(settings["notifications"] ? "Enabled" : "Disabled", "bright-green")}. ${
-            ColorString("notifications", "half-opaque", "italic")
-        }`,
-        `Threshold notifications?      | ${ColorString(settings["notification-threshold"] ? "Enabled" : "Disabled", "bright-green")}. ${
-            ColorString("notification-threshold", "half-opaque", "italic")
-        }`,
-        `Notification threshold        | ${ColorString(settings["notification-threshold-value"], "bright-green")} milliseconds. ${
-            ColorString("notification-threshold", "half-opaque", "italic")
-        }`,
-        `Cleanup error behavior?       | ${
-            ColorString(settings["always-short-circuit-cleanup"] ? "Short-circuit" : "Continue", "bright-green")
-        } ${ColorString("always-short-circuit-cleanup", "half-opaque", "italic")}`,
-    ].join("\n");
-
-    LogStuff(`${ColorString("Your current settings are:", "bright-yellow")}\n---\n${formattedSettings}`, "bulb");
+        "bulb",
+    );
 }
 
 /**

@@ -6,7 +6,7 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
-## Unreleased
+## [5.1.0] (Unreleased; 24-10-2025)
 
 ### Added
 
@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Now `name` and `version` (and equivalents, except for Golang) are no longer required. They'll just be omitted or replaced by "Unknown" (respectively) if missing.
 - Now some FknError codes were moved, removing the `External__` category.
+- Now `settings` always uses Enabled/Disabled for booleans (`always-short-circuit-cleanup` was unclear).
 
 ### Fixed
 
