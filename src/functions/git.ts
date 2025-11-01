@@ -234,7 +234,7 @@ export function GetStagedFiles(path: string): string[] {
         );
         if (!getFilesOutput.success) throw `(git diff --cached --name-only) ${getFilesOutput.stdout}`;
         if (!validate(getFilesOutput.stdout)) return [];
-        return normalizeArray(getFilesOutput.stdout.split("\n"), "soft");
+        return normalizeArray(getFilesOutput.stdout.split("\n"), "just-trim");
     } catch (e) {
         throw new FknError(
             "Git__GStaged",
@@ -315,7 +315,7 @@ export function GetCommittableFiles(path: string): string[] {
         if (!getFilesOutput.success) throw `(git status -s --porcelain) ${getFilesOutput.stdout}`;
         // empty string = no files
         if (!validate(getFilesOutput.stdout)) return [];
-        return normalizeArray(getFilesOutput.stdout.split("\n"), "soft");
+        return normalizeArray(getFilesOutput.stdout.split("\n"), "just-trim");
     } catch (e) {
         throw new FknError(
             "Git__GCommittable",
@@ -359,7 +359,7 @@ export function GetBranches(project: string): { current: string | false; all: st
         return {
             current,
             all: new StringArray(getBranchesOutput.stdout.replace("*", "").split("\n"))
-                .sortAlphabetically().normalize("soft").arr(),
+                .sortAlphabetically().normalize("just-trim").arr(),
         };
     } catch (e) {
         new FknError("Git__GBranches", `Couldn't get branches at ${ColorString(project, "bold")}.`).debug(String(e), true);

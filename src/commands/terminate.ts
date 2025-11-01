@@ -1,4 +1,5 @@
-import { reveal, validateAgainst } from "@zakahacecosas/string-utils";
+import { validateAgainst } from "@zakahacecosas/string-utils";
+import { reveal } from "@zakahacecosas/string-utils/cli";
 import type { TheTerminatorConstructedParams } from "./_interfaces.ts";
 import { FknError } from "../functions/error.ts";
 import { Interrogate, LogStuff, Notification } from "../functions/io.ts";

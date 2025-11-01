@@ -160,7 +160,7 @@ ${this.stack}
 below goes the debugged content dump (in most cases, what the CLI command that was executed returned).
 it may happen to be a sh*t ton of stuff to read.
 >>> BEGIN DEBUGGABLE CONTENT
-${stripAnsiCode(debuggableContent ?? "UNKNOWN OUTPUT - No debuggableContent was provided, or it was empty.")}
+${stripAnsiCode(validate(debuggableContent) ? debuggableContent : "UNKNOWN OUTPUT - No debuggableContent was provided, or it was empty.")}
 >>> END DEBUGGABLE CONTENT
 # END   FknERROR ${this.code} # GOOD LUCK FIXING THIS
 ---\n`;

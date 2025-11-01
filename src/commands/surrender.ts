@@ -1,5 +1,6 @@
 import * as DenoJson from "../../deno.json" with { type: "json" };
-import { normalize, reveal, type UnknownString, validate } from "@zakahacecosas/string-utils";
+import { normalize, type UnknownString, validate } from "@zakahacecosas/string-utils";
+import { reveal } from "@zakahacecosas/string-utils/cli";
 import { GetProjectEnvironment, RemoveProject } from "../functions/projects.ts";
 import type { TheSurrendererConstructedParams } from "./_interfaces.ts";
 import { Interrogate, LogStuff } from "../functions/io.ts";

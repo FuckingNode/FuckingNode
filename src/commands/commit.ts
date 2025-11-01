@@ -28,7 +28,7 @@ function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
     }
     if (
         Array.isArray(files) && files[0] !== "-A" && files.filter(validate).filter(CheckForPath).length === 0
-        && !testFlag(files[0] ?? "a", "keep", { allowNonExactString: true, allowQuickFlag: true, allowSingleDash: true })
+        && !testFlag(validate(files[0]) ? files[0] : "a", "keep", { allowNonExactString: true, allowQuickFlag: true, allowSingleDash: true })
     ) {
         LogStuff(
             `No files specified for committing. Specify any of the ${bold(GetCommittableFiles(path).length.toString())} modified files (run '${
@@ -111,7 +111,7 @@ export default async function TheCommitter(params: TheCommitterConstructedParams
 
     const gitProps = {
         fileCount: staged.length,
-        branch: (params.branch && !testFlag(params.branch, "push", { allowQuickFlag: true, allowSingleDash: true }))
+        branch: (validate(params.branch) && !testFlag(params.branch, "push", { allowQuickFlag: true, allowSingleDash: true }))
             ? branches.all.includes(normalize(params.branch)) ? params.branch : false
             : branches.current,
     };

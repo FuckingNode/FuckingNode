@@ -119,6 +119,6 @@ if (release) {
     }
 
     console.log(
-        "Don't forget hashing Nix releases!\nUpdate version number on flake.nix, push, then run the Nix hash action grab the hashes and commit again..",
+        "Don't forget hashing Nix releases!\nUpdate version number on flake.nix, push, then run the Nix hash action grab the hashes and commit again.",
     );
 }

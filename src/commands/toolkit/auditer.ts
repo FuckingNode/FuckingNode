@@ -187,7 +187,7 @@ export function ParseNodeBunReport(jsonString: string, platform: MANAGER_NODE | 
      * ```
      * which if i remember correctly is JSONL, but _not_ JSON which feels a bit stupid, therefore the name of the variable
      */
-    const yarnStupidJsonFormat = normalizeArray(jsonString.split("\n"), "soft").filter((s) => s.includes('{"type":"auditAdvisory"'))
+    const yarnStupidJsonFormat = normalizeArray(jsonString.split("\n"), "just-trim").filter((s) => s.includes('{"type":"auditAdvisory"'))
         .map((
             s,
         ) => JSON.parse(s));

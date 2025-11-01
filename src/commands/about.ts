@@ -4,7 +4,7 @@ import { LogStuff } from "../functions/io.ts";
 import type { VALID_COLORS } from "../types/misc.ts";
 import { ASCII } from "../functions/ascii.ts";
 import { phrases } from "../functions/phrases.ts";
-import { reveal } from "@zakahacecosas/string-utils";
+import { reveal } from "@zakahacecosas/string-utils/cli";
 
 function getRandomPhrase(): string {
     const randomIndex = Math.floor(Math.random() * phrases.length);
