@@ -6,7 +6,7 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
-## [5.1.0] (Unreleased; 24-10-2025)
+## [5.1.0] (01-11-2025)
 
 ### Added
 
@@ -14,13 +14,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Added runtime-agnosticness to `build`.
 - Added runtime-agnosticness to CmdSets, so they can be used anywhere.
 - Added detachable Cmds to CmdSets. These detach from the main process, showing live output on their own and taking input; perfect for `startCmd` where you might expect a dev server like React's or anything similar to appear and accept input.
-  - **Detaching is unstable, though.** Process handling is a bit rushed and strange bugs have found to happen _rarely_. We'll try to polish the thing in future patches.
 
 ### Changed
 
 - Now `name` and `version` (and equivalents, except for Golang) are no longer required. They'll just be omitted or replaced by "Unknown" (respectively) if missing.
 - Now some FknError codes were moved, removing the `External__` category.
 - Now `settings` always uses Enabled/Disabled for booleans (`always-short-circuit-cleanup` was unclear).
+- Now `compat` differentiates standard and agnostic feature support.
 
 ### Fixed
 

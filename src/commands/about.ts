@@ -14,9 +14,9 @@ function getRandomPhrase(): string {
 
 function getRandomColor(): VALID_COLORS {
     const colors: VALID_COLORS[] = [
-        "bright-blue",
-        "cyan",
-        "blue",
+        "red",
+        "orange",
+        "bright-orange",
     ];
 
     const randomIndex = Math.floor(Math.random() * colors.length);
