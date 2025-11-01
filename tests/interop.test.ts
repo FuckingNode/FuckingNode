@@ -343,7 +343,7 @@ Deno.test({
 });
 
 Deno.test({
-    name: "unsupported stack (lua) is handled conservatively",
+    name: "unsupported stack is handled conservatively",
     fn: async () => {
         const inferredName = parse(join(Deno.cwd(), "tests/environment/unsupported")).name;
         assertEquals(

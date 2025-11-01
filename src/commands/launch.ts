@@ -15,12 +15,6 @@ export default async function TheLauncher(params: TheLauncherConstructedParams):
         Deno.exit(1);
     }
 
-    // TODO(@ZakaHaceCosas): here you usually run the kind of stuff
-    // where you may want not just CLI output but CLI input
-    // (e.g. react servers where you can hit keystrokes to reload and stuff)
-    // so we need a different behavior here
-    // my idea is making the *last* Cmd spawn as a visible process
-    // and let it run
     await RunCmdSet({ env, key: "launchCmd" });
 
     return;

@@ -49,7 +49,6 @@ export function ValidateCmdSet(params: Parameters): (ParsedCmdInstruction | Cros
 }
 
 async function ExecCmd(pref: string, expr: string[], detach: boolean): Promise<ReturnType<typeof Commander>> {
-    // TODO(@ZakaHaceCosas): this can cause race conditions
     if (detach) {
         const child = new Deno.Command(pref, { args: expr }).spawn();
 
@@ -61,13 +60,33 @@ async function ExecCmd(pref: string, expr: string[], detach: boolean): Promise<R
             success = 1;
         };
 
-        Deno.addSignalListener("SIGINT", () => signalHandler("SIGINT"));
-        Deno.addSignalListener("SIGTERM", () => signalHandler("SIGTERM"));
+        const onSigint = () => signalHandler("SIGINT");
+        const onSigterm = () => signalHandler("SIGTERM");
+        const onSigbreak = () => signalHandler("SIGBREAK");
+
+        Deno.addSignalListener("SIGINT", onSigint);
+        Deno.addSignalListener("SIGTERM", onSigterm);
         if (LOCAL_PLATFORM.SYSTEM === "msft") {
-            Deno.addSignalListener("SIGBREAK", () => signalHandler("SIGBREAK"));
+            Deno.addSignalListener("SIGBREAK", onSigbreak);
         }
 
-        const out = await child.output();
+        let out;
+        try {
+            out = await child.output();
+        } catch (_e) {
+            // console.error(italic(`(FKN: child process error: ${e})`));
+            out = {
+                success: false,
+                stdout: "",
+            };
+        } finally {
+            Deno.removeSignalListener("SIGINT", onSigint);
+            Deno.removeSignalListener("SIGTERM", onSigterm);
+            if (LOCAL_PLATFORM.SYSTEM === "msft") {
+                Deno.removeSignalListener("SIGBREAK", onSigbreak);
+            }
+        }
+
         return {
             stdout: "",
             success: success === 1 ? true : out.success,

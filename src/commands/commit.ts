@@ -1,3 +1,5 @@
+// TODO(@ZakaHaceCosas): somewhere, we're not committing deleted files
+// (must be coming from path check)
 import { Interrogate, LogStuff } from "../functions/io.ts";
 import { ConservativelyGetProjectEnvironment } from "../functions/projects.ts";
 import type { TheCommitterConstructedParams } from "./_interfaces.ts";

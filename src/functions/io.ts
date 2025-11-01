@@ -175,6 +175,9 @@ export function Notification(title: string, msg: string, elapsed?: number): void
                 // at least on KDE neon, this doesn't come by default
                 // yet other apps do send notifications 😭
                 // TODO(@ZakaHaceCosas): find out how to make this work
+                // note: what DOES (very probably) work is D-Bus
+                // thing is, native code is... hard
+                // at least it is possible (deno has a FFI)
                 Commander(
                     "notify-send",
                     [
