@@ -50,47 +50,57 @@ export function ValidateCmdSet(params: Parameters): (ParsedCmdInstruction | Cros
 
 async function ExecCmd(pref: string, expr: string[], detach: boolean): Promise<ReturnType<typeof Commander>> {
     if (detach) {
-        const child = new Deno.Command(pref, { args: expr }).spawn();
-
-        let success = 0;
-
-        const signalHandler = (signal: "SIGTERM" | "SIGINT" | "SIGBREAK") => {
-            console.log(italic(`\n(FKN: caught manual exit signal ${signal}.)`));
-            child.kill(signal);
-            success = 1;
-        };
-
-        const onSigint = () => signalHandler("SIGINT");
-        const onSigterm = () => signalHandler("SIGTERM");
-        const onSigbreak = () => signalHandler("SIGBREAK");
-
-        Deno.addSignalListener("SIGINT", onSigint);
-        Deno.addSignalListener("SIGTERM", onSigterm);
-        if (LOCAL_PLATFORM.SYSTEM === "msft") {
-            Deno.addSignalListener("SIGBREAK", onSigbreak);
-        }
-
-        let out;
         try {
-            out = await child.output();
-        } catch (_e) {
-            // console.error(italic(`(FKN: child process error: ${e})`));
-            out = {
-                success: false,
-                stdout: "",
-            };
-        } finally {
-            Deno.removeSignalListener("SIGINT", onSigint);
-            Deno.removeSignalListener("SIGTERM", onSigterm);
-            if (LOCAL_PLATFORM.SYSTEM === "msft") {
-                Deno.removeSignalListener("SIGBREAK", onSigbreak);
-            }
-        }
+            const child = new Deno.Command(pref, { args: expr }).spawn();
 
-        return {
-            stdout: "",
-            success: success === 1 ? true : out.success,
-        };
+            let success = 0;
+
+            const signalHandler = (signal: "SIGTERM" | "SIGINT" | "SIGBREAK") => {
+                console.log(italic(`\n(FKN: caught manual exit signal ${signal}.)`));
+                child.kill(signal);
+                success = 1;
+            };
+
+            const onSigint = () => signalHandler("SIGINT");
+            const onSigterm = () => signalHandler("SIGTERM");
+            const onSigbreak = () => signalHandler("SIGBREAK");
+
+            Deno.addSignalListener("SIGINT", onSigint);
+            Deno.addSignalListener("SIGTERM", onSigterm);
+            if (LOCAL_PLATFORM.SYSTEM === "msft") {
+                Deno.addSignalListener("SIGBREAK", onSigbreak);
+            }
+
+            let out;
+            try {
+                out = await child.output();
+            } catch (_e) {
+                // console.error(italic(`(FKN: child process error: ${e})`));
+                out = {
+                    success: false,
+                    stdout: "",
+                };
+            } finally {
+                Deno.removeSignalListener("SIGINT", onSigint);
+                Deno.removeSignalListener("SIGTERM", onSigterm);
+                if (LOCAL_PLATFORM.SYSTEM === "msft") {
+                    Deno.removeSignalListener("SIGBREAK", onSigbreak);
+                }
+            }
+
+            return {
+                stdout: "",
+                success: success === 1 ? true : out.success,
+            };
+        } catch (e) {
+            if (e instanceof Deno.errors.NotFound) {
+                throw new FknError(
+                    "Os__NoEntity",
+                    `Detached Cmd tried to execute '${pref} ${expr.join(" ")}', but your OS wasn't able find it.`,
+                );
+            }
+            throw e;
+        }
     } else {
         return Commander(
             pref,
