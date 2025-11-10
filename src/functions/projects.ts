@@ -47,7 +47,7 @@ export function GetAllProjects(ignored?: false | "limit" | "exclude"): string[] 
     for (const entry of list) {
         try {
             const protection = GetProjectSettings(entry).divineProtection;
-            if (!protection) {
+            if (protection !== "*" && protection.length === 0) {
                 if (ignored === "exclude") aliveReturn.push(entry);
                 continue;
             }

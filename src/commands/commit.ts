@@ -1,5 +1,7 @@
 // TODO(@ZakaHaceCosas): somewhere, we're not committing deleted files
 // (must be coming from path check)
+// TODO(@ZakaHaceCosas) 2: sometimes a commit without a commitCmd doesn't run
+// (files get unstaged then the thing fails)
 import { Interrogate, LogStuff } from "../functions/io.ts";
 import { ConservativelyGetProjectEnvironment } from "../functions/projects.ts";
 import type { TheCommitterConstructedParams } from "./_interfaces.ts";
@@ -11,7 +13,7 @@ import { FknError } from "../functions/error.ts";
 import { RunCmdSet, ValidateCmdSet } from "../functions/cmd-set.ts";
 import { bold, italic, white } from "@std/fmt/colors";
 
-const NOT_COMMITTABLE = [".env", ".env.local", ".sqlite", ".db", "node_modules", ".bak"];
+const NOT_COMMITTABLE = [".env", ".env.local", ".sqlite", ".db", "node_modules", ".bak", ".venv", "venv"];
 
 function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
     const canCommit = CanCommit(path);
@@ -159,7 +161,7 @@ export default async function TheCommitter(params: TheCommitterConstructedParams
     // hear me out
     // 1. UNSTAGE their files (they probably won't even realize) so we can modify them
     const out = StageFiles(project, "!A");
-    if (out !== "ok") throw `No files to stage? This is likely an error somewhere.`;
+    if (out !== "ok") throw "No files to stage? This is likely an error somewhere.";
 
     // 2. run their commitCmd over UNSTAGED, MODIFIABLE files
     if (typeof env !== "string") {

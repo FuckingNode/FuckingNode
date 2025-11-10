@@ -19,17 +19,15 @@ from_git = { git = "https://github.com/FuckingNode/FuckingRust.git", branch = "d
 from_tarball = { url = "https://somewhere.com/some_crate-1.0.0.tar.gz" }
 ```
 
-## Better UX
+## Setups
 
-- [ ] Allow for spread commands, using --flags instead of plaintext for specific arguments, e.g. `fkn add path1 path2 path3` or `fkclean project1 project2 project3 --intensity=normal`.
-  - [x] Breaking one: `--projects` (`clean`)
-    - [ ] `--projects` (`audit`) and `--setups` (`setup`) delayed until V5.1
-  - [x] Non-breaking ones: `fkadd ...projects`, `fkrem ...projects`
+### Features
+
+- [ ] Add advanced templating. This is, prompts and questions to autofill a template
+  - [ ] fknode.yaml and prettier ones
+  - [ ] vercel.json, eslint conf, gatsby conf, etc...
 
 ## Chores & development
 
 - [ ] **Actually write some (more) fucking tests.** TDD is the best way to go.
-- [ ] Cleanup the codebase (it's getting kinda messy ngl).
-  - [x] Remove audit tests. That's actually _the only feature that shouldn't have a test suite._
-  - [x] Fix Nix hashing.
-  - [ ] Review all code to follow my own fucking guidelines, there are different ways of coding mixed up in the same project :skull: (this means updating old code to match `CONTRIBUTING.md`).
+- [ ] Cleanup the codebase (it's getting kinda messy ngl), and review all code to follow my own fucking guidelines, there are different ways of coding mixed up in the same project :skull: (this means updating old code to match `CONTRIBUTING.md`).
