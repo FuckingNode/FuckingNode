@@ -1,8 +1,8 @@
 import { normalize, spaceString } from "@zakahacecosas/string-utils";
 import { LogStuff } from "../functions/io.ts";
 import type { TheHelperConstructedParams } from "./_interfaces.ts";
-import { ColorString } from "../functions/color.ts";
-import { bold, brightGreen, brightYellow, dim, italic } from "@std/fmt/colors";
+import { orange, pink } from "../functions/color.ts";
+import { bold, brightBlue, brightGreen, brightYellow, cyan, dim, italic } from "@std/fmt/colors";
 
 type HelpItem = [string, string | null, string] | [string, string | null, string, boolean];
 
@@ -10,15 +10,18 @@ function formatCmd(obj: HelpItem[]): string {
     const strings: string[] = [];
 
     for (const thingy of obj) {
-        const cmd: string = ColorString(
-            thingy[0],
-            thingy[0] === ">>>" ? "bright-green" : ["export", "compat"].includes(thingy[0]) ? "cyan" : "bright-blue",
-        );
+        const cmd: string = thingy[0] === ">>>"
+            ? brightGreen(
+                thingy[0],
+            )
+            : ["export", "compat"].includes(thingy[0])
+            ? cyan(thingy[0])
+            : brightBlue(thingy[0]);
         const params: string = thingy[1] ? bold(italic(dim(thingy[1]))) : italic(dim("(No parameters)"));
         const desc: string = thingy[2].replaceAll("\n", "\n" + spaceString(" ", 0, 32))
-            .replace(new RegExp("--[^\\s]+", "gim"), (match) => ColorString(match, "orange", "bold"))
-            .replace(new RegExp("\<[^\\s]+\>", "gim"), (match) => ColorString(match, "pink", "bold"))
-            .replace(new RegExp("'[^\\s]+'", "gim"), (match) => ColorString(match, "orange", "bold"));
+            .replace(new RegExp("--[^\\s]+", "gim"), (match) => orange(bold(match)))
+            .replace(new RegExp("\<[^\\s]+\>", "gim"), (match) => pink(bold(match)))
+            .replace(new RegExp("'[^\\s]+'", "gim"), (match) => orange(bold(match)));
 
         strings.push(
             `${spaceString(cmd, 0, 33 - (thingy[0].length))}${desc}${((thingy[3] ?? false) === true) ? `\n${params}` : ""}`,
@@ -29,14 +32,14 @@ function formatCmd(obj: HelpItem[]): string {
 }
 
 function formatCmdWithTitle(title: string, desc: string, obj: HelpItem[] | null): string {
-    return `> ${ColorString(title, "bright-green", "bold")}\n\n>>> Details:\n\n${desc}${obj ? `\n\n>>> Parameters\n\n${formatCmd(obj)}\n` : ""}`;
+    return `> ${brightGreen(bold(title))}\n\n>>> Details:\n\n${desc}${obj ? `\n\n>>> Parameters\n\n${formatCmd(obj)}\n` : ""}`;
 }
 
 function projectReminder(): void {
     LogStuff(
-        "Note: <project> is either a file path OR a project's name.\nIn places where we can assume the project is already added (like 'clean', 'remove', or 'stats'),\nyou can pass the project's name (as it appears in the package file) and it should be recognized.",
-        undefined,
-        ["italic", "half-opaque"],
+        italic(
+            dim("Note: <project> is either a file path OR a project's name.\nIn places where we can assume the project is already added (like 'clean', 'remove', or 'stats'),\nyou can pass the project's name (as it appears in the package file) and it should be recognized."),
+        ),
     );
 }
 

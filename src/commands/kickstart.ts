@@ -13,7 +13,7 @@ import { GenerateGitUrl } from "./toolkit/git-url.ts";
 import { Clone } from "../functions/git.ts";
 import { validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { GetElapsedTime } from "../functions/date.ts";
-import { bold, italic } from "@std/fmt/colors";
+import { bold, brightGreen, italic } from "@std/fmt/colors";
 
 export default async function TheKickstarter(params: TheKickstarterConstructedParams): Promise<void> {
     const { gitUrl, path, manager } = params;
@@ -37,7 +37,7 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
         );
     }
 
-    LogStuff("Let's kickstart! Wait a moment please...", "tick-clear", ["bright-green", "bold"]);
+    LogStuff(bold(brightGreen("Let's kickstart! Wait a moment please...")), "tick-clear");
     LogStuff(`Cloning repo from ${bold(repoUrl)}`, "working");
 
     Clone(repoUrl, clonePath);

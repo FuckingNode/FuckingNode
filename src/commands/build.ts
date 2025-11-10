@@ -3,6 +3,7 @@ import type { TheBuilderConstructedParams } from "./_interfaces.ts";
 import { LogStuff, Notification } from "../functions/io.ts";
 import { GetElapsedTime } from "../functions/date.ts";
 import { RunCmdSet, ValidateCmdSet } from "../functions/cmd-set.ts";
+import { bold, brightGreen, brightYellow, green } from "@std/fmt/colors";
 
 export default async function TheBuilder(params: TheBuilderConstructedParams): Promise<void> {
     const env = await ConservativelyGetProjectEnvironment(params.project);
@@ -12,17 +13,17 @@ export default async function TheBuilder(params: TheBuilderConstructedParams): P
     const buildCmd = ValidateCmdSet({ env, key: "buildCmd" });
 
     if (!buildCmd) {
-        LogStuff("No build command(s) specified!", "warn", "bright-yellow");
+        LogStuff(brightYellow("No build command(s) specified!"), "warn");
         return;
     }
 
     const startup = new Date();
 
-    LogStuff(`There we go, time to build ${env.names.name}`, "tick-clear", "green");
+    LogStuff(green(`There we go, time to build ${env.names.name}`), "tick-clear");
 
     await RunCmdSet({ env, key: "buildCmd" });
 
-    LogStuff(`That worked out! ${env.names.name} should be built now.`, "tick", ["bold", "bright-green"]);
+    LogStuff(brightGreen(bold(`That worked out! ${env.names.name} should be built now.`)), "tick");
 
     Notification(
         "Build completed!",

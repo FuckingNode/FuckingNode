@@ -26,9 +26,8 @@ import { ResolveLockfiles } from "../commands/toolkit/cleaner.ts";
 import { isGlob } from "@std/path/is-glob";
 import { joinGlobs, normalizeGlob, parse } from "@std/path";
 import { globSync } from "node:fs";
-import { ColorString } from "./color.ts";
-import { bold, dim, italic, white } from "@std/fmt/colors";
-import type { VALID_COLORS } from "../types/misc.ts";
+import { orange, pink } from "./color.ts";
+import { bold, brightBlue, brightGreen, cyan, dim, italic, magenta, white } from "@std/fmt/colors";
 
 /**
  * Gets all the users projects and returns their absolute root paths as a `string[]`.
@@ -158,7 +157,7 @@ export async function AddProject(
         return env;
     } catch (e) {
         if (e instanceof FknError && glob) {
-            LogStuff(`Couldn't add ${workingEntry}. Maybe it's not a project. Skipping it...`, undefined, ["italic", "half-opaque"]);
+            LogStuff(italic(dim(`Couldn't add ${workingEntry}. Maybe it's not a project. Skipping it...`)));
             return "error";
         }
         if (!(e instanceof FknError) || e.code !== "Env__PkgFileUnparsable") throw e;
@@ -538,13 +537,27 @@ export function GetWorkspaces(path: string): string[] {
     }
 }
 
-function ColorizeRuntime(cpf: FnCPF, runtimeColor: VALID_COLORS, root: string): { path: string; name: string; nameVer: string; full: string } {
-    const formattedPath = ColorString(root, "italic", "half-opaque");
+function ColorizeRuntime(
+    cpf: FnCPF,
+    runtimeColor: "cyan" | "pink" | "bright-green" | "orange" | "bright-blue",
+    root: string,
+): { path: string; name: string; nameVer: string; full: string } {
+    const formattedPath = italic(dim(root));
+    const color = (s: string) =>
+        runtimeColor === "cyan"
+            ? cyan(bold(s))
+            : runtimeColor === "pink"
+            ? pink(bold(s))
+            : runtimeColor === "bright-blue"
+            ? brightBlue(bold(s))
+            : runtimeColor === "bright-green"
+            ? brightGreen(bold(s))
+            : orange(bold(s));
     return {
         path: formattedPath,
-        name: cpf.name ? ColorString(cpf.name, "bold", runtimeColor) : formattedPath,
-        nameVer: cpf.name ? `${ColorString(cpf.name, "bold", runtimeColor)}@${ColorString(cpf.version, "purple")}` : formattedPath,
-        full: cpf.name ? `${ColorString(cpf.name, "bold", runtimeColor)}@${ColorString(cpf.version, "purple")} ${formattedPath}` : formattedPath,
+        name: cpf.name ? color(cpf.name) : formattedPath,
+        nameVer: cpf.name ? `${color(cpf.name)}@${magenta(cpf.version)}` : formattedPath,
+        full: cpf.name ? `${color(cpf.name)}@${magenta(cpf.version)} ${formattedPath}` : formattedPath,
     };
 }
 
@@ -663,9 +676,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
     if (ResolveLockfiles(root).length > 1) {
         throw new FknError(
             "Env__SchrodingerLockfile",
-            `Multiple lockfiles found in ${
-                ColorString(root, "bold")
-            }. This is a bad practice and does not let us properly infer the package manager to use.`,
+            `Multiple lockfiles found in ${bold(root)}. This is a bad practice and does not let us properly infer the package manager to use.`,
         );
     }
 

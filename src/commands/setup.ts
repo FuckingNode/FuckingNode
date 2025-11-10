@@ -7,8 +7,7 @@ import { parse as parseJsonc } from "@std/jsonc";
 import { SETUPS, VISIBLE_SETUPS } from "./toolkit/setups.ts";
 import { mergeLines, normalize, table, validate } from "@zakahacecosas/string-utils";
 import { FknError } from "../functions/error.ts";
-import { ColorString } from "../functions/color.ts";
-import { bold } from "@std/fmt/colors";
+import { bold, italic } from "@std/fmt/colors";
 
 export default function TheSetuper(params: TheSetuperConstructedParams): void {
     if (!validate(params.setup)) {
@@ -53,7 +52,7 @@ export default function TheSetuper(params: TheSetuperConstructedParams): void {
     const path = JoinPaths(project, setupToUse.seek);
     const status = CheckForPath(path) ? (setupToUse.seek === "LICENSE" ? "Over" : "Merge") : "New";
 
-    const setupName = `${ColorString(setupToUse.name, "bold")} ${ColorString(setupToUse.seek, "italic")}`;
+    const setupName = `${bold(setupToUse.name)} ${italic(setupToUse.seek)}`;
 
     if (
         !(Interrogate(

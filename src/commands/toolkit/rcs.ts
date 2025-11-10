@@ -1,7 +1,7 @@
 import { type ProjectEnvironment, TypeGuardForCargo, TypeGuardForDeno, TypeGuardForNodeBun } from "../../types/platform.ts";
 import { LogStuff } from "../../functions/io.ts";
 import { parse } from "@std/semver";
-import { ColorString } from "../../functions/color.ts";
+import { italic } from "@std/fmt/colors";
 
 export function RecommendedCommunityStandards(env: ProjectEnvironment): void {
     if (TypeGuardForNodeBun(env)) {
@@ -27,7 +27,7 @@ export function RecommendedCommunityStandards(env: ProjectEnvironment): void {
             contributors ? "tick" : "bruh",
         );
         LogStuff(
-            description ? `"${ColorString(description, "italic")}", neat description.` : "No description found. What does your code even do?",
+            description ? `"${italic(description)}", neat description.` : "No description found. What does your code even do?",
             description ? "tick" : "error",
         );
         LogStuff(
@@ -96,7 +96,7 @@ export function RecommendedCommunityStandards(env: ProjectEnvironment): void {
         );
 
         LogStuff(
-            description ? `"${ColorString(description, "italic")}", neat description.` : "No description found. What does your project even do?",
+            description ? `"${italic(description)}", neat description.` : "No description found. What does your project even do?",
             description ? "tick" : "error",
         );
 

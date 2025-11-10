@@ -4,7 +4,7 @@ import { PerformAuditing } from "./toolkit/auditer.ts";
 import type { FkNodeSecurityAudit } from "../types/audit.ts";
 import type { TheAuditerConstructedParams } from "./_interfaces.ts";
 import { normalize, testFlag, validate } from "@zakahacecosas/string-utils";
-import { bold } from "@std/fmt/colors";
+import { bold, italic } from "@std/fmt/colors";
 
 export default async function TheAuditer(params: TheAuditerConstructedParams): Promise<void> {
     const { project } = params;
@@ -50,8 +50,7 @@ export default async function TheAuditer(params: TheAuditerConstructedParams): P
 
     LogStuff("Audit complete!", "tick-clear");
     LogStuff(
-        "Keep in mind our report simply can't be 100% accurate - the best option is always to fix vulnerabilities.",
+        italic("Keep in mind our report simply can't be 100% accurate - the best option is always to fix vulnerabilities."),
         "heads-up",
-        "italic",
     );
 }

@@ -1,11 +1,11 @@
 import { join } from "@std/path/join";
-import { ColorString } from "./color.ts";
+import { orange } from "./color.ts";
 import type { GLOBAL_ERROR_CODES } from "../types/errors.ts";
 import { GetDateNow } from "./date.ts";
 import { type UnknownString, validate } from "@zakahacecosas/string-utils";
 import { FKNODE_SHALL_WE_DEBUG } from "../main.ts";
 import { LOCAL_PLATFORM } from "../platform.ts";
-import { stripAnsiCode } from "@std/fmt/colors";
+import { bold, brightBlue, brightYellow, italic, red, stripAnsiCode } from "@std/fmt/colors";
 import { ALIASES } from "../commands/toolkit/git-url.ts";
 
 /**
@@ -58,9 +58,8 @@ export class FknError extends Error {
                 break;
             case "Os__NoAppdataNoHome":
                 this.hint = `We tried to find ${
-                    ColorString(
+                    bold(
                         LOCAL_PLATFORM.SYSTEM === "msft" ? "APPDATA env variable" : "XDG_CONFIG_HOME and HOME env variables",
-                        "bold",
                     )
                 } but failed, meaning config files cannot be created and the CLI can't work. Something seriously went motherfuckingly wrong. If these aren't the right environment variables for your system's config path (currently using APPDATA on Windows, /home/user/.config on macOS and Linux), please raise an issue on GitHub.`;
                 break;
@@ -115,17 +114,17 @@ export class FknError extends Error {
     private handleMessage(): void {
         const messageParts: string[] = [
             "----------",
-            ColorString(`A FknError happened! ${ColorString(this.code, "bold")}`, "red"),
+            red(`A FknError happened! ${bold(this.code)}`),
         ];
         if (this.message) {
             messageParts.push(
-                `Thrown message:      ${ColorString(this.message, "bright-yellow")}`,
+                `Thrown message:      ${brightYellow(this.message)}`,
             );
         }
         if (this.hint !== undefined) {
             messageParts.push(
                 "----------",
-                `${ColorString("Hint:", "bright-blue")} ${ColorString(this.hint, "italic")}`,
+                `${brightBlue("Hint:")} ${italic(this.hint)}`,
                 "----------",
             );
         }
@@ -166,7 +165,7 @@ ${stripAnsiCode(validate(debuggableContent) ? debuggableContent : "UNKNOWN OUTPU
 ---\n`;
         if (showWarn) {
             console.warn(
-                ColorString(`An exception occurred. For details about what happened, see the last entry of ${debugPath}`, "orange"),
+                orange(`An exception occurred. For details about what happened, see the last entry of ${debugPath}`),
             );
         }
         Deno.writeTextFileSync(
@@ -198,7 +197,7 @@ export function ErrorHandler(e: unknown): never {
         e.exit();
         Deno.exit(1); // (never reached, but without this line typescript doesn't shut up)
     }
-    const fk = ColorString("f*ck", "red", "bold");
+    const fk = red(bold("f*ck"));
     if (Error.isError(e)) {
         console.error(`${fk}! Something happened: ${e.message} (${e.cause})\n${e.stack}`);
         Deno.exit(1);

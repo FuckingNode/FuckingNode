@@ -11,9 +11,9 @@ import type { RESULT } from "../clean.ts";
 import { sortAlphabetically, validate } from "@zakahacecosas/string-utils";
 import { FkNodeInterop } from "../interop/interop.ts";
 import { LOCAL_PLATFORM } from "../../platform.ts";
-import { ColorString } from "../../functions/color.ts";
 import type { CF_FKNODE_SETTINGS } from "../../types/config_files.ts";
-import { bold, italic, red } from "@std/fmt/colors";
+import { blue, bold, brightBlue, brightGreen, brightYellow, cyan, dim, italic, magenta, red } from "@std/fmt/colors";
+import { orange, pink } from "../../functions/color.ts";
 
 /** Handles errors and short-circuiting. */
 function HandleErroring(
@@ -67,7 +67,7 @@ const ProjectCleaningFeatures = {
             if (output === true) LogStuff(`Updated dependencies for ${projectName}!`, "tick");
             return;
         } catch (e) {
-            LogStuff(`Failed to update deps for ${projectName}:${e}`, "warn", "bright-yellow");
+            LogStuff(brightYellow(`Failed to update deps for ${projectName}: ${e}`), "warn");
             HandleErroring(env, "updater", errors, shortCircuit);
             return;
         }
@@ -107,7 +107,7 @@ const ProjectCleaningFeatures = {
             if (output === true) LogStuff(`Linted ${projectName}!`, "tick");
             return;
         } catch (e) {
-            LogStuff(`Failed to lint ${projectName}: ${e}`, "warn", "bright-yellow");
+            LogStuff(brightYellow(`Failed to lint ${projectName}: ${e}`), "warn");
             HandleErroring(env, "linter", errors, shortCircuit);
             return;
         }
@@ -128,7 +128,7 @@ const ProjectCleaningFeatures = {
             if (output === true) LogStuff(`Prettified ${projectName}!`, "tick");
             return;
         } catch (e) {
-            LogStuff(`Failed to pretty ${projectName}: ${e}`, "warn", "bright-yellow");
+            LogStuff(brightYellow(`Failed to pretty ${projectName}: ${e}`), "warn");
             HandleErroring(env, "prettifier", errors, shortCircuit);
             return;
         }
@@ -163,22 +163,20 @@ const ProjectCleaningFeatures = {
                     continue;
                 } catch (e) {
                     if (String(e).includes("os error 2")) {
-                        // using ColorString instead of the 3rd arg is on purpose
-                        // emojis in italic look WEIRD
                         LogStuff(
-                            ColorString(`No need to destroy ${bold(path)}: it does not exist.`),
+                            `No need to destroy ${bold(path)}: it does not exist.`,
                             "skip",
                         );
                         continue;
                     }
-                    LogStuff(`Error destroying ${path}: ${e}`, "error", "red");
+                    LogStuff(brightYellow(`Failed to destroy ${path}: ${e}`), "warn");
                     continue;
                 }
             }
             LogStuff(`Destroyed stuff at ${projectName}!`, "tick");
             return;
         } catch (e) {
-            LogStuff(`Failed to destroy stuff at ${projectName}: ${e}`, "warn", "bright-yellow");
+            LogStuff(brightYellow(`Failed to destroy stuff at ${projectName}: ${e}`), "warn");
             HandleErroring(env, "destroyer", errors, shortCircuit);
             return;
         }
@@ -379,11 +377,10 @@ export function PerformHardCleanup(shortCircuit: boolean): void {
     if (ManagerExists("npm")) {
         try {
             LogStuff(
-                "NPM",
+                red("NPM"),
                 "package",
-                "red",
             );
-            LogStuff(`Running ${italic(npmHardPruneArgs.join(" "))}`, undefined, ["bold", "half-opaque"]);
+            LogStuff(bold(dim(`Running ${italic(npmHardPruneArgs.join(" "))}`)));
             Commander("npm", npmHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (e) {
@@ -394,11 +391,10 @@ export function PerformHardCleanup(shortCircuit: boolean): void {
     if (ManagerExists("pnpm")) {
         try {
             LogStuff(
-                "PNPM",
+                brightYellow("PNPM"),
                 "package",
-                "bright-yellow",
             );
-            LogStuff(`Running ${italic(pnpmHardPruneArgs.join(" "))}`, undefined, ["bold", "half-opaque"]);
+            LogStuff(bold(dim(`Running ${italic(pnpmHardPruneArgs.join(" "))}`)));
             Commander("pnpm", pnpmHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (e) {
@@ -409,11 +405,10 @@ export function PerformHardCleanup(shortCircuit: boolean): void {
     if (ManagerExists("yarn")) {
         try {
             LogStuff(
-                "YARN",
+                magenta("YARN"),
                 "package",
-                "purple",
             );
-            LogStuff(`Running ${italic(yarnHardPruneArgs.join(" "))}`, undefined, ["bold", "half-opaque"]);
+            LogStuff(bold(dim(`Running ${italic(yarnHardPruneArgs.join(" "))}`)));
             Commander("yarn", yarnHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (e) {
@@ -425,12 +420,11 @@ export function PerformHardCleanup(shortCircuit: boolean): void {
     if (ManagerExists("bun")) {
         try {
             LogStuff(
-                "BUN",
+                pink("BUN"),
                 "package",
-                "pink",
             );
             Commander("bun", ["init", "-y"]); // placebo
-            LogStuff(`Running ${italic(bunHardPruneArgs.join(" "))}`, undefined, ["bold", "half-opaque"]);
+            LogStuff(bold(dim(`Running ${italic(bunHardPruneArgs.join(" "))}`)));
             Commander("bun", bunHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (e) {
@@ -442,11 +436,10 @@ export function PerformHardCleanup(shortCircuit: boolean): void {
     if (ManagerExists("go")) {
         try {
             LogStuff(
-                "GOLANG",
+                cyan("GOLANG"),
                 "package",
-                "cyan",
             );
-            LogStuff(`Running ${italic(golangHardPruneArgs.join(" "))}`, undefined, ["bold", "half-opaque"]);
+            LogStuff(bold(dim(`Running ${italic(golangHardPruneArgs.join(" "))}`)));
             Commander("go", golangHardPruneArgs);
             LogStuff("Done", "tick");
         } catch (e) {
@@ -469,11 +462,10 @@ export function PerformHardCleanup(shortCircuit: boolean): void {
             const denoDir: string | undefined = Deno.env.get("DENO_DIR");
             if (!denoDir) throw "DENO_DIR is not defined in your environment variable set. Cannot clear Deno caches.";
             LogStuff(
-                "DENO",
+                brightBlue("DENO"),
                 "package",
-                "bright-blue",
             );
-            LogStuff(`Deleting ${italic(denoDir)}`, undefined, ["bold", "half-opaque"]);
+            LogStuff(bold(dim(`Deleting ${italic(denoDir)}`)));
             Deno.removeSync(denoDir);
             LogStuff("Done", "tick");
             // the CLI calls this kind of behaviors "maxim" cleanup
@@ -498,15 +490,14 @@ export function PerformHardCleanup(shortCircuit: boolean): void {
                 path = ParsePath("~/.cargo/registry");
             }
             LogStuff(
-                "CARGO",
+                orange("CARGO"),
                 "package",
-                "orange",
             );
-            LogStuff(`Deleting ${italic(path)}`, undefined, ["bold", "half-opaque"]);
+            LogStuff(bold(dim(`Deleting ${italic(path)}`)));
             Deno.removeSync(path, { recursive: true });
             LogStuff("Done", "tick");
         } catch (e) {
-            if (e instanceof Deno.errors.NotFound) LogStuff("Apparently there's no Cargo registry cache.", "moon-face", "italic");
+            if (e instanceof Deno.errors.NotFound) LogStuff(italic("Apparently there's no Cargo registry cache."), "moon-face");
             else {
                 LogStuff(`Failed!\n${e}`, "error");
                 HandleErroring("hard", "cargo", null, shortCircuit);
@@ -526,7 +517,7 @@ export function PerformHardCleanup(shortCircuit: boolean): void {
  */
 export async function PerformMaximCleanup(projects: string[]): Promise<void> {
     LogStuff(
-        `Time for maxim-pruning! ${ColorString("Wait patiently, please (node_modules takes a while to remove).", "italic")}`,
+        "Time for maxim-pruning!\nWait patiently, please (node_modules takes a while to remove).",
         "working",
     );
 
@@ -601,21 +592,19 @@ export function ShowReport(results: RESULT[]): void {
     const report: string[] = results.map((result) => {
         const protection = result.extras?.ignored
             ? italic(
-                `\n--> The above ${ColorString("was divinely protected from", "blue", "bold", "italic")} ${bold(result.extras.ignored)}`,
+                `\n--> The above ${blue(bold(italic("was divinely protected from")))} ${bold(result.extras.ignored)}`,
             )
             : "";
         const errors = result.extras?.failed
             ? italic(
-                `\n--> The above ${ColorString("faced errors with", "bold", "red", "italic")} ${bold(result.extras.failed)}`,
+                `\n--> The above ${bold(red(italic("faced errors with")))} ${bold(result.extras.failed)}`,
             )
             : "";
 
         return `${result.name} -> ${bold(result.status)}, taking ${italic(result.elapsedTime)}${protection}${errors}`;
     });
     LogStuff(
-        `Report\n\n${sortAlphabetically(report).join("\n")}\n\n${
-            ColorString(`Cleaning completed at ${new Date().toLocaleString()}`, "bright-green")
-        }`,
+        `Report\n\n${sortAlphabetically(report).join("\n")}\n\n${brightGreen(`Cleaning completed at ${new Date().toLocaleString()}`)}`,
         "chart",
     );
 }

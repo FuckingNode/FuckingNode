@@ -9,9 +9,8 @@ import { validate } from "@zakahacecosas/string-utils";
 import { FknError } from "../functions/error.ts";
 import { stringify as stringifyToml } from "@std/toml/stringify";
 import { GetTextIndentSize } from "../functions/filesystem.ts";
-import { ColorString } from "../functions/color.ts";
 import { RunCmdSet, ValidateCmdSet } from "../functions/cmd-set.ts";
-import { bold, red, white } from "@std/fmt/colors";
+import { bold, brightGreen, brightYellow, red, white } from "@std/fmt/colors";
 
 export default async function TheReleaser(params: TheReleaserConstructedParams): Promise<void> {
     if (!validate(params.version)) throw new FknError("Param__VerInvalid", "No version specified!");
@@ -68,7 +67,7 @@ export default async function TheReleaser(params: TheReleaserConstructedParams):
     if (!(params.dry === true || env.settings.releaseAlwaysDry === true)) {
         actions.push(
             red(
-                `Publish your changes to ${ColorString(env.runtime === "deno" ? "JSR" : env.runtime === "rust" ? "crates.is" : "npm", "bold")}`,
+                `Publish your changes to ${bold(env.runtime === "deno" ? "JSR" : env.runtime === "rust" ? "crates.is" : "npm")}`,
             ),
         );
     }
@@ -101,7 +100,7 @@ export default async function TheReleaser(params: TheReleaserConstructedParams):
 
     // build
     if (env.settings.buildForRelease) {
-        if (!buildCmd) LogStuff("You enabled buildForRelease, but no buildCmd was specified!", "warn", "bright-yellow");
+        if (!buildCmd) LogStuff(brightYellow("You enabled buildForRelease, but no buildCmd was specified!"), "warn");
         else RunCmdSet({ env, key: "buildCmd" });
     }
 
@@ -115,17 +114,18 @@ export default async function TheReleaser(params: TheReleaserConstructedParams):
 
     if (params.dry === true || env.settings.releaseAlwaysDry === true) {
         LogStuff(
-            "Aborted committing, publishing, and whatever else, because either the command you executed or this project's fknode.yaml instructed FuckingNode to make a \"dry-run\".\nYour 'releaseCmd' did execute.",
+            brightYellow(
+                "Aborted committing, publishing, and whatever else, because either the command you executed or this project's fknode.yaml instructed FuckingNode to make a \"dry-run\".\nYour 'releaseCmd' did execute.",
+            ),
             "warn",
-            "bright-yellow",
         );
         return;
     }
 
     LogStuff(
-        `\nFor safety, we'll first run ${env.manager}'s publish command with "--dry-run", and pause execution. Check that everything went alright, then come back to this terminal session and hit 'Y' so we continue with all tasks you assigned to us.\n(or hit 'N' if something's wrong).\n`,
-        undefined,
-        ["bright-yellow"],
+        brightYellow(
+            `\nFor safety, we'll first run ${env.manager}'s publish command with "--dry-run", and pause execution. Check that everything went alright, then come back to this terminal session and hit 'Y' so we continue with all tasks you assigned to us.\n(or hit 'N' if something's wrong).\n`,
+        ),
     );
 
     Commander(
@@ -179,6 +179,6 @@ export default async function TheReleaser(params: TheReleaserConstructedParams):
     const publishOutput = Commander(env.commands.base, env.commands.publish);
     if (!publishOutput.success) throw new FknError("Task__Release", `Publish command failed: ${publishOutput.stdout}`);
 
-    LogStuff(`That worked out! ${params.version} should be live now.`, "tick", ["bold", "bright-green"]);
+    LogStuff(bold(brightGreen(`That worked out! ${params.version} should be live now.`)), "tick");
     return;
 }

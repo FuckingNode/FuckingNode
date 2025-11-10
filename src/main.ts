@@ -34,6 +34,8 @@ import { LOCAL_PLATFORM } from "./platform.ts";
 import { parse } from "@std/path";
 import { ParseFIM } from "./functions/modules/instructions.ts";
 import { RunFEM } from "./functions/modules/extensions.ts";
+import { brightBlue, italic } from "@std/fmt/colors";
+import { orange } from "./functions/color.ts";
 
 async function init(): Promise<void> {
     await FreshSetup();
@@ -335,13 +337,13 @@ async function main(): Promise<void> {
             LogStuff(`Best documentation website for best CLI, live at https://fuckingnode.github.io/`, "bulb");
             LaunchWebsite("https://fuckingnode.github.io/");
             break;
-        case "experimental-do-not-use-lmao--test-fim-parser":
+        case "experimental--test-fim-parser":
             if (!Deno.args[1]) return;
             console.log(
                 ParseFIM(Deno.readTextFileSync(Deno.args[1])),
             );
             break;
-        case "experimental-do-not-use-lmao--test-fem-exec":
+        case "experimental--test-fem-exec":
             if (!Deno.args[1]) return;
             await RunFEM(Deno.readTextFileSync(Deno.args[1]));
             break;
@@ -374,9 +376,7 @@ async function main(): Promise<void> {
         case "pro-tip":
             LogStuff(`Here's a pro tip!`);
             LogStuff(
-                HINTS[Math.floor(Math.random() * HINTS.length)]!,
-                undefined,
-                "bright-blue",
+                brightBlue(HINTS[Math.floor(Math.random() * HINTS.length)]!),
             );
             break;
         case "help":
@@ -384,7 +384,7 @@ async function main(): Promise<void> {
             break;
         default:
             TheHelper({});
-            LogStuff(`You're seeing this because command '${flags[0]}' doesn't exist.`, undefined, ["orange", "italic"]);
+            LogStuff(orange(italic(`You're seeing this because command '${flags[0]}' doesn't exist.`)));
     }
 }
 

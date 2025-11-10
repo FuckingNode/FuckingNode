@@ -7,8 +7,8 @@ import { Interrogate, LogStuff } from "../functions/io.ts";
 import { Commit, GetBranches, Push } from "../functions/git.ts";
 import { CheckForPath, JoinPaths } from "../functions/filesystem.ts";
 import { FkNodeInterop } from "./interop/interop.ts";
-import { ColorString } from "../functions/color.ts";
-import { brightYellow } from "@std/fmt/colors";
+import { orange } from "../functions/color.ts";
+import { brightYellow, red } from "@std/fmt/colors";
 
 const FULL_NAME = `FuckingNode v${DenoJson.default.version}`;
 
@@ -32,7 +32,7 @@ export default async function TheSurrenderer(params: TheSurrendererConstructedPa
 
     if (
         !Interrogate(
-            `Are you 100% sure that ${env.names.full} ${ColorString("should be deprecated?\nThis is not something you can undo!", "orange")}`,
+            `Are you 100% sure that ${env.names.full} ${orange("should be deprecated?\nThis is not something you can undo!")}`,
             "warn",
         )
     ) return;
@@ -102,7 +102,7 @@ export default async function TheSurrenderer(params: TheSurrendererConstructedPa
 
     Push(env.root, GetBranches(env.root).current);
 
-    LogStuff("Project deprecated successfully, sir.", "comrade", "red");
+    LogStuff(red("Project deprecated successfully, sir."), "comrade");
     const rem = Interrogate(
         "If you DO want us to auto-remove the entire source code and node_modules from your local drive, hit 'y'. Hit 'n' otherwise (idk, you might want to keep the code as a memorial?)",
         "ask",

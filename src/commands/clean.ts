@@ -5,6 +5,7 @@ import { PerformCleanup, PerformHardCleanup, PerformMaximCleanup, ShowReport, Va
 import type { CleanerIntensity } from "../types/config_params.ts";
 import { GetElapsedTime } from "../functions/date.ts";
 import { GetUserSettings } from "../functions/config.ts";
+import { brightGreen, red } from "@std/fmt/colors";
 
 export type RESULT = {
     name: string;
@@ -47,9 +48,8 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
     }
 
     LogStuff(
-        `Cleaning started at ${new Date().toLocaleString()}\n`,
+        brightGreen(`Cleaning started at ${new Date().toLocaleString()}\n`),
         "working",
-        "bright-green",
     );
 
     const results: RESULT[] = [];
@@ -90,9 +90,8 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
             results.push(result);
         } catch (e) {
             LogStuff(
-                `Error while working around with ${projectName}: ${e}\n`,
+                red(`Error while working around with ${projectName}: ${e}\n`),
                 "error",
-                "red",
             );
             results.push({
                 name: projectName,
@@ -108,9 +107,10 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
     if (realIntensity === "maxim") await PerformMaximCleanup(projects);
 
     LogStuff(
-        projects.length > 1 ? `All your motherfucking projects have been cleaned!` : `Your motherfucking project has been cleaned!\n`,
+        brightGreen(
+            projects.length > 1 ? `All your motherfucking projects have been cleaned!` : `Your motherfucking project has been cleaned!\n`,
+        ),
         "tick",
-        "bright-green",
     );
     const elapsed = Date.now() - startup.getTime();
     Notification(

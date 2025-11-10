@@ -1,4 +1,5 @@
-import { ColorString } from "../../functions/color.ts";
+import { blue, brightBlue, brightYellow, cyan, green, italic, red } from "@std/fmt/colors";
+import { brightOrange, orange } from "../../functions/color.ts";
 import { Get } from "../../functions/embed.ts";
 
 const SUPPORTED_FILES = [
@@ -142,24 +143,26 @@ export const SETUPS: {
     },
 ];
 
-export const VISIBLE_SETUPS = SETUPS.map(({ name, desc, seek }) => ({
-    Name: ColorString(
-        name,
-        seek === "fknode.yaml"
-            ? "red"
-            : seek === "tsconfig.json"
-            ? "bright-blue"
-            : seek === ".editorconfig"
-            ? "cyan"
-            : seek === ".prettierrc"
-            ? "bright-yellow"
-            : (seek === ".gitattributes" || seek === ".gitignore")
-            ? "orange"
-            : seek === "LICENSE"
-            ? "bright-orange"
-            : seek === ".npmrc"
-            ? "green"
-            : "blue",
-    ),
-    Description: ColorString(desc, "italic"),
-}));
+export const VISIBLE_SETUPS = SETUPS.map(({ name, desc, seek }) => {
+    const color = seek === "fknode.yaml"
+        ? red
+        : seek === "tsconfig.json"
+        ? brightBlue
+        : seek === ".editorconfig"
+        ? cyan
+        : seek === ".prettierrc"
+        ? brightYellow
+        : (seek === ".gitattributes" || seek === ".gitignore")
+        ? orange
+        : seek === "LICENSE"
+        ? brightOrange
+        : seek === ".npmrc"
+        ? green
+        : blue;
+    return {
+        Name: color(
+            name,
+        ),
+        Description: italic(desc),
+    };
+});

@@ -62,26 +62,6 @@ export interface GITHUB_RELEASE {
 }
 
 /**
- * Colors that can be used to spice up the CLI's stdout.
- */
-export type VALID_COLORS =
-    | "red"
-    | "white"
-    | "bold"
-    | "blue"
-    | "green"
-    | "cyan"
-    | "purple"
-    | "pink"
-    | "half-opaque"
-    | "bright-green"
-    | "italic"
-    | "bright-blue"
-    | "bright-yellow"
-    | "orange"
-    | "bright-orange";
-
-/**
  * Git file codes.
  */
 export type GIT_FILES = UnknownString[] | "A" | "!A" | "S";

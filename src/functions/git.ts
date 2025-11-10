@@ -4,7 +4,7 @@ import { CheckForPath, JoinPaths, ParsePath } from "../functions/filesystem.ts";
 import { normalize, normalizeArray, StringArray, validate } from "@zakahacecosas/string-utils";
 import { FknError } from "./error.ts";
 import type { GIT_FILES } from "../types/misc.ts";
-import { ColorString } from "./color.ts";
+import { bold } from "@std/fmt/colors";
 
 /** Runs a Git command with any args. ASSUMES AN ALREADY SPOTTED PATH. */
 function g(path: string, args: string[]): ReturnType<typeof Commander> {
@@ -119,7 +119,7 @@ export function Commit(path: string, message: string, add: string[] | "all" | "n
     } catch (e) {
         throw new FknError(
             "Git__Commit",
-            `Couldn't create commit ${ColorString(message, "bold")} at ${ColorString(path, "bold")}: ${e}`,
+            `Couldn't create commit ${bold(message)} at ${bold(path)}: ${e}`,
         );
     }
 }
@@ -139,7 +139,7 @@ export function Push(path: string, branch: string | false): void {
     } catch (e) {
         throw new FknError(
             "Git__Push",
-            `Couldn't push at ${ColorString(path, "bold")}: ${e}`,
+            `Couldn't push at ${bold(path)}: ${e}`,
         );
     }
 }
@@ -186,7 +186,7 @@ export function Tag(path: string, tag: string, push: boolean): void {
     } catch (e) {
         throw new FknError(
             "Git__MkTag",
-            `Couldn't create tag ${tag} at ${ColorString(path, "bold")}: ${e}`,
+            `Couldn't create tag ${tag} at ${bold(path)}: ${e}`,
         );
     }
 }
@@ -211,7 +211,7 @@ export function GetLatestTag(path: string): string {
     } catch (e) {
         throw new FknError(
             "Git__GLTag",
-            `Couldn't get latest tag at ${ColorString(path, "bold")} because of error: ${e}`,
+            `Couldn't get latest tag at ${bold(path)} because of error: ${e}`,
         );
     }
 }
@@ -238,7 +238,7 @@ export function GetStagedFiles(path: string): string[] {
     } catch (e) {
         throw new FknError(
             "Git__GStaged",
-            `Couldn't get files ready for commit (staged) at ${ColorString(path, "bold")}: ${e}`,
+            `Couldn't get files ready for commit (staged) at ${bold(path)}: ${e}`,
         );
     }
 }
@@ -263,7 +263,7 @@ export function UndoCommit(path: string): void {
     } catch (e) {
         throw new FknError(
             "Git__Uncommit",
-            `Couldn't undo commit at ${ColorString(path, "bold")}: ${e}`,
+            `Couldn't undo commit at ${bold(path)}: ${e}`,
         );
     }
 }
@@ -298,7 +298,7 @@ export function ReadLastCommit(path: string): { message: string; hash: string; a
     } catch (e) {
         throw new FknError(
             "Git__ReadCommit",
-            `Couldn't get files ready for commit (staged) at ${ColorString(path, "bold")}: ${e}`,
+            `Couldn't get files ready for commit (staged) at ${bold(path)}: ${e}`,
         );
     }
 }
@@ -319,20 +319,20 @@ export function GetCommittableFiles(path: string): string[] {
     } catch (e) {
         throw new FknError(
             "Git__GCommittable",
-            `Couldn't get modified (committable) files at ${ColorString(path, "bold")}: ${e}`,
+            `Couldn't get modified (committable) files at ${bold(path)}: ${e}`,
         );
     }
 }
 /**
  * Gets all Git branches for a project.
  *
- * @param project Project path. **Assumes it's parsed & spotted.**
+ * @param path Project path. **Assumes it's parsed & spotted.**
  * @returns An object with the current branch and an array with all branch names.
  */
-export function GetBranches(project: string): { current: string | false; all: string[] } {
+export function GetBranches(path: string): { current: string | false; all: string[] } {
     try {
         const getBranchesOutput = g(
-            project,
+            path,
             [
                 "branch",
             ],
@@ -342,7 +342,7 @@ export function GetBranches(project: string): { current: string | false; all: st
             // fallback to status
             // this is an edge case for newly made repositories
             const statusOutput = g(
-                project,
+                path,
                 [
                     "status",
                 ],
@@ -362,7 +362,7 @@ export function GetBranches(project: string): { current: string | false; all: st
                 .sortAlphabetically().normalize("just-trim").arr(),
         };
     } catch (e) {
-        new FknError("Git__GBranches", `Couldn't get branches at ${ColorString(project, "bold")}.`).debug(String(e), true);
+        new FknError("Git__GBranches", `Couldn't get branches at ${bold(path)}.`).debug(String(e), true);
         return { current: false, all: [] };
     }
 }
@@ -381,7 +381,7 @@ export function Clone(repoUrl: string, clonePath: string): void {
     } catch (e) {
         throw new FknError(
             "Git__Clone",
-            `Couldn't clone ${ColorString(repoUrl, "bold")} to ${ColorString(clonePath, "bold")}: ${e}`,
+            `Couldn't clone ${bold(repoUrl)} to ${bold(clonePath)}: ${e}`,
         );
     }
 }
@@ -392,15 +392,15 @@ export function Clone(repoUrl: string, clonePath: string): void {
  * - `"!A"`: unstage all files.
  * - `"S"`: stage all files that are staged, but not committed (this is a no-op).
  *
- * @param project Project path. **Assumes it's parsed & spotted.**
+ * @param path Project path. **Assumes it's parsed & spotted.**
  * @param files An array of files to stage, or a special string.
  * @returns
  */
-export function StageFiles(project: string, files: GIT_FILES): "ok" | "nothingToStage" {
+export function StageFiles(path: string, files: GIT_FILES): "ok" | "nothingToStage" {
     try {
         if (files === "A") {
             const stageAllOutput = g(
-                project,
+                path,
                 [
                     "add",
                     "-A",
@@ -411,7 +411,7 @@ export function StageFiles(project: string, files: GIT_FILES): "ok" | "nothingTo
         }
         if (files === "!A") {
             const unstageAllOutput = g(
-                project,
+                path,
                 [
                     "reset",
                 ],
@@ -428,7 +428,7 @@ export function StageFiles(project: string, files: GIT_FILES): "ok" | "nothingTo
         if (filesToStage.length === 0) return "nothingToStage";
 
         const stageOutput = g(
-            project,
+            path,
             [
                 "add",
                 ...filesToStage,
@@ -439,7 +439,7 @@ export function StageFiles(project: string, files: GIT_FILES): "ok" | "nothingTo
     } catch (e) {
         throw new FknError(
             "Git__Stage",
-            `Couldn't stage files at ${ColorString(project, "bold")}: ${e}`,
+            `Couldn't stage files at ${bold(path)}: ${e}`,
         );
     }
 }

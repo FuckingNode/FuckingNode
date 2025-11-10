@@ -1,9 +1,9 @@
-import type { VALID_COLORS, VALID_EMOJIS } from "../types/misc.ts";
+import type { VALID_EMOJIS } from "../types/misc.ts";
 import { GetUserSettings } from "./config.ts";
 import { stringify as stringifyYaml } from "@std/yaml";
 import { Commander } from "./cli.ts";
 import { LOCAL_PLATFORM } from "../platform.ts";
-import { ColorString } from "./color.ts";
+import { bold } from "@std/fmt/colors";
 
 /**
  * Appends an emoji at the beginning of a message.
@@ -66,25 +66,17 @@ export function Emojify(message: string, emoji: VALID_EMOJIS): string {
  *
  * @param {unknown} message The message to be logged.
  * @param {?VALID_EMOJIS} [emoji] Additionally, add an emoji before the log.
- * @param {?(VALID_COLORS | VALID_COLORS[])} [color] Optionally, a color (or more) for the output.
  * @returns {void}
  */
 export function LogStuff(
     // deno-lint-ignore explicit-module-boundary-types no-explicit-any
     message: any,
     emoji?: VALID_EMOJIS,
-    color?: VALID_COLORS | VALID_COLORS[],
 ): void {
     try {
         if (typeof message !== "string") message = String(message);
         const finalMessage = emoji ? Emojify(message, emoji) : message;
-
-        if (color) {
-            if (Array.isArray(color)) console.log(ColorString(finalMessage, ...color));
-            else console.log(ColorString(finalMessage, color));
-        } else {
-            console.log(finalMessage);
-        }
+        console.log(finalMessage);
     } catch (e) {
         throw `Error logging stuff: ${e}`;
     }
@@ -100,10 +92,10 @@ export function LogStuff(
 export function Interrogate(question: string, style?: "ask" | "warn" | "heads-up"): boolean {
     switch (style) {
         case "warn":
-            LogStuff(question, "warn", "bold");
+            LogStuff(bold(question), "warn");
             break;
         case "heads-up":
-            LogStuff(question, "heads-up", "bold");
+            LogStuff(bold(question), "heads-up");
             break;
         case "ask":
         default:

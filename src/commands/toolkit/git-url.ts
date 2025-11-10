@@ -1,6 +1,7 @@
 import { type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { LogStuff } from "../../functions/io.ts";
 import { FknError } from "../../functions/error.ts";
+import { italic } from "@std/fmt/colors";
 
 export const ALIASES: Record<string, (arg: string) => string> = {
     gh: (repo: string) => `https://github.com/${repo}.git`,
@@ -50,9 +51,8 @@ export function GenerateGitUrl(str: UnknownString): {
         if (!strictGitUrlRegex.test(workingGitUrl)) throw new FknError("Param__GitTargetInvalid", `${str} is not a valid Git URL!`);
         if (userForgotDotGit) {
             LogStuff(
-                "Psst... You forgot '.git' at the end. No worries, we can still read it.",
+                italic("Psst... You forgot '.git' at the end. No worries, we can still read it."),
                 "bruh",
-                "italic",
             );
         }
         const splittedUrl = workingGitUrl

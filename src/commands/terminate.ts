@@ -3,7 +3,7 @@ import { reveal } from "@zakahacecosas/string-utils/cli";
 import type { TheTerminatorConstructedParams } from "./_interfaces.ts";
 import { FknError } from "../functions/error.ts";
 import { Interrogate, LogStuff, Notification } from "../functions/io.ts";
-import { bold, italic } from "@std/fmt/colors";
+import { bold, brightGreen, italic } from "@std/fmt/colors";
 import { LOCAL_PLATFORM } from "../platform.ts";
 import { Get } from "../functions/embed.ts";
 import { GetAllProjects, GetProjectEnvironment } from "../functions/projects.ts";
@@ -37,7 +37,7 @@ export default async function TheTerminator(params: TheTerminatorConstructedPara
             `Are you ${bold("100% sure")} we should ${bold("entirely remove")} the ${bold(italic(params.runtime))} runtime from this machine?`,
         )
     ) {
-        LogStuff("Got it. No action taken.", "tick-clear", ["bright-green"]);
+        LogStuff(brightGreen("Got it. No action taken."), "tick-clear");
         return;
     }
 
@@ -56,7 +56,7 @@ export default async function TheTerminator(params: TheTerminatorConstructedPara
                 "warn",
             )
         ) {
-            LogStuff("Got it. No action taken.", "tick-clear", ["bright-green"]);
+            LogStuff(brightGreen("Got it. No action taken."), "tick-clear");
             return;
         }
         LogStuff("You chose it.", "warn");
@@ -74,7 +74,7 @@ export default async function TheTerminator(params: TheTerminatorConstructedPara
 
     const output = await new Deno.Command(LOCAL_PLATFORM.SHELL, { args: [file] }).spawn().output();
 
-    if (output.success) LogStuff(`Done! No more ${params.runtime} programming I guess.`, "tick", "bright-green");
+    if (output.success) LogStuff(brightGreen(`Done! No more ${params.runtime} programming I guess.`), "tick");
     else {
         LogStuff("Something went wrong. Check above.", "error");
         Deno.exit(1);
@@ -90,5 +90,5 @@ export default async function TheTerminator(params: TheTerminatorConstructedPara
 
     await BulkRemove(projects.map((p) => p.root));
 
-    LogStuff("Done.", "tick-clear", "bright-green");
+    LogStuff(brightGreen("Done."), "tick-clear");
 }

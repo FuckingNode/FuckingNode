@@ -7,10 +7,10 @@ import { parse as parseYaml } from "@std/yaml";
 import { GetAppPath } from "../functions/config.ts";
 import type { CF_FKNODE_SCHEDULE } from "../types/config_files.ts";
 import * as DenoJson from "../../deno.json" with { type: "json" };
-import { ColorString } from "../functions/color.ts";
 import { LOCAL_PLATFORM } from "../platform.ts";
 import { validateAgainst } from "@zakahacecosas/string-utils";
 import { parse as parsePath } from "@std/path";
+import { brightGreen, brightYellow, green } from "@std/fmt/colors";
 
 async function CheckUpdates(): Promise<CF_FKNODE_SCHEDULE | "rl"> {
     const scheduleFilePath = GetAppPath("SCHEDULE");
@@ -52,9 +52,8 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
 
     if (needsToUpdate === "rl") {
         LogStuff(
-            "You were rate-limited by GitHub (from where we download updates), my bro. Try again in, at most, one hour.",
+            brightYellow("You were rate-limited by GitHub (from where we download updates), my bro. Try again in, at most, one hour."),
             "bruh",
-            "bright-yellow",
         );
         return;
     }
@@ -63,16 +62,14 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
 
     if ((compare(parse(DenoJson.default.version), parse(latestVer)) >= 0) && !params.force) {
         if (params.silent) return;
-        LogStuff(`You're up to date! ${ColorString(DenoJson.default.version, "bright-green")} is the latest.`, "tick");
+        LogStuff(`You're up to date! ${brightGreen(DenoJson.default.version)} is the latest.`, "tick");
         return;
     }
 
     LogStuff(
         params.force
             ? "Forced update/reinstall."
-            : `There's a new version! ${ColorString(latestVer, "bright-green")}. You're on ${
-                ColorString(DenoJson.default.version, "green")
-            }, by the way.`,
+            : `There's a new version! ${brightGreen(latestVer)}. You're on ${green(DenoJson.default.version)}, by the way.`,
         "bulb",
     );
     if (params.silent) return;
@@ -114,7 +111,7 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
         ).spawn().output();
     }
     LogStuff(
-        `Updating to ${ColorString(latestVer, "bright-green")}. A separate terminal should've popped up and started downloading the update.`,
+        `Updating to ${brightGreen(latestVer)}. A separate terminal should've popped up and started downloading the update.`,
         "tick",
     );
     return;

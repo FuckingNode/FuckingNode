@@ -15,8 +15,7 @@ import { GetProjectEnvironment } from "../../functions/projects.ts";
 import { Commander } from "../../functions/cli.ts";
 import { DEBUG_LOG } from "../../functions/error.ts";
 import { VULNERABILITY_VECTORS } from "./vectors.ts";
-import { stripAnsiCode } from "@std/fmt/colors";
-import { ColorString } from "../../functions/color.ts";
+import { bold, brightBlue, brightGreen, brightYellow, dim, italic, red, stripAnsiCode } from "@std/fmt/colors";
 
 /**
  * **NPM report.** This interface only types properties of our interest.
@@ -321,7 +320,8 @@ function askQuestion(
     isReversed: boolean,
     worth: 1 | 2,
 ): InterrogatoryResponse {
-    const formattedQuestion = ColorString(question, isFollowUp ? "bright-blue" : "bright-yellow", "italic");
+    question = italic(question);
+    const formattedQuestion = isFollowUp ? brightBlue(question) : brightYellow(question);
     const answered = Interrogate(formattedQuestion);
     const truthValue = isReversed ? !answered : answered;
     const value = worth === 1 ? "+1" : "+2";
@@ -404,9 +404,9 @@ function InterrogateVulnerableProject(questions: string[]): Omit<
             );
             if (!isTrue(followUp)) {
                 LogStuff(
-                    "We'll use the word 'WebSockets', however these questions apply for any other kind of persistent connection, like WebRTC.",
-                    undefined,
-                    "italic",
+                    italic(
+                        "We'll use the word 'WebSockets', however these questions apply for any other kind of persistent connection, like WebRTC.",
+                    ),
                 );
                 handleQuestion(
                     { q: "Do you use Secure WebSockets (WSS) for some or all connections?", f: true, r: false, w: 2 },
@@ -524,30 +524,28 @@ function InterrogateVulnerableProject(questions: string[]): Omit<
  * @returns {void}
  */
 function DisplayAudit(percentage: number): void {
-    let color: "bright-yellow" | "red" | "bright-green";
+    let color;
     let message: string;
     if (percentage < 20) {
-        color = "bright-green";
+        color = brightGreen;
         message =
             "Seems like we're okay, one fucking project less to take care of!\nNever forget the best risk is no risk - we still encourage you to fix the vulnerabilities if you can.";
     } else if (percentage >= 20 && percentage < 50) {
-        color = "bright-yellow";
-        message = `${ColorString("There is a potential risk", "bold")} of these vulnerabilities causing you a headache.\nWhile you ${
-            ColorString("might", "italic")
+        color = brightYellow;
+        message = `${bold("There is a potential risk")} of these vulnerabilities causing you a headache.\nWhile you ${
+            italic("might")
         } be able to live with them, you should fix them.`;
     } else {
-        color = "red";
+        color = red;
         message = `${
-            ColorString(`Oh fuck`, "bold")
+            bold(`Oh fuck`)
         }. This project really should get all vulnerabilities fixed.\nBreaking changes can hurt, but your app security's breaking hurts a lot more. ${
-            ColorString("Please, fix this issue.", "bold")
+            bold("Please, fix this issue.")
         }`;
     }
-    const percentageString = ColorString(
+    const percentageString = color(bold(
         `${percentage.toFixed(2)}%`,
-        color,
-        "bold",
-    );
+    ));
     LogStuff(
         `We've evaluated your responses and concluded a risk factor of ${percentageString}.`,
     );
@@ -567,7 +565,7 @@ function AuditProject(bareReport: ParsedNodeReport): FkNodeSecurityAudit {
 
     LogStuff(
         `\n===        FOUND VULNERABILITIES (${totalAdvisories.toString().padStart(3, "0")})        ===\n${
-            ColorString(advisories.join(" & "), "bold")
+            bold(advisories.join(" & "))
         }\n===    STARTING FUCKINGNODE SECURITY AUDIT    ===\n`,
     );
 
@@ -614,7 +612,7 @@ export async function PerformAuditing(project: string): Promise<FkNodeSecurityAu
 
     Deno.chdir(env.root);
 
-    LogStuff(`Auditing ${env.names.nameVer} [${ColorString(env.commands.audit.join(" "), "italic", "half-opaque")}]`, "working");
+    LogStuff(`Auditing ${env.names.nameVer} [${italic(dim(env.commands.audit.join(" ")))}]`, "working");
     const res = Commander(
         env.commands.base,
         env.commands.audit,

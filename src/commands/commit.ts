@@ -11,7 +11,7 @@ import type { GIT_FILES } from "../types/misc.ts";
 import { CheckForPath } from "../functions/filesystem.ts";
 import { FknError } from "../functions/error.ts";
 import { RunCmdSet, ValidateCmdSet } from "../functions/cmd-set.ts";
-import { bold, italic, white } from "@std/fmt/colors";
+import { bold, brightGreen, italic, white } from "@std/fmt/colors";
 
 const NOT_COMMITTABLE = [".env", ".env.local", ".sqlite", ".db", "node_modules", ".bak", ".venv", "venv"];
 
@@ -97,14 +97,19 @@ export default async function TheCommitter(params: TheCommitterConstructedParams
     }
 
     LogStuff(
-        `Staged${params.files[0] === "-A" ? " all files, totalling" : ""} ${staged.length} ${pluralOrNot("file", staged.length)} for commit:\n${
-            staged
-                .slice(0, 7)
-                .map((file) => `${white(bold("- " + file))}${prevStaged.includes(file) ? " (prev. staged, kept)" : ""}`)
-                .join("\n")
-        }${staged.length > 7 ? `\nand ${staged.length - 7} more` : ""}`,
+        bold(
+            brightGreen(
+                `Staged${params.files[0] === "-A" ? " all files, totalling" : ""} ${staged.length} ${
+                    pluralOrNot("file", staged.length)
+                } for commit:\n${
+                    staged
+                        .slice(0, 7)
+                        .map((file) => `${white(bold("- " + file))}${prevStaged.includes(file) ? " (prev. staged, kept)" : ""}`)
+                        .join("\n")
+                }${staged.length > 7 ? `\nand ${staged.length - 7} more` : ""}`,
+            ),
+        ),
         "tick",
-        ["bold", "bright-green"],
     );
 
     const commitCmd = ValidateCmdSet({ env, key: "commitCmd" });
@@ -194,9 +199,6 @@ export default async function TheCommitter(params: TheCommitterConstructedParams
 
     if (params.push) Push(project, gitProps.branch);
 
-    LogStuff(`That worked out! Commit "${params.message}" should be ${params.push ? "done and live" : "done"} now.`, "tick", [
-        "bold",
-        "bright-green",
-    ]);
+    LogStuff(bold(brightGreen(`That worked out! Commit "${params.message}" should be ${params.push ? "done and live" : "done"} now.`)), "tick");
     return;
 }

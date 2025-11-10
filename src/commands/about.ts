@@ -1,10 +1,10 @@
 import * as DenoJson from "../../deno.json" with { type: "json" };
-import { ColorString } from "../functions/color.ts";
+import { brightOrange, orange } from "../functions/color.ts";
 import { LogStuff } from "../functions/io.ts";
-import type { VALID_COLORS } from "../types/misc.ts";
 import { ASCII } from "../functions/ascii.ts";
 import { phrases } from "../functions/phrases.ts";
 import { reveal } from "@zakahacecosas/string-utils/cli";
+import { bold, brightBlue, brightGreen, brightYellow, cyan, dim, italic, red } from "@std/fmt/colors";
 
 function getRandomPhrase(): string {
     const randomIndex = Math.floor(Math.random() * phrases.length);
@@ -12,34 +12,35 @@ function getRandomPhrase(): string {
     return string;
 }
 
-function getRandomColor(): VALID_COLORS {
-    const colors: VALID_COLORS[] = [
+function getRandomColor(): "red" | "orange" | "bright-orange" {
+    const colors = [
         "red",
         "orange",
         "bright-orange",
-    ];
+    ] as const;
 
     const randomIndex = Math.floor(Math.random() * colors.length);
-    return (colors[randomIndex]) ?? "white";
+    return (colors[randomIndex])!;
 }
 
 function colorizeText(text: string): string {
     const lines = text.split("\n");
     return lines.map((line) => {
-        return ColorString(line, getRandomColor());
+        const color = getRandomColor();
+        return color === "red" ? red(line) : color === "orange" ? orange(line) : brightOrange(line);
     }).join("\n");
 }
 
 const coolStrings = {
-    ver: ColorString(`FuckingNode v${DenoJson.default.version}`, "bold", "red"),
-    ts: ColorString(`TypeScript ${Deno.version.typescript}`, "bright-blue"),
-    deno: ColorString(`Deno ${Deno.version.deno}`, "bright-yellow"),
-    spain: ColorString("Spain", "red"),
-    zakaOne: ColorString("ZakaHaceCosas", "bright-green"),
-    zakaTwo: ColorString('"ZakaMakesStuff"', "italic"),
-    gitUrl: ColorString("https://github.com/FuckingNode/FuckingNode", "orange"),
-    side: ColorString("Another side project", "italic"),
-    date: ColorString("September 28, 2024", "cyan"),
+    ver: bold(red(`FuckingNode v${DenoJson.default.version}`)),
+    ts: brightBlue(`TypeScript ${Deno.version.typescript}`),
+    deno: brightYellow(`Deno ${Deno.version.deno}`),
+    spain: red("Spain"),
+    zakaOne: brightGreen("ZakaHaceCosas"),
+    zakaTwo: italic('"ZakaMakesStuff"'),
+    gitUrl: orange("https://github.com/FuckingNode/FuckingNode"),
+    side: italic("Another side project"),
+    date: cyan("September 28, 2024"),
 };
 
 const phrase = getRandomPhrase();
@@ -50,11 +51,11 @@ export default async function TheAbouter(): Promise<void> {
     await reveal(colorizeText(ASCII), 2);
     LogStuff("-".repeat(dashLength));
     await reveal(
-        ColorString(phrase, "bright-green", "italic"),
+        brightGreen(italic(phrase)),
         10,
     );
     await reveal(
-        ColorString(`(random quote/tip ${index}/${phrases.length})`, "half-opaque", "italic"),
+        dim(italic(`(random quote/tip ${index}/${phrases.length})`)),
         5,
     );
     await reveal(
@@ -62,7 +63,7 @@ export default async function TheAbouter(): Promise<void> {
         10,
     );
     await reveal(
-        `Follow us and join our Discord at ${ColorString("https://fuckingnode.github.io/follow-us", "orange")}`,
+        `Follow us and join our Discord at ${orange("https://fuckingnode.github.io/follow-us")}`,
         2,
     );
     await reveal(
