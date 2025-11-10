@@ -1,47 +1,64 @@
 // this'll hopefully make it to the next major release
 // HOPEFULLY
 
+import { parse as parseJSON } from "@std/jsonc";
 import { GetAppPath } from "../config.ts";
 import { JoinPaths } from "../filesystem.ts";
 
-interface FKNInstructionModule {
-    ext: {
-        main_name: string;
-        main_fmt: "json" | "yaml" | "toml" | "xml" | "ini" | "matcher!";
-        lock_name: string;
-        rt_ident: string;
-        rt_color: number;
-        mgr_cmd: string;
-        commands: {
-            /** Exec, to run files. If null, mgr_cmd is directly used (cmd file). */
-            exec: string[] | null;
-            /** Run-a-script. If null, it's considered unsupported. */
-            script: string[] | null;
-            /** Dep update cmd. */
-            update: string[];
-            /** Clean cmds. If null, unsupported. */
-            clean: string[][] | null;
-            /** Audit cmd. If null, unsupported */
-            audit: string[] | null;
-            /** Package publish cmd. */
-            publish: string[] | null;
-        };
+type FIMDeclaration = {
+    main_name: string;
+    main_fmt: "json" | "yaml" | "toml" | "xml" | "ini" | "matcher!";
+    lock_name: string;
+    rt_ident: string;
+    rt_color: number;
+    mgr_cmd: string;
+    commands: {
+        /** Exec, to run files. If null, mgr_cmd is directly used (cmd file). */
+        exec: string[] | null;
+        /** Run-a-script. If null, it's considered unsupported. */
+        script: string[] | null;
+        /** Dep update cmd. */
+        update: string[];
+        /** Clean cmds. If null, unsupported. */
+        clean: string[][] | null;
+        /** Audit cmd. If null, unsupported */
+        audit: string[] | null;
+        /** Package publish cmd. */
+        publish: string[] | null;
     };
+};
+
+type FIMManifest = {
+    name: string;
+    ver: string;
+    desc: string;
+    implements: string[];
+};
+
+interface FKNInstructionModule {
+    ext: FIMDeclaration;
     finder: {
         name: string;
         ver: string;
     };
-    manifest: {
-        name: string;
-        ver: string;
-        desc: string;
-        implements: string[];
-    };
+    manifest: FIMManifest;
     spec: string;
 }
 
-export function ParseFIM(ext: string): FKNInstructionModule {
-    const s1 = ext.split("[FIM]")[1];
+// deno-lint-ignore no-explicit-any
+function ValidateFIMDeclaration(ext: any): ext is FIMDeclaration {
+    if (ext) return true;
+    return false;
+}
+
+// deno-lint-ignore no-explicit-any
+function ValidateFIMManifest(man: any): man is FIMManifest {
+    if (man) return true;
+    return false;
+}
+
+export function ParseFIM(fim: string): FKNInstructionModule {
+    const s1 = fim.split("[FIM]")[1];
     if (!s1) throw `No step 1 ([FIM] declaration) in FuckingNode instruction module.`;
     const s2 = s1.split("[MSD]")[0];
     if (!s2) throw `No step 2 ([FIM]-[MSD] stuff) in FuckingNode instruction module.`;
@@ -52,7 +69,7 @@ export function ParseFIM(ext: string): FKNInstructionModule {
     const s5 = s3.split("[EXT]")[0];
     if (!s5) throw `No step 5 ([MSD]-[EXT] stuff) in FuckingNode instruction module.`;
 
-    const Extension = s2.trim();
+    const extension = s2.trim();
     const _def = s5.trim().split("\n");
     const _spec = s4.trim().split("\n").pop();
     if (!_spec) throw `No #SPECIFICATION_VERSION specified at EOF-1.`;
@@ -61,10 +78,16 @@ export function ParseFIM(ext: string): FKNInstructionModule {
         _def.map((s) => [s.split("|")[0]?.trim(), s.split("|")[1]?.trim()]),
     );
 
+    const ext = parseJSON(extension);
+    const manifest = parseJSON(s4.replace(/#\d+\.\d+\.\d+/, ""));
+
+    if (!ValidateFIMDeclaration(ext)) throw "Failed to parse FIM, invalid ext declaration.";
+    if (!ValidateFIMManifest(manifest)) throw "Failed to parse FIM, invalid manifest.";
+
     return {
-        ext: JSON.parse(Extension),
+        ext,
         finder,
-        manifest: JSON.parse(s4.replace(/#\d+\.\d+\.\d+/, "")),
+        manifest,
         spec,
     };
 }

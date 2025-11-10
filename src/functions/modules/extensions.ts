@@ -84,7 +84,7 @@ function parseInstructions(s: string): string {
         }
     }
 
-    return `
+    const code = `
 self.onmessage = (_ev) => {
     const ev = _ev.data;
 
@@ -95,4 +95,6 @@ self.onmessage = (_ev) => {
     });
 };
     `;
+    console.debug(code);
+    return code;
 }
