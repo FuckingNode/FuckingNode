@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Fixed `--ignored` and `--alive` for `list` not working.
 - Fixed detached Cmds showing the whole stacktrace instead of a proper error message when a non existing entity is referenced.
+- Fixed detached Cmds not properly exiting on Windows because of a `SIGTERM` error (`SIGTERM` doesn't exist on Windows, that was the issue).
 
 ## [5.1.0] (01-11-2025)
 

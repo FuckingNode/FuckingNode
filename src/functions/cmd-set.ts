@@ -66,9 +66,14 @@ async function ExecCmd(pref: string, expr: string[], detach: boolean): Promise<R
             const onSigbreak = () => signalHandler("SIGBREAK");
 
             Deno.addSignalListener("SIGINT", onSigint);
-            Deno.addSignalListener("SIGTERM", onSigterm);
+            if (LOCAL_PLATFORM.SYSTEM === "posix") Deno.addSignalListener("SIGTERM", onSigterm);
             if (LOCAL_PLATFORM.SYSTEM === "msft") {
                 Deno.addSignalListener("SIGBREAK", onSigbreak);
+                // ? deno doesn't support SIGUP (types at least indicate that)
+                // however stack trace goes like
+                // TypeError: Windows only supports ctrl-c (SIGINT), ctrl-break (SIGBREAK), and ctrl-close (SIGUP), but got SIGTERM
+                // weird...
+                // Deno.addSignalListener("SIGUP", onSigbreak);
             }
 
             let out;
@@ -82,10 +87,8 @@ async function ExecCmd(pref: string, expr: string[], detach: boolean): Promise<R
                 };
             } finally {
                 Deno.removeSignalListener("SIGINT", onSigint);
-                Deno.removeSignalListener("SIGTERM", onSigterm);
-                if (LOCAL_PLATFORM.SYSTEM === "msft") {
-                    Deno.removeSignalListener("SIGBREAK", onSigbreak);
-                }
+                if (LOCAL_PLATFORM.SYSTEM === "posix") Deno.removeSignalListener("SIGTERM", onSigterm);
+                if (LOCAL_PLATFORM.SYSTEM === "msft") Deno.removeSignalListener("SIGBREAK", onSigbreak);
             }
 
             return {
