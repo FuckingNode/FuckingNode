@@ -19,6 +19,11 @@ from_git = { git = "https://github.com/FuckingNode/FuckingRust.git", branch = "d
 from_tarball = { url = "https://somewhere.com/some_crate-1.0.0.tar.gz" }
 ```
 
+## Cmds
+
+- [ ] Calls to FKN, so that you can directly invoke, idk, destroy, or clean, or we could even pack some cmd-specific features into the CLI.
+- [ ] Allow to use `--flags` to conditionally execute different scripts in Cmds.
+
 ## Setups
 
 ### Features

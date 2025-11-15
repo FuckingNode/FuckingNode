@@ -66,7 +66,7 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
                 `Cleaning the ${projectName} motherfucker...`,
                 "package",
             );
-            const res = PerformCleanup(
+            const res = await PerformCleanup(
                 update,
                 lint,
                 prettify,

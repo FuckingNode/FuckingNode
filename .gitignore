@@ -6,3 +6,5 @@ dist/**
 # NixOS builds
 result/
 result
+# system stuff
+.directory

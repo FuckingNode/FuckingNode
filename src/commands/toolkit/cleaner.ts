@@ -1,3 +1,4 @@
+import { globSync } from "node:fs";
 import * as DenoJson from "../../../deno.json" with { type: "json" };
 import { Commander, ManagerExists } from "../../functions/cli.ts";
 import { BulkRemove, CheckForPath, JoinPaths, ParsePath } from "../../functions/filesystem.ts";
@@ -14,6 +15,7 @@ import { LOCAL_PLATFORM } from "../../platform.ts";
 import type { CF_FKNODE_SETTINGS } from "../../types/config_files.ts";
 import { blue, bold, brightBlue, brightGreen, brightYellow, cyan, dim, italic, magenta, red } from "@std/fmt/colors";
 import { orange, pink } from "../../functions/color.ts";
+import { isGlob } from "@std/path";
 
 /** Handles errors and short-circuiting. */
 function HandleErroring(
@@ -133,7 +135,7 @@ const ProjectCleaningFeatures = {
             return;
         }
     },
-    Destroy: (
+    Destroy: async (
         projectName: string,
         env: ProjectEnvironment,
         intensity: CleanerIntensity,
@@ -153,7 +155,21 @@ const ProjectCleaningFeatures = {
                 "working",
             );
             for (const target of env.settings.destroy.targets) {
-                if (target === "node_modules" && intensity === "maxim") continue; // avoid removing this thingy twice
+                if ((target.endsWith("node_modules") || target.endsWith("node_modules/")) && intensity === "maxim") continue; // avoid removing this thingy twice
+                if (isGlob(target)) {
+                    LogStuff(`Expanding glob pattern ${bold(target)}...`, "working");
+                    const pattern = globSync(target);
+                    if (pattern.filter((p) => CheckForPath(p)).length === 0) {
+                        LogStuff(
+                            `No items matching ${bold(target)} currently exist.`,
+                            "skip",
+                        );
+                        continue;
+                    }
+                    await BulkRemove(pattern, pattern.length < 7);
+                    LogStuff(pattern.length >= 7 ? `Destroyed ${pattern.length} items via glob pattern!` : "Done with this pattern!", "tick");
+                    continue;
+                }
                 const path = ParsePath(JoinPaths(env.root, target));
                 try {
                     Deno.removeSync(path, {
@@ -237,7 +253,7 @@ const ProjectCleaningFeatures = {
  * @param {CF_FKNODE_SETTINGS} settings
  * @returns {Promise<{ protection: string | null; errors: string | null; }>}
  */
-export function PerformCleanup(
+export async function PerformCleanup(
     shouldUpdate: boolean,
     shouldLint: boolean,
     shouldPrettify: boolean,
@@ -246,10 +262,10 @@ export function PerformCleanup(
     intensity: "normal" | "hard" | "maxim",
     env: ProjectEnvironment,
     settings: CF_FKNODE_SETTINGS,
-): {
+): Promise<{
     protection: string | null;
     errors: string | null;
-} {
+}> {
     const protections: string[] = [];
     const errors: string[] = [];
 
@@ -313,7 +329,7 @@ export function PerformCleanup(
         );
     }
     if (whatShouldWeDo["destroy"]) {
-        ProjectCleaningFeatures.Destroy(
+        await ProjectCleaningFeatures.Destroy(
             env.names.name,
             env,
             intensity,

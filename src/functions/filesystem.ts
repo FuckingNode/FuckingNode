@@ -1,6 +1,7 @@
 import { join, normalize } from "@std/path";
 import { StringArray, type UnknownString, validate } from "@zakahacecosas/string-utils";
 import { FknError } from "./error.ts";
+import { LogStuff } from "./io.ts";
 
 /**
  * Returns `true` if a given path exists, `false` if otherwise.
@@ -109,14 +110,16 @@ export function JoinPaths(pathA: string, pathB: string): string {
  *
  * @async
  * @param {string[]} files Array of file paths to remove
+ * @param {boolean} [log=false] If true, it'll log to the stdout each removal.
  */
-export async function BulkRemove(files: string[]): Promise<void> {
+export async function BulkRemove(files: string[], log: boolean = false): Promise<void> {
     if (files.length === 0) return;
-    await Promise.all(files.map((file) =>
+    await Promise.all(files.map((file) => {
         Deno.remove(ParsePath(file), {
             recursive: true,
-        })
-    ));
+        });
+        if (log) LogStuff(`Destroyed ${file} successfully`, "tick");
+    }));
 }
 
 /** Gets the indent size used by an already read file, with fair enough accuracy. */

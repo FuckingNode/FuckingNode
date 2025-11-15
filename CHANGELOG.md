@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## Unreleased
 
+### Added
+
+- Added glob pattern support to `fkclean` destroyer.
+
 ### Fixed
 
 - Fixed `--ignored` and `--alive` for `list` not working.
