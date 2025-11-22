@@ -1,7 +1,5 @@
 // TODO(@ZakaHaceCosas): somewhere, we're not committing deleted files
 // (must be coming from path check)
-// TODO(@ZakaHaceCosas) 2: sometimes a commit without a commitCmd doesn't run
-// (files get unstaged then the thing fails)
 import { Interrogate, LogStuff } from "../functions/io.ts";
 import { ConservativelyGetProjectEnvironment } from "../functions/projects.ts";
 import type { TheCommitterConstructedParams } from "./_interfaces.ts";
