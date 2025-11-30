@@ -12,7 +12,7 @@ import {
 } from "../types/config_files.ts";
 import type { NonEmptyArray } from "../types/misc.ts";
 import { LOCAL_PLATFORM } from "../platform.ts";
-import { bold, brightYellow, dim, italic } from "@std/fmt/colors";
+import { bold, dim, italic } from "@std/fmt/colors";
 
 type Parameters = { key: "commitCmd" | "releaseCmd" | "buildCmd" | "launchCmd"; env: ProjectEnvironment | ConservativeProjectEnvironment };
 
@@ -49,6 +49,8 @@ export function ValidateCmdSet(params: Parameters): (ParsedCmdInstruction | Cros
 }
 
 async function ExecCmd(pref: string, expr: string[], detach: boolean): Promise<ReturnType<typeof Commander>> {
+    // dirty fix
+    pref = pref.replace(";;", "");
     if (detach) {
         try {
             const child = new Deno.Command(pref, { args: expr }).spawn();
@@ -138,14 +140,15 @@ export async function RunCmdSet(params: Parameters): Promise<void> {
             LogStuff(`Command #${cmdIndex} in sequence is platform specific, and not for you.\n`, "warn");
             continue;
         }
-        const cmdString = command.cmd.join(" ");
-        const detach = cmdString.slice(0, 2) === ";;";
+        const _cmdString = command.cmd.join(" ");
+        const cmdString = _cmdString.replace(";;", "");
+        const detach = _cmdString.slice(0, 2) === ";;";
         const cmdTypeString = command.type === "~" ? "Command" : command.type === "=" ? "File" : "Script";
         LogStuff(
             bold(
                 `Running Cmd ${cmdIndex}/${cmdSet.length} | ${detach ? "Detached " + cmdTypeString.toLowerCase() : cmdTypeString} / ${
                     italic(dim(cmdString))
-                }\n${detach ? bold(brightYellow("Heads up: detached cmds are a work-in-progress and might fail")) + "\n" : ""}`,
+                }\n`,
             ),
         );
         try {
