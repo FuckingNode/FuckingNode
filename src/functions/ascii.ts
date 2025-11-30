@@ -1,3 +1,5 @@
+import { shuffle } from "@zakahacecosas/entity-utils";
+
 const ascii1 = `
 ███████ ██    ██  ██████ ██   ██ ██ ███    ██  ██████      ███    ██  ██████  ██████  ███████
 ██      ██    ██ ██      ██  ██  ██ ████   ██ ██           ████   ██ ██    ██ ██   ██ ██
@@ -12,8 +14,4 @@ const ascii2 = `
 ██║       ╚═╝  ╚██████╗██║  ██╗██║██║ ╚████║╚██████╔╝    ██║ ╚████║╚██████╔╝██████╔╝███████╗
 ╚═╝             ╚═════╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝ ╚═════╝     ╚═╝  ╚═══╝ ╚═════╝ ╚═════╝ ╚══════╝`;
 
-function randomize(arr: string[]): string {
-    return arr[Math.floor(Math.random() * arr.length)]!;
-}
-
-export const ASCII = randomize([ascii1, ascii2]);
+export const ASCII = shuffle([ascii1, ascii2]);

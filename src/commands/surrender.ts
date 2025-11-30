@@ -9,6 +9,7 @@ import { CheckForPath, JoinPaths } from "../functions/filesystem.ts";
 import { FkNodeInterop } from "./interop/interop.ts";
 import { orange } from "../functions/color.ts";
 import { brightYellow, red } from "@std/fmt/colors";
+import { shuffle } from "@zakahacecosas/entity-utils";
 
 const FULL_NAME = `FuckingNode v${DenoJson.default.version}`;
 
@@ -21,11 +22,6 @@ const deprecationNotices: ((proj: string) => string)[] = [
     (p) => `# Project Sunset\n\n**${p} is being sunset**; it has reached the end of its lifecycle and will not receive further updates.`,
     (p) => `# End of Life notice\n\nThis project, **${p}** has reached *End of Life* (EOL). It is deprecated and thus no longer supported.`,
 ];
-
-// TODO(@ZakaHaceCosas): make this into a jsr package or something, idk
-function shuffle<T>(arr: T[]): T {
-    return arr[Math.floor(Math.random() * arr.length)]!;
-}
 
 export default async function TheSurrenderer(params: TheSurrendererConstructedParams): Promise<void> {
     const env = await GetProjectEnvironment(params.project);

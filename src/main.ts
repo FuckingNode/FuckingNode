@@ -36,6 +36,7 @@ import { ParseFIM } from "./functions/modules/instructions.ts";
 import { RunFEM } from "./functions/modules/extensions.ts";
 import { brightBlue, italic } from "@std/fmt/colors";
 import { orange } from "./functions/color.ts";
+import { shuffle } from "@zakahacecosas/entity-utils";
 
 async function init(): Promise<void> {
     await FreshSetup();
@@ -376,7 +377,7 @@ async function main(): Promise<void> {
         case "pro-tip":
             LogStuff(`Here's a pro tip!`);
             LogStuff(
-                brightBlue(HINTS[Math.floor(Math.random() * HINTS.length)]!),
+                brightBlue(shuffle(HINTS)),
             );
             break;
         case "help":

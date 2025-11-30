@@ -5,28 +5,16 @@ import { ASCII } from "../functions/ascii.ts";
 import { phrases } from "../functions/phrases.ts";
 import { reveal } from "@zakahacecosas/string-utils/cli";
 import { bold, brightBlue, brightGreen, brightYellow, cyan, dim, italic, red } from "@std/fmt/colors";
-
-function getRandomPhrase(): string {
-    const randomIndex = Math.floor(Math.random() * phrases.length);
-    const string = phrases[randomIndex] ?? "Make JS fun again!";
-    return string;
-}
-
-function getRandomColor(): "red" | "orange" | "bright-orange" {
-    const colors = [
-        "red",
-        "orange",
-        "bright-orange",
-    ] as const;
-
-    const randomIndex = Math.floor(Math.random() * colors.length);
-    return (colors[randomIndex])!;
-}
+import { shuffle } from "@zakahacecosas/entity-utils";
 
 function colorizeText(text: string): string {
     const lines = text.split("\n");
     return lines.map((line) => {
-        const color = getRandomColor();
+        const color = shuffle([
+            "red",
+            "orange",
+            "bright-orange",
+        ]);
         return color === "red" ? red(line) : color === "orange" ? orange(line) : brightOrange(line);
     }).join("\n");
 }
@@ -43,7 +31,7 @@ const coolStrings = {
     date: cyan("September 28, 2024"),
 };
 
-const phrase = getRandomPhrase();
+const phrase = shuffle(phrases);
 const index = phrases.indexOf(phrase) + 1;
 const dashLength = Math.min(phrase.length, 45);
 
