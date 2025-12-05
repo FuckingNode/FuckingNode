@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - Fixed detached Cmds not working in some cases.
+- Fixed `fkcommit` not staging deleted files. As a side effect the error message for staging non-existent files became dirtier.
 
 ## [5.1.1] (22-11-2025)
 

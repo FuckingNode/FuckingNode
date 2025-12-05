@@ -1,6 +1,6 @@
 import * as DenoJson from "../../deno.json" with { type: "json" };
 import { Commander } from "../functions/cli.ts";
-import { CheckForPath, JoinPaths, ParsePath } from "../functions/filesystem.ts";
+import { JoinPaths, ParsePath } from "../functions/filesystem.ts";
 import { normalize, normalizeArray, StringArray, validate } from "@zakahacecosas/string-utils";
 import { FknError } from "./error.ts";
 import type { GIT_FILES } from "../types/misc.ts";
@@ -422,8 +422,7 @@ export function StageFiles(path: string, files: GIT_FILES): "ok" | "nothingToSta
         if (files === "S") return "ok";
 
         const filesToStage = files
-            .filter((file) => validate(file))
-            .filter(CheckForPath);
+            .filter((file) => validate(file));
 
         if (filesToStage.length === 0) return "nothingToStage";
 

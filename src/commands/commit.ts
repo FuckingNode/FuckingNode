@@ -1,12 +1,9 @@
-// TODO(@ZakaHaceCosas): somewhere, we're not committing deleted files
-// (must be coming from path check)
 import { Interrogate, LogStuff } from "../functions/io.ts";
 import { ConservativelyGetProjectEnvironment } from "../functions/projects.ts";
 import type { TheCommitterConstructedParams } from "./_interfaces.ts";
 import { CanCommit, Commit, GetBranches, GetCommittableFiles, GetStagedFiles, IsRepo, Push, StageFiles } from "../functions/git.ts";
 import { normalize, pluralOrNot, testFlag, validate } from "@zakahacecosas/string-utils";
 import type { GIT_FILES } from "../types/misc.ts";
-import { CheckForPath } from "../functions/filesystem.ts";
 import { FknError } from "../functions/error.ts";
 import { RunCmdSet, ValidateCmdSet } from "../functions/cmd-set.ts";
 import { bold, brightGreen, italic, white } from "@std/fmt/colors";
@@ -27,7 +24,7 @@ function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
         return "ok"; // nothing to do, files alr staged
     }
     if (
-        Array.isArray(files) && files[0] !== "-A" && files.filter(validate).filter(CheckForPath).length === 0
+        Array.isArray(files) && files[0] !== "-A" && files.filter(validate).length === 0
         && !testFlag(validate(files[0]) ? files[0] : "a", "keep", { allowNonExactString: true, allowQuickFlag: true, allowSingleDash: true })
     ) {
         LogStuff(
@@ -38,21 +35,15 @@ function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
         );
         return "abort";
     }
-    try {
-        const out = GetCommittableFiles(path);
-        if (out.length === 0) return "abort";
-        const filtered = Array.isArray(files)
-            ? files
-                .filter(validate)
-                .filter(CheckForPath)
-            : ["(this should never appear in the cli)"];
-        // stage them early
-        StageFiles(path, (files === "A" || files[0] === "-A") ? "A" : filtered);
-        return "ok";
-    } catch {
-        LogStuff("Something went wrong while staging files. Aborting.", "error");
-        return "abort";
-    }
+    const out = GetCommittableFiles(path);
+    if (out.length === 0) return "abort";
+    const filtered = Array.isArray(files)
+        ? files
+            .filter(validate)
+        : ["(this should never appear in the cli)"];
+    // stage them early
+    StageFiles(path, (files === "A" || files[0] === "-A") ? "A" : filtered);
+    return "ok";
 }
 
 export default async function TheCommitter(params: TheCommitterConstructedParams): Promise<void> {
