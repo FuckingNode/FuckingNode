@@ -34,11 +34,10 @@ gantt
     title FuckingNode release schedule
     dateFormat  DD-MM-YYYY
     section Patches
-    (Skipped) NOV01 :done, 01-11-2025, 7d
-    (Skipped) NOV08 :done, 08-11-2025, 7d
-    (Skipped) NOV15 :done, 15-11-2025, 7d
-    Patch 4 NOV22 :done, 22-11-2025, 7d
-    %% Extra patch :crit, 29-11-2025, 6d
+    5.1.2 DEC01 :active, 06-12-2025, 7d
+    Patch 2 DEC13 :done, 13-12-2025, 7d
+    Patch 3 DEC20 :done, 20-12-2025, 7d
+    %% Extra patch :crit, 28-12-2025, 6d
     section Minor
-    Minor for NOV28 :milestone, 28-10-2025, 8d
+    Minor for DEC26 :milestone, 26-12-2025, 8d
 ```

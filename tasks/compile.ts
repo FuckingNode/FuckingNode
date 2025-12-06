@@ -85,10 +85,10 @@ const ALL_COMMANDS = Object.entries(TARGETS).map(([key, [target, output]]: [stri
         // it's just me who can make releases so ig it's okay to hardcode my user path lmao
         hashCmd: LOCAL_PLATFORM.SYSTEM === "msft"
             ? new Deno.Command("kbi", { args: hasherArguments, env: { PATH: "C:\\Users\\Zaka\\kbi\\exe;" + Deno.env.get("PATH") } })
-            : new Deno.Command("sudo", { args: ["kbi", ...hasherArguments] }),
+            : new Deno.Command("kbi", { args: hasherArguments }),
         signCmd: LOCAL_PLATFORM.SYSTEM === "msft"
             ? new Deno.Command("kbi", { args: hasherArguments, env: { PATH: "C:\\Users\\Zaka\\kbi\\exe;" + Deno.env.get("PATH") } })
-            : new Deno.Command("sudo", { args: ["kbi", ...signerArguments] }),
+            : new Deno.Command("kbi", { args: signerArguments }),
     };
 });
 
