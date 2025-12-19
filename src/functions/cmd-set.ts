@@ -143,7 +143,7 @@ export async function RunCmdSet(params: Parameters): Promise<void> {
         const _cmdString = command.cmd.join(" ");
         const cmdString = _cmdString.replace(";;", "");
         const detach = _cmdString.slice(0, 2) === ";;";
-        const cmdTypeString = command.type === "~" ? "Command" : command.type === "=" ? "File" : "Script";
+        const cmdTypeString = command.type === "~" ? "Command" : command.type === "=" ? "File" : command.type === "$" ? "Script" : "Raw exec";
         LogStuff(
             bold(
                 `Running Cmd ${cmdIndex}/${cmdSet.length} | ${detach ? "Detached " + cmdTypeString.toLowerCase() : cmdTypeString} / ${
@@ -184,6 +184,7 @@ export async function RunCmdSet(params: Parameters): Promise<void> {
             if (command.type === "<") expr.push(...cmd.slice(1));
             else if (command.type === "~") expr.push(cmd.join(" "));
             else expr.push(...cmd);
+            console.log(expr);
             const _out = await ExecCmd(pref, expr, detach);
             const out = {
                 success: _out.success,
