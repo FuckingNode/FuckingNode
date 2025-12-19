@@ -106,7 +106,7 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
                     path,
                     Deno.pid.toString(),
                 ],
-                detached: true,
+                stdin: "inherit",
             },
         ).spawn().output();
     }
