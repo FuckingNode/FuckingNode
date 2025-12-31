@@ -8,11 +8,11 @@ This document describes how FuckingNode schedules releases. We want releases to 
 
 Types are as in SemVer.
 
-| Type      | Frequency                                                                                          | Includes                                                                                                     |
-| :-------- | :------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------- |
-| **Patch** | Every month's 1st, 2nd, and 3rd saturday.                                                          | Only fixes and performance improvements. No behavioral changes (unless explicitly required to fix an issue). |
-| **Minor** | Every month's last friday. If a patch was immediately needed, it'd follow on sunday, not saturday. | New features or non-breaking features. Behavioral changes or "unnoticeably breaking" changes may happen.     |
-| **Major** | Unscheduled.                                                                                       | Big, breaking changes.                                                                                       |
+| Type      | Frequency                                                                                                | Includes                                                                                                     |
+| :-------- | :------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------- |
+| **Patch** | Can release a month's 1st, 2nd, and 3rd saturday.                                                        | Only fixes and performance improvements. No behavioral changes (unless explicitly required to fix an issue). |
+| **Minor** | Can release month's last friday. If a patch was immediately needed, it'd follow on sunday, not saturday. | New features or non-breaking features. Behavioral changes or "unnoticeably breaking" changes may happen.     |
+| **Major** | Unscheduled.                                                                                             | Big, breaking changes.                                                                                       |
 
 We define "unnoticeably breaking" changes as changes that are _breaking by definition_ but not _breaking in practice_. For example, changing a fixed or "predictable" form of output (like cleanup report or an error code) is _breaking by definition_ (as, for example, if someone had a tool that captures FuckingNode's output for whatever purpose, said changes would break compatibility), however in practice these changes are small enough to be considered "unnoticeable".
 
@@ -25,6 +25,8 @@ Whether a change is small enough or not to fit within this definition is determi
 >
 > If the date of a minor release arrives and there's just patch-only changes ready to be shipped, then the minor release is skipped _but the patch isn't_, releasing said patch-only release on a sunday, as you'd expect from this schedule.
 
+Note as well that this project has a single maintainer. Do not expect _every_ month's 1st, 2nd, and 3rd saturdays to have a patch released at all, as I tend time or simply forget to make releases. Sorry for that.
+
 ## Schedule diagram
 
 On a diagram, our schedule look like this.
@@ -34,10 +36,10 @@ gantt
     title FuckingNode release schedule
     dateFormat  DD-MM-YYYY
     section Patches
-    5.1.2 DEC01 :active, 06-12-2025, 7d
-    Patch 2 DEC13 :done, 13-12-2025, 7d
-    Patch 3 DEC20 :done, 20-12-2025, 7d
-    %% Extra patch :crit, 28-12-2025, 6d
+    Patch 1 JAN03 :active, 03-01-2026, 7d
+    Patch 2 DEC10 :done, 10-01-2026, 7d
+    Patch 3 DEC17 :done, 17-01-2026, 7d
+    %% Extra patch :crit, 31-01-2026, 6d
     section Minor
-    Minor for DEC26 :milestone, 26-12-2025, 8d
+    Minor for JAN30 :milestone, 30-01-2026, 8d
 ```
