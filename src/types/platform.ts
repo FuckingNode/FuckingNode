@@ -228,6 +228,7 @@ interface GenericProjectEnvironment {
             | ["audit"]
             | ["audit", "--ignore-registry-errors", "--json"]
             | ["audit", "--json"]
+            | ["audit", "--socket"]
             | ["audit", "--recursive", "--all", "--json"]
             | false;
         /**
@@ -307,7 +308,7 @@ interface DenoEnvironment extends GenericProjectEnvironment {
         script: ["deno", "task"];
         update: ["outdated", "--update"];
         clean: false;
-        audit: false;
+        audit: ["audit", "--socket"];
         publish: ["publish", "--check=all"];
         start: "run";
     };

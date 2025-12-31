@@ -792,7 +792,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
                 update: ["outdated", "--update"],
                 clean: false,
                 script: ["deno", "task"],
-                audit: false,
+                audit: ["audit", "--socket"],
                 publish: ["publish", "--check=all"],
                 start: "run",
             },

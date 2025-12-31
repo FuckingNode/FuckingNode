@@ -29,9 +29,9 @@ export type FkNodeSecurityAudit = {
 };
 
 /**
- * A parsed NodeJS report, from either `npm`, `pnpm`, or `yarn`.
+ * A parsed report given by the runtime.
  */
-export type ParsedNodeReport = {
+export type ParsedRuntimeReport = {
     /**
      * Do the proposed fixes imply breaking changes?
      *

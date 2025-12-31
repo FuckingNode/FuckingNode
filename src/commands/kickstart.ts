@@ -120,14 +120,17 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
         "tick-clear",
     );
 
-    LaunchUserIDE();
-
     const elapsed = Date.now() - startup.getTime();
     Notification(
         "Kickstart successful!",
         `Your project is ready. It took ${GetElapsedTime(startup)}. Go write some fucking good code!`,
         elapsed,
     );
+
+    // launch IDE after notification so he gets notified yes or yes
+    // and comes up to the IDE opening
+    // (or, if unlucky, to whatever error stopping it from launching)
+    LaunchUserIDE();
 
     return;
 }

@@ -17,7 +17,7 @@ const featureCompatibility = [
     { Feature: "Stats", NodeJS: y, Deno: y, Bun: y, Go: p, Cargo: y },
     { Feature: "Surrender", NodeJS: y, Deno: y, Bun: y, Go: y, Cargo: y },
     { Feature: "Setup", NodeJS: a, Deno: a, Bun: a, Go: a, Cargo: a },
-    { Feature: "Audit", NodeJS: y, Deno: n, Bun: y, Go: n, Cargo: n },
+    { Feature: "Audit", NodeJS: y, Deno: y, Bun: y, Go: n, Cargo: n },
     { Feature: "Launch", NodeJS: a, Deno: a, Bun: a, Go: a, Cargo: a },
     { Feature: "Terminate", NodeJS: p, Deno: p, Bun: p, Go: y, Cargo: y },
 ];
@@ -45,10 +45,6 @@ const releaseCompatibility = [
     { NodeJS: y, Deno: y, Bun: y, Go: n, Cargo: n },
 ];
 
-const auditCompatibility = [
-    { NodeJS: y, Deno: n, Bun: y, Go: n, Cargo: n },
-];
-
 const migrateCompatibility = [
     { From: "NodeJS", To: "Deno", Supported: y },
     { From: "NodeJS", To: "Bun", Supported: y },
@@ -64,7 +60,7 @@ function overallSupport(): void {
     LogStuff("OVERALL SUPPORT ---");
     LogStuff(table(featureCompatibility));
     LogStuff(
-        "'Yes', 'No', 'Partial' indicate the obvious.\n'(Agnostic)' indicates that the feature runs anywhere, even if not listed here.\n\nFor specific compatibility details, run 'compat' followed by any of these:\ncleaner, kickstart, release, migrate, commit, audit, launch.",
+        "'Yes', 'No', 'Partial' indicate the obvious.\n'(Agnostic)' indicates that the feature runs anywhere, even if not listed here.\n\nFor specific compatibility details, run 'compat' followed by any of these:\ncleaner, kickstart, release, migrate, commit, launch.",
     );
     return;
 }
@@ -119,10 +115,6 @@ export default function TheCompater(params: TheCompaterConstructedParams): void 
         case "release":
             LogStuff("RELEASE FEATURE SUPPORT ---");
             LogStuff(table(releaseCompatibility));
-            return;
-        case "audit":
-            LogStuff("AUDIT FEATURE SUPPORT ---");
-            LogStuff(table(auditCompatibility));
             return;
         case "launch":
             LogStuff("LAUNCH FEATURE SUPPORT ---");

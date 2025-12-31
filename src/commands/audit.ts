@@ -16,7 +16,7 @@ export default async function TheAuditer(params: TheAuditerConstructedParams): P
     if (shouldAuditAll) {
         const projects = GetAllProjects();
         LogStuff(
-            "Audit is only supported for NodeJS and BunJS projects as of now.",
+            "Audit is only supported for JavaScript projects as of now.",
             "heads-up",
         );
         const report: {

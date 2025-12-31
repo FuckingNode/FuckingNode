@@ -8,9 +8,9 @@
  */
 
 import { normalize, normalizeArray, validate, validateAgainst } from "@zakahacecosas/string-utils";
-import { type MANAGER_NODE, TypeGuardForNodeBun } from "../../types/platform.ts";
+import { type MANAGER_NODE, TypeGuardForJS } from "../../types/platform.ts";
 import { Interrogate, LogStuff } from "../../functions/io.ts";
-import type { FkNodeSecurityAudit, ParsedNodeReport } from "../../types/audit.ts";
+import type { FkNodeSecurityAudit, ParsedRuntimeReport } from "../../types/audit.ts";
 import { GetProjectEnvironment } from "../../functions/projects.ts";
 import { Commander } from "../../functions/cli.ts";
 import { DEBUG_LOG } from "../../functions/error.ts";
@@ -167,7 +167,7 @@ function AnalyzeSecurityVectorKeywords(svKeywords: SV_KEYWORDS[]): string[] {
 const qps = (s: string): string => s.replaceAll(">", "").replaceAll("<", "").replaceAll("=", "").split(".")[0]!;
 
 /**
- * Parses a NodeJS report, using JSON format.
+ * Parses a NodeJS (or BunJS) report, using JSON format.
  *
  * Notes:
  * - npm and pnpm offer statistics, but yarn doesn't; only reason we don't offer vulnerability count (update: it does, but in a separate JSON, so they're hard to gather)
@@ -176,7 +176,7 @@ const qps = (s: string): string => s.replaceAll(">", "").replaceAll("<", "").rep
  * @param {string} jsonString Report string (JSON PLEASE).
  * @param {MANAGER_NODE} platform Package manager used for the report.
  */
-export function ParseNodeBunReport(jsonString: string, platform: MANAGER_NODE | "bun"): ParsedNodeReport {
+export function ParseNodeBunReport(jsonString: string, platform: MANAGER_NODE | "bun"): ParsedRuntimeReport {
     /**
      * `yarn audit --json` returns something like this:
      * ```json
@@ -282,6 +282,53 @@ export function ParseNodeBunReport(jsonString: string, platform: MANAGER_NODE | 
                 overview: entry.overview,
             });
         }
+    }
+
+    const questions = AnalyzeSecurityVectorKeywords(initialKws);
+    let severity: "low" | "moderate" | "high" | "critical";
+
+    if (severities.includes("critical")) severity = "critical";
+    else if (severities.includes("high")) severity = "high";
+    else if (severities.includes("moderate")) severity = "moderate";
+    else severity = "low";
+
+    const breaking = brokenDeps.includes(true);
+
+    return {
+        advisories: Array.from(new Set(advisories)).sort(),
+        severity,
+        breaking,
+        questions,
+    };
+}
+
+/**
+ * Parses a DenoJS report, using formatted strings because there's no JSON flag as of now.
+ *
+ * @param {string} notJsonString Report string (THEY BETTER ADD --json TO DENO).
+ */
+export function ParseDenoReport(notJsonString: string): ParsedRuntimeReport {
+    const cleanString = stripAnsiCode(notJsonString).split("\n").filter(validate).map((s) => s.trim());
+
+    const brokenDeps: boolean[] = [false];
+    const advisories: string[] = [];
+    const severities: ("low" | "moderate" | "high" | "critical")[] = [];
+    const initialKws: SV_KEYWORDS[] = [];
+
+    for (const advisory of cleanString) {
+        advisory.split("\n").forEach((s) => {
+            if (s.includes(" (major upgrade)")) brokenDeps.push(true);
+            if (s.startsWith("│ Info:")) {
+                advisories.push(s.split(":")[2]!.split("//github.com/advisories/")[1]!.trim());
+            }
+            if (s.startsWith("│ Severity:")) severities.push(s.split(":")[1]!.trim() as "low");
+            if (s.startsWith("╭ ")) {
+                initialKws.push({
+                    overview: s.replace("╭ ", ""),
+                    summary: s.replace("╭ ", ""),
+                });
+            }
+        });
     }
 
     const questions = AnalyzeSecurityVectorKeywords(initialKws);
@@ -555,10 +602,10 @@ function DisplayAudit(percentage: number): void {
 /**
  * Handler function for auditing a project.
  *
- * @param {ParsedNodeReport} bareReport Parsed npm audit.
+ * @param {ParsedRuntimeReport} bareReport Parsed npm audit.
  * @returns {FkNodeSecurityAudit}
  */
-function AuditProject(bareReport: ParsedNodeReport): FkNodeSecurityAudit {
+function AuditProject(bareReport: ParsedRuntimeReport): FkNodeSecurityAudit {
     const { advisories, questions, severity } = bareReport;
 
     const totalAdvisories: number = advisories.length;
@@ -601,7 +648,7 @@ function AuditProject(bareReport: ParsedNodeReport): FkNodeSecurityAudit {
 export async function PerformAuditing(project: string): Promise<FkNodeSecurityAudit | 0 | 1> {
     const env = await GetProjectEnvironment(project);
     if (
-        !TypeGuardForNodeBun(env)
+        !TypeGuardForJS(env)
     ) {
         LogStuff(
             `Audit is unsupported for ${env.manager.toUpperCase()} (${project}).`,
@@ -634,10 +681,16 @@ export async function PerformAuditing(project: string): Promise<FkNodeSecurityAu
         return 1;
     }
 
-    const audit = AuditProject(ParseNodeBunReport(res.stdout, env.manager));
+    const audit = AuditProject(env.manager === "deno" ? ParseDenoReport(res.stdout) : ParseNodeBunReport(res.stdout, env.manager));
 
     return {
         ...audit,
         name: env.names.nameVer,
     };
 }
+
+console.log(
+    ParseDenoReport(
+        Deno.readTextFileSync("./tests/environment/test-three/a.txt"),
+    ),
+);
