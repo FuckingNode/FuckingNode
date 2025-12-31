@@ -688,9 +688,3 @@ export async function PerformAuditing(project: string): Promise<FkNodeSecurityAu
         name: env.names.nameVer,
     };
 }
-
-console.log(
-    ParseDenoReport(
-        Deno.readTextFileSync("./tests/environment/test-three/a.txt"),
-    ),
-);

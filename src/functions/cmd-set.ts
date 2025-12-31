@@ -184,7 +184,6 @@ export async function RunCmdSet(params: Parameters): Promise<void> {
             if (command.type === "<") expr.push(...cmd.slice(1));
             else if (command.type === "~") expr.push(cmd.join(" "));
             else expr.push(...cmd);
-            console.log(expr);
             const _out = await ExecCmd(pref, expr, detach);
             const out = {
                 success: _out.success,
