@@ -407,8 +407,7 @@ function InterrogateVulnerableProject(questions: string[]): Omit<
     const isTrue = (s: InterrogatoryResponse): boolean => validateAgainst(s, ["true+2", "true+1"]);
 
     // okay the fact I cared to make questions for everything is wild!
-    // TODO(@ZakaHaceCosas) im keeping a "TODO" comment here though, just as a reminder
-    // a small review would still be cool
+    // note: a small review would still be cool
     for (const question of questions) {
         const response = handleQuestion({ q: question, f: false, r: true, w: 1 });
 

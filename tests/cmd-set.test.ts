@@ -65,6 +65,12 @@ Deno.test({
                     type: "<",
                 },
                 posix: null,
+            }, {
+                cmd: [
+                    ";;ping",
+                    "google.com",
+                ],
+                type: "<",
             }],
         );
     },

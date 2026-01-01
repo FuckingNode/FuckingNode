@@ -62,6 +62,12 @@ export interface CF_FKNODE_SETTINGS {
      * @type {boolean}
      */
     "always-short-circuit-cleanup": boolean;
+    /**
+     * If set, kickstart will always use this directory as the root for cloned projects.
+     *
+     * @type {(string | null)}
+     */
+    "kickstart-root": string | null;
 }
 
 /**

@@ -14,6 +14,7 @@ export const DEFAULT_SETTINGS: CF_FKNODE_SETTINGS = {
     "notification-threshold": false,
     "notification-threshold-value": 10000,
     "always-short-circuit-cleanup": false,
+    "kickstart-root": null,
 };
 
 /**

@@ -20,9 +20,11 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
     const startup = new Date();
     const { full: repoUrl, name: projectName } = GenerateGitUrl(gitUrl);
 
-    const clonePath: string = ParsePath(validate(path) ? path : JoinPaths(Deno.cwd(), projectName));
+    const userSettings = GetUserSettings();
+    const root = userSettings["kickstart-root"] ?? Deno.cwd();
+    const clonePath: string = ParsePath(validate(path) ? path : JoinPaths(root, projectName));
 
-    const clonePathValidator = await CheckForDir(clonePath);
+    const clonePathValidator = CheckForDir(clonePath);
     if (clonePathValidator === "ValidButNotEmpty") {
         throw new FknError(
             "Fs__DemandsEmptying",
@@ -89,7 +91,7 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
         ? initialManager
         : ManagerExists(env.manager)
         ? env.manager
-        : (GetUserSettings())["default-manager"];
+        : userSettings["default-manager"];
 
     if (!managerToUse) {
         throw new FknError(

@@ -6,6 +6,19 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
+## Unreleased [5.2.0] (02-01-2026)
+
+### Added
+
+- Added `audit` support for DenoJS.
+- Added `kickstart-root` setting to automatically root your kickstarted projects to a specific location, like `/home/zaka/my-projects`, without needing to `cd` into it every time. Disabled by default, set it to a directory (empty or not; if relative path is given it'll be converted to absolute). Set to `"false"` to disable.
+
+### Fixed
+
+- Fixed the "Raw exec" label not showing up when running a raw exec cmd.
+- Fixed (probably) autoupdate for Linux.
+- Fixed CmdSets sometimes failing because `undefined` would be accidentally passed as an argument to your command.
+
 ## [5.1.2] (06-12-2025)
 
 ### Fixed

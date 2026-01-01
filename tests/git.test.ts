@@ -1,8 +1,6 @@
 import { assertEquals } from "@std/assert";
 import { GenerateGitUrl } from "../src/commands/toolkit/git-url.ts";
 
-// TODO: figure out how to simulate git environments so we can test everything without messing with the repo or constantly change hardcoded values
-
 Deno.test({
     name: "properly generates git urls",
     fn: () => {

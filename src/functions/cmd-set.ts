@@ -51,6 +51,7 @@ export function ValidateCmdSet(params: Parameters): (ParsedCmdInstruction | Cros
 async function ExecCmd(pref: string, expr: string[], detach: boolean): Promise<ReturnType<typeof Commander>> {
     // dirty fix
     pref = pref.replace(";;", "");
+    console.log(pref, expr);
     if (detach) {
         try {
             const child = new Deno.Command(pref, { args: expr }).spawn();
@@ -184,7 +185,7 @@ export async function RunCmdSet(params: Parameters): Promise<void> {
             if (command.type === "<") expr.push(...cmd.slice(1));
             else if (command.type === "~") expr.push(cmd.join(" "));
             else expr.push(...cmd);
-            const _out = await ExecCmd(pref, expr, detach);
+            const _out = await ExecCmd(pref, expr.filter(validate), detach);
             const out = {
                 success: _out.success,
                 stdout: detach ? italic("(FKN: detached execution terminated.)") : _out.stdout as string,

@@ -37,7 +37,7 @@ export default async function TheSettings(params: TheSettingsConstructedParams):
         case "change":
             if (!validateAgainst(args[1], VALID_SETTINGS)) {
                 LogStuff(
-                    `Invalid setting, use one of these keys: ${VALID_SETTINGS.toString()}`,
+                    `Invalid setting, use one of these keys:\n- ${VALID_SETTINGS.join("\n- ")}`,
                 );
                 return;
             }

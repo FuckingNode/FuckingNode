@@ -3,7 +3,7 @@ import { GetDateNow } from "../functions/date.ts";
 import { DEFAULT_SETTINGS } from "../constants.ts";
 import type { CF_FKNODE_SETTINGS } from "../types/config_files.ts";
 import { FknError } from "./error.ts";
-import { BulkRemove, CheckForPath, JoinPaths } from "./filesystem.ts";
+import { BulkRemove, CheckForDir, CheckForPath, JoinPaths } from "./filesystem.ts";
 import { parse as parseYaml } from "@std/yaml";
 import { Interrogate, LogStuff, StringifyYaml } from "./io.ts";
 import { type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
@@ -124,6 +124,12 @@ export function ChangeSetting(
             return LogStuff(`${value} is not valid. Enter either "npm", "pnpm", "yarn", "deno", "bun", "cargo", or "go".`);
         }
         newSettings = { ...currentSettings, "default-manager": value };
+    } else if (setting === "kickstart-root") {
+        if (!validate(value)) return LogStuff("Invalid string provided.");
+        if (!["false", "null", "no"].includes(value) && ["NotFound", "NotDir"].includes(CheckForDir(value))) {
+            return LogStuff(`${value} is not a valid directory path.`);
+        }
+        newSettings = { ...currentSettings, "kickstart-root": ["false", "null", "no"].includes(value) ? null : Deno.realPathSync(value) };
     } else if (setting === "update-freq") {
         const freq = Math.ceil(Number(value));
         if (!Number.isFinite(freq) || freq <= 0) return LogStuff(`${value} is not valid. Enter a valid number greater than 0.`);
@@ -192,6 +198,7 @@ export function DisplaySettings(): void {
                 `Short circuit on cleanup error? | ${brightGreen(settings["always-short-circuit-cleanup"] ? "Enabled" : "Disabled")}. ${
                     dim(italic("always-short-circuit-cleanup"))
                 }`,
+                `Root for kickstarted projects?  | ${brightGreen(settings["kickstart-root"] ?? "Not set")}. ${dim(italic("kickstart-root"))}`,
             ].join("\n")
         }`,
         "bulb",

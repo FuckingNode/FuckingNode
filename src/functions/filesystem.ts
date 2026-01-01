@@ -23,13 +23,13 @@ export function CheckForPath(path: string): boolean {
  *
  * @async
  * @param {string} path
- * @returns {Promise<"NotDir" | "ValidButNotEmpty" | "NotFound" | "Valid">}
+ * @returns {"NotDir" | "ValidButNotEmpty" | "NotFound" | "Valid"}
  */
-export async function CheckForDir(path: string): Promise<"NotDir" | "ValidButNotEmpty" | "NotFound" | "Valid"> {
+export function CheckForDir(path: string): "NotDir" | "ValidButNotEmpty" | "NotFound" | "Valid" {
     try {
-        const info = await Deno.stat(path);
+        const info = Deno.statSync(path);
         if (!info.isDirectory) return "NotDir";
-        for await (const _ of Deno.readDir(path)) return "ValidButNotEmpty";
+        for (const _ of Deno.readDirSync(path)) return "ValidButNotEmpty";
         return "Valid";
     } catch (e) {
         // path doesn't exist.
