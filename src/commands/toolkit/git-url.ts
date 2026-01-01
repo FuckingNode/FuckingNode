@@ -64,7 +64,9 @@ export function GenerateGitUrl(str: UnknownString): {
     }
 
     if (!str.includes(":")) throw new FknError("Param__GitTargetInvalid", "Git URL must be a valid URL or scope!");
+    if (str.endsWith("/")) str = str.slice(0, str.length - 1);
 
+    // @ts-expect-error stupid type error, it works just fine
     const [alias, repo] = str.split(":");
 
     if (!validate(alias)) throw new FknError("Param__GitTargetAliasInvalid", "Missing alias.");

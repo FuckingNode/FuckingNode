@@ -15,6 +15,7 @@ export const DEFAULT_SETTINGS: CF_FKNODE_SETTINGS = {
     "notification-threshold-value": 10000,
     "always-short-circuit-cleanup": false,
     "kickstart-root": null,
+    "workspace-policy": null,
 };
 
 /**
@@ -45,4 +46,9 @@ export const DEFAULT_FKNODE_YAML: FullFkNodeYaml = {
     projectEnvOverride: false,
     buildCmd: false,
     buildForRelease: false,
+    kickstarter: {
+        install: null,
+        workspaces: null,
+    },
+    kickstartCmd: null,
 };

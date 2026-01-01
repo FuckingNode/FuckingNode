@@ -5,7 +5,8 @@ import type { CF_FKNODE_SETTINGS } from "../types/config_files.ts";
 import { GetUserSettings } from "./config.ts";
 import { LOCAL_PLATFORM } from "../platform.ts";
 
-export function LaunchUserIDE(): void {
+export function LaunchUserIDE(where?: string): void {
+    const path = where ?? ".";
     const IDE: CF_FKNODE_SETTINGS["fav-editor"] = (GetUserSettings())["fav-editor"];
 
     if (!validateAgainst(IDE, ["vscode", "sublime", "emacs", "notepad++", "atom", "vscodium"])) {
@@ -39,7 +40,9 @@ export function LaunchUserIDE(): void {
     // Deno wants me to run from a shell to use .bat or .cmd, which didn't happen before
     // idk if deno changed behavior or vscode changed to a .cmd but whatever
     // ALSO this only happens on Windows apparently??
-    const out = LOCAL_PLATFORM.SYSTEM === "msft" ? Commander(LOCAL_PLATFORM.SHELL, [executionCommand, "."]) : Commander(executionCommand, ["."]);
+    const out = LOCAL_PLATFORM.SYSTEM === "msft"
+        ? Commander(LOCAL_PLATFORM.SHELL, [executionCommand, path])
+        : Commander(executionCommand, [path]);
     if (!out.success) throw new Error(`Error launching ${IDE}: ${out.stdout}`);
     return;
 }

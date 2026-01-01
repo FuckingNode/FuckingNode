@@ -68,6 +68,12 @@ export interface CF_FKNODE_SETTINGS {
      * @type {(string | null)}
      */
     "kickstart-root": string | null;
+    /**
+     * If set, adding a project will automatically handle workspaces (if any) like this.
+     *
+     * @type {("standalone" | "unified" | null)}
+     */
+    "workspace-policy": "standalone" | "unified" | null;
 }
 
 /**
@@ -116,7 +122,11 @@ export interface FullFkNodeYaml {
      * @type {(("updater" | "cleaner" | "linter" | "prettifier" | "destroyer")[] | "*")}
      */
     divineProtection: ("updater" | "cleaner" | "linter" | "prettifier" | "destroyer")[] | "*";
-    /** If true, the cleaner will short-circuit whenever an error happens on any task. Defaults to false. */
+    /**
+     * If true, the cleaner will short-circuit whenever an error happens on any task. Defaults to false.
+     *
+     * @type {boolean}
+     */
     cleanerShortCircuit: boolean;
     /**
      * If `--lint` is passed to `clean`, this script will be used to lint the project. It must be a runtime script (defined in `package.json` -> `scripts`), and must be a single word (no need for "npm run" prefix). `false` overrides these rules (it's the default).
@@ -230,6 +240,33 @@ export interface FullFkNodeYaml {
      * @type {boolean}
      */
     buildForRelease: boolean;
+    /**
+     * Defaults for when kickstarting this project.
+     *
+     * @type {{
+     *         workspaces: "force-liberty" | "libre" | "unified" | "standalone";
+     *         install: "force-liberty" | "libre" | "no" | `use ${string}`;
+     *     }}
+     */
+    kickstarter: {
+        /** Default handling for workspaces.
+         *
+         * - `null` - Lets the user decide. Default FuckingNode behavior.
+         * - `"force-liberty"` - Lets and forces the user to decide, even if they have a default setting.
+         * - `"unified"` - Equivalent to hitting 'No' in the default prompt. Adds the root project and nothing else.
+         * - `"standalone"` - Equivalent to hitting 'Yes' in the default prompt. Adds the workspaces individually.
+         */
+        workspaces: null | "force-liberty" | "unified" | "standalone";
+        /** Default handling for dependencies.
+         *
+         * - `null` - Lets the user "decide". Default FuckingNode behavior. Cannot enforce it.
+         * - `"no"` - Doesn't try to install anything. Useful for non-code repositories.
+         * - `"use (cmd)"` - Prompts the user to use a specific install command. The user can accept or reject it (in which case the kickstart will halt).
+         */
+        install: null | "no" | `use ${string}`;
+    };
+    /** An optional CmdSet to run after a kickstart. Users will be shown the content and always be prompted whether to allow it to run or not. */
+    kickstartCmd: null | CmdSet;
 }
 
 /**

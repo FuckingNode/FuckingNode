@@ -127,9 +127,25 @@ export function ChangeSetting(
     } else if (setting === "kickstart-root") {
         if (!validate(value)) return LogStuff("Invalid string provided.");
         if (!["false", "null", "no"].includes(value) && ["NotFound", "NotDir"].includes(CheckForDir(value))) {
-            return LogStuff(`${value} is not a valid directory path.`);
+            return LogStuff(
+                `${value} is not a valid directory path, and is not any of the negation strings ("false", "null", or "no") for disabling this setting.`,
+            );
         }
         newSettings = { ...currentSettings, "kickstart-root": ["false", "null", "no"].includes(value) ? null : Deno.realPathSync(value) };
+    } else if (setting === "workspace-policy") {
+        if (!validateAgainst(value, ["standalone", "yes", "add", "unified", "no", "ignore", "default", "null", "0"])) {
+            return LogStuff(
+                `${value} is not a valid value. Provide either "standalone" / "yes" / "add" for adding all workspaces; "unified" / "no" / "ignore" for adding just the root; or "default" / "null" / "0" for asking each time (default).`,
+            );
+        }
+        newSettings = {
+            ...currentSettings,
+            "workspace-policy": validateAgainst(value, ["standalone", "yes", "add"])
+                ? "standalone"
+                : validateAgainst(value, ["unified", "no", "ignore"])
+                ? "unified"
+                : null,
+        };
     } else if (setting === "update-freq") {
         const freq = Math.ceil(Number(value));
         if (!Number.isFinite(freq) || freq <= 0) return LogStuff(`${value} is not valid. Enter a valid number greater than 0.`);
@@ -199,6 +215,13 @@ export function DisplaySettings(): void {
                     dim(italic("always-short-circuit-cleanup"))
                 }`,
                 `Root for kickstarted projects?  | ${brightGreen(settings["kickstart-root"] ?? "Not set")}. ${dim(italic("kickstart-root"))}`,
+                `Workspace clone handling?       | ${
+                    brightGreen(
+                        settings["workspace-policy"]
+                            ? (settings["workspace-policy"] === "standalone" ? "Always add as standalone projects." : "Always unify.")
+                            : "Not set",
+                    )
+                }. ${dim(italic("workspace-policy"))}`,
             ].join("\n")
         }`,
         "bulb",

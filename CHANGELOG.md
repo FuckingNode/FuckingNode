@@ -12,12 +12,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Added `audit` support for DenoJS.
 - Added `kickstart-root` setting to automatically root your kickstarted projects to a specific location, like `/home/zaka/my-projects`, without needing to `cd` into it every time. Disabled by default, set it to a directory (empty or not; if relative path is given it'll be converted to absolute). Set to `"false"` to disable.
+- Added `workspace-policy` setting to automatically handle workspaces of added projects with workspaces. Setting a default will avoid the annoying "add workspaces" prompt every time.
+- Added `kickstartCmd`, which functions as a post-install script, and `kickstarter` configuration object to `fknode.yaml`, for more efficiently kickstarting projects.
 
 ### Fixed
 
 - Fixed the "Raw exec" label not showing up when running a raw exec cmd.
 - Fixed (probably) autoupdate for Linux.
 - Fixed CmdSets sometimes failing because `undefined` would be accidentally passed as an argument to your command.
+- Fixed repository scopes with a trailing slash not being understood.
 
 ## [5.1.2] (06-12-2025)
 

@@ -14,7 +14,10 @@ import type { NonEmptyArray } from "../types/misc.ts";
 import { LOCAL_PLATFORM } from "../platform.ts";
 import { bold, dim, italic } from "@std/fmt/colors";
 
-type Parameters = { key: "commitCmd" | "releaseCmd" | "buildCmd" | "launchCmd"; env: ProjectEnvironment | ConservativeProjectEnvironment };
+type Parameters = {
+    key: "commitCmd" | "releaseCmd" | "buildCmd" | "launchCmd" | "kickstartCmd";
+    env: ProjectEnvironment | ConservativeProjectEnvironment;
+};
 
 function ValidateCallback(v: CmdInstruction): ParsedCmdInstruction | null {
     if (!v) return null;
@@ -51,7 +54,6 @@ export function ValidateCmdSet(params: Parameters): (ParsedCmdInstruction | Cros
 async function ExecCmd(pref: string, expr: string[], detach: boolean): Promise<ReturnType<typeof Commander>> {
     // dirty fix
     pref = pref.replace(";;", "");
-    console.log(pref, expr);
     if (detach) {
         try {
             const child = new Deno.Command(pref, { args: expr }).spawn();
@@ -83,7 +85,7 @@ async function ExecCmd(pref: string, expr: string[], detach: boolean): Promise<R
             try {
                 out = await child.output();
             } catch (_e) {
-                // console.error(italic(`(FKN: child process error: ${e})`));
+                console.error(italic("(FKN: child process errored)"));
                 out = {
                     success: false,
                     stdout: "",

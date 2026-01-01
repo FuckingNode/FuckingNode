@@ -15,7 +15,7 @@ import { CheckForPath, JoinPaths, ParsePath, ParsePathList } from "./filesystem.
 import { Interrogate, LogStuff } from "./io.ts";
 import { DEBUG_LOG, FknError } from "../functions/error.ts";
 import { type FkNodeYaml, type FullFkNodeYaml, ValidateFkNodeYaml } from "../types/config_files.ts";
-import { GetAppPath } from "./config.ts";
+import { GetAppPath, GetUserSettings } from "./config.ts";
 import { GetDateNow } from "./date.ts";
 import type { PROJECT_ERROR_CODES } from "../types/errors.ts";
 import { FkNodeInterop } from "../commands/interop/interop.ts";
@@ -73,6 +73,7 @@ export function GetAllProjects(ignored?: false | "limit" | "exclude"): string[] 
 export async function AddProject(
     entry: UnknownString,
     glob: boolean = false,
+    workspacePolicy: FullFkNodeYaml["kickstarter"]["workspaces"] = null,
 ): Promise<ProjectEnvironment | "rootless" | "aborted" | "error" | "glob"> {
     if (validate(entry) && isGlob(entry)) {
         await Promise.all(
@@ -131,12 +132,22 @@ export async function AddProject(
         }
 
         const workspaceString: string[] = await Promise.all(env.mainCPF.ws.map(async (ws) => await NameProject(ws, "all")));
+        const defaultPolicy = GetUserSettings()["workspace-policy"];
+        const interrogation = `Hey! This looks like a fucking monorepo. We've found these workspaces:\n\n${
+            workspaceString.join("\n")
+        }.\n\nShould we add them to your list as well?\nWe recommend this if each workspace has its own scripts. If your scripts are already setup from the root to handle all workspace members, it's actually better to reject this.`;
 
-        const addWorkspaces = Interrogate(
-            `Hey! This looks like a fucking monorepo. We've found these workspaces:\n\n${
-                workspaceString.join("\n")
-            }.\n\nShould we add them to your list as well?\nWe recommend this if each workspace has its own scripts. If your scripts are already setup from the root to handle all workspace members, it's actually better to reject this.`,
-        );
+        const addWorkspaces = workspacePolicy === null
+            ? (defaultPolicy ? (defaultPolicy === "standalone" ? true : false) : Interrogate(
+                interrogation,
+            ))
+            : workspacePolicy === "force-liberty"
+            ? Interrogate(
+                interrogation,
+            )
+            : workspacePolicy === "standalone"
+            ? true
+            : false;
 
         if (!addWorkspaces) {
             addTheEntry(env.names.full, env.runtime);
@@ -333,7 +344,7 @@ export function deepMerge(
  * @param {string} path Path to the project. Expects an already parsed path.
  * @returns {FullFkNodeYaml} A `FullFkNodeYaml` object.
  */
-function GetProjectSettings(path: string): FullFkNodeYaml {
+export function GetProjectSettings(path: string): FullFkNodeYaml {
     const pathToDivineFile = JoinPaths(path, "fknode.yaml");
 
     if (!CheckForPath(pathToDivineFile)) {

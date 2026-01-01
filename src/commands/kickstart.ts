@@ -1,56 +1,33 @@
-import { ManagerExists } from "../functions/cli.ts";
+import { Commander, ManagerExists } from "../functions/cli.ts";
 import { CheckForDir, JoinPaths, ParsePath } from "../functions/filesystem.ts";
-import { LogStuff, Notification } from "../functions/io.ts";
-import { AddProject } from "../functions/projects.ts";
+import { Interrogate, LogStuff, Notification } from "../functions/io.ts";
+import { AddProject, ConservativelyGetProjectEnvironment } from "../functions/projects.ts";
 import type { TheKickstarterConstructedParams } from "./_interfaces.ts";
 import { FkNodeInterop } from "./interop/interop.ts";
 import { NameLockfile, ResolveLockfiles } from "./toolkit/cleaner.ts";
-import type { MANAGER_GLOBAL } from "../types/platform.ts";
+import type { MANAGER_GLOBAL, ProjectEnvironment } from "../types/platform.ts";
 import { LaunchUserIDE } from "../functions/user.ts";
 import { FknError } from "../functions/error.ts";
 import { GetUserSettings } from "../functions/config.ts";
 import { GenerateGitUrl } from "./toolkit/git-url.ts";
 import { Clone } from "../functions/git.ts";
-import { validate, validateAgainst } from "@zakahacecosas/string-utils";
+import { type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { GetElapsedTime } from "../functions/date.ts";
 import { bold, brightGreen, italic } from "@std/fmt/colors";
+import type { CF_FKNODE_SETTINGS, FullFkNodeYaml } from "../types/config_files.ts";
+import { GetProjectSettings } from "../functions/projects.ts";
+import { orange } from "../functions/color.ts";
+import { RunCmdSet } from "../functions/cmd-set.ts";
 
-export default async function TheKickstarter(params: TheKickstarterConstructedParams): Promise<void> {
-    const { gitUrl, path, manager } = params;
-    const startup = new Date();
-    const { full: repoUrl, name: projectName } = GenerateGitUrl(gitUrl);
-
-    const userSettings = GetUserSettings();
-    const root = userSettings["kickstart-root"] ?? Deno.cwd();
-    const clonePath: string = ParsePath(validate(path) ? path : JoinPaths(root, projectName));
-
-    const clonePathValidator = CheckForDir(clonePath);
-    if (clonePathValidator === "ValidButNotEmpty") {
-        throw new FknError(
-            "Fs__DemandsEmptying",
-            `${clonePath} is not empty! Choose somewhere else to clone this.`,
-        );
-    }
-
-    if (clonePathValidator === "NotDir") {
-        throw new FknError(
-            "Fs__DemandsDIR",
-            `${clonePath} is not a directory...`,
-        );
-    }
-
-    LogStuff(bold(brightGreen("Let's kickstart! Wait a moment please...")), "tick-clear");
-    LogStuff(`Cloning repo from ${bold(repoUrl)}`, "working");
-
-    Clone(repoUrl, clonePath);
-
-    LogStuff("Cloned it!", "tick-clear");
-
-    Deno.chdir(clonePath);
-
+async function InstallDependencies(
+    manager: UnknownString,
+    userSettings: CF_FKNODE_SETTINGS,
+    policies: FullFkNodeYaml["kickstarter"],
+): Promise<ProjectEnvironment> {
     const lockfiles = ResolveLockfiles(Deno.cwd());
+    const isRequest = validate(manager) && manager.startsWith("use ");
 
-    if (lockfiles.length === 0) {
+    if (lockfiles.length === 0 && !isRequest) {
         if (validateAgainst(manager, ["npm", "pnpm", "yarn", "bun", "deno", "cargo", "go"])) {
             LogStuff("This project lacks a lockfile. We'll generate an empty one, then let the package manager populate it.", "warn");
             Deno.writeTextFileSync(
@@ -70,22 +47,64 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
                 }`,
                 "warn",
             );
-            return;
+            Deno.exit(1);
         }
     }
 
-    const env = await AddProject(Deno.cwd());
+    let env;
+
+    if (policies.workspaces === "standalone" || policies.workspaces === "unified") {
+        Notification(
+            "Heads up!",
+            "Intervention is needed for your kickstart to continue.",
+        );
+        LogStuff(
+            `This project specifically wants you to ${
+                bold(policies.workspaces === "standalone" ? "add all workspaces individually" : "ignore workspaces when adding the project")
+            }. Do you want to obey?`,
+        );
+        const proceed = Interrogate(
+            "Hit 'Y' to use it, or 'N' to ignore the request and use default settings.",
+            "ask",
+        );
+        env = await AddProject(Deno.cwd(), false, proceed ? policies.workspaces : null);
+    } else if (policies.workspaces === "force-liberty") {
+        Notification(
+            "Watch out",
+            "Intervention may be needed for your kickstart to continue.",
+        );
+        LogStuff(
+            "By the way, this project wants you to explicitly handle workspace addition, regardless of defaults.\nIntervention might be needed.",
+        );
+        env = await AddProject(Deno.cwd(), false, policies.workspaces);
+    } else {
+        env = await AddProject(Deno.cwd());
+    }
 
     // if there's no env the error should've already been reported
-    if (env === "aborted" || env === "error") return;
+    if (env === "aborted" || env === "error") Deno.exit(1);
     if (env === "glob" || env === "rootless") {
         LogStuff(
             "Hold up, this project is a (probably rootless) monorepo. Kickstart can't handle it well.\nThe project cloned successfully, but dependencies weren't installed.",
         );
-        return;
+        Deno.exit(1);
     }
 
-    const initialManager = validateAgainst(manager, ["npm", "pnpm", "yarn", "deno", "bun"]) ? manager : env.manager;
+    if (isRequest) {
+        const arr = manager.split(" ").slice(1);
+        const managerName = arr.join(" ");
+        if (validateAgainst(managerName, ["npm", "pnpm", "yarn", "deno", "bun"])) {
+            FkNodeInterop.Installers.UniJs(Deno.cwd(), managerName);
+        } else if (managerName === "go") {
+            FkNodeInterop.Installers.Golang(Deno.cwd());
+        } else if (managerName === "cargo") {
+            FkNodeInterop.Installers.Cargo(Deno.cwd());
+        } else {
+            Commander(arr[0]!, arr.slice(1));
+        }
+    }
+
+    const initialManager = validateAgainst(manager, ["npm", "pnpm", "yarn", "deno", "bun", "go", "cargo"]) ? manager : env.manager;
 
     const managerToUse: MANAGER_GLOBAL = ManagerExists(initialManager)
         ? initialManager
@@ -122,17 +141,115 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
         "tick-clear",
     );
 
+    return env;
+}
+
+export default async function TheKickstarter(params: TheKickstarterConstructedParams): Promise<void> {
+    const { gitUrl, path, manager } = params;
+    const startup = new Date();
+    const { full: repoUrl, name: projectName } = GenerateGitUrl(gitUrl);
+
+    const userSettings = GetUserSettings();
+    const root = userSettings["kickstart-root"] ?? Deno.cwd();
+    const clonePath: string = ParsePath(validate(path) ? path : JoinPaths(root, projectName));
+
+    const clonePathValidator = CheckForDir(clonePath);
+    if (clonePathValidator === "ValidButNotEmpty") {
+        throw new FknError(
+            "Fs__DemandsEmptying",
+            `${clonePath} is not empty! Choose somewhere else to clone this.`,
+        );
+    }
+
+    if (clonePathValidator === "NotDir") {
+        throw new FknError(
+            "Fs__DemandsDIR",
+            `${clonePath} is not a directory...`,
+        );
+    }
+
+    LogStuff(bold(brightGreen("Let's kickstart! Wait a moment please...")), "tick-clear");
+    LogStuff(`Cloning repo from ${bold(repoUrl)}`, "working");
+
+    Clone(repoUrl, clonePath);
+
+    LogStuff("Cloned it!", "tick-clear");
+
+    Deno.chdir(clonePath);
+
+    const settings = GetProjectSettings(clonePath);
+
+    let env;
+
+    if (!settings.kickstarter.install) {
+        env = await InstallDependencies(manager, userSettings, settings.kickstarter);
+    } else if (settings.kickstarter.install.startsWith("use ")) {
+        Notification(
+            "Heads up!",
+            "Intervention is needed for your kickstart to continue.",
+        );
+        LogStuff(
+            `This project specifically wants you to use the ${
+                bold(settings.kickstarter.install.split(" ").slice(1).join(" "))
+            } installation command. Shall we?`,
+        );
+        const proceed = Interrogate(
+            `Hit 'Y' to use it, or 'N' to ignore the request.\n${
+                bold(orange(
+                    "If the package manager is not installed or if you ignore the request, we won't continue the kickstart, risking some time loss on your side. This isn't critical because the repository is already cloned, but it's worth noting.",
+                ))
+            }`,
+            "ask",
+        );
+        if (!proceed) {
+            LogStuff("Request ignored. Exited.", "bruh");
+            return;
+        }
+        env = await InstallDependencies(settings.kickstarter.install, userSettings, settings.kickstarter);
+    } else {
+        LogStuff(
+            bold(
+                "This project specifically wants no dependency installation to happen, therefore it has been skipped.\nYou can manually install dependencies at any time.\n",
+            ),
+        );
+        env = await ConservativelyGetProjectEnvironment(clonePath);
+    }
+
     const elapsed = Date.now() - startup.getTime();
     Notification(
-        "Kickstart successful!",
-        `Your project is ready. It took ${GetElapsedTime(startup)}. Go write some fucking good code!`,
+        settings.kickstartCmd ? "Almost there!" : "Kickstart successful!",
+        settings.kickstartCmd
+            ? `After ${GetElapsedTime(startup)}, there's one last step before having your project ready`
+            : `Your project is ready. It took ${GetElapsedTime(startup)}. Go write some fucking good code!`,
         elapsed,
     );
 
-    // launch IDE after notification so he gets notified yes or yes
-    // and comes up to the IDE opening
-    // (or, if unlucky, to whatever error stopping it from launching)
-    LaunchUserIDE();
+    if (!settings.kickstartCmd) {
+        // launch IDE after notification so he gets notified yes or yes
+        // and comes up to the IDE opening
+        // (or, if unlucky, to whatever error stopping it from launching)
+        LaunchUserIDE();
+        return;
+    }
 
-    return;
+    LogStuff(
+        `This repository wants a CmdSet to run. Think of it as a post-install script.\nThe sequence is as follows:\n\n${
+            bold(settings.kickstartCmd.join("\n"))
+        }\n\n${
+            bold(orange(
+                "Kickstart CmdSets can be a useful way to save time, but they also imply risks. Unless on a trusted repository, make sure to carefully review it.\nDo not run stuff you do not understand.",
+            ))
+        }`,
+        "heads-up",
+    );
+    const proceed = Interrogate("Hit 'Y' to allow this CmdSet to run, or 'N' not to do so.", "warn");
+    if (!proceed) {
+        LogStuff("Okay then, we won't run it. The rest is already setup, so we'll launch your IDE now. Go write some fucking good code!");
+        LaunchUserIDE();
+        return;
+    }
+    await RunCmdSet({
+        key: "kickstartCmd",
+        env,
+    });
 }
