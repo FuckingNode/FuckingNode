@@ -71,7 +71,7 @@ export const HINTS = [
     `You can kickstart a project with a Git alias.\nFor example, 'kickstart gh:cool-guy/cool-repo' maps to 'https://github.com/cool-guy/cool-repo.git' - so you type less.\nThere's 10 aliases, run 'compat kickstart' to see all.`,
     `All config files live at ${GetAppPath("BASE")}.\nTouch anything there if you want to.`,
     `If you touch and break any config file, run 'fkn something-fucked-up'. It'll reset all config files except for your project list.`,
-    `Here's an actually good pro tip: use DenoJS, or BunJS, or learn another language like Go or Rust.\nJust. Avoid. Node.`,
+    `Here's an actually good pro tip: use Deno, or Bun, or learn another language like Go or Rust.\nJust. Avoid. Node.`,
 ];
 
 const appRelatedJokes = [

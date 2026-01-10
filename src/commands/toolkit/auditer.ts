@@ -167,7 +167,7 @@ function AnalyzeSecurityVectorKeywords(svKeywords: SV_KEYWORDS[]): string[] {
 const qps = (s: string): string => s.replaceAll(">", "").replaceAll("<", "").replaceAll("=", "").split(".")[0]!;
 
 /**
- * Parses a NodeJS (or BunJS) report, using JSON format.
+ * Parses a NodeJS (or Bun) report, using JSON format.
  *
  * Notes:
  * - npm and pnpm offer statistics, but yarn doesn't; only reason we don't offer vulnerability count (update: it does, but in a separate JSON, so they're hard to gather)
@@ -303,7 +303,7 @@ export function ParseNodeBunReport(jsonString: string, platform: MANAGER_NODE | 
 }
 
 /**
- * Parses a DenoJS report, using formatted strings because there's no JSON flag as of now.
+ * Parses a Deno report, using formatted strings because there's no JSON flag as of now.
  *
  * @param {string} notJsonString Report string (THEY BETTER ADD --json TO DENO).
  */

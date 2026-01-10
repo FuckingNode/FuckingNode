@@ -3,7 +3,9 @@ import { GetUserSettings } from "./config.ts";
 import { stringify as stringifyYaml } from "@std/yaml";
 import { Commander } from "./cli.ts";
 import { LOCAL_PLATFORM } from "../platform.ts";
-import { bold } from "@std/fmt/colors";
+import { bold, stripAnsiCode } from "@std/fmt/colors";
+import { SHOULD_CLEAN_OUTPUT } from "../main.ts";
+import process from "node:process";
 
 /**
  * Appends an emoji at the beginning of a message.
@@ -75,6 +77,10 @@ export function LogStuff(
 ): void {
     try {
         if (typeof message !== "string") message = String(message);
+        if (SHOULD_CLEAN_OUTPUT || !process.stdout.isTTY || !process.stderr.isTTY) {
+            console.log(stripAnsiCode(message));
+            return;
+        }
         const finalMessage = emoji ? Emojify(message, emoji) : message;
         console.log(finalMessage);
     } catch (e) {

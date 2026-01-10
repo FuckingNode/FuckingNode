@@ -10,6 +10,7 @@ import { type UnknownString, validate, validateAgainst } from "@zakahacecosas/st
 import { format } from "@std/fmt/bytes";
 import { LOCAL_PLATFORM } from "../platform.ts";
 import { brightGreen, brightYellow, dim, italic } from "@std/fmt/colors";
+import { SHOULD_LOAD_CFG } from "../main.ts";
 
 /**
  * Returns file paths for all config files the app uses.
@@ -92,6 +93,7 @@ export async function FreshSetup(repairSetts?: boolean): Promise<void> {
  * @returns {CF_FKNODE_SETTINGS}
  */
 export function GetUserSettings(): CF_FKNODE_SETTINGS {
+    if (!SHOULD_LOAD_CFG) return DEFAULT_SETTINGS;
     const stuff: CF_FKNODE_SETTINGS = parseYaml(Deno.readTextFileSync(GetAppPath("SETTINGS"))) as CF_FKNODE_SETTINGS;
     return {
         ...DEFAULT_SETTINGS,
@@ -218,7 +220,7 @@ export function DisplaySettings(): void {
                 `Workspace clone handling?       | ${
                     brightGreen(
                         settings["workspace-policy"]
-                            ? (settings["workspace-policy"] === "standalone" ? "Always add as standalone projects." : "Always unify.")
+                            ? (settings["workspace-policy"] === "standalone" ? "Always add as standalone projects" : "Always unify")
                             : "Not set",
                     )
                 }. ${dim(italic("workspace-policy"))}`,

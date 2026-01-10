@@ -1,5 +1,4 @@
 import { StringifyYaml } from "../src/functions/io.ts";
-import { LOCAL_PLATFORM } from "../src/platform.ts";
 
 const release = Deno.args.includes("--release");
 
@@ -81,14 +80,8 @@ const ALL_COMMANDS = Object.entries(TARGETS).map(([key, [target, output]]: [stri
     return {
         target: key as OS,
         compileCmd: new Deno.Command("deno", { args: compilerArguments }),
-        // env: {} is a workaround for Deno not properly reading my PATH for whatever reason...
-        // it's just me who can make releases so ig it's okay to hardcode my user path lmao
-        hashCmd: LOCAL_PLATFORM.SYSTEM === "msft"
-            ? new Deno.Command("kbi", { args: hasherArguments, env: { PATH: "C:\\Users\\Zaka\\kbi\\exe;" + Deno.env.get("PATH") } })
-            : new Deno.Command("kbi", { args: hasherArguments }),
-        signCmd: LOCAL_PLATFORM.SYSTEM === "msft"
-            ? new Deno.Command("kbi", { args: hasherArguments, env: { PATH: "C:\\Users\\Zaka\\kbi\\exe;" + Deno.env.get("PATH") } })
-            : new Deno.Command("kbi", { args: signerArguments }),
+        hashCmd: new Deno.Command("kbi", { args: hasherArguments }),
+        signCmd: new Deno.Command("kbi", { args: signerArguments }),
     };
 });
 

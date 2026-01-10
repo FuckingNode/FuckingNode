@@ -27,7 +27,7 @@ export interface GenericJsPkgFile {
 }
 
 /**
- * NodeJS and BunJS `package.json` props, only the ones we need.
+ * NodeJS and Bun `package.json` props, only the ones we need.
  *
  * @interface NodePkgFile
  */
@@ -50,7 +50,7 @@ export interface NodePkgFile extends GenericJsPkgFile {
 }
 
 /**
- * DenoJS `deno.json` props, only the ones we need.
+ * Deno `deno.json` props, only the ones we need.
  *
  * @interface DenoPkgFile
  */

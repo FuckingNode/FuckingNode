@@ -6,14 +6,18 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
-## Unreleased [5.2.0] (02-01-2026)
+## [5.2.0] (10-01-2026)
+
+Built against Deno 2.5.6 instead of latest. 2.6.X broke macOS builds and hasn't yet been fixed. Previous version was built against 2.5.3, so there's no downgrade.
 
 ### Added
 
-- Added `audit` support for DenoJS.
+- Added `audit` support for Deno.
 - Added `kickstart-root` setting to automatically root your kickstarted projects to a specific location, like `/home/zaka/my-projects`, without needing to `cd` into it every time. Disabled by default, set it to a directory (empty or not; if relative path is given it'll be converted to absolute). Set to `"false"` to disable.
 - Added `workspace-policy` setting to automatically handle workspaces of added projects with workspaces. Setting a default will avoid the annoying "add workspaces" prompt every time.
 - Added `kickstartCmd`, which functions as a post-install script, and `kickstarter` configuration object to `fknode.yaml`, for more efficiently kickstarting projects.
+- Added global `--clear` flag to strip emojis and ANSI coloring from output.
+- Added global `--no-config` to prevent your user settings from loading, using default ones instead.
 
 ### Fixed
 
@@ -21,6 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Fixed (probably) autoupdate for Linux.
 - Fixed CmdSets sometimes failing because `undefined` would be accidentally passed as an argument to your command.
 - Fixed repository scopes with a trailing slash not being understood.
+- Fixed inconsistent wording (Deno / DenoJS or Bun / BunJS).
 
 ## [5.1.2] (06-12-2025)
 
@@ -305,7 +310,7 @@ _Sort of_ breaking, but nothing important so I won't make a major release.
 - Now when no path is provided and it makes sense to, the CWD will be used, without needing to specify it.
 - Now `package.json` files do not crash the program if no `version` was specified.
 - Now glob patterns are supported when seeking for monorepos when adding a project.
-- Now we no longer show a "partial support" warning when adding DenoJS or BunJS projects, and when cleaning, "Cleanup is unsupported" was replaced with "This runtime lacks cleanup/deduping commands".
+- Now we no longer show a "partial support" warning when adding Deno or Bun projects, and when cleaning, "Cleanup is unsupported" was replaced with "This runtime lacks cleanup/deduping commands".
 - Now `commit` does not require the CWD to be an added project, making it tech-stack agnostic.
 - Now, when using dry-run with `release` (which should mean "no _real action_"), this will actually be respected (before, commits would be made and even pushed despite having this flag). Now with this flag only your `releaseCmd` gets to run.
 - Now `release` will always use `--dry-run` with your package manager's release command before publishing, and tell you to check if everything's alright. If you find something wrong, you'll be able to abort.
@@ -415,7 +420,7 @@ _Sort of_ breaking, but nothing important so I won't make a major release.
 ### Added
 
 - Added the ability for the CLI to update itself. From now on, running `fkn upgrade` on outdated installations will download the installer script for the latest version and proceed with the installation.
-- Added `stats` Recommended Community Standards for DenoJS. It is _very basic_, though.
+- Added `stats` Recommended Community Standards for Deno. It is _very basic_, though.
 
 ## [3.1.0] (03-03-2025)
 

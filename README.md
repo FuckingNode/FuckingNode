@@ -27,7 +27,7 @@
 
 FuckingNode is a CLI tool (not a CLI-ish npm package) that _automates_ **cleaning**, **linting**, and **prettifying** JS or TS projects, _simplifies_ **releasing** npm / jsr **packages**, **destroying generated artifacts & caches**, **(safely) making Git commits**, and _speeds up_ **cloning** and **starting up** your projects.
 
-We may not be able to fix your bugs, but we are able to automate most headache-giving tasks across all of your NodeJS projects and give you a set of tools to make JS development great again. DenoJS, BunJS, and even Golang and Rust are also (partially) supported (_see [Cross-runtime support](https://fuckingnode.github.io/cross-platform/) for more info._).
+We may not be able to fix your bugs, but we are able to automate most headache-giving tasks across all of your NodeJS projects and give you a set of tools to make JS development great again. Deno, Bun, and even Golang and Rust are also (partially) supported (_see [Cross-runtime support](https://fuckingnode.github.io/cross-platform/) for more info._).
 
 So, TL;DR, it helps recover storage, reduce the risk of mistakes, and make your life easier.
 

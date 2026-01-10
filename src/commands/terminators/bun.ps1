@@ -1,4 +1,4 @@
-Write-Host ">>> Removing BunJS..."
+Write-Host ">>> Removing Bun..."
 
 Write-Host ">>> Removing .bun..."
 
@@ -12,7 +12,6 @@ Write-Host ">>| Just in case, a PATH backup will be made at $env:USERPROFILE\FKN
 $oldPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
 
 Out-File "$env:USERPROFILE\FKN_PATH_BACKUP-TERMINATE_BUN.txt"
-#luego deno\bin
 $newPath = ($oldPath.Split(";") | Where-Object { $_ -ne $env:USERPROFILE + "\.bun\bin" }) -join ";"
 
 [System.Environment]::SetEnvironmentVariable("Path", $newPath, "User")

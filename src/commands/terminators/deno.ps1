@@ -1,4 +1,4 @@
-Write-Host ">>> Removing DenoJS..."
+Write-Host ">>> Removing Deno..."
 
 Write-Host ">>> Removing .deno..."
 

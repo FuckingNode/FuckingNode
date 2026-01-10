@@ -27,8 +27,8 @@ const coolStrings = {
     zakaOne: brightGreen("ZakaHaceCosas"),
     zakaTwo: italic('"ZakaMakesStuff"'),
     gitUrl: orange("https://github.com/FuckingNode/FuckingNode"),
-    side: italic("Another side project"),
-    date: cyan("September 28, 2024"),
+    side: italic("Yet another side project"),
+    date: cyan("the 28th of September, 2024"),
 };
 
 const phrase = shuffle(phrases);
@@ -59,7 +59,7 @@ export default async function TheAbouter(): Promise<void> {
         2,
     );
     await reveal(
-        `${coolStrings.side}, born ${coolStrings.date} (a bit earlier but 'Initial commit' in the 1st repo was then)`,
+        `${coolStrings.side}, born ${coolStrings.date}.`,
         3,
     );
 }

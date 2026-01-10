@@ -85,6 +85,12 @@ if (hasFlag("version", true, true) && !flags[1]) {
     Deno.exit(0);
 }
 
+export let SHOULD_CLEAN_OUTPUT = false;
+export let SHOULD_LOAD_CFG = true;
+
+if (hasFlag("clear", false, false) || Deno.env.get("FKNODE_CLEAR_OUTPUT") === "yeah") SHOULD_CLEAN_OUTPUT = true;
+if (hasFlag("no-config", false, false) || Deno.env.get("FKNODE_DETACH_CONFIG") === "yeah") SHOULD_LOAD_CFG = false;
+
 async function main(): Promise<void> {
     // debug commands
     if (Deno.args[0] === "FKNDBG_PROC") {

@@ -2,7 +2,7 @@
 set -e
 set -u
 
-echo ">>> Removing DenoJS..."
+echo ">>> Removing Deno..."
 
 echo ">>> Removing ~/.deno..."
 

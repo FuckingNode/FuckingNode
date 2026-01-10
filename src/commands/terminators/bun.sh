@@ -2,7 +2,7 @@
 set -e
 set -u
 
-echo ">>> Removing BunJS..."
+echo ">>> Removing Bun..."
 
 echo ">>> Removing ~/.bun..."
 
