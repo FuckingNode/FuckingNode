@@ -12,13 +12,13 @@
     pkgs = import nixpkgs { inherit system; };
 
     pname = "fuckingnode";
-    version = "5.1.0";
+    version = "5.2.0";
 
     urls = {
       "x86_64-linux"   = "https://github.com/FuckingNode/FuckingNode/releases/download/${version}/FuckingNode-linux64";
-      "aarch64-linux"  = "https://github.com/FuckingNode/FuckingNode/releases/download/${version}/FuckingNode-linux_arm";
-      "x86_64-darwin"  = "https://github.com/FuckingNode/FuckingNode/releases/download/${version}/FuckingNode-macos64";
-      "aarch64-darwin" = "https://github.com/FuckingNode/FuckingNode/releases/download/${version}/FuckingNode-macos_arm";
+      "aarch64-linux"  = "https://github.com/FuckingNode/FuckingNode/releases/download/${version}/FuckingNode-linuxArm";
+      "x86_64-darwin"  = "https://github.com/FuckingNode/FuckingNode/releases/download/${version}/FuckingNode-mac64";
+      "aarch64-darwin" = "https://github.com/FuckingNode/FuckingNode/releases/download/${version}/FuckingNode-macArm";
     };
 
     sha256s = {
@@ -51,8 +51,8 @@
 
       meta = {
         description = "FuckingNode CLI tool";
-        homepage = "https://github.com/FuckingNode/FuckingNode";
-        license = pkgs.lib.licenses.mit;
+        homepage = "https://fuckingnode.github.io/";
+        license = pkgs.lib.licenses.gpl3;
         platforms = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
         mainProgram = "fuckingnode";
       };
