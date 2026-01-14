@@ -6,6 +6,13 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
+## [5.2.1] (17-01-2026)
+
+### Fixed
+
+- Fixed a strange error stack appearing when CTRL+C-ing a detached command in a CmdSet. This is an unresolved Deno issue, by the way.
+- Fixed build being behind upstream Deno runtime.
+
 ## [5.2.0] (10-01-2026)
 
 Built against Deno 2.5.6 instead of latest. 2.6.X broke macOS builds and hasn't yet been fixed. Previous version was built against 2.5.3, so there's no downgrade.

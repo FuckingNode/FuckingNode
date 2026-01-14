@@ -17,6 +17,7 @@
     "jsr:@zakahacecosas/entity-utils@^1.0.1": "1.0.1",
     "jsr:@zakahacecosas/string-utils@4": "4.0.0",
     "npm:@types/node@*": "22.15.3",
+    "npm:ctrlc-windows@^2.2.0": "2.2.0",
     "npm:typescript@^5.9.3": "5.9.3"
   },
   "jsr": {
@@ -104,6 +105,9 @@
         "undici-types"
       ]
     },
+    "ctrlc-windows@2.2.0": {
+      "integrity": "sha512-t9y568r+T8FUuBaqKK60YGFJdj3b3ktdJW9WXIT3CuBdQhAOYdSZu75jFUN0Ay4Yz5HHicVQqAYCwcnqhOn23g=="
+    },
     "typescript@5.9.3": {
       "integrity": "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==",
       "bin": true
@@ -126,6 +130,7 @@
       "jsr:@std/yaml@1.0.10",
       "jsr:@zakahacecosas/entity-utils@^1.0.1",
       "jsr:@zakahacecosas/string-utils@4",
+      "npm:ctrlc-windows@^2.2.0",
       "npm:typescript@^5.9.3"
     ]
   }

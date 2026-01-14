@@ -1,3 +1,4 @@
+import { ctrlc } from "ctrlc-windows";
 import { normalize, unquote, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { DebugFknErr, ErrorHandler, FknError } from "./error.ts";
 import type { ConservativeProjectEnvironment, ProjectEnvironment } from "../types/platform.ts";
@@ -62,7 +63,15 @@ async function ExecCmd(pref: string, expr: string[], detach: boolean): Promise<R
 
             const signalHandler = (signal: "SIGTERM" | "SIGINT" | "SIGBREAK") => {
                 console.log(italic(`\n(FKN: caught manual exit signal ${signal}.)`));
-                child.kill(signal);
+                const kill = child.kill.bind(child);
+                // see https://github.com/denoland/deno/issues/29599
+                child.kill = (signal) => {
+                    if (signal === "SIGINT") {
+                        ctrlc(child.pid);
+                    } else {
+                        kill(signal);
+                    }
+                };
                 success = 1;
             };
 
