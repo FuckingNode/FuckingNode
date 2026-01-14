@@ -10,7 +10,6 @@ export type VALID_EMOJIS =
     | "what"
     | "bulb"
     | "tick"
-    | "tick-clear"
     | "error"
     | "heads-up"
     | "working"

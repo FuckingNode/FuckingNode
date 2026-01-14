@@ -37,7 +37,7 @@ export default async function TheTerminator(params: TheTerminatorConstructedPara
             `Are you ${bold("100% sure")} we should ${bold("entirely remove")} the ${bold(italic(params.runtime))} runtime from this machine?`,
         )
     ) {
-        LogStuff(brightGreen("Got it. No action taken."), "tick-clear");
+        LogStuff(brightGreen("Got it. No action taken."), "tick");
         return;
     }
 
@@ -56,7 +56,7 @@ export default async function TheTerminator(params: TheTerminatorConstructedPara
                 "warn",
             )
         ) {
-            LogStuff(brightGreen("Got it. No action taken."), "tick-clear");
+            LogStuff(brightGreen("Got it. No action taken."), "tick");
             return;
         }
         LogStuff("You chose it.", "warn");
@@ -90,5 +90,5 @@ export default async function TheTerminator(params: TheTerminatorConstructedPara
 
     await BulkRemove(projects.map((p) => p.root));
 
-    LogStuff(brightGreen("Done."), "tick-clear");
+    LogStuff(brightGreen("Done."), "tick");
 }

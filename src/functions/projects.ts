@@ -98,7 +98,7 @@ export async function AddProject(
                     ? ""
                     : `\nNote this project uses the ${rt} runtime. Keep in mind it's not fully supported.`
             }`,
-            "tick-clear",
+            "tick",
         );
     }
 
@@ -153,7 +153,7 @@ export async function AddProject(
             addTheEntry(env.names.full, env.runtime);
             LogStuff(
                 `Added workspace root as a project!`,
-                "tick-clear",
+                "tick",
             );
             return env;
         }
@@ -163,7 +163,7 @@ export async function AddProject(
 
         LogStuff(
             `Added all of your projects. Many motherfuckers less to care about!`,
-            "tick-clear",
+            "tick",
         );
         return env;
     } catch (e) {
@@ -206,7 +206,7 @@ export async function AddProject(
 
         LogStuff(
             `Added all of your projects. Many motherfuckers less to care about!`,
-            "tick-clear",
+            "tick",
         );
         return "rootless";
     }
@@ -241,7 +241,7 @@ export async function RemoveProject(
         if (list.length > 0) {
             LogStuff(
                 `There goes another "revolutionary cutting edge project" gone. Life's ever changing, right?`,
-                "tick-clear",
+                "tick",
             );
         } else {
             LogStuff(

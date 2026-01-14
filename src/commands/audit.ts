@@ -37,7 +37,7 @@ export default async function TheAuditer(params: TheAuditerConstructedParams): P
             return string;
         });
         if (reportDetails.length === 0) {
-            LogStuff("Not a single project has security issues. Great!", "tick-clear");
+            LogStuff("Not a single project has security issues. Great!", "tick");
             return;
         }
         LogStuff(
@@ -48,7 +48,7 @@ export default async function TheAuditer(params: TheAuditerConstructedParams): P
         await PerformAuditing(project);
     }
 
-    LogStuff("Audit complete!", "tick-clear");
+    LogStuff("Audit complete!", "tick");
     LogStuff(
         italic("Keep in mind our report simply can't be 100% accurate - the best option is always to fix vulnerabilities."),
         "heads-up",

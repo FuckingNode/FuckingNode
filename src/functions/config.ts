@@ -185,7 +185,7 @@ export function ChangeSetting(
 
     if (newSettings) {
         Deno.writeTextFileSync(settingsPath, StringifyYaml(newSettings));
-        LogStuff(`Settings successfully updated! ${setting} is now ${value}`, "tick-clear");
+        LogStuff(`Settings successfully updated! ${setting} is now ${value}`, "tick");
     }
 
     return;
@@ -270,6 +270,6 @@ export async function FlushConfigFiles(target: UnknownString, force: boolean, si
     ) return;
 
     await BulkRemove(file);
-    if (!silent) LogStuff("That worked out!", "tick-clear");
+    if (!silent) LogStuff("That worked out!", "tick");
     return;
 }

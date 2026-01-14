@@ -138,7 +138,7 @@ async function InstallDependencies(
 
     LogStuff(
         `Great! ${env.names.nameVer} is now setup and ready for use. Your IDE will now launch.\nGo write some fucking good code!`,
-        "tick-clear",
+        "tick",
     );
 
     return env;
@@ -168,12 +168,12 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
         );
     }
 
-    LogStuff(bold(brightGreen("Let's kickstart! Wait a moment please...")), "tick-clear");
+    LogStuff(bold(brightGreen("Let's kickstart! Wait a moment please...")), "tick");
     LogStuff(`Cloning repo from ${bold(repoUrl)}`, "working");
 
     Clone(repoUrl, clonePath);
 
-    LogStuff("Cloned it!", "tick-clear");
+    LogStuff("Cloned it!", "tick");
 
     Deno.chdir(clonePath);
 

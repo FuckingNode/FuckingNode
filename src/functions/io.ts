@@ -29,8 +29,6 @@ export function Emojify(message: string, emoji: VALID_EMOJIS): string {
                 return `💡`;
             case "tick":
                 return `✅`;
-            case "tick-clear":
-                return `✔`;
             case "error":
                 return `❌`;
             case "warn":
@@ -49,7 +47,7 @@ export function Emojify(message: string, emoji: VALID_EMOJIS): string {
             case "package":
                 return `📦`;
             case "trash":
-                return `🗑`;
+                return `🗑️`;
             case "chart":
                 return `📊`;
             case "wink":

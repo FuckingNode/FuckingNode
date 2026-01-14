@@ -19,7 +19,7 @@ export default async function TheBuilder(params: TheBuilderConstructedParams): P
 
     const startup = new Date();
 
-    LogStuff(green(`There we go, time to build ${env.names.name}`), "tick-clear");
+    LogStuff(green(`There we go, time to build ${env.names.name}`), "tick");
 
     await RunCmdSet({ env, key: "buildCmd" });
 
