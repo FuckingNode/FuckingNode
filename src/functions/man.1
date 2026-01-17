@@ -1,0 +1,24 @@
+.TH FUCKINGNODE 1 "08 Jan 2026" "vX.Y.Z" "FuckingNode user manual"
+.SH NAME
+fuckingnode \- a CLI tool to automate common maintenance or setup tasks in coding projects; JavaScript oriented but usable with other stacks as well.
+.SH SYNOPSIS
+\fBfuckingnode\fR [\fICOMMAND\fR] [\fIARGUMENTS\fR]
+.SH DESCRIPTION
+FuckingNode is a CLI that automates and fastens life-cycle tasks for projects made in Node.js, Deno, Bun and other environments. Automates artifact cleanup, code formatting, chore commits, and virtually any task you wish; makes it way faster to clone and setup projects; allows for safer Git commits; automates version releases; and more. Keep in mind this 'man' page is basic; 'fuckingnode help' or the online documentation (being this one the best we can recommend) should be used instead. :contentReference[oaicite:1]{index=1}
+.SH COMMON COMMANDS
+.TP
+\fBfkn add <path>\fR
+Adds a project to FuckingNode's project list. Projects in the list can be referenced by name instead of root path, and tasks can be automated in bulk for the whole list. :contentReference[oaicite:2]{index=2}
+.TP
+\fBfkn clean\fR
+Automatically cleans, updates dependencies for, lints, and removes artifacts for all projects in the list. Each project can be independently setup for what to do when this command is ran. :contentReference[oaicite:3]{index=3}
+.TP
+\fBfkn clean <project>\fR
+Only cleans a specific project. :contentReference[oaicite:4]{index=4}
+.SH EXAMPLES
+.TP
+TODO
+.SH EXIT STATUS
+FuckingNode does not use fine-grained status codes, it returns either 0 for success or 1 for failure.
+.SH AUTHOR
+ZakaHaceCosas.

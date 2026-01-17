@@ -37,6 +37,7 @@ import { RunFEM } from "./functions/modules/extensions.ts";
 import { brightBlue, italic } from "@std/fmt/colors";
 import { orange } from "./functions/color.ts";
 import { shuffle } from "@zakahacecosas/entity-utils";
+import { SetupUnixMan } from "./functions/man.ts";
 
 async function init(): Promise<void> {
     await FreshSetup();
@@ -377,6 +378,12 @@ async function main(): Promise<void> {
                     : "https://tenor.com/view/sokora-dunk-ice-skate-ice-dunk-balling-gif-7665972654807661282?quality=lossless",
             );
             break;
+        case "man":
+        case "manual": {
+            if (LOCAL_PLATFORM.SYSTEM === "msft") LogStuff("You are on Windows, why the hell would you want to setup a manpage?");
+            else SetupUnixMan();
+            break;
+        }
         case "tip":
         case "hint":
         case "protip":
