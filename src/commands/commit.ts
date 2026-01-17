@@ -1,7 +1,7 @@
 import { Interrogate, LogStuff } from "../functions/io.ts";
 import { ConservativelyGetProjectEnvironment } from "../functions/projects.ts";
 import type { TheCommitterConstructedParams } from "./_interfaces.ts";
-import { CanCommit, Commit, GetBranches, GetCommittableFiles, GetStagedFiles, IsRepo, Push, StageFiles } from "../functions/git.ts";
+import { CanCommit, Commit, GetBranches, GetCommittableFiles, GetRepoRoot, GetStagedFiles, IsRepo, Push, StageFiles } from "../functions/git.ts";
 import { normalize, pluralOrNot, testFlag, validate } from "@zakahacecosas/string-utils";
 import type { GIT_FILES } from "../types/misc.ts";
 import { FknError } from "../functions/error.ts";
@@ -54,7 +54,8 @@ export default async function TheCommitter(params: TheCommitterConstructedParams
         );
     }
 
-    const project = Deno.cwd();
+    const project = GetRepoRoot(Deno.cwd());
+    Deno.chdir(project);
 
     if (!IsRepo(project)) {
         LogStuff(

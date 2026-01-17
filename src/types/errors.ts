@@ -19,6 +19,7 @@ export const GIT_ERRORS = [
     "Git__NoBranchAA",
     "Git__Forbidden",
     "Git__NoBranch",
+    "Git__TopLevel",
 ] as const;
 export const ENV_ERRORS = [
     "Env__NotFound",

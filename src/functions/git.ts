@@ -442,3 +442,25 @@ export function StageFiles(path: string, files: GIT_FILES): "ok" | "nothingToSta
         );
     }
 }
+/**
+ * Gets the root directory of a Git repo.
+ *
+ * @param {string} path Any path nested within the repo.
+ * @returns {string} Root location.
+ */
+export function GetRepoRoot(path: string): string {
+    try {
+        const topLevelOutput = g(path, [
+            "rev-parse",
+            "--show-toplevel",
+        ]);
+        if (!topLevelOutput.success) throw `(git rev-parse --show-toplevel): ${topLevelOutput.stdout}`;
+        // ParsePath needed, git does C:/ instead of C:\\ for whatever reason
+        return ParsePath(topLevelOutput.stdout);
+    } catch (e) {
+        throw new FknError(
+            "Git__TopLevel",
+            `Couldn't get repository root at ${bold(path)}: ${e}`,
+        );
+    }
+}

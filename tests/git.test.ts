@@ -1,5 +1,6 @@
 import { assertEquals } from "@std/assert";
 import { GenerateGitUrl } from "../src/commands/toolkit/git-url.ts";
+import { GetRepoRoot } from "../src/functions/git.ts";
 
 Deno.test({
     name: "properly generates git urls",
@@ -19,5 +20,18 @@ Deno.test({
 
         assertEquals(GenerateGitUrl("gh:user/cool-repo").name, "cool-repo");
         assertEquals(GenerateGitUrl("https://github.com/user/cool-repo..git").name, "cool-repo");
+    },
+});
+
+Deno.test({
+    name: "properly gets the root of a repo",
+    fn: () => {
+        Deno.chdir("src/types");
+        const out = GetRepoRoot(Deno.cwd());
+        Deno.chdir("../../");
+        assertEquals(
+            out,
+            Deno.cwd(),
+        );
     },
 });
