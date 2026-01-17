@@ -15,23 +15,23 @@
 
 <div align="center">
 
-[Documentation](https://fuckingnode.github.io/manual) &nbsp;&nbsp;•&nbsp;&nbsp; [Issues](https://github.com/FuckingNode/FuckingNode/issues/new) &nbsp;&nbsp;•&nbsp;&nbsp; [Roadmap](https://fuckingnode.github.io/roadmap)
+[Documentation](https://fuckingnode.github.io/manual) &nbsp;&nbsp;•&nbsp;&nbsp; [Issues](https://github.com/FuckingNode/FuckingNode/issues/new)
 
 </div>
 
 ### [Read the manual →](https://fuckingnode.github.io/manual)
 
-[Watch here our **official low budget action trailer** →](https://youtube.com/watch?v=J675ZcYBrHM)
+[Watch the video →](https://youtube.com/watch?v=J675ZcYBrHM)
 
 ## What is "FuckingNode"?
 
-FuckingNode is a CLI tool (not a CLI-ish npm package) that _automates_ **cleaning**, **linting**, and **prettifying** JS or TS projects, _simplifies_ **releasing** npm / jsr **packages**, **destroying generated artifacts & caches**, **(safely) making Git commits**, and _speeds up_ **cloning** and **starting up** your projects.
+FuckingNode is a CLI tool (not a CLI-ish npm package) that _automates_ **cleaning**, **linting**, and **prettifying** JS or TS projects, _simplifies_ **releasing** npm / jsr **packages**, **destroying generated artifacts & caches**, **(safely) making Git commits**, and _speeds up_ **cloning** and **starting up** your projects; among other stuff.
 
-We may not be able to fix your bugs, but we are able to automate most headache-giving tasks across all of your NodeJS projects and give you a set of tools to make JS development great again. Deno, Bun, and even Golang and Rust are also (partially) supported (_see [Cross-runtime support](https://fuckingnode.github.io/cross-platform/) for more info._).
+We may not be able to fix your bugs, but we are able to automate most headache-giving tasks across all of your NodeJS projects and give you a set of tools to make JS development great again. Deno and Bun are mostly supported too. And, for non-JavaScript developers, some features were bridged to Golang and Rust, whereas others simply don't require to be using any specific stack (thus working for anyone). _See [Cross-runtime support](https://fuckingnode.github.io/cross-platform/) for more info._
 
-So, TL;DR, it helps recover storage, reduce the risk of mistakes, and make your life easier.
+So yeah, it helps you recover storage, make fewer mistakes, and make your dev life easier.
 
-It's not magic, it's **FuckingNode**—and yes, we're shipping _that_ name to production.
+It's not magic, it's **FuckingNode**. And yes, we shipped it with _that_ name to production.
 
 ### Usage
 
@@ -49,7 +49,7 @@ fkn help                  # show it all
 
 The standard command is `fuckingnode`, though `fkn` and `fknode` aliases are auto-added when downloading via a script installer. Command-specific aliases like `fkclean`, `fkadd`, `fkstart`, etc... do exist.
 
-Refer to our [documentation](https://fuckingnode.github.io/) to learn about our motivation, all our features, and more.
+Refer to our [documentation](https://fuckingnode.github.io/) to learn about all our features, our motivation, and much more.
 
 ---
 
