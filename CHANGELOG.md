@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- Fixed notifications not always working on Linux. They're now almost-natively implemented via D-Bus.
 - Fixed a strange error stack appearing when CTRL+C-ing a detached command in a CmdSet. This is an unresolved Deno issue, by the way.
 - Fixed build being behind upstream Deno runtime.
 - Fixed `fkcommit` not working as it should if ran from a directory nested away from the repository's root.

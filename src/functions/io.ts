@@ -178,23 +178,31 @@ export function Notification(title: string, msg: string, elapsed?: number): void
                     app_icon: "",
                     summary: title,
                     body: msg,
-                    actions: {},
+                    actions: [],
                     hints: {},
                     timeout: -1,
                 };
 
+                const message = new DBus.Message({
+                    destination: "org.freedesktop.Notifications",
+                    path: "/org/freedesktop/Notifications",
+                    interface: "org.freedesktop.Notifications",
+                    member: "Notify",
+                    body: [
+                        parameters.app_name,
+                        parameters.replaces_id,
+                        parameters.app_icon,
+                        parameters.summary,
+                        parameters.body,
+                        parameters.actions,
+                        parameters.hints,
+                        parameters.timeout,
+                    ],
+                    signature: "susssasa{sv}i",
+                });
+
                 // don't await as we don't really care about output, errors will get ignored
-                bus.call(
-                    new DBus.Message(
-                        {
-                            destination: "org.freedesktop.Notifications",
-                            path: "/org/freedesktop/Notifications",
-                            interface: "org.freedesktop.Notifications",
-                            member: "Notify",
-                            body: Object.values(parameters),
-                        },
-                    ),
-                );
+                bus.call(message);
             } catch {
                 // cannot notify
             }
