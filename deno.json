@@ -155,6 +155,7 @@
         "exactOptionalPropertyTypes": true
     },
     "imports": {
+        "@particle/dbus-next": "npm:@particle/dbus-next@^0.11.4",
         "@std/cli": "jsr:@std/cli@^1.0.25",
         "@std/datetime": "jsr:@std/datetime@^0.225.6",
         "@std/fmt": "jsr:@std/fmt@^1.0.8",

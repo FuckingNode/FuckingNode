@@ -6,6 +6,7 @@ import { LOCAL_PLATFORM } from "../platform.ts";
 import { bold, stripAnsiCode } from "@std/fmt/colors";
 import { SHOULD_CLEAN_OUTPUT } from "../main.ts";
 import process from "node:process";
+import DBus from "@particle/dbus-next";
 
 /**
  * Appends an emoji at the beginning of a message.
@@ -168,18 +169,31 @@ export function Notification(title: string, msg: string, elapsed?: number): void
             );
         } else {
             try {
-                // at least on KDE neon, this doesn't come by default
-                // yet other apps do send notifications 😭
-                // TODO(@ZakaHaceCosas): find out how to make this work
-                // note: what DOES (very probably) work is D-Bus
-                // thing is, native code is... hard
-                // at least it is possible (deno has a FFI)
-                Commander(
-                    "notify-send",
-                    [
-                        title,
-                        msg,
-                    ],
+                const bus = DBus.sessionBus();
+
+                // do not change the order of this thing
+                const parameters = {
+                    app_name: "FuckingNode",
+                    replaces_id: 0,
+                    app_icon: "",
+                    summary: title,
+                    body: msg,
+                    actions: {},
+                    hints: {},
+                    timeout: -1,
+                };
+
+                // don't await as we don't really care about output, errors will get ignored
+                bus.call(
+                    new DBus.Message(
+                        {
+                            destination: "org.freedesktop.Notifications",
+                            path: "/org/freedesktop/Notifications",
+                            interface: "org.freedesktop.Notifications",
+                            member: "Notify",
+                            body: Object.values(parameters),
+                        },
+                    ),
                 );
             } catch {
                 // cannot notify
