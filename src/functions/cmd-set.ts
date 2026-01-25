@@ -14,10 +14,18 @@ import {
 import type { NonEmptyArray } from "../types/misc.ts";
 import { LOCAL_PLATFORM } from "../platform.ts";
 import { bold, dim, italic } from "@std/fmt/colors";
+import type { TASK_ERROR_CODES } from "../types/errors.ts";
 
 type Parameters = {
     key: "commitCmd" | "releaseCmd" | "buildCmd" | "launchCmd" | "kickstartCmd";
     env: ProjectEnvironment | ConservativeProjectEnvironment;
+};
+type FormattedCmd = {
+    pref: string;
+    expr: string[];
+    detach: boolean;
+    cmdTypeString: "Command" | "File" | "Script" | "Raw exec" | "Detached command" | "Detached file" | "Detached script" | "Detached raw exec";
+    cmdString: string;
 };
 
 function ValidateCallback(v: CmdInstruction): ParsedCmdInstruction | null {
@@ -34,16 +42,23 @@ function ValidateCallback(v: CmdInstruction): ParsedCmdInstruction | null {
     };
 }
 
-export function ValidateCmdSet(params: Parameters): (ParsedCmdInstruction | CrossPlatformParsedCmdInstruction)[] | null {
+export function ValidateCmdSet(
+    params: Parameters,
+): (ParsedCmdInstruction | CrossPlatformParsedCmdInstruction | ParsedCmdInstruction[])[] | null {
     const rawSet = params.env.settings[params.key];
     if (!rawSet) return null;
 
     const set = Object.values(rawSet).map((v) => {
         if (!v) return null;
+        if (Array.isArray(v)) return v.map((w) => ValidateCallback(w)).filter((i) => i !== null);
         if (typeof v === "object") {
             return {
-                msft: v.msft ? ValidateCallback(v.msft) : null,
-                posix: v.posix ? ValidateCallback(v.posix) : null,
+                msft: v.msft
+                    ? (Array.isArray(v.msft)) ? v.msft.map((w) => ValidateCallback(w)).filter((i) => i !== null) : ValidateCallback(v.msft)
+                    : null,
+                posix: v.posix
+                    ? (Array.isArray(v.posix)) ? v.posix.map((w) => ValidateCallback(w)).filter((i) => i !== null) : ValidateCallback(v.posix)
+                    : null,
             };
         }
         return ValidateCallback(v);
@@ -126,7 +141,105 @@ async function ExecCmd(pref: string, expr: string[], detach: boolean): Promise<R
     }
 }
 
-// TODO(@ZakaHaceCosas): we plan to make this support paralleled cmds too
+function CmdFormatter(command: ParsedCmdInstruction, env: ProjectEnvironment | ConservativeProjectEnvironment): FormattedCmd {
+    const cmdString = command.cmd.join(" ");
+    const detach = cmdString.slice(0, 2) === ";;";
+    const cmdTypeString = command.type === "~" ? "Command" : command.type === "=" ? "File" : command.type === "$" ? "Script" : "Raw exec";
+    const pref = command.type === "<" ? command.cmd[0] : command.type === "$"
+        // @ts-expect-error: TS type inference can't tell that this IS validated above
+        ? env.commands.script[0]
+        : command.type === "="
+        // @ts-expect-error: same here
+        ? env.commands.file[0]
+        : LOCAL_PLATFORM.SHELL;
+    const expr = [
+        command.type === "<" ? undefined : command.type === "$"
+            // @ts-expect-error: same as above
+            ? env.commands.script[1]
+            : command.type === "="
+            // @ts-expect-error: yet again
+            ? env.commands.file[1]
+            : "-c",
+    ];
+    const cmd = detach ? [command.cmd[0].replace(";;", ""), ...(command.cmd.slice(1))] : command.cmd;
+    if (command.type === "<") expr.push(...cmd.slice(1));
+    else if (command.type === "~") expr.push(cmd.join(" "));
+    else expr.push(...cmd);
+    return {
+        pref,
+        expr: expr.filter(validate),
+        detach,
+        cmdTypeString,
+        cmdString: command.cmd[0].replace(";;", ""),
+    };
+}
+
+async function CmdRunner(
+    cmd: ParsedCmdInstruction,
+    env: ConservativeProjectEnvironment | ProjectEnvironment,
+    cmdIndex: number,
+    key: Parameters["key"],
+    errorCode: TASK_ERROR_CODES,
+    format: FormattedCmd,
+): Promise<void> {
+    const command = IsCPCmdInstruction(cmd) ? cmd[LOCAL_PLATFORM.SYSTEM] : cmd;
+    if (!command) {
+        // non-CP instructions do get filtered for null values, so we can be sure
+        // this is only null when a CPCmdInstruction isn't defined for us
+        LogStuff(`CmdSet #${cmdIndex} in sequence is platform specific, and not for you.\n`, "warn");
+        return;
+    }
+    if (Array.isArray(command)) {
+        return;
+    }
+    const { cmdString, pref, expr, detach, cmdTypeString } = format;
+    try {
+        if (env.commands.script === false && command.type === "$") {
+            throw new FknError(
+                "Interop__JSRunUnable",
+                `${env.manager} does not support JavaScript-like "run" commands, however you've set ${key} in your fknode.yaml to ${cmdString}. Since we don't know what you're doing, this task won't proceed for this project.`,
+            );
+        }
+        if (env.commands.file === false && command.type === "=") {
+            throw new FknError(
+                "Interop__FileRunUnable",
+                `${env.manager} does not support running code files, however you've set ${key} in your fknode.yaml to ${cmdString}. Since we don't know what you're doing, this task won't proceed for this project.`,
+            );
+        }
+        const _out = await ExecCmd(pref, expr, detach);
+        const out = {
+            success: _out.success,
+            stdout: detach ? italic("(FKN: detached execution terminated.)") : _out.stdout as string,
+        };
+        if (!out.success) {
+            LogStuff(out.stdout ?? "(No stdout/stderr was written by the command)");
+            throw out.stdout;
+        }
+        if (normalize(out.stdout).length === 0) LogStuff(dim(italic("No output received.")));
+        else LogStuff(out.stdout);
+        LogStuff(`\n${bold("Done")} with ${cmdString}!\n`);
+        return;
+    } catch (e) {
+        Notification(
+            `Your ${key} failed!`,
+            `${cmdTypeString}#${cmdIndex} "${cmdString}" failed, so we've halted execution.`,
+            30000,
+        );
+        if (typeof e === "string") {
+            DebugFknErr(
+                errorCode,
+                `${cmdTypeString} "${cmdString}" has failed (#${cmdIndex} in '${key}' sequence). We've halted execution. Error log, if any, was dumped into ${
+                    GetAppPath("ERRORS")
+                }.`,
+                e,
+                false,
+            );
+        }
+        // halt execution, especially to avoid releases
+        ErrorHandler(e);
+    }
+}
+
 export async function RunCmdSet(params: Parameters): Promise<void> {
     const cmdSet = ValidateCmdSet(params);
     if (!cmdSet) return;
@@ -141,7 +254,9 @@ export async function RunCmdSet(params: Parameters): Promise<void> {
         ? "Task__Commit"
         : params.key === "launchCmd"
         ? "Task__Launch"
-        : "Task__Release";
+        : params.key === "releaseCmd"
+        ? "Task__Release"
+        : "Task__Kickstart";
 
     for (const _cmd of cmdSet) {
         const command = IsCPCmdInstruction(_cmd) ? _cmd[LOCAL_PLATFORM.SYSTEM] : _cmd;
@@ -152,81 +267,23 @@ export async function RunCmdSet(params: Parameters): Promise<void> {
             LogStuff(`Command #${cmdIndex} in sequence is platform specific, and not for you.\n`, "warn");
             continue;
         }
-        const _cmdString = command.cmd.join(" ");
-        const cmdString = _cmdString.replace(";;", "");
-        const detach = _cmdString.slice(0, 2) === ";;";
-        const cmdTypeString = command.type === "~" ? "Command" : command.type === "=" ? "File" : command.type === "$" ? "Script" : "Raw exec";
+        if (Array.isArray(command)) {
+            LogStuff(
+                bold(
+                    `Running parallelized Cmd ${cmdIndex}/${cmdSet.length} | Includes ${command.length} parallel statements\n`,
+                ),
+            );
+            await Promise.all(command.map((cmd) => CmdRunner(cmd, params.env, cmdIndex, params.key, errorCode, CmdFormatter(cmd, params.env))));
+            LogStuff(`${bold("Done with the whole Cmd!")}\n`);
+            return;
+        }
+        const fmt = CmdFormatter(command, params.env);
         LogStuff(
             bold(
-                `Running Cmd ${cmdIndex}/${cmdSet.length} | ${detach ? "Detached " + cmdTypeString.toLowerCase() : cmdTypeString} / ${
-                    italic(dim(cmdString))
-                }\n`,
+                `Running Cmd ${cmdIndex}/${cmdSet.length} | ${fmt.cmdTypeString} / ${italic(dim(fmt.cmdString))}\n`,
             ),
         );
-        try {
-            if (params.env.commands.script === false && command.type === "$") {
-                throw new FknError(
-                    "Interop__JSRunUnable",
-                    `${params.env.manager} does not support JavaScript-like "run" commands, however you've set ${params.key} in your fknode.yaml to ${cmdString}. Since we don't know what you're doing, this task won't proceed for this project.`,
-                );
-            }
-            if (params.env.commands.file === false && command.type === "=") {
-                throw new FknError(
-                    "Interop__FileRunUnable",
-                    `${params.env.manager} does not support running code files, however you've set ${params.key} in your fknode.yaml to ${cmdString}. Since we don't know what you're doing, this task won't proceed for this project.`,
-                );
-            }
-            const pref = command.type === "<" ? command.cmd[0] : command.type === "$"
-                // @ts-expect-error: TS type inference can't tell that this IS validated above
-                ? params.env.commands.script[0]
-                : command.type === "="
-                // @ts-expect-error: same here
-                ? params.env.commands.file[0]
-                : LOCAL_PLATFORM.SHELL;
-            const expr = [
-                command.type === "<" ? undefined : command.type === "$"
-                    // @ts-expect-error: same as above
-                    ? params.env.commands.script[1]
-                    : command.type === "="
-                    // @ts-expect-error: yet again
-                    ? params.env.commands.file[1]
-                    : "-c",
-            ];
-            const cmd = detach ? [command.cmd[0].replace(";;", ""), ...(command.cmd.slice(1))] : command.cmd;
-            if (command.type === "<") expr.push(...cmd.slice(1));
-            else if (command.type === "~") expr.push(cmd.join(" "));
-            else expr.push(...cmd);
-            const _out = await ExecCmd(pref, expr.filter(validate), detach);
-            const out = {
-                success: _out.success,
-                stdout: detach ? italic("(FKN: detached execution terminated.)") : _out.stdout as string,
-            };
-            if (!out.success) {
-                LogStuff(out.stdout ?? "(No stdout/stderr was written by the command)");
-                throw out.stdout;
-            }
-            if (normalize(out.stdout).length === 0) LogStuff(dim(italic("No output received.")));
-            else LogStuff(out.stdout);
-            LogStuff(bold("\nDone!\n"));
-        } catch (e) {
-            Notification(
-                `Your ${params.key} failed!`,
-                `${cmdTypeString}#${cmdIndex} "${cmdString}" failed, so we've halted execution.`,
-                30000,
-            );
-            if (typeof e === "string") {
-                DebugFknErr(
-                    errorCode,
-                    `${cmdTypeString} "${cmdString}" has failed (#${cmdIndex} in '${params.key}' sequence). We've halted execution. Error log, if any, was dumped into ${
-                        GetAppPath("ERRORS")
-                    }.`,
-                    e,
-                    false,
-                );
-            }
-            // halt execution, especially to avoid releases
-            ErrorHandler(e);
-        }
+        await CmdRunner(command, params.env, cmdIndex, params.key, errorCode, fmt);
     }
 
     return;

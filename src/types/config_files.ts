@@ -100,8 +100,8 @@ export interface CF_FKNODE_SCHEDULE {
 export type CmdInstruction = `\$${string}` | `~${string}` | `=${string}` | `<${string}` | null;
 export type ParsedCmdInstruction = { type: "<" | "~" | "$" | "="; cmd: NonEmptyArray<string> };
 export type CrossPlatformParsedCmdInstruction = {
-    msft: ParsedCmdInstruction | null;
-    posix: ParsedCmdInstruction | null;
+    msft: ParsedCmdInstruction | ParsedCmdInstruction[] | null;
+    posix: ParsedCmdInstruction | ParsedCmdInstruction[] | null;
 };
 // deno-lint-ignore explicit-module-boundary-types no-explicit-any
 export function IsCPCmdInstruction(a: any): a is CrossPlatformParsedCmdInstruction {
@@ -109,7 +109,8 @@ export function IsCPCmdInstruction(a: any): a is CrossPlatformParsedCmdInstructi
     return ((a.msft && a.msft.type && typeof a.msft.type === "string" && validate(a.msft.type))
         || (a.posix && a.posix.type && typeof a.posix.type === "string" && validate(a.posix.type)));
 }
-export type CmdSet = (CmdInstruction | { posix: CmdInstruction; msft: CmdInstruction })[];
+export type CmdSet =
+    (CmdInstruction | { posix: CmdInstruction | CmdInstruction[]; msft: CmdInstruction | CmdInstruction[] } | CmdInstruction[])[];
 
 /** An `fknode.yaml` file for configuring individual projects */
 export type FkNodeYaml = Partial<FullFkNodeYaml>;

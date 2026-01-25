@@ -30,12 +30,13 @@ export const ENV_ERRORS = [
     "Env__SchrodingerLockfile",
 ] as const;
 export const TASK_ERRORS = [
+    "Task__Kickstart",
     "Task__Release",
     "Task__Commit",
     "Task__Launch",
     "Task__Update",
-    "Task__Lint",
     "Task__Pretty",
+    "Task__Lint",
     "Task__Build",
 ] as const;
 export const PARAM_ERRORS = [
@@ -57,15 +58,15 @@ export const INTERNAL_ERRORS = [
     "Internal__Lazy",
 ] as const;
 
-type OS_ERROR_CODES = typeof OS_ERRORS[number];
-type FS_ERROR_CODES = typeof FS_ERRORS[number];
-type CFG_ERROR_CODES = typeof CFG_ERRORS[number];
-type GIT_ERROR_CODES = typeof GIT_ERRORS[number];
-type ENV_ERROR_CODES = typeof ENV_ERRORS[number];
-type TASK_ERROR_CODES = typeof TASK_ERRORS[number];
-type PARAM_ERROR_CODES = typeof PARAM_ERRORS[number];
-type INTEROP_ERROR_CODES = typeof INTEROP_ERRORS[number];
-type INTERNAL_ERROR_CODES = typeof INTERNAL_ERRORS[number];
+export type OS_ERROR_CODES = typeof OS_ERRORS[number];
+export type FS_ERROR_CODES = typeof FS_ERRORS[number];
+export type CFG_ERROR_CODES = typeof CFG_ERRORS[number];
+export type GIT_ERROR_CODES = typeof GIT_ERRORS[number];
+export type ENV_ERROR_CODES = typeof ENV_ERRORS[number];
+export type TASK_ERROR_CODES = typeof TASK_ERRORS[number];
+export type PARAM_ERROR_CODES = typeof PARAM_ERRORS[number];
+export type INTEROP_ERROR_CODES = typeof INTEROP_ERRORS[number];
+export type INTERNAL_ERROR_CODES = typeof INTERNAL_ERRORS[number];
 
 /**
  * All possible CLI error codes.

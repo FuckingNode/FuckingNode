@@ -20,4 +20,8 @@ buildCmd:
     #- posix: ~;;echo "hit ctrl+c" && tail -f /dev/null
     #- posix: ~;;echo "don't hit anything" && sleep 2
     - <;;ping google.com
+    - - ~"echo 'a' > a.txt"
+      - ~"echo 'b' > b.txt"
+      - ~"echo 'c' > c.txt"
+      - ~"echo 'd' > d.txt"
 cleanerShortCircuit: true

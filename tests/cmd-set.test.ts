@@ -71,7 +71,39 @@ Deno.test({
                     "google.com",
                 ],
                 type: "<",
-            }],
+            }, [{
+                cmd: [
+                    "echo",
+                    "'a'",
+                    ">",
+                    "a.txt",
+                ],
+                type: "$",
+            }, {
+                cmd: [
+                    "echo",
+                    "'b'",
+                    ">",
+                    "b.txt",
+                ],
+                type: "$",
+            }, {
+                cmd: [
+                    "echo",
+                    "'c'",
+                    ">",
+                    "c.txt",
+                ],
+                type: "$",
+            }, {
+                cmd: [
+                    "echo",
+                    "'d'",
+                    ">",
+                    "d.txt",
+                ],
+                type: "$",
+            }]],
         );
     },
 });

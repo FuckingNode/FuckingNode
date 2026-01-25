@@ -13,6 +13,4 @@ Run("check", "."); // ensure code is right
 
 Run("fmt"); // ensure code is formatted
 
-Run("upgrade"); // ensure we're on latest
-
 Run("outdated", "--update", "--latest"); // ensure deps are on latest
