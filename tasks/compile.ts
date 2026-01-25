@@ -48,6 +48,8 @@ const ALL_COMMANDS = Object.entries(TARGETS).map(([key, [target, output]]: [stri
         "--allow-run",
         // used for an easter egg that requires OS uptime
         "--allow-sys=osUptime",
+        // used for linux notifications
+        "--allow-ffi",
         // used for extensions
         "--unstable-worker-options",
         // include setups

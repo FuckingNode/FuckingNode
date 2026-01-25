@@ -6,6 +6,12 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
+## [5.3.0]  (30-01-2026)
+
+### Fixed
+
+- Fixed a Deno permission modal appearing every time you run the CLI.
+
 ## [5.2.1] (17-01-2026)
 
 ### Fixed
