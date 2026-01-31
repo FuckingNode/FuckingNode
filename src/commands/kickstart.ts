@@ -151,7 +151,7 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
 
     const userSettings = GetUserSettings();
     const root = userSettings["kickstart-root"] ?? Deno.cwd();
-    const clonePath: string = ParsePath(validate(path) ? path : JoinPaths(root, projectName));
+    const clonePath: string = ParsePath(validate(path) && !validateAgainst(path, ["-", "--"]) ? path : JoinPaths(root, projectName));
 
     const clonePathValidator = CheckForDir(clonePath);
     if (clonePathValidator === "ValidButNotEmpty") {
@@ -169,7 +169,7 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
     }
 
     LogStuff(bold(brightGreen("Let's kickstart! Wait a moment please...")), "tick");
-    LogStuff(`Cloning repo from ${bold(repoUrl)}`, "working");
+    LogStuff(`Cloning repo from ${bold(repoUrl)} into ${bold(clonePath)}`, "working");
 
     Clone(repoUrl, clonePath);
 

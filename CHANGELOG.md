@@ -12,6 +12,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Added the ability to make Cmds run several commands in parallel.
 
+### Changed
+
+- Now kickstart will tell you the path it's cloning to.
+- Now you can pass `--` as the path to kickstart to use the default, so you can change the package manager to use without specifying a path.
+
 ### Fixed
 
 - Fixed the app doing some useless calculation and object construction on each run.
