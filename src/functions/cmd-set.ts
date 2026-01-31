@@ -275,15 +275,15 @@ export async function RunCmdSet(params: Parameters): Promise<void> {
             );
             await Promise.all(command.map((cmd) => CmdRunner(cmd, params.env, cmdIndex, params.key, errorCode, CmdFormatter(cmd, params.env))));
             LogStuff(`${bold("Done with the whole Cmd!")}\n`);
-            return;
+        } else {
+            const fmt = CmdFormatter(command, params.env);
+            LogStuff(
+                bold(
+                    `Running Cmd ${cmdIndex}/${cmdSet.length} | ${fmt.cmdTypeString} / ${italic(dim(fmt.cmdString))}\n`,
+                ),
+            );
+            await CmdRunner(command, params.env, cmdIndex, params.key, errorCode, fmt);
         }
-        const fmt = CmdFormatter(command, params.env);
-        LogStuff(
-            bold(
-                `Running Cmd ${cmdIndex}/${cmdSet.length} | ${fmt.cmdTypeString} / ${italic(dim(fmt.cmdString))}\n`,
-            ),
-        );
-        await CmdRunner(command, params.env, cmdIndex, params.key, errorCode, fmt);
     }
 
     return;

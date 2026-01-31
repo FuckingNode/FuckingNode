@@ -17,11 +17,13 @@ buildCmd:
     - ~ls
     - ="src/types/misc.ts --args"
     - msft: <powershell -c 'echo raw exec'
-    #- posix: ~;;echo "hit ctrl+c" && tail -f /dev/null
-    #- posix: ~;;echo "don't hit anything" && sleep 2
-    - <;;ping google.com
+      posix: <bash -c 'echo raw exec'
     - - ~"echo 'a' > a.txt"
       - ~"echo 'b' > b.txt"
       - ~"echo 'c' > c.txt"
       - ~"echo 'd' > d.txt"
+    - - ~"rm a.txt"
+      - ~"rm b.txt"
+      - ~"rm c.txt"
+      - ~"rm d.txt"
 cleanerShortCircuit: true

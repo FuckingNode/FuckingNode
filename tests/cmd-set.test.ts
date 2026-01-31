@@ -1,5 +1,4 @@
 import { assertEquals } from "@std/assert/equals";
-// import { LOCAL_PLATFORM } from "../src/constants/platform.ts";
 import { RunCmdSet, ValidateCmdSet } from "../src/functions/cmd-set.ts";
 import { ProjectEnvironment } from "../src/types/platform.ts";
 import { GetProjectEnvironment } from "../src/functions/projects.ts";
@@ -64,13 +63,16 @@ Deno.test({
                     ],
                     type: "<",
                 },
-                posix: null,
-            }, {
-                cmd: [
-                    ";;ping",
-                    "google.com",
-                ],
-                type: "<",
+                posix: {
+                    cmd: [
+                        "bash",
+                        "-c",
+                        "'echo",
+                        "raw",
+                        "exec'",
+                    ],
+                    type: "<",
+                },
             }, [{
                 cmd: [
                     "echo",
@@ -78,7 +80,7 @@ Deno.test({
                     ">",
                     "a.txt",
                 ],
-                type: "$",
+                type: "~",
             }, {
                 cmd: [
                     "echo",
@@ -86,7 +88,7 @@ Deno.test({
                     ">",
                     "b.txt",
                 ],
-                type: "$",
+                type: "~",
             }, {
                 cmd: [
                     "echo",
@@ -94,7 +96,7 @@ Deno.test({
                     ">",
                     "c.txt",
                 ],
-                type: "$",
+                type: "~",
             }, {
                 cmd: [
                     "echo",
@@ -102,8 +104,37 @@ Deno.test({
                     ">",
                     "d.txt",
                 ],
-                type: "$",
-            }]],
+                type: "~",
+            }], [
+                {
+                    cmd: [
+                        "rm",
+                        "a.txt",
+                    ],
+                    type: "~",
+                },
+                {
+                    cmd: [
+                        "rm",
+                        "b.txt",
+                    ],
+                    type: "~",
+                },
+                {
+                    cmd: [
+                        "rm",
+                        "c.txt",
+                    ],
+                    type: "~",
+                },
+                {
+                    cmd: [
+                        "rm",
+                        "d.txt",
+                    ],
+                    type: "~",
+                },
+            ]],
         );
     },
 });
