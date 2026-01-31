@@ -5,6 +5,7 @@ import { GetDateNow, ParseDate } from "./date.ts";
 import { parse as parseYaml } from "@std/yaml";
 import { StringifyYaml } from "./io.ts";
 import * as DenoJson from "../../deno.json" with { type: "json" };
+import { difference } from "@std/datetime";
 
 export async function RunScheduledTasks(): Promise<void> {
     const settings = GetUserSettings();
@@ -12,31 +13,20 @@ export async function RunScheduledTasks(): Promise<void> {
     const scheduleFile: CF_FKNODE_SCHEDULE = parseYaml(Deno.readTextFileSync(scheduleFilePath)) as CF_FKNODE_SCHEDULE;
 
     const currentDate: Date = new Date();
-    function CalculateDifference(date: Date): number {
-        return (currentDate.getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
-    }
+    const { milliseconds } = difference(currentDate, ParseDate(scheduleFile.updater.lastCheck), { units: ["milliseconds"] });
 
-    const dates = {
+    if (milliseconds! < settings["update-freq"]) return;
+
+    const updatedScheduleFile: CF_FKNODE_SCHEDULE = {
+        ...scheduleFile,
         updater: {
-            last: scheduleFile.updater.lastCheck,
-            diff: CalculateDifference(
-                ParseDate(scheduleFile.updater.lastCheck),
-            ),
+            lastCheck: GetDateNow(),
+            latestVer: DenoJson.default.version,
         },
     };
-
-    if (dates.updater.diff >= settings["update-freq"]) {
-        const updatedScheduleFile: CF_FKNODE_SCHEDULE = {
-            ...scheduleFile,
-            updater: {
-                lastCheck: GetDateNow(),
-                latestVer: DenoJson.default.version,
-            },
-        };
-        await TheUpdater({
-            silent: true,
-            force: false,
-        });
-        Deno.writeTextFileSync(scheduleFilePath, StringifyYaml(updatedScheduleFile));
-    }
+    await TheUpdater({
+        silent: true,
+        force: false,
+    });
+    Deno.writeTextFileSync(scheduleFilePath, StringifyYaml(updatedScheduleFile));
 }

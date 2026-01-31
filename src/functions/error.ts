@@ -49,7 +49,7 @@ export class FknError extends Error {
             case "Os__NoEntity":
                 if (LOCAL_PLATFORM.SYSTEM === "msft") {
                     this.hint =
-                        `Just in case it's a shell command (like 'echo' or 'ls') and you input it somewhere like 'buildCmd': it has to be preceded with 'powershell', as its passed as an argument to this executable.`;
+                        "Just in case it's a shell command (like 'echo' or 'ls') and you input it somewhere like 'buildCmd': it has to be preceded with 'powershell', as its passed as an argument to this executable.";
                 }
                 break;
             case "Fs__Unreal":
@@ -64,15 +64,15 @@ export class FknError extends Error {
                 } but failed, meaning config files cannot be created and the CLI can't work. Something seriously went motherfuckingly wrong. If these aren't the right environment variables for your system's config path (currently using APPDATA on Windows, /home/user/.config on macOS and Linux), please raise an issue on GitHub.`;
                 break;
             case "Env__NotFound":
-                this.hint = `Check for typos or a wrong name. Given input (either a project's name or a file path) wasn't found.`;
+                this.hint = "Check for typos or a wrong name. Given input (either a project's name or a file path) wasn't found.";
                 break;
             case "Env__PkgFileUnparsable":
                 this.hint =
-                    `Your project's main file (package.json, deno.json, go.mod, etc.) is unparsable, or is missing basic fields ("name" and "version" on JS/Cargo, "go" and "module" on Golang).\nCheck for typos or syntax errors. If you're sure the file is correct, please open an issue on GitHub (if everything's right, it might be a bug with our interop layer).`;
+                    'Your project\'s main file (package.json, deno.json, go.mod, etc.) is unparsable, or is missing basic fields ("name" and "version" on JS/Cargo, "go" and "module" on Golang).\nCheck for typos or syntax errors. If you\'re sure the file is correct, please open an issue on GitHub (if everything\'s right, it might be a bug with our interop layer).';
                 break;
             case "Interop__JSRunUnable":
                 this.hint =
-                    `Non-JS environments do not have an equivalent to "npm run" or "yarn run" tasks, so we can't execute that task. To avoid undesired behavior, we stopped execution. Please remove the setting key from this fknode.yaml that's causing the error.`;
+                    'Non-JS environments do not have an equivalent to "npm run" or "bun run" tasks, so we can\'t execute that task. To avoid undesired behavior, we stopped execution. Please remove the setting key from this fknode.yaml that\'s causing the error.';
                 break;
             case "Env__MissingMotor":
                 this.hint =

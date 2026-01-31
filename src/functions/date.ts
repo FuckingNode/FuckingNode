@@ -28,13 +28,9 @@ export function ParseDate(date: string): Date {
  * @returns {string}
  */
 export function GetElapsedTime(date: Date): string {
-    const diff = difference(date, new Date()).milliseconds ?? 0;
+    const { milliseconds, seconds, minutes } = difference(date, new Date());
 
-    if (diff < 1000) return `less than a second`;
+    if (milliseconds! < 1000) return "less than a second";
 
-    // https://stackoverflow.com/a/21294619
-    const minutes = Math.floor(diff / 60000);
-    const seconds = ((diff % 60000) / 1000).toFixed(0);
-
-    return `${minutes}m ${seconds.padStart(2, "0")}s`;
+    return `${minutes}m ${seconds!.toString().padStart(2, "0")}s`;
 }

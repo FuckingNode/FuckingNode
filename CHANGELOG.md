@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- Fixed the app doing some useless calculation and object construction on each run.
 - Fixed a Deno permission modal appearing every time you run the CLI.
 
 ## [5.2.1] (17-01-2026)

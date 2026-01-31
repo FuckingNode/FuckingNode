@@ -140,22 +140,24 @@ export function Notification(title: string, msg: string, elapsed?: number): void
     const settings = GetUserSettings();
     if (!settings["notifications"]) return;
     if ((elapsed && settings["notification-threshold"]) && elapsed < settings["notification-threshold-value"]) return;
+    // const icon = join(Deno.execPath(), "..", "fkn.png");
     // NOTE: we should show our logo
     // requires to bundle it / add it to the installer script
-    // on Windows, to write XML inside of the damn script :sob:
-    // on macOS and Linux, idk what does it require, we'll find out
+    // on Windows, to bundle this as a native app
+    // on macOS, I don't know
+    // on Linux it actually should work (thanks D-Bus) (NOTE: UNTESTED)
     if (LOCAL_PLATFORM.SYSTEM === "msft") {
         Commander(
             "powershell",
             [
                 "-Command",
-                `[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null; `
-                + `$template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02); `
-                + `$template.GetElementsByTagName("text").Item(0).AppendChild($template.CreateTextNode("${title}")) > $null; `
-                + `$template.GetElementsByTagName("text").Item(1).AppendChild($template.CreateTextNode("${msg}")) > $null; `
-                + `$notification = [Windows.UI.Notifications.ToastNotification]::new($template); `
-                + `$notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("FuckingNode"); `
-                + `$notifier.Show($notification);`,
+                "[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null; "
+                + "$template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02); "
+                + `$template.GetElementsByTagName("text").Item(0).AppendChild($template.CreateTextNode("${title}")) | Out-Null; `
+                + `$template.GetElementsByTagName("text").Item(1).AppendChild($template.CreateTextNode("${msg}")) | Out-Null; `
+                + "$notification = [Windows.UI.Notifications.ToastNotification]::new($template); "
+                + '$notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("FuckingNode"); '
+                + "$notifier.Show($notification);",
             ],
         );
     } else if (LOCAL_PLATFORM.SYSTEM === "posix") {
