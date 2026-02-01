@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## Unreleased
 
+### Added
+
+- Added a manpage for Linux. It is minimal and doesn't document every single feature, but we'll expand it over time so it allows for offline documentation reading.
+
 ### Fixed
 
 - Fixed kickstart not launching your IDE in certain cases if a `kickstartCmd` exists.

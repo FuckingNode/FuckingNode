@@ -1,0 +1,38 @@
+.TH FUCKINGNODE 1 "01 Feb 2026" "v5.2.3" "FuckingNode user manual"
+.SH NAME
+fuckingnode \- a CLI tool to automate common maintenance or setup tasks in coding projects; JavaScript oriented but usable with other stacks as well.
+.SH SYNOPSIS
+\fBfuckingnode\fR [\fICOMMAND\fR] [\fIARGUMENTS\fR]
+.SH DESCRIPTION
+FuckingNode is a CLI that automates and fastens life-cycle tasks for projects made in Node.js, Deno, Bun and other environments. Automates artifact cleanup, code formatting, chore commits, and virtually any task you wish; makes it way faster to clone and setup projects; allows for safer Git commits; automates version releases; and more. Keep in mind this 'man' page is basic; 'fuckingnode help' or the online documentation (being this one the best we can recommend) should be used instead. :contentReference[oaicite:1]{index=1}
+.SH COMMON COMMANDS
+.TP
+\fBfkn add ./project1\fR
+Takes an optional file path (if none, CWD is used) or glob pattern. Adds a project to FuckingNode's project list. Projects in the list can be referenced by name instead of root path, and tasks can be automated in bulk for the whole list.
+.TP
+\fBfkn clean\fR
+Cleans, updates dependencies for, lints, and removes artifacts for all projects in the list. Each project can be independently setup for what to do when this command is ran.
+.TP
+\fBfkn clean ./project1\fR
+Cleans only the specified project.
+.TP
+\fBfkn clean hard --lint --pretty --update\fR
+Performs a hard clean with linting, prettifying, and dependency updates.
+.TP
+\fBfkn clean hard-only\fR
+Clears only global caches without cleaning individual projects.
+.TP
+\fBfkn help\fR
+Displays help for FuckingNode commands.
+.TP
+\fBfkn help <feature>\fR
+Displays help for a specific feature, e.g. 'commit', 'build', or 'release', among others.
+
+.SH CONFIGURATION
+Create a \fBfknode.yaml\fR file at the project root to customize behavior. You may follow the reference at https://fuckingnode.github.io/manual/fknode-yaml/
+.SH EXIT STATUS
+FuckingNode does not use fine-grained status codes as of now.
+0      Success
+1      Failure
+.SH AUTHOR
+ZakaHaceCosas

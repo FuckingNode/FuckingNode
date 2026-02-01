@@ -1,16 +1,11 @@
-// deno-lint-ignore-file no-unreachable
-import { FknError } from "./error.ts";
+import { Get } from "./embed.ts";
+import { LogStuff } from "./io.ts";
 
 export function SetupUnixMan(): void {
-    throw new FknError(
-        "Internal__Lazy",
-        "Man setup is yet to be added.",
-    );
-
-    // @ts-ignore unreachable code is "bad"
+    LogStuff("Setting man up...", "working");
     Deno.writeTextFileSync(
         "/usr/share/man/man1/fuckingnode.1",
-        "TODO", // TODO(@ZakaHaceCosas): embed man.1 file
+        Get("man.1", "/manpage"),
     );
     new Deno.Command(
         "sudo",
@@ -18,4 +13,5 @@ export function SetupUnixMan(): void {
             args: ["mandb"],
         },
     ).outputSync();
+    LogStuff("Done.", "tick");
 }
