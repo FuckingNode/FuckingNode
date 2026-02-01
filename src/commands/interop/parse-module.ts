@@ -2,14 +2,16 @@
  * @file This file includes parses for file formats that cannot be parsed using existing libraries that I'm aware of, e.g. Go.mod.
  * @author ZakaHaceCosas
  */
+// deno-lint-ignore-file no-explicit-any
 
 import { isObject } from "../../functions/projects.ts";
 import { normalize, type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
-import type { CargoPkgFile, DenoPkgFile, FnCPF, GolangPkgFile, MANAGER_JS, NodePkgFile } from "../../types/platform.ts";
+import type { CargoPkgFile, DenoPkgFile, FnCPF, FnCPFDependency, GolangPkgFile, MANAGER_JS, NodePkgFile } from "../../types/platform.ts";
 import * as DenoJson from "../../../deno.json" with { type: "json" };
 import { FknError } from "../../functions/error.ts";
 import { parse as parseToml } from "@std/toml";
 import { parse as parseJsonc } from "@std/jsonc";
+import { ParsePath } from "../../functions/filesystem.ts";
 
 /**
  * gets a Golang require-like string:
@@ -194,9 +196,49 @@ export const PackageFileParsers = {
             function processCargoDependencies(
                 depsObject: CargoPkgFile["dependencies"] | undefined,
                 rValue: FnCPF["deps"][0]["rel"],
-                depsArray: { name: string; ver: string; rel: string; src: string }[],
+                depsArray: FnCPFDependency[],
             ): void {
-                Object.entries(depsObject ?? {}).forEach(([k, v]) => {
+                if (!depsObject) return;
+                Object.entries(depsObject).forEach(([k, _v]) => {
+                    // typing is hard
+                    const v: any = _v as any;
+                    if (typeof v === "string") {
+                        depsArray.push({
+                            name: k,
+                            ver: v,
+                            rel: rValue,
+                            src: "crates.io",
+                        });
+                        return;
+                    }
+                    if ((v as any)["path"]) {
+                        const path = ParsePath(v["path"]);
+                        depsArray.push({
+                            name: k,
+                            ver: "undefined",
+                            rel: "rst:localD",
+                            src: `rs-local://${path}`,
+                        });
+                        return;
+                    }
+                    if ((v as any)["git"]) {
+                        depsArray.push({
+                            name: k,
+                            ver: "undefined",
+                            rel: "rst:git",
+                            src: `git:${v["branch"] ? `${v["branch"]}@` : ""}${v["git"]}` as any,
+                        });
+                        return;
+                    }
+                    if ((v as any)["url"]) {
+                        depsArray.push({
+                            name: k,
+                            ver: "undefined",
+                            rel: "rst:tar",
+                            src: v["url"],
+                        });
+                        return;
+                    }
                     depsArray.push({
                         name: k,
                         ver: typeof v === "object" ? String(v.version) : String(v),

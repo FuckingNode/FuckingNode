@@ -3,22 +3,6 @@
 > [!TIP]
 > These are all things I want to do. Most tasks are major-release oriented, as patches just fix bugs and minors just bring in random improvements that come to my mind - or at least that's the idea.
 
-## Cross-runtime support
-
-### Cargo
-
-- [ ] Sources are MOSTLY `crates.io` but not always, may be local deps, Git-based deps, or remote tarball-based deps.
-
-```toml
-[dependencies]
-# we understand this
-from_crates = "1.0"
-# we DON'T understand this
-locally = { path = "../local_crate" }
-from_git = { git = "https://github.com/FuckingNode/FuckingRust.git", branch = "dev" }
-from_tarball = { url = "https://somewhere.com/some_crate-1.0.0.tar.gz" }
-```
-
 ## Cmds
 
 - [ ] Calls to FKN, so that you can directly invoke, idk, destroy, or clean, or we could even pack some cmd-specific features into the CLI.

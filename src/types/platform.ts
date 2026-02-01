@@ -14,7 +14,10 @@ export interface UnderstoodProjectProtection {
 }
 
 /** A Cargo dependency. */
-export type CargoDependency = string | { version: string; optional?: boolean; features?: string[] };
+export type CargoDependency = string | { version: string; optional?: boolean; features?: string[] } | { path: string } | {
+    git: `https://${string}.git`;
+    branch?: string;
+} | { url: `https://${string}.tar.gz` };
 
 /**
  * Use this when you just need the name or version of a package, to avoid Node-Deno type issues.
@@ -416,7 +419,7 @@ export type MANAGER_GLOBAL = MANAGER_JS | "cargo" | "go";
  *
  * @interface FnCPFDependency
  */
-interface FnCPFDependency {
+export interface FnCPFDependency {
     /**
      * Package name.
      *
@@ -432,11 +435,19 @@ interface FnCPFDependency {
     /**
      * Package relationship.
      */
-    rel: "univ:dep" | "univ:devD" | "go:ind" | "js:peer" | "rst:buildD";
+    rel: "univ:dep" | "univ:devD" | "go:ind" | "js:peer" | "rst:buildD" | "rst:git" | "rst:tar" | "rst:localD";
     /**
      * Package source.
      */
-    src: "npm" | "jsr" | "pkg.go.dev" | "crates.io" | "github";
+    src:
+        | "npm"
+        | "jsr"
+        | "pkg.go.dev"
+        | "crates.io"
+        | "github"
+        | `rs-local://${string}`
+        | `git:${string}@https://${string}.git`
+        | `https://${string}.tar.gz`;
 }
 
 /**

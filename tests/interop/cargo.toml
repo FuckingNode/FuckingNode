@@ -12,6 +12,9 @@ reqwest = { version = "0.11", features = [
     "json",
 ] } # HTTP client library with JSON support
 tokio = { version = "1", features = ["full"] } # Asynchronous runtime for Rust
+locally = { path = "../local_crate" }
+from_git = { git = "https://github.com/FuckingNode/FuckingRust.git", branch = "dev" }
+from_tarball = { url = "https://somewhere.com/some_crate-1.0.0.tar.gz" }
 
 [dev-dependencies]
 criterion = "0.3" # Library for benchmarking
