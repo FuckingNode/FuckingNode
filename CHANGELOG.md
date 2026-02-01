@@ -6,6 +6,13 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
+## Unreleased
+
+### Fixed
+
+- Fixed kickstart not launching your IDE in certain cases if a `kickstartCmd` exists.
+- Fixed many things being wrong with kickstart's CLI output for newer features.
+
 ## [5.2.2] (31-01-2026)
 
 ### Added

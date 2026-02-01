@@ -7,6 +7,7 @@ import { GetAppPath } from "./config.ts";
 import { LogStuff, Notification } from "./io.ts";
 import {
     type CmdInstruction,
+    type CmdSet,
     type CrossPlatformParsedCmdInstruction,
     IsCPCmdInstruction,
     type ParsedCmdInstruction,
@@ -15,6 +16,7 @@ import type { NonEmptyArray } from "../types/misc.ts";
 import { LOCAL_PLATFORM } from "../platform.ts";
 import { bold, dim, italic } from "@std/fmt/colors";
 import type { TASK_ERROR_CODES } from "../types/errors.ts";
+import { stringify as stringifyYaml } from "@std/yaml";
 
 type Parameters = {
     key: "commitCmd" | "releaseCmd" | "buildCmd" | "launchCmd" | "kickstartCmd";
@@ -287,4 +289,28 @@ export async function RunCmdSet(params: Parameters): Promise<void> {
     }
 
     return;
+}
+
+export function HumanizeCmd(cmd: CmdSet): string {
+    return stringifyYaml(cmd)
+        .split("\n")
+        .map((s) => s.replace("- ", "").trim())
+        .filter((s) => LOCAL_PLATFORM.SYSTEM === "msft" ? !s.startsWith("posix: ") : !s.startsWith("msft: "))
+        .map((s) =>
+            s.replaceAll("posix: ", "").replaceAll("msft: ", "")
+                .replace(
+                    "~",
+                    `${LOCAL_PLATFORM.SHELL} -c `.padEnd("(execute code file):      ".length, " "),
+                )
+                .replace(
+                    "=",
+                    "(execute code file):      ",
+                )
+                .replace(
+                    "<",
+                    "(execute PROGRAM/BINARY): ",
+                )
+                .replace("$", "(run project script):     ")
+        )
+        .join("\n");
 }

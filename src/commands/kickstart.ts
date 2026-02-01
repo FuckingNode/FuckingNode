@@ -13,11 +13,11 @@ import { GenerateGitUrl } from "./toolkit/git-url.ts";
 import { Clone } from "../functions/git.ts";
 import { type UnknownString, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { GetElapsedTime } from "../functions/date.ts";
-import { bold, brightGreen, italic } from "@std/fmt/colors";
+import { bold, brightGreen, italic, red } from "@std/fmt/colors";
 import type { CF_FKNODE_SETTINGS, FullFkNodeYaml } from "../types/config_files.ts";
 import { GetProjectSettings } from "../functions/projects.ts";
 import { orange } from "../functions/color.ts";
-import { RunCmdSet } from "../functions/cmd-set.ts";
+import { HumanizeCmd, RunCmdSet } from "../functions/cmd-set.ts";
 
 async function InstallDependencies(
     manager: UnknownString,
@@ -137,7 +137,7 @@ async function InstallDependencies(
     else FkNodeInterop.Installers.UniJs(Deno.cwd(), managerToUse);
 
     LogStuff(
-        `Great! ${env.names.nameVer} is now setup and ready for use. Your IDE will now launch.\nGo write some fucking good code!`,
+        `Great! ${env.names.nameVer} finished dependency install and is ready to work with.`,
         "tick",
     );
 
@@ -189,9 +189,10 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
             "Intervention is needed for your kickstart to continue.",
         );
         LogStuff(
-            `This project specifically wants you to use the ${
+            `This project specifically wants you to use the '${
                 bold(settings.kickstarter.install.split(" ").slice(1).join(" "))
-            } installation command. Shall we?`,
+            }' installation command. Shall we?`,
+            "warn",
         );
         const proceed = Interrogate(
             `Hit 'Y' to use it, or 'N' to ignore the request.\n${
@@ -219,7 +220,7 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
     Notification(
         settings.kickstartCmd ? "Almost there!" : "Kickstart successful!",
         settings.kickstartCmd
-            ? `After ${GetElapsedTime(startup)}, there's one last step before having your project ready`
+            ? `After ${GetElapsedTime(startup)}, there's one last step before having your project ready.`
             : `Your project is ready. It took ${GetElapsedTime(startup)}. Go write some fucking good code!`,
         elapsed,
     );
@@ -229,27 +230,36 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
         // and comes up to the IDE opening
         // (or, if unlucky, to whatever error stopping it from launching)
         LaunchUserIDE();
-        return;
+        Deno.exit(0);
     }
 
     LogStuff(
-        `This repository wants a CmdSet to run. Think of it as a post-install script.\nThe sequence is as follows:\n\n${
-            bold(settings.kickstartCmd.join("\n"))
-        }\n\n${
+        `${red(bold("This repository wants a CmdSet to run."))} Think of it as a post-install script.\nThe sequence is as follows:\n\n${
+            bold(HumanizeCmd(settings.kickstartCmd))
+        }\n${
             bold(orange(
                 "Kickstart CmdSets can be a useful way to save time, but they also imply risks. Unless on a trusted repository, make sure to carefully review it.\nDo not run stuff you do not understand.",
             ))
         }`,
-        "heads-up",
+        "warn",
     );
-    const proceed = Interrogate("Hit 'Y' to allow this CmdSet to run, or 'N' not to do so.", "warn");
+    const proceed = Interrogate(
+        "Hit 'Y' to allow this CmdSet to run, or 'N' not to do so. "
+            + italic("We'll launch your IDE with the project regardless of what you choose."),
+    );
     if (!proceed) {
-        LogStuff("Okay then, we won't run it. The rest is already setup, so we'll launch your IDE now. Go write some fucking good code!");
+        LogStuff(
+            "Okay, won't run it. The rest is already setup, so we'll launch your IDE now. Go write some fucking good code!",
+            "tick",
+        );
         LaunchUserIDE();
-        return;
+        Deno.exit(0);
     }
     await RunCmdSet({
         key: "kickstartCmd",
         env,
     });
+    LogStuff("All setup. Go write some fucking good code!", "tick");
+    LaunchUserIDE();
+    Deno.exit(0);
 }
