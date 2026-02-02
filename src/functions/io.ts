@@ -74,17 +74,13 @@ export function LogStuff(
     message: any,
     emoji?: VALID_EMOJIS,
 ): void {
-    try {
-        if (typeof message !== "string") message = String(message);
-        if (SHOULD_CLEAN_OUTPUT || !process.stdout.isTTY || !process.stderr.isTTY) {
-            console.log(stripAnsiCode(message));
-            return;
-        }
-        const finalMessage = emoji ? Emojify(message, emoji) : message;
-        console.log(finalMessage);
-    } catch (e) {
-        throw `Error logging stuff: ${e}`;
+    if (typeof message !== "string") message = String(message);
+    if (SHOULD_CLEAN_OUTPUT || !process.stdout.isTTY || !process.stderr.isTTY) {
+        console.log(stripAnsiCode(message));
+        return;
     }
+    const finalMessage = emoji ? Emojify(message, emoji) : message;
+    console.log(finalMessage);
 }
 
 /**
