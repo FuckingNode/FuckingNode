@@ -13,13 +13,14 @@ try {
 
 Deno.mkdir("./dist/");
 
-type OS = "win64" | "macArm" | "linuxArm" | "mac64" | "linux64";
+type OS = "win64" | "macArm" | "linuxArm" | "mac64" | "linux64"; // | "winArm";
 
 const TARGETS: Record<
     OS,
     [string, OS]
 > = {
     win64: ["x86_64-pc-windows-msvc", "win64"],
+    //winArm: ["aarch64-pc-windows-msvc", "winArm"],
     macArm: ["aarch64-apple-darwin", "macArm"],
     linuxArm: ["aarch64-unknown-linux-gnu", "linuxArm"],
     mac64: ["x86_64-apple-darwin", "mac64"],
@@ -54,10 +55,13 @@ const ALL_COMMANDS = Object.entries(TARGETS).map(([key, [target, output]]: [stri
         "--unstable-worker-options",
         // include setups
         "--include",
-        "./src/commands/toolkit/setups",
+        "./src/embed/setups",
         // include uninstallers
         "--include",
-        "./src/commands/terminators",
+        "./src/embed/terminators",
+        // include manpage
+        "--include",
+        "./src/embed/manpage",
         "--target",
         target,
         "--output",
@@ -99,6 +103,7 @@ if (release) {
         mac64: "",
         macArm: "",
         win64: "",
+        // winArm: "",
     };
 
     const decoder = new TextDecoder();

@@ -11,7 +11,7 @@
         "singleQuote": false,
         "semiColons": true,
         "useTabs": false,
-        "exclude": ["src/commands/toolkit/setups/**"],
+        "exclude": ["src/embed/**"],
         "useBraces": "whenNotSingleLine",
         "typeLiteral.separatorKind": "semiColon",
         "trailingCommas": "onlyMultiLine",
