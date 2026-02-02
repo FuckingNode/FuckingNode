@@ -464,11 +464,11 @@ export interface FnCPF {
      */
     name: string | undefined;
     /**
-     * Package version. Must follow the SemVer format.
+     * Package version. Must follow the SemVer format. Can be null if a project does not set it.
      *
-     * @type {string}
+     * @type {string | undefined}
      */
-    version: string;
+    version: string | undefined;
     /**
      * Runtime/Manager.
      *

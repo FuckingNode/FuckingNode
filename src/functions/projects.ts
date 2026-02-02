@@ -554,21 +554,23 @@ function ColorizeRuntime(
     root: string,
 ): { path: string; name: string; nameVer: string; full: string } {
     const formattedPath = italic(dim(root));
-    const color = (s: string) =>
-        runtimeColor === "cyan"
-            ? cyan(bold(s))
+    const colorName = cpf.name
+        ? (runtimeColor === "cyan"
+            ? cyan(bold(cpf.name))
             : runtimeColor === "pink"
-            ? pink(bold(s))
+            ? pink(bold(cpf.name))
             : runtimeColor === "bright-blue"
-            ? brightBlue(bold(s))
+            ? brightBlue(bold(cpf.name))
             : runtimeColor === "bright-green"
-            ? brightGreen(bold(s))
-            : orange(bold(s));
+            ? brightGreen(bold(cpf.name))
+            : orange(bold(cpf.name)))
+        : null;
+    const colorVersion = cpf.version ? magenta(cpf.version) : null;
     return {
         path: formattedPath,
-        name: cpf.name ? color(cpf.name) : formattedPath,
-        nameVer: cpf.name ? `${color(cpf.name)}@${magenta(cpf.version)}` : formattedPath,
-        full: cpf.name ? `${color(cpf.name)}@${magenta(cpf.version)} ${formattedPath}` : formattedPath,
+        name: colorName || formattedPath,
+        nameVer: colorName ? `${colorName}${colorVersion ? "@" + colorVersion : ""}` : formattedPath,
+        full: colorName ? `${colorName}${colorVersion ? "@" + colorVersion : ""} ${formattedPath}` : formattedPath,
     };
 }
 

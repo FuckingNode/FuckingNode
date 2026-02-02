@@ -175,7 +175,7 @@ export const PackageFileParsers = {
 
             return {
                 name: parsedContent.module,
-                version: version === undefined ? "Unknown" : version,
+                version: version || undefined,
                 rm: "go",
                 plat: {
                     edt: parsedContent.go,
@@ -264,8 +264,8 @@ export const PackageFileParsers = {
                     ? parsedContent.package?.version
                     : parsedContent.package?.version?.workspace === true
                     ? parsedContent.workspace?.package?.version
-                    : "unknown-ver")
-                    ?? "unknown-ver";
+                    : undefined)
+                    ?? undefined;
             const edt =
                 (typeof parsedContent.package?.edition === "string"
                     ? parsedContent.package?.edition
@@ -308,7 +308,7 @@ export const PackageFileParsers = {
 
             return {
                 name: parsedContent.name,
-                version: parsedContent.version ?? "Unknown",
+                version: parsedContent.version || undefined,
                 rm: rt,
                 plat: {
                     edt: null,
@@ -346,7 +346,7 @@ export const PackageFileParsers = {
 
             return {
                 name: parsedContent.name,
-                version: parsedContent.version ?? "Unknown",
+                version: parsedContent.version || undefined,
                 rm: "deno",
                 plat: {
                     edt: null,
