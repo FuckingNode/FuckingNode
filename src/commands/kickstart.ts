@@ -19,6 +19,20 @@ import { GetProjectSettings } from "../functions/projects.ts";
 import { orange } from "../functions/color.ts";
 import { HumanizeCmd, RunCmdSet } from "../functions/cmd-set.ts";
 
+function Success(startup: Date): never {
+    const elapsed = Date.now() - startup.getTime();
+    Notification(
+        "Kickstart successful!",
+        `After ${GetElapsedTime(startup)}, your project is ready. Go write some fucking good code!`,
+        elapsed,
+    );
+    // launch IDE after notification so he gets notified yes or yes
+    // and comes up to the IDE opening
+    // (or, if unlucky, to whatever error stopping it from launching)
+    LaunchUserIDE();
+    Deno.exit(0);
+}
+
 async function InstallDependencies(
     manager: UnknownString,
     userSettings: CF_FKNODE_SETTINGS,
@@ -70,11 +84,11 @@ async function InstallDependencies(
         env = await AddProject(Deno.cwd(), false, proceed ? policies.workspaces : null);
     } else if (policies.workspaces === "force-liberty") {
         Notification(
-            "Watch out",
-            "Intervention may be needed for your kickstart to continue.",
+            "Heads up!",
+            "Intervention is needed for your kickstart to continue.",
         );
         LogStuff(
-            "By the way, this project wants you to explicitly handle workspace addition, regardless of defaults.\nIntervention might be needed.",
+            "This project wants you to explicitly handle workspace addition, regardless of defaults.\nIntervention will be needed.",
         );
         env = await AddProject(Deno.cwd(), false, policies.workspaces);
     } else {
@@ -151,7 +165,9 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
 
     const userSettings = GetUserSettings();
     const root = userSettings["kickstart-root"] ?? Deno.cwd();
-    const clonePath: string = ParsePath(validate(path) && !validateAgainst(path, ["-", "--"]) ? path : JoinPaths(root, projectName));
+    const clonePath: string = ParsePath(
+        validate(path) && !validateAgainst(path, ["-", "--"]) ? JoinPaths(Deno.cwd(), path) : JoinPaths(root, projectName),
+    );
 
     const clonePathValidator = CheckForDir(clonePath);
     if (clonePathValidator === "ValidButNotEmpty") {
@@ -216,22 +232,12 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
         env = await ConservativelyGetProjectEnvironment(clonePath);
     }
 
-    const elapsed = Date.now() - startup.getTime();
-    Notification(
-        settings.kickstartCmd ? "Almost there!" : "Kickstart successful!",
-        settings.kickstartCmd
-            ? `After ${GetElapsedTime(startup)}, there's one last step before having your project ready.`
-            : `Your project is ready. It took ${GetElapsedTime(startup)}. Go write some fucking good code!`,
-        elapsed,
-    );
+    if (!settings.kickstartCmd) Success(startup);
 
-    if (!settings.kickstartCmd) {
-        // launch IDE after notification so he gets notified yes or yes
-        // and comes up to the IDE opening
-        // (or, if unlucky, to whatever error stopping it from launching)
-        LaunchUserIDE();
-        Deno.exit(0);
-    }
+    Notification(
+        "Almost there!",
+        "Intervention is needed for your kickstart to continue.",
+    );
 
     LogStuff(
         `${red(bold("This repository wants a CmdSet to run."))} Think of it as a post-install script.\nThe sequence is as follows:\n\n${
@@ -249,17 +255,15 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
     );
     if (!proceed) {
         LogStuff(
-            "Okay, won't run it. The rest is already setup, so we'll launch your IDE now. Go write some fucking good code!",
+            "Okay, won't run it. The rest is all setup, launching your IDE. Go write some fucking good code!",
             "tick",
         );
-        LaunchUserIDE();
-        Deno.exit(0);
+        Success(startup);
     }
     await RunCmdSet({
         key: "kickstartCmd",
         env,
     });
     LogStuff("All setup. Go write some fucking good code!", "tick");
-    LaunchUserIDE();
-    Deno.exit(0);
+    Success(startup);
 }

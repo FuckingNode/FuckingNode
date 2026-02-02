@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Fixed kickstart not launching your IDE in certain cases if a `kickstartCmd` exists.
 - Fixed many things being wrong with kickstart's CLI output for newer features.
+- Fixed a rare case where providing a specific filepath for kickstart prevents it from handling `kickstarter` and `kickstartCmd` settings.
 - Fixed `terminate` actually not working at all.
 - Fixed some long-standing issues with Rust dependencies in the FnCPF.
 
