@@ -18,6 +18,7 @@ import type { CF_FKNODE_SETTINGS, FullFkNodeYaml } from "../types/config_files.t
 import { GetProjectSettings } from "../functions/projects.ts";
 import { orange } from "../functions/color.ts";
 import { HumanizeCmd, RunCmdSet } from "../functions/cmd-set.ts";
+import { isAbsolute } from "@std/path/is-absolute";
 
 function Success(startup: Date): never {
     const elapsed = Date.now() - startup.getTime();
@@ -166,7 +167,9 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
     const userSettings = GetUserSettings();
     const root = userSettings["kickstart-root"] ?? Deno.cwd();
     const clonePath: string = ParsePath(
-        validate(path) && !validateAgainst(path, ["-", "--"]) ? JoinPaths(Deno.cwd(), path) : JoinPaths(root, projectName),
+        validate(path) && !validateAgainst(path, ["-", "--"])
+            ? (isAbsolute(path) ? path : JoinPaths(Deno.cwd(), path))
+            : JoinPaths(root, projectName),
     );
 
     const clonePathValidator = CheckForDir(clonePath);
