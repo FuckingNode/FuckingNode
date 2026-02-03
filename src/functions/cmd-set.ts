@@ -146,7 +146,13 @@ async function ExecCmd(pref: string, expr: string[], detach: boolean): Promise<R
 function CmdFormatter(command: ParsedCmdInstruction, env: ProjectEnvironment | ConservativeProjectEnvironment): FormattedCmd {
     const cmdString = command.cmd.join(" ");
     const detach = cmdString.slice(0, 2) === ";;";
-    const cmdTypeString = command.type === "~" ? "Command" : command.type === "=" ? "File" : command.type === "$" ? "Script" : "Raw exec";
+    const cmdTypeString = command.type === "~"
+        ? (detach ? "Detached command" : "Command")
+        : command.type === "="
+        ? (detach ? "Detached file" : "File")
+        : command.type === "$"
+        ? (detach ? "Detached script" : "Script")
+        : (detach ? "Detached raw exec" : "Raw exec");
     const pref = command.type === "<" ? command.cmd[0] : command.type === "$"
         // @ts-expect-error: TS type inference can't tell that this IS validated above
         ? env.commands.script[0]
@@ -211,7 +217,7 @@ async function CmdRunner(
         const _out = await ExecCmd(pref, expr, detach);
         const out = {
             success: _out.success,
-            stdout: detach ? italic("(FKN: detached execution terminated.)") : _out.stdout as string,
+            stdout: detach ? italic("(FKN: detached execution terminated.)") : _out.stdout,
         };
         if (!out.success) {
             LogStuff(out.stdout ?? "(No stdout/stderr was written by the command)");

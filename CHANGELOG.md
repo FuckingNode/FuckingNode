@@ -25,6 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Fixed `terminate` actually not working at all.
 - Fixed some long-standing issues with Rust dependencies in the FnCPF.
 - Fixed `projectEnvOverride` not being respected when adding a project.
+- Fixed the word "Detached" not appearing on CmdSets even though they do get detached.
 
 ## [5.2.2] (31-01-2026)
 

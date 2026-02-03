@@ -78,7 +78,7 @@ export default function TheSetuper(params: TheSetuperConstructedParams): void {
         } else if (setupToUse.seek === "fknode.yaml") {
             finalContent = StringifyYaml(deepMerge(contentToUse, parseYaml(fileContent)));
         } else {
-            finalContent = mergeLines(fileContent, contentToUse as string);
+            finalContent = mergeLines(fileContent, contentToUse);
         }
     } else {
         finalContent = setupToUse.seek === "fknode.yaml"
