@@ -646,30 +646,31 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
      * breaking this thing
      */
     const _ = settings.projectEnvOverride === false;
-    const isGo = _ && pathChecks.golang["pkg"] || pathChecks.golang["lock"];
-    const isRust = _ && pathChecks.rust["pkg"] || pathChecks.rust["lock"];
+    const isGo = _ && pathChecks.golang["pkg"] || pathChecks.golang["lock"] || settings.projectEnvOverride === "go";
+    const isRust = _ && pathChecks.rust["pkg"] || pathChecks.rust["lock"] || settings.projectEnvOverride === "cargo";
     const isDeno = _ && pathChecks.deno["lock"]
         || pathChecks.deno["json"]
-        || pathChecks.deno["jsonc"];
+        || pathChecks.deno["jsonc"] || settings.projectEnvOverride === "deno";
     const isBun = _ && pathChecks.bun["lock"]
         || pathChecks.bun["lockb"]
-        || pathChecks.bun["toml"];
+        || pathChecks.bun["toml"] || settings.projectEnvOverride === "bun";
     const isPnpm = _ && pathChecks.node["lockPnpm"]
         || pathChecks.node["pnpmInfer1"]
         || pathChecks.node["pnpmInfer2"]
-        || scriptHas("pnpm");
+        || scriptHas("pnpm") || settings.projectEnvOverride === "pnpm";
     const isYarn = _ && pathChecks.node["lockYarn"]
         || pathChecks.node["yarnInfer1"]
         || pathChecks.node["yarnInfer2"]
-        || scriptHas("yarn");
+        || scriptHas("yarn") || settings.projectEnvOverride === "yarn";
     const isNpm = _ && pathChecks.node["lockNpm"]
         || pathChecks.node["npmInfer"]
-        || scriptHas("npm");
+        || scriptHas("npm") || settings.projectEnvOverride === "npm";
     const isNode = _ && isPnpm || isNpm || isYarn
-        || pathChecks.node["json"];
+        || pathChecks.node["json"] || settings.projectEnvOverride === "npm";
 
     if (
-        !pathChecks.node["json"] && !pathChecks.deno["json"] && !pathChecks.bun["toml"] && !pathChecks.golang["pkg"] && !pathChecks.rust["pkg"]
+        _ && !pathChecks.node["json"] && !pathChecks.deno["json"] && !pathChecks.bun["toml"] && !pathChecks.golang["pkg"]
+        && !pathChecks.rust["pkg"]
     ) {
         throw new FknError(
             "Env__NoPkgFile",
@@ -677,7 +678,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
         );
     }
 
-    const seemsToBeNothing = !isNode && !isBun && !isDeno && !isGo && !isRust && !(CheckForPath(paths.node.json));
+    const seemsToBeNothing = _ && !isNode && !isBun && !isDeno && !isGo && !isRust && !(CheckForPath(paths.node.json));
 
     if (seemsToBeNothing) {
         throw new FknError(
@@ -701,7 +702,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
         ? pathChecks.deno["jsonc"] ? paths.deno.jsonc : pathChecks.deno["json"] ? paths.deno.json : paths.node.json
         : paths.node.json;
 
-    const mainString: string = Deno.readTextFileSync(mainPath);
+    const mainString: string = _ ? Deno.readTextFileSync(mainPath) : "";
 
     const runtimeColor = isBun ? "pink" : isNode ? "bright-green" : isDeno ? "bright-blue" : isRust ? "orange" : "cyan";
 

@@ -257,8 +257,8 @@ export const PackageFileParsers = {
                     ? parsedContent.package?.name
                     : parsedContent.package?.name?.workspace === true
                     ? parsedContent.workspace?.package?.name
-                    : "unknown-name")
-                    ?? "unknown-name";
+                    : undefined)
+                    ?? undefined;
             const version =
                 (typeof parsedContent.package?.version === "string"
                     ? parsedContent.package?.version

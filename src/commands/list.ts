@@ -42,14 +42,13 @@ async function ListProjects(
     const toPrint = (await Promise.all(
         list.map((entry) => GetProjectEnvironment(entry)),
     )).map((env) => {
-        if (ignore === "limit") {
-            return `${env.names.full} (${
-                bold(
-                    Array.isArray(env.settings.divineProtection) ? env.settings.divineProtection.join(" and ") : "Everything!",
-                )
-            })\n`;
-        }
-        return env.names.full;
+        const str = `${env.names.full} ${bold(`[${env.runtime}+${env.manager}]${env.settings.projectEnvOverride ? "(overridden!)" : ""}`)}`;
+        if (ignore !== "limit") return str;
+        return `${env.names.full} [${env.runtime}] (${
+            bold(
+                Array.isArray(env.settings.divineProtection) ? env.settings.divineProtection.join(" and ") : "Everything!",
+            )
+        })\n`;
     });
 
     LogStuff(message + sortAlphabetically(toPrint).join("\n"), "bulb");

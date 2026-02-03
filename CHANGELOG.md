@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Changed
 
 - Now projects without a version number won't show `@Unknown`, they'll just omit it.
+- Now `list` shows the runtime explicitly, and also states if it's an overridden runtime or not.
 
 ### Fixed
 
@@ -23,6 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Fixed a rare case where providing a specific filepath for kickstart prevents it from handling `kickstarter` and `kickstartCmd` settings.
 - Fixed `terminate` actually not working at all.
 - Fixed some long-standing issues with Rust dependencies in the FnCPF.
+- Fixed `projectEnvOverride` not being respected when adding a project.
 
 ## [5.2.2] (31-01-2026)
 
