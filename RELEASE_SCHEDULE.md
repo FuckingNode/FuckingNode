@@ -36,9 +36,9 @@ gantt
     title FuckingNode release schedule
     dateFormat  DD-MM-YYYY
     section Patches
-    Patch 1 FEB06 :active, 06-02-2026, 7d
-    Patch 2 FEB13 :active, 13-02-2026, 7d
-    Patch 3 FEB20 :active, 20-02-2026, 7d
+    Patch 1 FEB07 :done, 07-02-2026, 7d
+    Patch 2 FEB14 :active, 14-02-2026, 7d
+    Patch 3 FEB21 :active, 21-02-2026, 7d
     Extra patch :crit, 01-03-2026, 6d
     section Minor
     (Skip) Minor for FEB27 :done, 27-02-2026, 8d

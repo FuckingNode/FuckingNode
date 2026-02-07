@@ -306,7 +306,7 @@ export function HumanizeCmd(cmd: CmdSet): string {
             s.replaceAll("posix: ", "").replaceAll("msft: ", "")
                 .replace(
                     "~",
-                    `${LOCAL_PLATFORM.SHELL} -c `.padEnd("(execute code file):      ".length, " "),
+                    "(run shell script):       ",
                 )
                 .replace(
                     "=",
@@ -316,7 +316,10 @@ export function HumanizeCmd(cmd: CmdSet): string {
                     "<",
                     "(execute PROGRAM/BINARY): ",
                 )
-                .replace("$", "(run project script):     ")
+                .replace(
+                    "$",
+                    "(run project script):     ",
+                )
         )
         .join("\n");
 }

@@ -6,11 +6,11 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
-## [5.2.3] (Unreleased; 06-02-2026)
+## [5.2.3] (07-02-2026)
 
 ### Added
 
-- Added a manpage for Linux. It is minimal and doesn't document every single feature, but we'll expand it over time so it allows for offline documentation reading.
+- Added a manpage for Linux. It is minimal and still work in progress (doesn't document a single feature for now, we'll expand it over time so it allows for offline documentation reading).
 
 ### Changed
 
