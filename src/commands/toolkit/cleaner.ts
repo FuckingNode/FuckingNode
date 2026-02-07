@@ -53,7 +53,7 @@ function HandleErroring(
  * All project cleaning features.
  */
 const ProjectCleaningFeatures = {
-    Update: (
+    Update: async (
         projectName: string,
         env: ProjectEnvironment,
         errors: string[],
@@ -65,7 +65,7 @@ const ProjectCleaningFeatures = {
             "working",
         );
         try {
-            const output = FkNodeInterop.Features.Update(env);
+            const output = await FkNodeInterop.Features.Update(env);
             if (output === true) LogStuff(`Updated dependencies for ${projectName}!`, "tick");
             return;
         } catch (e) {
@@ -93,7 +93,7 @@ const ProjectCleaningFeatures = {
 
         return;
     },
-    Lint: (
+    Lint: async (
         projectName: string,
         env: ProjectEnvironment,
         errors: string[],
@@ -105,7 +105,7 @@ const ProjectCleaningFeatures = {
             "working",
         );
         try {
-            const output = FkNodeInterop.Features.Lint(env);
+            const output = await FkNodeInterop.Features.Lint(env);
             if (output === true) LogStuff(`Linted ${projectName}!`, "tick");
             return;
         } catch (e) {
@@ -114,7 +114,7 @@ const ProjectCleaningFeatures = {
             return;
         }
     },
-    Pretty: (
+    Pretty: async (
         projectName: string,
         env: ProjectEnvironment,
         errors: string[],
@@ -126,7 +126,7 @@ const ProjectCleaningFeatures = {
             "working",
         );
         try {
-            const output = FkNodeInterop.Features.Pretty(env);
+            const output = await FkNodeInterop.Features.Pretty(env);
             if (output === true) LogStuff(`Prettified ${projectName}!`, "tick");
             return;
         } catch (e) {
@@ -305,7 +305,7 @@ export async function PerformCleanup(
         );
     }
     if (whatShouldWeDo["update"]) {
-        ProjectCleaningFeatures.Update(
+        await ProjectCleaningFeatures.Update(
             env.names.name,
             env,
             errors,
@@ -313,7 +313,7 @@ export async function PerformCleanup(
         );
     }
     if (whatShouldWeDo["lint"]) {
-        ProjectCleaningFeatures.Lint(
+        await ProjectCleaningFeatures.Lint(
             env.names.name,
             env,
             errors,
@@ -321,7 +321,7 @@ export async function PerformCleanup(
         );
     }
     if (whatShouldWeDo["pretty"]) {
-        ProjectCleaningFeatures.Pretty(
+        await ProjectCleaningFeatures.Pretty(
             env.names.name,
             env,
             errors,

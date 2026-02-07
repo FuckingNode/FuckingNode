@@ -25,7 +25,7 @@ export default async function TheBuilder(params: TheBuilderConstructedParams): P
 
     LogStuff(brightGreen(bold(`That worked out! ${env.names.name} should be built now.`)), "tick");
 
-    Notification(
+    await Notification(
         "Build completed!",
         `Your build of ${env.mainCPF.name} succeeded! Elapsed ${GetElapsedTime(startup)}.`,
         Date.now() - startup.getTime(),

@@ -10,18 +10,18 @@ import { FkNodeInterop } from "./interop/interop.ts";
 import { FknError } from "../functions/error.ts";
 import { TypeGuardForJS } from "../types/platform.ts";
 
-function handler(
+async function handler(
     from: MANAGER_JS,
     to: MANAGER_JS,
     env: ProjectEnvironment,
-): void {
+): Promise<void> {
     try {
         if (!TypeGuardForJS(env)) return;
 
         LogStuff("Please wait (this will take a while)...", "working");
 
         LogStuff("Updating dependencies (1/6)...", "working");
-        FkNodeInterop.Features.Update(env);
+        await FkNodeInterop.Features.Update(env);
 
         if (env.runtime !== "deno") {
             LogStuff("Removing node_modules (2/6)...", "working");
@@ -82,7 +82,7 @@ function handler(
         FkNodeInterop.Installers.UniJs(env.root, to);
 
         LogStuff("Updating to ensure lockfile consistency (6/6)...", "working");
-        FkNodeInterop.Features.Update(env);
+        await FkNodeInterop.Features.Update(env);
     } catch (e) {
         LogStuff(`Migration threw an: ${e}`, "error");
     }
@@ -122,7 +122,7 @@ export default async function TheMigrator(params: TheMigratorConstructedParams):
         "warn",
     );
 
-    handler(
+    await handler(
         workingEnv.manager,
         desiredManager,
         workingEnv,
@@ -130,7 +130,7 @@ export default async function TheMigrator(params: TheMigratorConstructedParams):
 
     LogStuff(`That worked out! Enjoy using ${desiredManager} for ${workingEnv.names.full}`);
     const elapsed = Date.now() - startup.getTime();
-    Notification(
+    await Notification(
         `Your project was migrated!`,
         `From ${workingEnv.manager} to ${desiredManager}, all set! It took ${GetElapsedTime(startup)}.`,
         elapsed,

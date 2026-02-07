@@ -5,15 +5,15 @@ import { DebugFknErr, FknError } from "../../functions/error.ts";
 import { FkNodeInterop } from "./interop.ts";
 import { GetAppPath } from "../../functions/config.ts";
 
-function HandleError(
+async function HandleError(
     err:
         | "Task__Update"
         | "Task__Lint"
         | "Task__Pretty"
         | "Task__Launch",
     stdout: string,
-): never {
-    Notification(
+): Promise<never> {
+    await Notification(
         `An error happened with ${err.split("__")[1]!.toLowerCase()} task!`,
         `The error log was dumped to ${GetAppPath("ERRORS")}.`,
         300000,
@@ -29,7 +29,7 @@ function HandleError(
  * Cross-runtime compatible tasks. Supports linting, prettifying, and updating dependencies.
  */
 export const InteropedFeatures = {
-    Lint: (env: ProjectEnvironment): boolean => {
+    Lint: async (env: ProjectEnvironment): Promise<boolean> => {
         if (TypeGuardForNodeBun(env)) {
             if (env.settings.lintScript === false) {
                 if (FkNodeInterop.PackageFileUtils.SpotDependency("eslint", env.mainCPF.deps) === undefined) {
@@ -50,7 +50,7 @@ export const InteropedFeatures = {
                     ],
                 );
 
-                if (!output.success) HandleError("Task__Lint", output.stdout);
+                if (!output.success) await HandleError("Task__Lint", output.stdout);
 
                 return true;
             } else {
@@ -59,7 +59,7 @@ export const InteropedFeatures = {
                     [env.commands.script[1], env.settings.lintScript],
                 );
 
-                if (!output.success) HandleError("Task__Lint", output.stdout);
+                if (!output.success) await HandleError("Task__Lint", output.stdout);
 
                 return true;
             }
@@ -69,7 +69,7 @@ export const InteropedFeatures = {
                 ["check", "--all-targets", "--workspace"],
             );
 
-            if (!output.success) HandleError("Task__Lint", output.stdout);
+            if (!output.success) await HandleError("Task__Lint", output.stdout);
 
             return false;
         } else if (env.runtime === "deno") {
@@ -78,7 +78,7 @@ export const InteropedFeatures = {
                 env.settings.lintScript === false ? ["check", "."] : [env.commands.script[1], env.settings.lintScript],
             );
 
-            if (!output.success) HandleError("Task__Lint", output.stdout);
+            if (!output.success) await HandleError("Task__Lint", output.stdout);
 
             return true;
         } else {
@@ -87,12 +87,12 @@ export const InteropedFeatures = {
                 ["vet", "./..."],
             );
 
-            if (!output.success) HandleError("Task__Lint", output.stdout);
+            if (!output.success) await HandleError("Task__Lint", output.stdout);
 
             return true;
         }
     },
-    Pretty: (env: ProjectEnvironment): boolean => {
+    Pretty: async (env: ProjectEnvironment): Promise<boolean> => {
         const script = env.settings.prettyScript;
 
         if (TypeGuardForNodeBun(env)) {
@@ -115,7 +115,7 @@ export const InteropedFeatures = {
                     ],
                 );
 
-                if (!output.success) HandleError("Task__Pretty", output.stdout);
+                if (!output.success) await HandleError("Task__Pretty", output.stdout);
 
                 return true;
             } else {
@@ -124,7 +124,7 @@ export const InteropedFeatures = {
                     [env.commands.script[1], script],
                 );
 
-                if (!output.success) HandleError("Task__Pretty", output.stdout);
+                if (!output.success) await HandleError("Task__Pretty", output.stdout);
 
                 return true;
             }
@@ -134,7 +134,7 @@ export const InteropedFeatures = {
                 env.settings.prettyScript === false ? ["fmt"] : [env.commands.script[1], env.settings.prettyScript],
             );
 
-            if (!output.success) HandleError("Task__Pretty", output.stdout);
+            if (!output.success) await HandleError("Task__Pretty", output.stdout);
 
             return true;
         } else {
@@ -144,12 +144,12 @@ export const InteropedFeatures = {
                 ["fmt", "./..."],
             );
 
-            if (!output.success) HandleError("Task__Pretty", output.stdout);
+            if (!output.success) await HandleError("Task__Pretty", output.stdout);
 
             return true;
         }
     },
-    Update: (env: ProjectEnvironment): boolean => {
+    Update: async (env: ProjectEnvironment): Promise<boolean> => {
         const script = env.settings.updaterOverride;
 
         if (script === false) {
@@ -158,7 +158,7 @@ export const InteropedFeatures = {
                 env.commands.update,
             );
 
-            if (!output.success) HandleError("Task__Update", output.stdout);
+            if (!output.success) await HandleError("Task__Update", output.stdout);
 
             return true;
         }
@@ -175,7 +175,7 @@ export const InteropedFeatures = {
             [env.commands.script[1], script],
         );
 
-        if (!output.success) HandleError("Task__Update", output.stdout);
+        if (!output.success) await HandleError("Task__Update", output.stdout);
 
         return true;
     },

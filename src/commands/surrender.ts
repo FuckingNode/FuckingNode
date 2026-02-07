@@ -87,7 +87,7 @@ export default async function TheSurrenderer(params: TheSurrendererConstructedPa
         [],
     );
 
-    FkNodeInterop.Features.Update(env);
+    await FkNodeInterop.Features.Update(env);
 
     Commit(
         env.root,

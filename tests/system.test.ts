@@ -81,8 +81,8 @@ Deno.test({
 
 Deno.test({
     name: "notifications show up",
-    fn: () => {
-        Notification(
+    fn: async () => {
+        await Notification(
             "I'm a test!",
             "The chaos of maintaining JavaScript projects ends here.",
         );

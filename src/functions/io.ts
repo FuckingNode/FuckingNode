@@ -132,7 +132,7 @@ export function StringifyYaml(content: unknown): string {
  * @param {string} msg Main text.
  * @param {number} elapsed Elapsed time, for checking the threshold.
  */
-export function Notification(title: string, msg: string, elapsed?: number): void {
+export async function Notification(title: string, msg: string, elapsed?: number): Promise<void> {
     const settings = GetUserSettings();
     if (!settings["notifications"]) return;
     if ((elapsed && settings["notification-threshold"]) && elapsed < settings["notification-threshold-value"]) return;
@@ -200,10 +200,12 @@ export function Notification(title: string, msg: string, elapsed?: number): void
                 });
 
                 // don't await as we don't really care about output, errors will get ignored
-                bus.call(message);
+                await bus.call(message);
+                bus.disconnect();
             } catch {
                 // cannot notify
             }
         }
     }
+    return;
 }

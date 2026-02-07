@@ -20,9 +20,9 @@ import { orange } from "../functions/color.ts";
 import { HumanizeCmd, RunCmdSet } from "../functions/cmd-set.ts";
 import { isAbsolute } from "@std/path/is-absolute";
 
-function Success(startup: Date): never {
+async function Success(startup: Date): Promise<never> {
     const elapsed = Date.now() - startup.getTime();
-    Notification(
+    await Notification(
         "Kickstart successful!",
         `After ${GetElapsedTime(startup)}, your project is ready. Go write some fucking good code!`,
         elapsed,
@@ -69,7 +69,7 @@ async function InstallDependencies(
     let env;
 
     if (policies.workspaces === "standalone" || policies.workspaces === "unified") {
-        Notification(
+        await Notification(
             "Heads up!",
             "Intervention is needed for your kickstart to continue.",
         );
@@ -84,7 +84,7 @@ async function InstallDependencies(
         );
         env = await AddProject(Deno.cwd(), false, proceed ? policies.workspaces : null);
     } else if (policies.workspaces === "force-liberty") {
-        Notification(
+        await Notification(
             "Heads up!",
             "Intervention is needed for your kickstart to continue.",
         );
@@ -203,7 +203,7 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
     if (!settings.kickstarter.install) {
         env = await InstallDependencies(manager, userSettings, settings.kickstarter);
     } else if (settings.kickstarter.install.startsWith("use ")) {
-        Notification(
+        await Notification(
             "Heads up!",
             "Intervention is needed for your kickstart to continue.",
         );
@@ -235,16 +235,16 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
         env = await ConservativelyGetProjectEnvironment(clonePath);
     }
 
-    if (!settings.kickstartCmd) Success(startup);
+    if (!settings.kickstartCmd) await Success(startup);
 
-    Notification(
+    await Notification(
         "Almost there!",
         "Intervention is needed for your kickstart to continue.",
     );
 
     LogStuff(
         `${red(bold("This repository wants a CmdSet to run."))} Think of it as a post-install script.\nThe sequence is as follows:\n\n${
-            bold(HumanizeCmd(settings.kickstartCmd))
+            bold(HumanizeCmd(settings.kickstartCmd!))
         }\n${
             bold(orange(
                 "Kickstart CmdSets can be a useful way to save time, but they also imply risks. Unless on a trusted repository, make sure to carefully review it.\nDo not run stuff you do not understand.",

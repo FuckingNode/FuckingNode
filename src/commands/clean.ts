@@ -113,7 +113,7 @@ export default async function TheCleaner(params: TheCleanerConstructedParams): P
         "tick",
     );
     const elapsed = Date.now() - startup.getTime();
-    Notification(
+    await Notification(
         projects.length > 1 ? `All your motherfucking projects have been cleaned!` : `Your motherfucking project has been cleaned!`,
         `We did it! It took ${GetElapsedTime(startup)}.${
             results.some((r) => (r.extras && r.extras.failed && r.extras.failed.trim().length > 0))

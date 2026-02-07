@@ -83,7 +83,7 @@ export default async function TheTerminator(params: TheTerminatorConstructedPara
     if (!params.projectsToo) return;
 
     LogStuff("Now, onto removing your projects...", "warn");
-    Notification("Last chance to stop project removal", "You should be 101% sure you pushed your code, or really sure you want it gone.");
+    await Notification("Last chance to stop project removal", "You should be 101% sure you pushed your code, or really sure you want it gone.");
     await reveal("7, 6, 5, 4, 3, 2, 1.", 400);
 
     LogStuff("STEP 2: Removing the projects", "working");

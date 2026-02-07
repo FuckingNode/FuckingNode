@@ -228,7 +228,7 @@ async function CmdRunner(
         LogStuff(`\n${bold("Done")} with ${cmdString}!\n`);
         return;
     } catch (e) {
-        Notification(
+        await Notification(
             `Your ${key} failed!`,
             `${cmdTypeString}#${cmdIndex} "${cmdString}" failed, so we've halted execution.`,
             30000,
