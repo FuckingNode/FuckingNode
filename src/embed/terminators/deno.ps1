@@ -1,11 +1,8 @@
 Write-Host ">>> Removing Deno..."
 
-Write-Host ">>> Removing .deno..."
-
 $denoDir = $env:USERPROFILE + "\.deno"
 
 Remove-Item $denoDir -Recurse -Force
-
 
 Write-Host ">>> Removing Deno from PATH..."
 Write-Host ">>| Just in case, a PATH backup will be made at $env:USERPROFILE\FKN_PATH_BACKUP-TERMINATE_DENO.txt."
