@@ -17,7 +17,7 @@ export const LOCAL_PLATFORM: {
     SSS: ".ps1" | ".sh";
 } = {
     SYSTEM: WIN ? "msft" : "posix",
-    USER: (Deno.env.get("USERNAME") || Deno.env.get("USER")),
+    USER: Deno.env.get("USERNAME") || Deno.env.get("USER"),
     APPDATA: (
         Deno.env.get("APPDATA")
         || Deno.env.get("XDG_CONFIG_HOME")

@@ -19,7 +19,7 @@ export function LaunchWebsite(url: string): void {
         );
     } else {
         Commander(
-            "open",
+            "xdg-open",
             [
                 url,
             ],

@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - Fixed CmdSet's high unreliability when working with shell commands; especially if they have quote characters (`'`).
+- Fixed websites not auto-launching on some Linux distributions when FKN tries to. It now uses `xdg-open` which _should_ work everywhere.
 
 ## [5.2.3] (07-02-2026)
 
