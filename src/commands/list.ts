@@ -1,7 +1,7 @@
 import { LogStuff } from "../functions/io.ts";
 import { GetAllProjects, GetProjectEnvironment } from "../functions/projects.ts";
 import { sortAlphabetically, testFlag, type UnknownString, validate } from "@zakahacecosas/string-utils";
-import { bold } from "@std/fmt/colors";
+import { bold, dim } from "@std/fmt/colors";
 
 /**
  * Lists all projects.
@@ -34,24 +34,26 @@ async function ListProjects(
         }
     }
 
-    const message: string = ignore === "limit"
-        ? `Here are the motherfuckers you added (and ignored) so far:\n\n`
-        : ignore === "exclude"
-        ? `Here are the motherfuckers you added (and haven't ignored) so far:\n\n`
-        : `Here are the motherfuckers you added so far:\n\n`;
+    const message: string = `Here are the motherfuckers you added ${
+        ignore === "limit" ? "(and ignored)" : ignore === "exclude" ? "(and haven't ignored)" : ""
+    } so far:\n${dim("Shown as: [RT+PM] ([N] (v[V])) [R] [DP]...")}\n`;
     const toPrint = (await Promise.all(
         list.map((entry) => GetProjectEnvironment(entry)),
     )).map((env) => {
-        const str = `${env.names.full} ${bold(`[${env.runtime}+${env.manager}]${env.settings.projectEnvOverride ? "(overridden!)" : ""}`)}`;
-        if (ignore !== "limit") return str;
-        return `${env.names.full} [${env.runtime}] (${
-            bold(
-                Array.isArray(env.settings.divineProtection) ? env.settings.divineProtection.join(" and ") : "Everything!",
-            )
-        })\n`;
+        return `${bold(`[${env.runtime}+${env.manager}]${env.settings.projectEnvOverride ? "(!)" : ""}`).padEnd(20, " ")} ${env.names.full} (${
+            Array.isArray(env.settings.divineProtection) && env.settings.divineProtection.length
+                ? "protected from " + bold(env.settings.divineProtection.join(" and "))
+                : env.settings.divineProtection === "*"
+                ? bold("protected from everything!")
+                : "clear"
+        })`;
     });
 
-    LogStuff(message + sortAlphabetically(toPrint).join("\n"), "bulb");
+    LogStuff(
+        message + sortAlphabetically(toPrint).join("\n") + "\n"
+            + dim("...where RT is Runtime, PM is PackageManager, N is Name, V is Version, R is Root, and DP is DivineProtection"),
+        "bulb",
+    );
 
     return;
 }

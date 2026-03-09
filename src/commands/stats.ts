@@ -33,7 +33,7 @@ export default async function TheStatistics(target: UnknownString): Promise<void
         .toSorted()
         .slice(0, maxDeps)
         .map((dep) =>
-            `${bold(dep.name)}@${italic(dep.ver)} ${env.manager === "deno" ? `> ${dep.src}` : ""} # ${
+            `${bold(dep.name)} v${italic(dep.ver)} ${env.manager === "deno" ? `> ${dep.src}` : ""} # ${
                 italic(dim(StringifyDependencyRelationship(dep.rel)))
             }`
         )

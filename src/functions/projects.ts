@@ -569,8 +569,8 @@ function ColorizeRuntime(
     return {
         path: formattedPath,
         name: colorName || formattedPath,
-        nameVer: colorName ? `${colorName}${colorVersion ? "@" + colorVersion : ""}` : formattedPath,
-        full: colorName ? `${colorName}${colorVersion ? "@" + colorVersion : ""} ${formattedPath}` : formattedPath,
+        nameVer: colorName ? `${colorName}${colorVersion ? " v" + colorVersion : ""}` : formattedPath,
+        full: colorName ? `${colorName}${colorVersion ? " v" + colorVersion : ""} ${formattedPath}` : formattedPath,
     };
 }
 

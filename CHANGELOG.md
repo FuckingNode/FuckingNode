@@ -10,10 +10,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- Now project version is shown as `name v1.2.3` instead of `name@1.2.3` to prevent terminal emulators from interpreting them as email addresses (at least KDE Konsole does that).
 - Now the `terminate` command properly removes PATH entries for Deno and Bun; and it is also better at removing Node.js from Windows.
+- Now `list` shows a legend for all the data it displays.
 
 ### Fixed
 
+- Fixed issues with `list`.
 - Fixed CmdSet's high unreliability when working with shell commands; especially if they have quote characters (`'`).
 - Fixed websites not auto-launching on some Linux distributions when FKN tries to. It now uses `xdg-open` which _should_ work everywhere.
 

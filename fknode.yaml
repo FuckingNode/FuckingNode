@@ -27,3 +27,4 @@ buildCmd:
       - ~"rm c.txt"
       - ~"rm d.txt"
 cleanerShortCircuit: true
+divineProtection: ["cleaner"]
