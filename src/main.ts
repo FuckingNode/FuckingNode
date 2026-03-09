@@ -215,7 +215,7 @@ async function main(): Promise<void> {
             await TheSettings({ args: flags.slice(1) });
             break;
         case "migrate":
-            await TheMigrator({ projectPath: (flags[2] ?? Deno.cwd()), wantedManager: flags[1] });
+            await TheMigrator({ projectPath: flags[2] ?? Deno.cwd(), wantedManager: flags[1] });
             break;
         case "self-update":
         case "upgrade":
@@ -227,14 +227,14 @@ async function main(): Promise<void> {
             break;
         case "build":
             await TheBuilder({
-                project: (flags[1] ?? Deno.cwd()),
+                project: flags[1] ?? Deno.cwd(),
             });
             break;
         case "release":
         case "publish":
             await TheReleaser({
                 version: flags[1],
-                project: (flags[2] ?? Deno.cwd()),
+                project: flags[2] ?? Deno.cwd(),
                 push: hasFlag("push", true),
                 dry: hasFlag("dry-run", true),
             });
@@ -323,7 +323,7 @@ async function main(): Promise<void> {
         case "gen-cpf":
         case "generate-cpf":
             await TheExporter({
-                project: (flags[1] ?? Deno.cwd()),
+                project: flags[1] ?? Deno.cwd(),
                 jsonc: hasFlag("jsonc", false),
                 cli: hasFlag("cli", false),
                 export: hasFlag("export", false),
@@ -345,13 +345,13 @@ async function main(): Promise<void> {
             LogStuff(`Best documentation website for best CLI, live at https://fuckingnode.github.io/`, "bulb");
             LaunchWebsite("https://fuckingnode.github.io/");
             break;
-        case "experimental--test-fim-parser":
+        case "experimental-fim-parser":
             if (!Deno.args[1]) return;
             console.log(
                 ParseFIM(Deno.readTextFileSync(Deno.args[1])),
             );
             break;
-        case "experimental--test-fem-exec":
+        case "experimental-fem-exec":
             if (!Deno.args[1]) return;
             await RunFEM(Deno.readTextFileSync(Deno.args[1]));
             break;

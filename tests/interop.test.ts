@@ -8,6 +8,7 @@ import { ConservativelyGetProjectEnvironment } from "../src/functions/projects.t
 import { join, parse } from "@std/path";
 import { DEFAULT_FKNODE_YAML } from "../src/constants.ts";
 import { bold, dim, italic, white } from "@std/fmt/colors";
+import { LOCAL_PLATFORM } from "../src/platform.ts";
 
 Deno.test({
     name: "interop layer manages cargo pkg file",
@@ -30,7 +31,12 @@ Deno.test({
                     { name: "serde", ver: "1.0", rel: "univ:dep", src: "crates.io" },
                     { name: "reqwest", ver: "0.11", rel: "univ:dep", src: "crates.io" },
                     { name: "tokio", ver: "1", rel: "univ:dep", src: "crates.io" },
-                    { name: "locally", rel: "rst:localD", src: "rs-local://..\\local_crate" as any, ver: "undefined" },
+                    {
+                        name: "locally",
+                        rel: "rst:localD",
+                        src: `rs-local://${"..\\local_crate".replace("\\", LOCAL_PLATFORM.SYSTEM === "posix" ? "/" : "\\")}`,
+                        ver: "undefined",
+                    },
                     { name: "from_git", rel: "rst:git", src: "git:dev@https://github.com/FuckingNode/FuckingRust.git", ver: "undefined" },
                     { name: "from_tarball", rel: "rst:tar", src: "https://somewhere.com/some_crate-1.0.0.tar.gz", ver: "undefined" },
                     { name: "criterion", ver: "0.3", rel: "univ:devD", src: "crates.io" },

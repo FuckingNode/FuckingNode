@@ -12,6 +12,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Now the `terminate` command properly removes PATH entries for Deno and Bun; and it is also better at removing Node.js from Windows.
 
+### Fixed
+
+- Fixed CmdSet's high unreliability when working with shell commands; especially if they have quote characters (`'`).
+
 ## [5.2.3] (07-02-2026)
 
 ### Added

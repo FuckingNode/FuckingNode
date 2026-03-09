@@ -160,7 +160,7 @@ function CmdFormatter(command: ParsedCmdInstruction, env: ProjectEnvironment | C
         // @ts-expect-error: same here
         ? env.commands.file[0]
         : LOCAL_PLATFORM.SHELL;
-    const expr = [
+    const _expr = [
         command.type === "<" ? undefined : command.type === "$"
             // @ts-expect-error: same as above
             ? env.commands.script[1]
@@ -170,9 +170,30 @@ function CmdFormatter(command: ParsedCmdInstruction, env: ProjectEnvironment | C
             : "-c",
     ];
     const cmd = detach ? [command.cmd[0].replace(";;", ""), ...(command.cmd.slice(1))] : command.cmd;
-    if (command.type === "<") expr.push(...cmd.slice(1));
-    else if (command.type === "~") expr.push(cmd.join(" "));
-    else expr.push(...cmd);
+    if (command.type === "<") _expr.push(...cmd.slice(1));
+    else if (command.type === "~") _expr.push(...cmd);
+    else _expr.push(...cmd);
+    let holderStr: string | null = null;
+    let expr: string[] = [];
+    _expr.forEach((e, _) => {
+        if (!validate(e)) return;
+        if (holderStr === null) {
+            if (!e.includes("'")) expr.push(e);
+            else {
+                if (e.startsWith("'") && e.endsWith("'")) expr.push(e);
+                else holderStr = e;
+            }
+        } else {
+            if (!e.includes("'")) holderStr += " " + e;
+            else {
+                holderStr += " " + e;
+                holderStr = holderStr.slice(1, -1);
+                expr.push(holderStr);
+                holderStr = null;
+            }
+        }
+    });
+    if (_expr[0] === "-c") expr = ["-c", expr.slice(1).join(" ")];
     return {
         pref,
         expr: expr.filter(validate),
