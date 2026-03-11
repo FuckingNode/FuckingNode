@@ -261,12 +261,12 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
             "Okay, won't run it. The rest is all setup, launching your IDE. Go write some fucking good code!",
             "tick",
         );
-        Success(startup);
+        await Success(startup);
     }
     await RunCmdSet({
         key: "kickstartCmd",
         env,
     });
     LogStuff("All setup. Go write some fucking good code!", "tick");
-    Success(startup);
+    await Success(startup);
 }
