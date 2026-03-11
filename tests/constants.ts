@@ -17,10 +17,10 @@ const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
     ONE: {
         root: ParsePath(`${CONSTANTS.ENV_PATH}/test-one`),
         names: {
-            full: brightGreen(bold("a.js")) + "@" + magenta("1.0.0")
+            full: brightGreen(bold("a.js")) + " v" + magenta("1.0.0")
                 + " " + italic(dim(normalize(JoinPaths(Deno.cwd(), "tests/environment/test-one")))),
             name: brightGreen(bold("a.js")),
-            nameVer: brightGreen(bold("a.js")) + "@" + magenta("1.0.0"),
+            nameVer: brightGreen(bold("a.js")) + " v" + magenta("1.0.0"),
             path: italic(dim(normalize(JoinPaths(Deno.cwd(), "tests/environment/test-one")))),
         },
         settings: {

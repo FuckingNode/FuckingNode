@@ -6,7 +6,7 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
-## Unreleased
+## [5.2.4] Unreleased
 
 ### Changed
 
@@ -19,6 +19,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Fixed issues with `list`.
 - Fixed CmdSet's high unreliability when working with shell commands; especially if they have quote characters (`'`).
 - Fixed websites not auto-launching on some Linux distributions when FKN tries to. It now uses `xdg-open` which _should_ work everywhere.
+- Fixed the Deno wrapper asking for UID permissions on kickstart.
+- Fixed `kickstart` not properly firing system notifications and IDE launch.
 
 ## [5.2.3] (07-02-2026)
 

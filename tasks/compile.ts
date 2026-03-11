@@ -44,11 +44,11 @@ const ALL_COMMANDS = Object.entries(TARGETS).map(([key, [target, output]]: [stri
         // fetch the network, to update the app
         "--allow-net",
         // see ENV variables, to access .../AppData/...
-        "--allow-env",
+        "--allow-env=FKNODE_SHALL_WE_DEBUG,FKNODE_DETACH_CONFIG,FKNODE_CLEAR_OUTPUT,USERNAME,USER,APPDATA,XDG_CONFIG_HOME,HOME,DENO_DIR,USERPROFILE,DBUS_SESSION_BUS_ADDRESS",
         // run cleanup commands
         "--allow-run",
         // used for an easter egg that requires OS uptime
-        "--allow-sys=osUptime",
+        "--allow-sys=osUptime,uid",
         // used for linux notifications
         "--allow-ffi",
         // used for extensions
