@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [5.2.4] Unreleased
 
+### Added
+
+- Added templating to LICENSE-type setups. They'll autocomplete the year + ask the name of the copyright holder.
+
 ### Changed
 
 - Now project version is shown as `name v1.2.3` instead of `name@1.2.3` to prevent terminal emulators from interpreting them as email addresses (at least KDE Konsole does that).

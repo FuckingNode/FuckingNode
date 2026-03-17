@@ -307,7 +307,7 @@ async function main(): Promise<void> {
         case "setup":
         case "configure":
         case "preset":
-            TheSetuper({
+            await TheSetuper({
                 setup: flags[1],
                 project: flags[2],
             });
