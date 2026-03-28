@@ -36,7 +36,7 @@ async function ListProjects(
 
     const message: string = `Here are the motherfuckers you added ${
         ignore === "limit" ? "(and ignored)" : ignore === "exclude" ? "(and haven't ignored)" : ""
-    } so far:\n${dim("Shown as: [RT+PM] ([N] (v[V])) [R] [DP]...")}\n`;
+    } so far:\n`;
     const toPrint = (await Promise.all(
         list.map((entry) => GetProjectEnvironment(entry)),
     )).map((env) => {
@@ -51,7 +51,7 @@ async function ListProjects(
 
     LogStuff(
         message + sortAlphabetically(toPrint).join("\n") + "\n"
-            + dim("...where RT is Runtime, PM is PackageManager, N is Name, V is Version, R is Root, and DP is DivineProtection"),
+            + dim("Shown as: [Runtime+PackageManager] ([Name] (v[Version])) [Root] [DivineProtection]..."),
         "bulb",
     );
 

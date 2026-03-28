@@ -1,4 +1,3 @@
-import { ctrlc } from "ctrlc-windows";
 import { normalize, unquote, validate, validateAgainst } from "@zakahacecosas/string-utils";
 import { DebugFknErr, ErrorHandler, FknError } from "./error.ts";
 import type { ConservativeProjectEnvironment, ProjectEnvironment } from "../types/platform.ts";
@@ -76,36 +75,23 @@ async function ExecCmd(pref: string, expr: string[], detach: boolean): Promise<R
         try {
             const child = new Deno.Command(pref, { args: expr }).spawn();
 
-            let success = 0;
+            let success = false;
 
-            const signalHandler = (signal: "SIGTERM" | "SIGINT" | "SIGBREAK") => {
+            const signalHandler = (signal: "SIGTERM" | "SIGINT" | "SIGBREAK" | "SIGHUP") => {
                 console.log(italic(`\n(FKN: caught manual exit signal ${signal}.)`));
-                const kill = child.kill.bind(child);
-                // see https://github.com/denoland/deno/issues/29599
-                child.kill = (signal) => {
-                    if (signal === "SIGINT") {
-                        ctrlc(child.pid);
-                    } else {
-                        kill(signal);
-                    }
-                };
-                success = 1;
+                success = true;
+                child.kill(signal);
             };
 
             const onSigint = () => signalHandler("SIGINT");
             const onSigterm = () => signalHandler("SIGTERM");
             const onSigbreak = () => signalHandler("SIGBREAK");
+            const onSighup = () => signalHandler("SIGHUP");
 
             Deno.addSignalListener("SIGINT", onSigint);
-            if (LOCAL_PLATFORM.SYSTEM === "posix") Deno.addSignalListener("SIGTERM", onSigterm);
-            if (LOCAL_PLATFORM.SYSTEM === "msft") {
-                Deno.addSignalListener("SIGBREAK", onSigbreak);
-                // ? deno doesn't support SIGUP (types at least indicate that)
-                // however stack trace goes like
-                // TypeError: Windows only supports ctrl-c (SIGINT), ctrl-break (SIGBREAK), and ctrl-close (SIGUP), but got SIGTERM
-                // weird...
-                // Deno.addSignalListener("SIGUP", onSigbreak);
-            }
+            Deno.addSignalListener("SIGHUP", onSighup);
+            Deno.addSignalListener("SIGTERM", onSigterm);
+            if (LOCAL_PLATFORM.SYSTEM === "msft") Deno.addSignalListener("SIGBREAK", onSigbreak);
 
             let out;
             try {
@@ -114,17 +100,18 @@ async function ExecCmd(pref: string, expr: string[], detach: boolean): Promise<R
                 console.error(italic("(FKN: child process errored)"));
                 out = {
                     success: false,
-                    stdout: "",
+                    stdout: String(_e),
                 };
             } finally {
                 Deno.removeSignalListener("SIGINT", onSigint);
-                if (LOCAL_PLATFORM.SYSTEM === "posix") Deno.removeSignalListener("SIGTERM", onSigterm);
+                Deno.removeSignalListener("SIGHUP", onSighup);
+                Deno.removeSignalListener("SIGTERM", onSigterm);
                 if (LOCAL_PLATFORM.SYSTEM === "msft") Deno.removeSignalListener("SIGBREAK", onSigbreak);
             }
 
             return {
                 stdout: "",
-                success: success === 1 ? true : out.success,
+                success: success ?? out.success,
             };
         } catch (e) {
             if (e instanceof Deno.errors.NotFound) {

@@ -347,35 +347,35 @@ export function deepMerge(
 export function GetProjectSettings(path: string): FullFkNodeYaml {
     const pathToDivineFile = JoinPaths(path, "fknode.yaml");
 
-    if (!CheckForPath(pathToDivineFile)) {
-        DEBUG_LOG("FKN YAML / RESORTING TO DEFAULTS (no fknode.yaml)");
-        return DEFAULT_FKNODE_YAML;
-    }
+    try {
+        const content = Deno.readTextFileSync(pathToDivineFile);
+        const divineContent = parseYaml(content);
 
-    const content = Deno.readTextFileSync(pathToDivineFile);
-    const divineContent = parseYaml(content);
-
-    if (!ValidateFkNodeYaml(divineContent)) {
-        DEBUG_LOG("FKN YAML / RESORTING TO DEFAULTS (invalid fknode.yaml)");
-        if (!content.includes("UPON INTERACTING")) {
-            Deno.writeTextFileSync(
-                pathToDivineFile,
-                `\n# [NOTE (${GetDateNow()}): Invalid config file! (Auto-added by FuckingNode). DEFAULT SETTINGS WILL BE USED UPON INTERACTING WITH THIS MOTHERFUCKER UNTIL YOU FIX THIS FILE! Refer to https://fuckingnode.github.io/manual/fknode-yaml/ to learn about how fknode.yaml works.]\n`,
-                {
-                    append: true,
-                },
-            );
+        if (!ValidateFkNodeYaml(divineContent)) {
+            DEBUG_LOG("FKN YAML / RESORTING TO DEFAULTS (invalid fknode.yaml)");
+            if (!content.includes("UPON INTERACTING")) {
+                Deno.writeTextFileSync(
+                    pathToDivineFile,
+                    `\n# [NOTE (${GetDateNow()}): Invalid config file! (Auto-added by FuckingNode). DEFAULT SETTINGS WILL BE USED UPON INTERACTING WITH THIS MOTHERFUCKER UNTIL YOU FIX THIS FILE! Refer to https://fuckingnode.github.io/manual/fknode-yaml/ to learn about how fknode.yaml works.]\n`,
+                    {
+                        append: true,
+                    },
+                );
+            }
+            return DEFAULT_FKNODE_YAML;
         }
+
+        const mergedSettings: FullFkNodeYaml = deepMerge(
+            structuredClone(DEFAULT_FKNODE_YAML),
+            divineContent,
+        );
+        DEBUG_LOG("FKN YAML / WILL RETURN", path, mergedSettings);
+
+        return mergedSettings;
+    } catch (e) {
+        DEBUG_LOG("FKN YAML / WILL FAIL", path, e);
         return DEFAULT_FKNODE_YAML;
     }
-
-    const mergedSettings: FullFkNodeYaml = deepMerge(
-        structuredClone(DEFAULT_FKNODE_YAML),
-        divineContent,
-    );
-    DEBUG_LOG("FKN YAML / WILL RETURN", path, mergedSettings);
-
-    return mergedSettings;
 }
 
 /**

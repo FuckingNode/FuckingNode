@@ -6,7 +6,7 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
-## [5.2.4] Unreleased
+## [5.2.4] (29-03-2026)
 
 ### Added
 
@@ -17,6 +17,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Now project version is shown as `name v1.2.3` instead of `name@1.2.3` to prevent terminal emulators from interpreting them as email addresses (at least KDE Konsole does that).
 - Now the `terminate` command properly removes PATH entries for Deno and Bun; and it is also better at removing Node.js from Windows.
 - Now `list` shows a legend for all the data it displays.
+- Now signal handling (for CTRL+C-ing out of Cmds) should be more reliable.
+- Now binaries are around 20 MB smaller.
+- Now platform data (like your OS and shell scripting platform) are loaded better, plus unneeded data that was loaded for nothing was removed. Improves performance by a few milliseconds.
 
 ### Fixed
 

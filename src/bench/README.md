@@ -1,6 +1,24 @@
 # Benchmarks
 
-Benchmarks above `---` were taken on the last commit of each tag.
+Benchmarks above `---` were taken on the last commit of each tag. Results for benchmarks other than the main one (`bench.ts`) are in a comment within each individual file. `task.ts` is excluded; it's not a benchmark.
+
+## V5.2.4
+
+| benchmark               | time/iter (avg) | iter/s | (min … max)           | p75      | p99      | p995     |
+| ----------------------- | --------------- | ------ | --------------------- | -------- | -------- | -------- |
+| lister                  | 9.2 ms          | 109.1  | ( 8.3 ms … 15.9 ms)   | 9.1 ms   | 15.9 ms  | 15.9 ms  |
+| lister (ignored)        | 9.0 ms          | 111.7  | ( 8.2 ms … 14.8 ms)   | 9.1 ms   | 14.8 ms  | 14.8 ms  |
+| remover                 | 175.2 µs        | 5,708  | (141.9 µs … 335.5 µs) | 185.3 µs | 299.4 µs | 335.5 µs |
+| adder                   | 3.8 ms          | 266.4  | ( 3.4 ms … 5.8 ms)    | 3.9 ms   | 5.6 ms   | 5.8 ms   |
+| bulk adder              | 7.3 ms          | 137.6  | ( 6.8 ms … 8.4 ms)    | 7.5 ms   | 8.4 ms   | 8.4 ms   |
+| git check for repo      | 2.6 ms          | 388.7  | (943.9 µs … 6.3 ms)   | 3.6 ms   | 4.7 ms   | 5.0 ms   |
+| git get branches        | 4.6 ms          | 217.0  | ( 3.6 ms … 8.3 ms)    | 5.3 ms   | 6.9 ms   | 8.3 ms   |
+| git get latest tag      | 5.0 ms          | 200.8  | ( 2.1 ms … 10.3 ms)   | 7.1 ms   | 10.3 ms  | 10.3 ms  |
+| name a project          | 32.6 µs         | 30,690 | ( 14.4 µs … 6.2 ms)   | 31.8 µs  | 58.5 µs  | 63.9 µs  |
+| get project env         | 2.2 ms          | 447.3  | ( 1.6 ms … 5.8 ms)    | 1.9 ms   | 5.7 ms   | 5.7 ms   |
+| stats                   | 1.9 ms          | 535.4  | ( 1.7 ms … 6.0 ms)    | 1.9 ms   | 2.5 ms   | 2.9 ms   |
+| report                  | 262.7 µs        | 3,807  | (225.8 µs … 801.8 µs) | 262.2 µs | 537.7 µs | 596.5 µs |
+| simply execute the root | 748.8 ms        | 1.3    | (614.9 ms … 978.7 ms) | 795.6 ms | 978.7 ms | 978.7 ms |
 
 ## V5.0.0
 
@@ -41,7 +59,11 @@ Benchmarks above `---` were taken on the last commit of each tag.
 | report                  | 89.1 ms         | 11.2   | ( 47.8 ms … 139.5 ms) | 117.6 ms | 139.5 ms | 139.5 ms |
 | simply execute the root | 2.2 s           | 0.5    | ( 1.0 s … 3.3 s)      | 2.8 s    | 3.3 s    | 3.3 s    |
 
-## What we did to make V5 faster
+## Some writing
+
+### What we did to make V5 faster
+
+(You can ignore this now, this is old. Used it for V5's changelog.)
 
 - FuckingNode runs some checks every time before actually running. _Just_ parallelizing them made the entire CLI much, MUCH faster.
 - Bulk adding projects (via glob patterns) was also parallelized. Made it 5% faster.
