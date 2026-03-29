@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Now signal handling (for CTRL+C-ing out of Cmds) should be more reliable.
 - Now binaries are around 20 MB smaller.
 - Now platform data (like your OS and shell scripting platform) are loaded better, plus unneeded data that was loaded for nothing was removed. Improves performance by a few milliseconds.
+- Now, on Linux, program files get installed to `/usr/local/bin` (LHS recommendation), rather than creating their own directory and adding it to PATH. Old program files will get removed on update or reinstall, don't worry about that.
 
 ### Fixed
 
