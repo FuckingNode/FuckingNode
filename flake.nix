@@ -12,7 +12,7 @@
     pkgs = import nixpkgs { inherit system; };
 
     pname = "fuckingnode";
-    version = "5.2.1";
+    version = "5.3.0";
 
     urls = {
       "x86_64-linux"   = "https://github.com/FuckingNode/FuckingNode/releases/download/${version}/FuckingNode-linux64";
@@ -42,11 +42,11 @@
 
       installPhase = ''
         mkdir -p $out/bin
-        cp $src $out/bin/fuckingnode
+        cp $src $out/bin/fkn
       '';
 
       fixupPhase = ''
-        chmod +x $out/bin/fuckingnode
+        chmod +x $out/bin/fkn
       '';
 
       meta = {
@@ -54,7 +54,7 @@
         homepage = "https://fuckingnode.github.io/";
         license = pkgs.lib.licenses.gpl3;
         platforms = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
-        mainProgram = "fuckingnode";
+        mainProgram = "fkn";
       };
     };
 

@@ -627,12 +627,12 @@ export default function TheHelper(params: TheHelperConstructedParams): void {
             break;
         case "help":
             LogStuff(
-                `Usage: ${brightGreen("fuckingnode")} <command> [params...]\n\n${USAGE}`,
+                `Usage: ${brightGreen("fkn")} <command> [params...]\n\n${USAGE}`,
             );
             break;
         default:
             LogStuff(
-                `Usage: ${brightGreen("fuckingnode")} <command> [params...]\n\n${USAGE}\n`,
+                `Usage: ${brightGreen("fkn")} <command> [params...]\n\n${USAGE}\n`,
             );
             LogStuff(
                 brightYellow("Run 'help <command-name>' to get help with a specific command."),

@@ -6,7 +6,7 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
-## [5.2.4] (29-03-2026)
+## [5.3.0] (04-04-2026)
 
 ### Added
 
@@ -29,6 +29,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Fixed websites not auto-launching on some Linux distributions when FKN tries to. It now uses `xdg-open` which _should_ work everywhere.
 - Fixed the Deno wrapper asking for UID permissions on kickstart.
 - Fixed `kickstart` not properly firing system notifications and IDE launch.
+
+### Removed
+
+- Removed shortcut creation, and renamed the default binary from `fuckingnode` to `fkn`. Polluting your machine with aliases isn't great practice; create your own aliases if needed.
 
 ## [5.2.3] (07-02-2026)
 

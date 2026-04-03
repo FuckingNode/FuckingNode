@@ -81,7 +81,7 @@ if (hasFlag("help", true)) {
 
 if (hasFlag("version", true, true) && !flags[1]) {
     console.log(
-        `FuckingNode v${DenoJson.default.version} built for ${Deno.build.target}\nDeno JavaScript runtime ${Deno.version.deno} | TypeScript ${Deno.version.typescript} | V8 Engine ${Deno.version.v8}\nRun 'fuckingnode about' for details.`,
+        `FuckingNode v${DenoJson.default.version} built for ${Deno.build.target}\nDeno JavaScript runtime ${Deno.version.deno} | TypeScript ${Deno.version.typescript} | V8 Engine ${Deno.version.v8}\nRun 'fkn about' for details.`,
     );
     Deno.exit(0);
 }

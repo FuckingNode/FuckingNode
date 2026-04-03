@@ -47,8 +47,6 @@ fkn launch < project >    # runs "npm run dev" and opens your IDE
 fkn help                  # show it all
 ```
 
-The standard command is `fuckingnode`, though `fkn` and `fknode` aliases are auto-added when downloading via a script installer. Command-specific aliases like `fkclean`, `fkadd`, `fkstart`, etc... do exist.
-
 Refer to our [documentation](https://fuckingnode.github.io/) to learn about all our features, our motivation, and much more.
 
 ---

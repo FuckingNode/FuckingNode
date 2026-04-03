@@ -73,7 +73,7 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
         "bulb",
     );
     if (params.silent) return;
-    if (!validateAgainst(parsePath(Deno.execPath()).dir, ["C:\\FuckingNode", "/usr/local/fuckingnode"])) {
+    if (!validateAgainst(parsePath(Deno.execPath()).dir, ["C:\\FuckingNode", "/usr/local/bin"])) {
         LogStuff(
             "Installed from a package manager, please use said package manager to update FuckingNode.\nIf you didn't install from a package manager, then FuckingNode is running from an unknown, which is likely an installation error (or you moving it somewhere else).",
         );

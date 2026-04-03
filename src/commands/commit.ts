@@ -29,7 +29,7 @@ function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
     ) {
         LogStuff(
             `No files specified for committing. Specify any of the ${bold(GetCommittableFiles(path).length.toString())} modified files (run '${
-                bold('fkcommit "message" file1 folder/file2...')
+                bold('fkn "message" file1 folder/file2...')
             }').`,
             "bruh",
         );
