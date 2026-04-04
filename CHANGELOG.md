@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [5.3.0] (04-04-2026)
 
+> [!IMPORTANT]
+> Binary `fuckingnode` and shortcut `fknode` are no longer available. Neither are shortcuts (`fkclean`, `fkstart`...). Please use `fkn <command>` from this release on.
+
 ### Added
 
 - Added templating to LICENSE-type setups. They'll autocomplete the year + ask the name of the copyright holder.
