@@ -9,11 +9,13 @@ const decoder = new TextDecoder();
  * @async
  * @param {string} main Main command.
  * @param {(string | undefined)[]} stuff Additional args for the command. `undefined` strings get removed.
+ * @param {?boolean} [doNotTrim=false] If true, output is not trimmed.
  * @returns {CommanderOutput} An object with a boolean telling if it was successful or not, and its full output.
  */
 export function Commander(
     main: string,
     stuff: (string | undefined)[],
+    doNotTrim: boolean = false,
 ): {
     /**
      * True if success, false if failure.
@@ -22,7 +24,7 @@ export function Commander(
      */
     success: boolean;
     /**
-     * Output of the command. Uses both `stdout` and `stderr`, joined by an \n. Trimmed.
+     * Output of the command. Uses both `stdout` and `stderr`, joined by an \n.
      *
      * @type {string}
      */
@@ -42,9 +44,11 @@ export function Commander(
 
         const process = command.outputSync();
 
+        const out = `${decoder.decode(process.stdout)}\n${decoder.decode(process.stderr)}`;
+
         return {
             success: process.success,
-            stdout: `${decoder.decode(process.stdout)}\n${decoder.decode(process.stderr)}`.trim(),
+            stdout: doNotTrim ? out : out.trim(),
         };
     } catch (e) {
         if (!(e instanceof Deno.errors.NotFound)) throw e;

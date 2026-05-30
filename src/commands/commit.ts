@@ -1,9 +1,19 @@
 import { Interrogate, LogStuff } from "../functions/io.ts";
 import { ConservativelyGetProjectEnvironment } from "../functions/projects.ts";
 import type { TheCommitterConstructedParams } from "./_interfaces.ts";
-import { CanCommit, Commit, GetBranches, GetCommittableFiles, GetRepoRoot, GetStagedFiles, IsRepo, Push, StageFiles } from "../functions/git.ts";
+import {
+    Commit,
+    GetBranches,
+    GetCommittableFiles,
+    GetCommittablenessState,
+    GetRepoRoot,
+    GetStagedFiles,
+    IsRepo,
+    Push,
+    StageFiles,
+} from "../functions/git.ts";
 import { normalize, pluralOrNot, testFlag, validate } from "@zakahacecosas/string-utils";
-import type { GIT_FILES } from "../types/misc.ts";
+import { CommittablenessState, type GIT_FILES } from "../types/misc.ts";
 import { FknError } from "../functions/error.ts";
 import { RunCmdSet, ValidateCmdSet } from "../functions/cmd-set.ts";
 import { bold, brightGreen, italic, white } from "@std/fmt/colors";
@@ -11,13 +21,13 @@ import { bold, brightGreen, italic, white } from "@std/fmt/colors";
 const NOT_COMMITTABLE = [".env", ".env.local", ".sqlite", ".db", "node_modules", ".bak", ".venv", "venv"];
 
 function StagingHandler(path: string, files: GIT_FILES): "ok" | "abort" {
-    const canCommit = CanCommit(path);
-    if (canCommit === false) {
+    const canCommit = GetCommittablenessState(path);
+    if (canCommit === CommittablenessState.SAFE) {
         LogStuff("Nothing to commit, sir!", "tick");
         return "abort";
     }
     if (files === "S") {
-        if (canCommit === "nonAdded") {
+        if (canCommit === CommittablenessState.UNSTAGED) {
             LogStuff('There are changes, but none of them is added. Use "git add <file>" for that.', "what");
             return "abort";
         }

@@ -3,12 +3,12 @@ import { Commander } from "../functions/cli.ts";
 import { JoinPaths, ParsePath } from "../functions/filesystem.ts";
 import { normalize, normalizeArray, StringArray, validate } from "@zakahacecosas/string-utils";
 import { FknError } from "./error.ts";
-import type { GIT_FILES } from "../types/misc.ts";
+import { CommittablenessState, type GIT_FILES } from "../types/misc.ts";
 import { bold } from "@std/fmt/colors";
 
-/** Runs a Git command with any args. ASSUMES AN ALREADY SPOTTED PATH. */
-function g(path: string, args: string[]): ReturnType<typeof Commander> {
-    return Commander("git", ["-C", path, ...args]);
+/** Runs a Git command with any args and in any path, does not trim output. ASSUMES AN ALREADY SPOTTED PATH. */
+export function g(path: string, args: string[]): ReturnType<typeof Commander> {
+    return Commander("git", ["-C", path, ...args], true);
 }
 
 /**
@@ -45,39 +45,53 @@ export function IsRepo(path: string): boolean {
  * Checks if a local repository has uncommitted changes or not. Returns `true` if you CAN commit (there are no uncommitted changes) and `false` if otherwise.
  *
  * @param {string} path Path to the repo, or project name.
- * @returns {boolean | "nonAdded"}
+ * @returns {CommittablenessState}
  */
-export function CanCommit(path: string): boolean | "nonAdded" {
+export function GetCommittablenessState(path: string): CommittablenessState {
     try {
-        // make sure we're in a repo
-        if (!IsRepo(path)) return false;
-
         // check for uncommitted changes
-        const localChanges = g(path, ["status"]);
+        const localChanges = g(path, ["status", "--porcelain"]);
 
-        if (
-            (/nothing added to to commit but untracked files present|no changes added to commit/.test(localChanges.stdout ?? ""))
-        ) return "nonAdded";
+        if (!localChanges.success) throw `(git status --porcelain): ${localChanges.stdout}`;
+        // empty means clean
+        if (localChanges.stdout === "") return CommittablenessState.SAFE;
 
-        if (
-            (/nothing to commit|working tree clean/.test(localChanges.stdout ?? ""))
-            || !localChanges.success // anything that isn't 0 means something is in the tree
-        ) return false; // if anything happens we assume the tree isn't clean, just in case.
+        const lines = localChanges.stdout.split("\n").filter(Boolean);
 
-        // check if the local branch is behind the remote
-        const remoteStatus = g(path, [
-            "rev-list",
-            "--count",
-            "--left-only",
-            "@{u}...HEAD",
-        ]);
-        if (!remoteStatus.stdout) return false; // if we can't get the remote status, we assume it's not clean
-        if (
-            remoteStatus.success
-            && parseInt(remoteStatus.stdout, 10) > 0
-        ) return false; // local branch is behind the remote, so we shouldn't change stuff
+        if (lines.length === 0) {
+            // check if we're behind remote before declaring clean
+            const remoteStatus = g(path, ["rev-list", "--count", "--left-only", "@{u}...HEAD"]);
+            // if it fails, it's pretty much because there's no remote, so you can't really be behind the nothing
+            if (!remoteStatus.success || remoteStatus.stdout === "") return CommittablenessState.SAFE;
+            // local branch is behind the remote, so we shouldn't change stuff
+            if (parseInt(remoteStatus.stdout, 10) > 0) return CommittablenessState.BEHIND_REMOTE;
+            return CommittablenessState.SAFE; // clean working tree and up to date with remote, we can do whatever we want
+        }
 
-        return true; // clean working tree and up to date with remote, we can do whatever we want
+        // here we fine-grain stuff a little
+        let hasStaged = false;
+        let hasUnstaged = false;
+        let hasUntracked = false;
+
+        for (const line of lines) {
+            const x = line[0];
+            const y = line[1];
+
+            if (x === "?" && y === "?") {
+                hasUntracked = true;
+            } else {
+                if (x !== " ") hasStaged = true;
+                if (y !== " ") hasUnstaged = true;
+            }
+        }
+
+        if (hasStaged && hasUnstaged) return CommittablenessState.STAGED_AND_DIRTY;
+        if (hasUnstaged) return CommittablenessState.UNSTAGED;
+        if (hasStaged) return CommittablenessState.STAGED;
+        if (hasUntracked) return CommittablenessState.UNTRACKED_ONLY;
+
+        // (shouldn't be reachable if porcelain output is well-formed)
+        throw `unknown error checking if ${path} is committable. is it even a repo?`;
     } catch (e) {
         throw new FknError("Git__CanCommit", `An error happened validating the Git working tree: ${e}`);
     }

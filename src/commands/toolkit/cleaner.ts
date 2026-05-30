@@ -7,7 +7,7 @@ import { GetProjectEnvironment, UnderstandProjectProtection } from "../../functi
 import type { CleanerIntensity } from "../../types/config_params.ts";
 import type { LOCKFILE_GLOBAL, MANAGER_GLOBAL, ProjectEnvironment } from "../../types/platform.ts";
 import { FknError } from "../../functions/error.ts";
-import { CanCommit, Commit } from "../../functions/git.ts";
+import { Commit, GetCommittablenessState } from "../../functions/git.ts";
 import type { RESULT } from "../clean.ts";
 import { sortAlphabetically, validate } from "@zakahacecosas/string-utils";
 import { FkNodeInterop } from "../interop/interop.ts";
@@ -16,6 +16,7 @@ import type { CF_FKNODE_SETTINGS } from "../../types/config_files.ts";
 import { blue, bold, brightBlue, brightGreen, brightYellow, cyan, dim, italic, magenta, red } from "@std/fmt/colors";
 import { orange, pink } from "../../functions/color.ts";
 import { isGlob } from "@std/path";
+import { CommittablenessState } from "../../types/misc.ts";
 
 /** Handles errors and short-circuiting. */
 function HandleErroring(
@@ -212,7 +213,7 @@ const ProjectCleaningFeatures = {
             LogStuff("No actions to be committed.", "bruh");
             return;
         }
-        if (!CanCommit(env.root)) {
+        if (GetCommittablenessState(env.root) !== CommittablenessState.SAFE) {
             LogStuff("Tree isn't clean, can't commit", "bruh");
             return;
         }

@@ -67,3 +67,22 @@ export type GIT_FILES = UnknownString[] | "A" | "!A" | "S";
 
 /** typescript just shut the hell up */
 export type NonEmptyArray<T> = [T, ...T[]];
+
+/** states regarding the committableness (term i made up) of a git repo
+ *
+ * if you need some "IsSafe" check just do `x == 5` (`5 == CommittablenessState.SAFE`), anything else is equally unsafe and the fine-grained-ness is only for the fkn commit thing
+ */
+export const enum CommittablenessState {
+    /** Uncommitted unstaged changes exist. Cannot commit safely. */
+    UNSTAGED,
+    /** Untracked files exist, but tracked files are unchanged. */
+    UNTRACKED_ONLY,
+    /** Staged changes exist with no other dirt. Ready to commit. */
+    STAGED,
+    /** Staged changes AND unstaged changes exist simultaneously. Cannot commit safely. */
+    STAGED_AND_DIRTY,
+    /** Local branch is behind the remote. Should not commit. */
+    BEHIND_REMOTE,
+    /** No changes anywhere. Nothing to commit. Only safe state. */
+    SAFE,
+}
