@@ -155,6 +155,9 @@
         "exactOptionalPropertyTypes": true
     },
     "imports": {
+        "@optique/core": "jsr:@optique/core@^1.1.0",
+        "@optique/man": "jsr:@optique/man@^1.1.0",
+        "@optique/run": "jsr:@optique/run@^1.1.0",
         "@particle/dbus-next": "npm:@particle/dbus-next@^0.11.4",
         "@std/cli": "jsr:@std/cli@^1.0.30",
         "@std/datetime": "jsr:@std/datetime@^0.225.7",

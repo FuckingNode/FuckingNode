@@ -59,9 +59,6 @@ const ALL_COMMANDS = Object.entries(TARGETS).map(([key, [target, output]]: [stri
         // include uninstallers
         "--include",
         "./src/embed/terminators",
-        // include manpage
-        "--include",
-        "./src/embed/manpage",
         "--target",
         target,
         "--output",

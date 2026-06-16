@@ -47,7 +47,7 @@ async function handler(
         LogStuff("A copy will be made (package.json.bak), just in case", "wink");
         if (env.mainPath.endsWith("jsonc")) {
             LogStuff(
-                "Your deno.jsonc's comments (if any) WON'T be preserved in final package file, but WILL be present in the .bak file. Sorry bro.",
+                "Your deno.jsonc's comments (if any) WON'T be preserved in final package file, but WILL be present in the .bak file. Sorry mate.",
                 "bruh",
             );
         }

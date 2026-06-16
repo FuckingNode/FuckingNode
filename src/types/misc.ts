@@ -1,5 +1,3 @@
-import type { UnknownString } from "@zakahacecosas/string-utils";
-
 /**
  * Valid emojis
  */
@@ -63,7 +61,7 @@ export interface GITHUB_RELEASE {
 /**
  * Git file codes.
  */
-export type GIT_FILES = UnknownString[] | "A" | "!A" | "S";
+export type GIT_FILES = readonly string[] | "A" | "!A" | "S";
 
 /** typescript just shut the hell up */
 export type NonEmptyArray<T> = [T, ...T[]];

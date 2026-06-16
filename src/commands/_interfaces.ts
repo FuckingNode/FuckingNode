@@ -35,7 +35,7 @@ export interface TheCleanerConstructedParams {
      */
     parameters: {
         intensity: string;
-        project: string[] | 0;
+        project: readonly string[] | 0;
     };
 }
 
@@ -248,7 +248,7 @@ export interface TheCommitterConstructedParams {
      *
      * @type {UnknownString[] | "A" | "S"}
      */
-    files: UnknownString[] | "A" | "S";
+    files: readonly string[] | "A" | "S";
     /**
      * Whether to push changes to remote or not.
      *

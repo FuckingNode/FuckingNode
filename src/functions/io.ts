@@ -4,7 +4,7 @@ import { stringify as stringifyYaml } from "@std/yaml";
 import { Commander } from "./cli.ts";
 import { LOCAL_PLATFORM } from "../platform.ts";
 import { bold, stripAnsiCode } from "@std/fmt/colors";
-import { SHOULD_CLEAN_OUTPUT } from "../main.ts";
+import { SHALL_CLEAN_OUTPUT } from "../main.ts";
 import process from "node:process";
 import DBus from "@particle/dbus-next";
 
@@ -75,7 +75,7 @@ export function LogStuff(
     emoji?: VALID_EMOJIS,
 ): void {
     if (typeof message !== "string") message = String(message);
-    if (SHOULD_CLEAN_OUTPUT || !process.stdout.isTTY || !process.stderr.isTTY) {
+    if (SHALL_CLEAN_OUTPUT || !process.stdout.isTTY || !process.stderr.isTTY) {
         console.log(stripAnsiCode(message));
         return;
     }

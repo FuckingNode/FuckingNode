@@ -52,7 +52,7 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
 
     if (needsToUpdate === "rl") {
         LogStuff(
-            brightYellow("You were rate-limited by GitHub (from where we download updates), my bro. Try again in, at most, one hour."),
+            brightYellow("You were rate-limited by GitHub (from where we download updates). Try again in, at most, one hour."),
             "bruh",
         );
         return;

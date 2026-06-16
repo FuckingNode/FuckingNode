@@ -39,23 +39,19 @@ export default async function TheAbouter(): Promise<void> {
     await reveal(colorizeText(ASCII), 2);
     LogStuff("-".repeat(dashLength));
     await reveal(
-        brightGreen(italic(phrase)),
+        `${brightGreen(italic(phrase))} ${dim(italic(`(random quote/tip/joke ${index}/${phrases.length})`))}`,
         10,
-    );
-    await reveal(
-        dim(italic(`(random quote/tip ${index}/${phrases.length})`)),
-        5,
     );
     await reveal(
         `Running ${coolStrings.ver}. Written in ${coolStrings.ts}. Powered by ${coolStrings.deno}.\nDeveloped in ${coolStrings.spain} by ${coolStrings.zakaOne} (${coolStrings.zakaTwo} in spanish).\n`,
         10,
     );
     await reveal(
-        `Follow us and join our Discord at ${orange("https://fuckingnode.github.io/follow-us")}`,
+        `Follow us and join our Discord at ${orange("https://fuckingnode.github.io/follow-us")}.`,
         2,
     );
     await reveal(
-        `We all love freedom, right? This is open-source: ${coolStrings.gitUrl}\n`,
+        `We all love freedom, right? This is open-source ${coolStrings.gitUrl}.\n`,
         2,
     );
     await reveal(

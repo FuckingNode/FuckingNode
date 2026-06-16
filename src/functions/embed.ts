@@ -2,7 +2,7 @@ import { join } from "@std/path";
 import { FknError } from "./error.ts";
 
 /** Get an embedded file. */
-export function Get(name: string, _src: "/setups" | "/terminators" | "/manpage"): string {
+export function Get(name: string, _src: "/setups" | "/terminators"): string {
     const src = "../embed" + _src;
     const dir = Deno.readDirSync(join(import.meta.dirname!, src));
     for (const match of dir) {

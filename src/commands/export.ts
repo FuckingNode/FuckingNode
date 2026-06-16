@@ -25,8 +25,5 @@ export default async function TheExporter(params: TheExporterConstructedParams):
         );
     }
     if (params.cli || !params.export) LogStuff(cpfString);
-    LogStuff(
-        brightGreen(params.export ? `FnCPF successfully written to ${bold(outFileName)}.` : "There's this project's FnCPF."),
-        "tick",
-    );
+    if (params.export && !params.cli) brightGreen(`FnCPF successfully written to ${bold(outFileName)}.`);
 }

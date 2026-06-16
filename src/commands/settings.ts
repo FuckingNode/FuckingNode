@@ -19,7 +19,9 @@ function ResetSettings(): void {
 
 export default async function TheSettings(params: TheSettingsConstructedParams): Promise<void> {
     const VALID_SETTINGS: (keyof CF_FKNODE_SETTINGS)[] = Object.keys(DEFAULT_SETTINGS) as (keyof CF_FKNODE_SETTINGS)[];
-    const args = normalizeArray(params.args);
+    const args = normalizeArray(params.args, {
+        preserveCase: true,
+    });
 
     if (!args || args.length === 0) {
         DisplaySettings();

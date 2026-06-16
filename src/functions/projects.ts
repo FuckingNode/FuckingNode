@@ -28,6 +28,7 @@ import { joinGlobs, normalizeGlob, parse } from "@std/path";
 import { globSync } from "node:fs";
 import { orange, pink } from "./color.ts";
 import { bold, brightBlue, brightGreen, cyan, dim, italic, magenta, white } from "@std/fmt/colors";
+import { LOCAL_PLATFORM } from "../platform.ts";
 
 /**
  * Gets all the users projects and returns their absolute root paths as a `string[]`.
@@ -78,7 +79,7 @@ export async function AddProject(
     if (validate(entry) && isGlob(entry)) {
         await Promise.all(
             globSync(entry)
-                .filter((f) => Deno.statSync(f).isDirectory)
+                .filter((f) => Deno.statSync(f).isDirectory === true)
                 .map((p) => AddProject(p, true)),
         );
         return "glob";
@@ -261,9 +262,14 @@ export async function RemoveProject(
 }
 
 /** Manages the project list by adding or removing projects. */
-export async function ListManager(action: "add" | "rem", paths: string[]): Promise<void> {
+export async function ListManager(action: "add" | "rem", paths: readonly string[]): Promise<void> {
     // dedupe if needed
     const projects = paths.length === 0 ? ["."] : new Set(paths).values().toArray();
+    if (projects.length > 1 && LOCAL_PLATFORM.SYSTEM === "posix") {
+        console.log(
+            'Note: If you use a glob pattern, ensure it goes between colons ("./*" and not just ./*), otherwise your shell might expand it differently than us and break stuff.',
+        );
+    }
     if (action === "add") await Promise.all(projects.map((p) => AddProject(p)));
     else await Promise.all(projects.map((p) => RemoveProject(p)));
 }

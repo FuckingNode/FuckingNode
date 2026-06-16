@@ -8,9 +8,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [5.4.0] (Unreleased)
 
+### Added
+
+- Added a manpage that gets installed when you download/update FKN.
+
+### Changed
+
+- Now the project uses the Optique.dev CLI parser, making everything stabler.
+
 ### Fixed
 
 - Fixed some stability issues with Git-related features.
+- Fixed paths being lowercased, which breaks Linux.
 
 ## [5.3.0] (04-04-2026)
 

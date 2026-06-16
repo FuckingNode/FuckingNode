@@ -532,7 +532,7 @@ export function PerformHardCleanup(shortCircuit: boolean): void {
  * @param {string[]} projects Projects to be cleaned.
  * @returns {void}
  */
-export async function PerformMaximCleanup(projects: string[]): Promise<void> {
+export async function PerformMaximCleanup(projects: readonly string[]): Promise<void> {
     LogStuff(
         "Time for maxim-pruning!\nWait patiently, please (node_modules takes a while to remove).",
         "working",

@@ -3,7 +3,7 @@ import { orange } from "./color.ts";
 import type { GLOBAL_ERROR_CODES } from "../types/errors.ts";
 import { GetDateNow } from "./date.ts";
 import { type UnknownString, validate } from "@zakahacecosas/string-utils";
-import { FKNODE_SHALL_WE_DEBUG } from "../main.ts";
+import { SHALL_DEBUG } from "../main.ts";
 import { LOCAL_PLATFORM } from "../platform.ts";
 import { bold, brightBlue, brightYellow, italic, red, stripAnsiCode } from "@std/fmt/colors";
 import { ALIASES } from "../commands/toolkit/git-url.ts";
@@ -211,7 +211,7 @@ export function ErrorHandler(e: unknown): never {
  * (constant case instead of pascal case so i can better recognize this)
  */
 export function DEBUG_LOG(...a: unknown[]): void {
-    if (FKNODE_SHALL_WE_DEBUG) console.debug(" >>> FKNDBG >>>", ...a);
+    if (SHALL_DEBUG) console.debug(" >>> FKNDBG >>>", ...a);
 }
 
 /** Throws a `FknError` and writes any debuggable content. */
