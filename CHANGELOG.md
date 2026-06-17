@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 
 - Added a manpage that gets installed when you download/update FKN.
+- Added global `--ascii-only` flag for emojis to be replaced with ASCII stuff.
 
 ### Changed
 

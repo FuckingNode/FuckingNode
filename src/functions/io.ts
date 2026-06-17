@@ -4,7 +4,7 @@ import { stringify as stringifyYaml } from "@std/yaml";
 import { Commander } from "./cli.ts";
 import { LOCAL_PLATFORM } from "../platform.ts";
 import { bold, stripAnsiCode } from "@std/fmt/colors";
-import { SHALL_CLEAN_OUTPUT } from "../main.ts";
+import { SHALL_ASCIIFY_EMOJIS, SHALL_CLEAN_OUTPUT } from "../main.ts";
 import process from "node:process";
 import DBus from "@particle/dbus-next";
 
@@ -17,44 +17,85 @@ import DBus from "@particle/dbus-next";
  */
 export function Emojify(message: string, emoji: VALID_EMOJIS): string {
     const emojiString = function (emoji: VALID_EMOJIS): string {
-        switch (emoji) {
-            case "danger":
-                return `🛑`;
-            case "prohibited":
-                return `⛔`;
-            case "wip":
-                return `🚧`;
-            case "what":
-                return `❓`;
-            case "bulb":
-                return `💡`;
-            case "tick":
-                return `✅`;
-            case "error":
-                return `❌`;
-            case "warn":
-                // return String.fromCodePoint(0x26A0, 0xFE0F); // attempt to fix text rendering
-                return `⚠️`;
-            case "heads-up":
-                return `🚨`;
-            case "working":
-                return `🔄`;
-            case "skip":
-                return `⏩`;
-            case "moon-face":
-                return `🌚`;
-            case "bruh":
-                return `😐`;
-            case "package":
-                return `📦`;
-            case "trash":
-                return `🗑️`;
-            case "chart":
-                return `📊`;
-            case "wink":
-                return `😉`;
-            case "comrade":
-                return `🫡`;
+        if (SHALL_ASCIIFY_EMOJIS) {
+            switch (emoji) {
+                case "danger":
+                    return "[/!\\]";
+                case "prohibited":
+                    return "[ X ]";
+                case "wip":
+                    return "[WIP]";
+                case "what":
+                    return "[ ? ]";
+                case "bulb":
+                    return "[ ¡ ]";
+                case "tick":
+                    return "[OK!]";
+                case "error":
+                    return "[ERR]";
+                case "warn":
+                    return "[ ! ]";
+                case "heads-up":
+                    return "[!!!]";
+                case "working":
+                    return "[...]";
+                case "skip":
+                    return "[>>>]";
+                case "moon-face":
+                    return "(._.)";
+                case "bruh":
+                    return " :-\\ ";
+                case "package":
+                    return "[PKG]";
+                case "trash":
+                    return "[DEL]";
+                case "chart":
+                    return "[+/-]";
+                case "wink":
+                    return " ;-) ";
+                case "comrade":
+                    return "o7   ";
+            }
+        } else {
+            switch (emoji) {
+                case "danger":
+                    return `🛑`;
+                case "prohibited":
+                    return `⛔`;
+                case "wip":
+                    return `🚧`;
+                case "what":
+                    return `❓`;
+                case "bulb":
+                    return `💡`;
+                case "tick":
+                    return `✅`;
+                case "error":
+                    return `❌`;
+                case "warn":
+                    // return String.fromCodePoint(0x26A0, 0xFE0F); // attempt to fix text rendering
+                    return `⚠️`;
+                case "heads-up":
+                    return `🚨`;
+                case "working":
+                    return `🔄`;
+                case "skip":
+                    return `⏩`;
+                case "moon-face":
+                    return `🌚`;
+                case "bruh":
+                    return `😐`;
+                case "package":
+                    return `📦`;
+                case "trash":
+                    return `🗑️`;
+                case "chart":
+                    return `📊`;
+                case "wink":
+                    return `😉`;
+                case "comrade":
+                    return `🫡`;
+            }
         }
     }(emoji).normalize("NFC");
 
