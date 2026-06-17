@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Added a manpage that gets installed when you download/update FKN.
 - Added global `--ascii-only` flag for emojis to be replaced with ASCII stuff.
+- Added to `setup` the Unlicense, MPL2, LGPL3, LGPL2.1, GPL1, FDL1.3, EPL1 and AGPL3; added replacements in places where they were missing and reformatted some existing licenses to use MarkDown (using [gh:IQAndreas/markdown-licenses](https://github.com/IQAndreas/markdown-licenses/blob/master/README.md), thank you so much).
 
 ### Changed
 

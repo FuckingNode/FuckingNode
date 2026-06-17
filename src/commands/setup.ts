@@ -7,7 +7,7 @@ import { parse as parseJsonc } from "@std/jsonc";
 import { SETUPS, VISIBLE_SETUPS } from "./toolkit/setups.ts";
 import { mergeLines, normalize, table, validate } from "@zakahacecosas/string-utils";
 import { FknError } from "../functions/error.ts";
-import { bold, italic, stripAnsiCode } from "@std/fmt/colors";
+import { bold, gray, italic, stripAnsiCode } from "@std/fmt/colors";
 
 function isJsonFile(seek: string): boolean {
     return seek === "tsconfig.json" || seek === ".prettierrc";
@@ -156,5 +156,12 @@ export default async function TheSetuper(params: TheSetuperConstructedParams): P
         finalContent,
     );
 
-    LogStuff("Done!", "tick");
+    LogStuff(
+        "Done!" + (setupToUse.seek === "LICENSE"
+            ? gray(
+                " Note that we wrote a MD-formatted LICENSE. Just telling you in case you're more used to plaintext ones this. (Credits to the maintainers of gh:IQAndreas/markdown-licenses).",
+            )
+            : ""),
+        "tick",
+    );
 }

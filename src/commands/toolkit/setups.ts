@@ -106,6 +106,36 @@ export const SETUPS: {
         seek: "LICENSE",
     },
     {
+        name: "license-epl1",
+        desc: "LICENSE file for the Eclipse Public License v1.",
+        content: Get("LICENSE-EPL1", "/setups"),
+        seek: "LICENSE",
+    },
+    {
+        name: "license-fld1.3",
+        desc: "LICENSE file for the GNU Free Documentation License v1.3.",
+        content: Get("LICENSE-FDL1.3", "/setups"),
+        seek: "LICENSE",
+    },
+    {
+        name: "license-agpl3",
+        desc: "LICENSE file for the GNU Affero General Public License v3.",
+        content: Get("LICENSE-AGPL3", "/setups"),
+        seek: "LICENSE",
+    },
+    {
+        name: "license-lgpl3",
+        desc: "LICENSE file for the GNU Lesser General Public License v3.",
+        content: Get("LICENSE-LGPL3", "/setups"),
+        seek: "LICENSE",
+    },
+    {
+        name: "license-lgpl2.1",
+        desc: "LICENSE file for the GNU Lesser General Public License v2.1.",
+        content: Get("LICENSE-LGPL2.1", "/setups"),
+        seek: "LICENSE",
+    },
+    {
         name: "license-gpl3",
         desc: "LICENSE file for the GNU General Public License v3.",
         content: Get("LICENSE-GPL3", "/setups"),
@@ -118,9 +148,27 @@ export const SETUPS: {
         seek: "LICENSE",
     },
     {
+        name: "license-gpl",
+        desc: "LICENSE file for the GNU General Public License v1.",
+        content: Get("LICENSE-GPL", "/setups"),
+        seek: "LICENSE",
+    },
+    {
         name: "license-apache2",
         desc: "LICENSE file for the Apache 2.0 License.",
         content: Get("LICENSE-APACHE2", "/setups"),
+        seek: "LICENSE",
+    },
+    {
+        name: "license-unlicense",
+        desc: "LICENSE file for the Unlicense.",
+        content: Get("LICENSE-UNLICENSE", "/setups"),
+        seek: "LICENSE",
+    },
+    {
+        name: "license-mpl2",
+        desc: "LICENSE file for the Mozilla Public License v2.",
+        content: Get("LICENSE-MPL2", "/setups"),
         seek: "LICENSE",
     },
     {
