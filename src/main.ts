@@ -1,4 +1,3 @@
-// TODO(@ZakaHaceCosas): some aliases are missing
 // the things.
 import TheCleaner from "./commands/clean.ts";
 import TheLister from "./commands/list.ts";
@@ -42,7 +41,6 @@ import { brightBlue } from "@std/fmt/colors";
 import { shuffle } from "@zakahacecosas/entity-utils";
 import { SetupUnixMan } from "./functions/man.ts";
 
-// deno-lint-ignore no-slow-types
 export const FuckingNodeMeta = {
     version: DenoJson.default.version,
     brief: message`A CLI to automate headache giving tasks and make it easier to develop in NodeJS, Deno, or Bun.`,
@@ -127,11 +125,13 @@ function hasFlag(flag: string, allowQuickFlag: boolean, firstOnly: boolean = fal
 
 export let SHALL_DEBUG = false;
 export let SHALL_CLEAN_OUTPUT = false;
+export let SHALL_ASCIIFY_EMOJIS = false;
 export let SHALL_LOAD_CFG = true;
 
 if (import.meta.main) {
     if (hasFlag("dbg", false, false) || Deno.env.get("FKNODE_SHALL_WE_DEBUG") === "yeah") SHALL_DEBUG = true;
     if (hasFlag("clear", false, false) || Deno.env.get("FKNODE_CLEAR_OUTPUT") === "yeah") SHALL_CLEAN_OUTPUT = true;
+    if (hasFlag("ascii-only", false, false) || Deno.env.get("FKNODE_ASCII_ONLY") === "yeah") SHALL_ASCIIFY_EMOJIS = true;
     if (hasFlag("no-config", false, false) || Deno.env.get("FKNODE_DETACH_CONFIG") === "yeah") SHALL_LOAD_CFG = false;
 }
 
@@ -176,10 +176,11 @@ const parser = or(
             {
                 brief: message`Alias for 'clean' with hard intensity.`,
                 description: message`Equivalent to 'clean --intensity hard'. Supports all other flags; exists for you to type a bit less.`,
+                aliases: ["global-clean"],
             },
         ),
         command(
-            "maxim-cleanup",
+            "maxim-clean",
             object({
                 type: constant("clean"),
                 intensity: constant("maxim"),
@@ -234,6 +235,7 @@ const parser = or(
             {
                 brief: message`Removes projects from your project list.`,
                 footer: message`Analog to ${commandLine("fkn add")}.`,
+                aliases: ["remove"],
             },
         ),
         command(
@@ -255,6 +257,7 @@ const parser = or(
                 brief: message`Shows your added project list.`,
                 description:
                     message`Your project list is used to:\n- Bulk-run several maintenance tasks (like cleaning, linting, etc.) at once, via 'clean'.\n- Let you use a project's name instead of full path from most other commands.\nThis command shows you the list.`,
+                aliases: ["ls"],
             },
         ),
         command(
@@ -311,6 +314,7 @@ const parser = or(
             {
                 brief: message`Launches the official site.`,
                 description: message`Launches our official website in your web browser and nothing else.`,
+                aliases: ["web", "doc", "website"],
             },
         ),
         command(
@@ -347,6 +351,7 @@ const parser = or(
             {
                 brief: message`Upgrades the CLI if needed.`,
                 description: message`Checks for updates. If any, tries to auto-update itself.`,
+                aliases: ["update", "self-update"],
             },
         ),
         command(
@@ -395,7 +400,7 @@ const parser = or(
                 })),
             }),
             {
-                brief: message`'export' lets you see your project's CPF, meant for debug`,
+                brief: message`Exports your project's CPF. Helps with debugging.`,
                 description:
                     message`The FuckingNode Common Package File (FnCPF) is a fancy name for a common structure we convert all package files into. It's useful to debug - as if this file shows content differences with your package file, there's likely a bug in our source code.`,
                 aliases: ["export", "gen-cpf", "generate-cpf"],
@@ -441,7 +446,7 @@ const parser = or(
                 )),
             }),
             {
-                brief: message`'audit' audits projects for you and helps you understand vulnerabilities`,
+                brief: message`Runs a security audit and determines if any found vulnerability actually affects your project.`,
                 description:
                     message`This will run the 'audit' command for the given project, or all projects if no project is specified. It will then ask questions to determine if found vulnerabilities are actually concerning.\n\nA simple example is:\nIf a vulnerability related to HTTP appears, but you state not to use HTTP requests at all, it won't be considered a concern.`,
             },
@@ -486,9 +491,9 @@ const parser = or(
                 )),
             }),
             {
-                brief: message`"Shows basic statistics for a project and (if viable) compares it against a basic set of recommended standards."`,
+                brief: message`Shows basic statistics for a project and (if viable) compares it against a basic set of recommended standards.`,
                 description:
-                    message`"This shows basic stats (like number of dependencies) for your project.\nIn supported platforms, also compares your project's main file (e.g., the package.json) to a set of recommendations."`,
+                    message`This shows basic stats (like number of dependencies) for your project.\nIn supported platforms, also compares your project's main file (e.g., the package.json) to a set of recommendations.`,
             },
         ),
         command(
@@ -518,9 +523,9 @@ const parser = or(
                 }),
             ),
             {
-                brief: message`"Allows you to view or change settings. Run it without args to see current settings."`,
+                brief: message`Allows you to view or change settings. Run it without args to see current settings.`,
                 description:
-                    message`"This commands holds subcommands to manage your settings. You can change any setting, or reset them all to their default value. You can also cleanup old internal files from here, to save up space."`,
+                    message`This commands holds subcommands to manage your settings. You can change any setting, or reset them all to their default value. You can also cleanup old internal files from here, to save up space.`,
             },
         ),
         command(
@@ -580,7 +585,7 @@ const parser = or(
                 ),
             }),
             {
-                brief: message`'launch' quickly launches your project with all you need`,
+                brief: message`Launches your code editor with a specific project and runs a specified command (e.g., "npm run start").`,
                 description:
                     message`This launches your code editor with the given project opened. It also runs a specific command (e.g., 'npm run start') if specified in your fknode.yaml's launchCmd.`,
             },
@@ -594,7 +599,8 @@ const parser = or(
                 })),
             }),
             {
-                brief: message`'compat' shows compatibility info.`,
+                aliases: ["features"],
+                brief: message`Shows an overall summary of support for all features, or details on a specific feature if provided.`,
                 description:
                     message`If used with no args, shows a table indicating what features work where (NodeJS, Bun, Deno, Rust, and Golang).\nIf you specify a feature, it shows more specific details related to that feature's compatibility.`,
             },
@@ -734,7 +740,7 @@ const parser = or(
                 ],
                 brief: message`Deprecates a project, optionally leaving a [message], an [alternative], and a [learn-more-url].`,
                 description:
-                    message`"This is a fun one. It automates the process of deprecating that project you know you won't ever release...\nIt randomly chooses a deprecation notice, lets you add:\n- a message\n- an alternative to this tool\n- a URL to somewhere to learn more about this\nThen it creates a deprecation notice in the project's README, and commits it. Note that messages are position-based, so to skip [message] and only write alternative for example, pass an empty string ("") to [message].`,
+                    message`This is a fun one. It automates the process of deprecating that project you know you won't ever release...\nIt randomly chooses a deprecation notice, lets you add:\n- a message\n- an alternative to this tool\n- a URL to somewhere to learn more about this\nThen it creates a deprecation notice in the project's README, and commits it. Note that messages are position-based, so to skip [message] and only write alternative for example, pass an empty string ("") to [message].`,
             },
         ),
     ),
