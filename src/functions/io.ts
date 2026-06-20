@@ -8,6 +8,13 @@ import { SHALL_ASCIIFY_EMOJIS, SHALL_CLEAN_OUTPUT } from "../main.ts";
 import process from "node:process";
 import DBus from "@particle/dbus-next";
 
+/* const { symbols: { sendNotification } } = Deno.dlopen("notify.so", {
+    sendNotification: {
+        parameters: ["buffer", "usize", "buffer", "usize"],
+        result: "void",
+    },
+}); */
+
 /**
  * Appends an emoji at the beginning of a message.
  *

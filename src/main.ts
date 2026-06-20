@@ -41,6 +41,7 @@ import { brightBlue } from "@std/fmt/colors";
 import { shuffle } from "@zakahacecosas/entity-utils";
 import { SetupUnixMan } from "./functions/man.ts";
 
+// deno-lint-ignore no-slow-types
 export const FuckingNodeMeta = {
     version: DenoJson.default.version,
     brief: message`A CLI to automate headache giving tasks and make it easier to develop in NodeJS, Deno, or Bun.`,
@@ -274,7 +275,9 @@ const parser = or(
                     },
                 ),
                 path: optional(
-                    argument(
+                    option(
+                        "-p",
+                        "--path",
                         path({
                             allowCreate: true,
                             mustExist: false,
@@ -288,8 +291,9 @@ const parser = or(
                     ),
                 ),
                 manager: optional(
-                    // TODO(@ZakaHaceCosas)
-                    argument(
+                    option(
+                        "-m",
+                        "--manager",
                         choice(["npm", "pnpm", "yarn", "deno", "bun"], {
                             metavar: "PKG MANAGER",
                             caseInsensitive: true,
@@ -321,14 +325,14 @@ const parser = or(
             "terminate",
             object({
                 type: constant("terminate"),
-                runtime: argument(
+                runtime: optional(argument(
                     string({
                         metavar: "RUNTIME",
                     }),
                     {
                         description: message`Runtime to be uninstalled.`,
                     },
-                ),
+                )),
                 projectsToo: option("--motherfuckers-too"),
             }),
             {
@@ -337,7 +341,20 @@ const parser = or(
                     message`Terminates a runtime; this is, does a deep uninstall (trying its best so no installation leftovers remain).\n\nIt uninstalls the whole toolchain. For Node.js this includes all package managers that you may have.\n\nWorks by running a shell script (you can check their source on our public code repository).\n\nIf chosen via ${
                         optionName("--motherfuckers-too")
                     } (discouraged!), it will remove from your disk all projects written in said lang. This is useful as projects in a language you are not even using anymore unnecessarily take up storage, though you should use this option with care. Only affects projects tracked by FKN.`,
-                aliases: ["fuck-the-lang", "fuck-the-runtime", "ftl", "ftr", "never-again-using", "resign"],
+                aliases: [
+                    "fuck-the-lang",
+                    "fuck-the-runtime",
+                    "ftl",
+                    "ftr",
+                    "never-again-using",
+                    "resign",
+                    "seriously-fuck-node",
+                    "unnode",
+                    "undeno",
+                    "unbun",
+                    "ungo",
+                    "unrust",
+                ],
             },
         ),
         command(
@@ -627,15 +644,6 @@ const parser = or(
             },
         ),
         command(
-            "details",
-            object({
-                type: constant("details"),
-            }),
-            {
-                brief: message`Show version details.`,
-            },
-        ),
-        command(
             "repo",
             object({
                 type: constant("repo"),
@@ -799,11 +807,7 @@ async function main(): Promise<void> {
         ...FuckingNodeMeta,
     });
 
-    if (out.type === "details") {
-        return console.log(
-            `FuckingNode v${DenoJson.default.version} built for ${Deno.build.target}\nDeno JavaScript runtime ${Deno.version.deno} | TypeScript ${Deno.version.typescript} | V8 Engine ${Deno.version.v8}\nRun 'fkn about' for details.`,
-        );
-    } else if (out.type === "dbg") {
+    if (out.type === "dbg") {
         if (out.whatTo === "proc") {
             console.log(
                 table([
@@ -875,9 +879,18 @@ async function main(): Promise<void> {
     if (out.type === "remove") return await ListManager("rem", out.project);
     if (out.type === "list") return await TheLister(out.alive ? "alive" : out.ignored ? "ignored" : undefined);
     if (out.type === "terminate") {
-        // TODO(@ZakaHaceCosas): unnode, unbun, etc...
         return await TheTerminator({
-            runtime: out.runtime,
+            runtime: (Deno.args[0] === "unnode" || Deno.args[0] === "seriously-fuck-node")
+                ? "node"
+                : Deno.args[0] === "undeno"
+                ? "deno"
+                : Deno.args[0] === "unbun"
+                ? "bun"
+                : Deno.args[0] === "unrust"
+                ? "rust"
+                : Deno.args[0] === "ungo"
+                ? "go"
+                : out.runtime,
             projectsToo: out.projectsToo,
         });
     }

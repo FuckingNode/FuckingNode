@@ -8,7 +8,7 @@ export const LOCAL_PLATFORM: {
     /** What system platform we're on. */
     SYSTEM: "msft" | "posix";
     /** APPDATA or whatever it is equivalent to on Linux & macOS. */
-    APPDATA: string | undefined;
+    APPDATA: string;
     /** Shell name (and command prefix). */
     SHELL: "bash" | "powershell";
     /** Shell Script Suffix for filenames. */
@@ -17,7 +17,7 @@ export const LOCAL_PLATFORM: {
     SYSTEM: WIN ? "msft" : "posix",
     APPDATA: WIN ? Deno.env.get("APPDATA")! : (
         Deno.env.get("XDG_CONFIG_HOME")
-        || `${Deno.env.get("HOME") ?? ""}/.config/` // this is a fallback
+        || `${Deno.env.get("HOME") ?? ""}/.config/`
     ),
     SHELL: WIN ? "powershell" : "bash",
     SSS: WIN ? ".ps1" : ".sh",

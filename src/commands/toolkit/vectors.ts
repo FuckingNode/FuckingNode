@@ -149,4 +149,4 @@ export const VULNERABILITY_VECTORS = {
         "sandbox",
         "vulnerability",
     ],
-};
+} as const;

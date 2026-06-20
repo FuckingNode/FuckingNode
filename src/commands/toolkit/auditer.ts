@@ -106,11 +106,11 @@ type SV_KEYWORDS = { summary: string; overview: string };
 function AnalyzeSecurityVectorKeywords(svKeywords: SV_KEYWORDS[]): string[] {
     const questions: Set<string> = new Set<string>();
 
-    function includes(target: string, substrings: string[]): boolean {
+    function includes(target: string, substrings: readonly string[]): boolean {
         return substrings.some((substring) => target.includes(normalize(substring)));
     }
 
-    function has(keywords: SV_KEYWORDS, values: string[]): boolean {
+    function has(keywords: SV_KEYWORDS, values: readonly string[]): boolean {
         const details = validate(keywords.summary) ? normalize(keywords.summary) : "";
         const summary = validate(keywords.overview) ? normalize(keywords.overview) : "";
         return includes(summary, values) || includes(details, values);

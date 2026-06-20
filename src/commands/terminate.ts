@@ -24,11 +24,11 @@ export default async function TheTerminator(params: TheTerminatorConstructedPara
         5,
     );
     await reveal(
-        "HOWEVER YOU BETTER BE SURE YOU'RE NOT RUNNING THIS BY ACCIDENT.\nGoing through runtime installation again is slow (specially Rust and Node (and when talking about Node, it's painful too)).",
+        "HOWEVER YOU BETTER BE SURE YOU'RE NOT RUNNING THIS BY ACCIDENT.\n",
         10,
     );
     await reveal(
-        "These warnings are running a bit slow, to give you time to think and ensure you're certain about this.\nDon't worry, this process still runs faster than manually uninstalling ;).",
+        "These warnings are deliberately made slow to give you time to think and ensure you want this to happen.\nDon't worry, this process still is more efficient than manually uninstalling as it handles PATH and stale file cleanup in most cases.\n",
         5,
     );
 

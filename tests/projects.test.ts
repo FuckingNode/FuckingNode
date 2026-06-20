@@ -1,6 +1,6 @@
 import { AddProject, GetProjectEnvironment, NameProject, SpotProject, ValidateProject } from "../src/functions/projects.ts";
 import { assert, assertEquals } from "@std/assert";
-import { TEST_ONE } from "./constants.ts";
+import { TEST_PROJECT } from "./constants.ts";
 import { DEFAULT_FKNODE_YAML } from "../src/constants.ts";
 import { parse as parseYaml } from "@std/yaml";
 import { JoinPaths } from "../src/functions/filesystem.ts";
@@ -9,8 +9,8 @@ import { JoinPaths } from "../src/functions/filesystem.ts";
 Deno.test({
     name: "reads node env",
     fn: async () => {
-        const env = await GetProjectEnvironment(TEST_ONE.root);
-        assertEquals(env, TEST_ONE);
+        const env = await GetProjectEnvironment(TEST_PROJECT.root);
+        assertEquals(env, TEST_PROJECT);
     },
 });
 
@@ -36,10 +36,10 @@ Deno.test({
 Deno.test({
     name: "gets the right fknode.yaml",
     fn: async () => {
-        const settings = (await GetProjectEnvironment(TEST_ONE.root)).settings;
+        const settings = (await GetProjectEnvironment(TEST_PROJECT.root)).settings;
         assertEquals(settings, {
             ...DEFAULT_FKNODE_YAML,
-            ...(parseYaml(Deno.readTextFileSync(JoinPaths(TEST_ONE.root, "fknode.yaml"))) as any),
+            ...(parseYaml(Deno.readTextFileSync(JoinPaths(TEST_PROJECT.root, "fknode.yaml"))) as any),
         });
     },
 });

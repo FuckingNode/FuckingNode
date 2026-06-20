@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- Kickstart changed its syntax: it now uses `-m <manager> -p <path>` instead of positional parameters.
 - Now the project uses the Optique.dev CLI parser, making everything stabler.
 
 ### Fixed

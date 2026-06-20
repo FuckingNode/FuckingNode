@@ -6,90 +6,89 @@ import { normalize } from "@std/path";
 import { bold, brightGreen, dim, italic, magenta } from "@std/fmt/colors";
 
 // CONSTANTS
-export const CONSTANTS = {
+export const CONSTANTS: {
+    CWD: string;
+    ENV_PATH: string;
+    INTEROP_PATH: string;
+} = {
     CWD: Deno.cwd(),
     ENV_PATH: JoinPaths(Deno.cwd(), "tests/environment"),
     INTEROP_PATH: JoinPaths(Deno.cwd(), "tests/interop"),
 };
 
-// (naming things is fr the hardest)
-const TEST_PROJECTS: Record<string, ProjectEnvironment> = {
-    ONE: {
-        root: ParsePath(`${CONSTANTS.ENV_PATH}/test-one`),
-        names: {
-            full: brightGreen(bold("a.js")) + " v" + magenta("1.0.0")
-                + " " + italic(dim(normalize(JoinPaths(Deno.cwd(), "tests/environment/test-one")))),
-            name: brightGreen(bold("a.js")),
-            nameVer: brightGreen(bold("a.js")) + " v" + magenta("1.0.0"),
-            path: italic(dim(normalize(JoinPaths(Deno.cwd(), "tests/environment/test-one")))),
-        },
-        settings: {
-            ...DEFAULT_FKNODE_YAML,
-            destroy: {
-                intensities: "*",
-                targets: [
-                    "node_modules/",
-                ],
-            },
-            flagless: {
-                flaglessCommit: false,
-                flaglessDestroy: true,
-                flaglessLint: true,
-                flaglessPretty: true,
-                flaglessUpdate: true,
-            },
-        },
-        runtimeColor: "bright-green",
-        mainPath: ParsePath(`${CONSTANTS.ENV_PATH}/test-one/package.json`),
-        mainName: "package.json",
-        mainSTD: JSON.parse(Deno.readTextFileSync(ParsePath(`${CONSTANTS.ENV_PATH}/test-one/package.json`))),
-        mainCPF: {
-            name: "a.js",
-            version: "1.0.0",
-            rm: "npm",
-            plat: { edt: null },
-            deps: [
-                {
-                    name: "tslib",
-                    ver: "^2.0.0",
-                    rel: "univ:dep",
-                    src: "npm",
-                },
-            ],
-            ws: [],
-            fknVer: DenoJson.default.version,
-        },
-        commands: {
-            base: "npm",
-            dlx: ["npx"],
-            clean: [
-                [
-                    "dedupe",
-                ],
-                [
-                    "prune",
-                ],
-            ],
-            update: [
-                "update",
-            ],
-            audit: [
-                "audit",
-                "--json",
-            ],
-            file: ["node"],
-            script: ["npm", "run"],
-            publish: ["publish"],
-            start: "start",
-        },
-        runtime: "node",
-        manager: "npm",
-        lockfile: {
-            name: "package-lock.json",
-            path: ParsePath(`${CONSTANTS.ENV_PATH}/test-one/package-lock.json`),
-        },
-        hall_of_trash: ParsePath(`${CONSTANTS.ENV_PATH}/test-one/node_modules`),
+export const TEST_PROJECT: ProjectEnvironment = {
+    root: ParsePath(`${CONSTANTS.ENV_PATH}/test-one`),
+    names: {
+        full: brightGreen(bold("a.js")) + " v" + magenta("1.0.0")
+            + " " + italic(dim(normalize(JoinPaths(Deno.cwd(), "tests/environment/test-one")))),
+        name: brightGreen(bold("a.js")),
+        nameVer: brightGreen(bold("a.js")) + " v" + magenta("1.0.0"),
+        path: italic(dim(normalize(JoinPaths(Deno.cwd(), "tests/environment/test-one")))),
     },
+    settings: {
+        ...DEFAULT_FKNODE_YAML,
+        destroy: {
+            intensities: "*",
+            targets: [
+                "node_modules/",
+            ],
+        },
+        flagless: {
+            flaglessCommit: false,
+            flaglessDestroy: true,
+            flaglessLint: true,
+            flaglessPretty: true,
+            flaglessUpdate: true,
+        },
+    },
+    runtimeColor: "bright-green",
+    mainPath: ParsePath(`${CONSTANTS.ENV_PATH}/test-one/package.json`),
+    mainName: "package.json",
+    mainSTD: JSON.parse(Deno.readTextFileSync(ParsePath(`${CONSTANTS.ENV_PATH}/test-one/package.json`))),
+    mainCPF: {
+        name: "a.js",
+        version: "1.0.0",
+        rm: "npm",
+        plat: { edt: null },
+        deps: [
+            {
+                name: "tslib",
+                ver: "^2.0.0",
+                rel: "univ:dep",
+                src: "npm",
+            },
+        ],
+        ws: [],
+        fknVer: DenoJson.default.version,
+    },
+    commands: {
+        base: "npm",
+        dlx: ["npx"],
+        clean: [
+            [
+                "dedupe",
+            ],
+            [
+                "prune",
+            ],
+        ],
+        update: [
+            "update",
+        ],
+        audit: [
+            "audit",
+            "--json",
+        ],
+        file: ["node"],
+        script: ["npm", "run"],
+        publish: ["publish"],
+        start: "start",
+    },
+    runtime: "node",
+    manager: "npm",
+    lockfile: {
+        name: "package-lock.json",
+        path: ParsePath(`${CONSTANTS.ENV_PATH}/test-one/package-lock.json`),
+    },
+    hall_of_trash: ParsePath(`${CONSTANTS.ENV_PATH}/test-one/node_modules`),
 };
-
-export const TEST_ONE = TEST_PROJECTS["ONE"]!;

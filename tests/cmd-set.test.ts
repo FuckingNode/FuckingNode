@@ -1,6 +1,6 @@
 import { assertEquals } from "@std/assert/equals";
 import { RunCmdSet, ValidateCmdSet } from "../src/functions/cmd-set.ts";
-import { ProjectEnvironment } from "../src/types/platform.ts";
+import type { ProjectEnvironment } from "../src/types/platform.ts";
 import { GetProjectEnvironment } from "../src/functions/projects.ts";
 
 const env: ProjectEnvironment = await GetProjectEnvironment(".");

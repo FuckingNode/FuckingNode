@@ -9,3 +9,5 @@ result/
 result
 # system stuff
 .directory
+# soon
+mod/build/**
