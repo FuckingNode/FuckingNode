@@ -90,6 +90,10 @@ Then, add this to your system packages:
 inputs.fuckingnode.packages."${pkgs.system}".default;
 ```
 
+---
+
+All binaries come from our GitHub releases and are hashed and digitally signed. Head to the latest release to grab the hashfile and the signature files. Check them against [this public signature](https://github.com/HanaOrg/KonbiniAuthors/blob/main/org/fu/fuckingnode.asc).
+
 ### Compile from source
 
 Install [Deno 2](https://docs.deno.com/runtime/) and open this project from the root. You can now either run `deno task compile` and get the output executable from `dist/`, or run `deno -A src/main.ts [...commands]` from the root to test the CLI directly.
