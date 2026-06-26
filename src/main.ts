@@ -54,14 +54,16 @@ export const FuckingNodeMeta = {
 
 const CleanerOptions = {
     projects: optional(
-        multiple(argument(
-            string({
-                metavar: "PROJECT(S)",
-            }),
-            {
-                description: message`Project(s) to be cleaned. When omitted, bulk-cleans all added projects.`,
-            },
-        )),
+        multiple(
+            argument(
+                string({
+                    metavar: "PROJECT(S)",
+                }),
+                {
+                    description: message`Project(s) to be cleaned. When omitted, bulk-cleans all added projects.`,
+                },
+            ),
+        ),
     ),
     pretty: option("-p", "--pretty", {
         description:
@@ -73,7 +75,9 @@ const CleanerOptions = {
     }),
     commit: option("-c", "--commit", {
         description: message`Commit any changes made (via, e.g., ${optionName("-p")} or ${
-            optionName("-u")
+            optionName(
+                "-u",
+            )
         }) ONLY IF ${'"commitActions"'} is set to true in your fknode.yaml AND local working tree was clean before we touched it AND local repo is not behind upstream. It uses a default commit message; override it by setting ${'"commitMessage"'} in your fknode.yaml.`,
     }),
     destroy: option("-d", "--destroy", {
@@ -97,31 +101,51 @@ const CommitterOptionsA = {
     ),
 } as const;
 const CommitterOptionsB = {
-    branch: optional(option(
-        "-b",
-        "--branch",
-        string({
-            metavar: "BRANCH",
+    branch: optional(
+        option(
+            "-b",
+            "--branch",
+            string({
+                metavar: "BRANCH",
+            }),
+            {
+                description: message`Branch to commit to. If not given, currently active branch is used.`,
+            },
+        ),
+    ),
+    keepStaged: optional(
+        option("-k", "--keep-staged", {
+            description:
+                message`If any file was staged before running the command, it'll keep it staged.\nBy default we unstage everything so only what you specify here is committed.`,
         }),
-        {
-            description: message`Branch to commit to. If not given, currently active branch is used.`,
-        },
-    )),
-    keepStaged: optional(option("-k", "--keep-staged", {
-        description:
-            message`If any file was staged before running the command, it'll keep it staged.\nBy default we unstage everything so only what you specify here is committed.`,
-    })),
+    ),
     yes: optional(
         option("-y", "--yes", {
             description: message`By default we show a confirmation to ensure you want to proceed. This skips it.`,
         }),
     ),
-    push: optional(option("-p", "--push", { description: message`If passed, pushes the commit to the remote repository after making it.` })),
+    push: optional(
+        option("-p", "--push", {
+            description: message`If passed, pushes the commit to the remote repository after making it.`,
+        }),
+    ),
 } as const;
 
-function hasFlag(flag: string, allowQuickFlag: boolean, firstOnly: boolean = false): boolean {
-    if (firstOnly === true) return testFlag(Deno.args[0] ?? "", flag, { allowQuickFlag, allowNonExactString: true });
-    return testFlags(Deno.args, flag, { allowQuickFlag, allowNonExactString: true });
+function hasFlag(
+    flag: string,
+    allowQuickFlag: boolean,
+    firstOnly: boolean = false,
+): boolean {
+    if (firstOnly === true) {
+        return testFlag(Deno.args[0] ?? "", flag, {
+            allowQuickFlag,
+            allowNonExactString: true,
+        });
+    }
+    return testFlags(Deno.args, flag, {
+        allowQuickFlag,
+        allowNonExactString: true,
+    });
 }
 
 export let SHALL_DEBUG = false;
@@ -130,10 +154,22 @@ export let SHALL_ASCIIFY_EMOJIS = false;
 export let SHALL_LOAD_CFG = true;
 
 if (import.meta.main) {
-    if (hasFlag("dbg", false, false) || Deno.env.get("FKNODE_SHALL_WE_DEBUG") === "yeah") SHALL_DEBUG = true;
-    if (hasFlag("clear", false, false) || Deno.env.get("FKNODE_CLEAR_OUTPUT") === "yeah") SHALL_CLEAN_OUTPUT = true;
-    if (hasFlag("ascii-only", false, false) || Deno.env.get("FKNODE_ASCII_ONLY") === "yeah") SHALL_ASCIIFY_EMOJIS = true;
-    if (hasFlag("no-config", false, false) || Deno.env.get("FKNODE_DETACH_CONFIG") === "yeah") SHALL_LOAD_CFG = false;
+    if (
+        hasFlag("dbg", false, false)
+        || Deno.env.get("FKNODE_SHALL_WE_DEBUG") === "yeah"
+    ) SHALL_DEBUG = true;
+    if (
+        hasFlag("clear", false, false)
+        || Deno.env.get("FKNODE_CLEAR_OUTPUT") === "yeah"
+    ) SHALL_CLEAN_OUTPUT = true;
+    if (
+        hasFlag("ascii-only", false, false)
+        || Deno.env.get("FKNODE_ASCII_ONLY") === "yeah"
+    ) SHALL_ASCIIFY_EMOJIS = true;
+    if (
+        hasFlag("no-config", false, false)
+        || Deno.env.get("FKNODE_DETACH_CONFIG") === "yeah"
+    ) SHALL_LOAD_CFG = false;
 }
 
 if (SHALL_DEBUG) DEBUG_LOG("Initialized FKNODE_SHALL_WE_DEBUG constant WITH ARGS", Deno.args);
@@ -145,20 +181,19 @@ const parser = or(
             "clean",
             object({
                 type: constant("clean"),
-                intensity: optional(option(
-                    "-i",
-                    "--intensity",
-                    choice(
-                        ["normal", "hard", "hard-only", "maxim", "maxim-only"],
-                        {
+                intensity: optional(
+                    option(
+                        "-i",
+                        "--intensity",
+                        choice(["normal", "hard", "hard-only", "maxim", "maxim-only"], {
                             metavar: "INTENSITY",
+                        }),
+                        {
+                            description:
+                                message`Either ${"normal"}, ${"hard"}, ${"hard-only"}, ${"maxim"}, or ${"maxim-only"}. Higher intensities yield better (but more time-consuming) results. Omitting this will use your default value (changeable through settings).`,
                         },
                     ),
-                    {
-                        description:
-                            message`Either ${"normal"}, ${"hard"}, ${"hard-only"}, ${"maxim"}, or ${"maxim-only"}. Higher intensities yield better (but more time-consuming) results. Omitting this will use your default value (changeable through settings).`,
-                    },
-                )),
+                ),
                 ...CleanerOptions,
             }),
             {
@@ -190,29 +225,39 @@ const parser = or(
             {
                 brief: message`Alias for 'clean' with maxim intensity.`,
                 description: message`Equivalent to 'clean --intensity maxim'. Supports all other flags; exists for you to type a bit less.`,
-                aliases: ["storage-emergency", "get-rid-of-node-modules", "get-rid-of-node_modules"],
+                aliases: [
+                    "storage-emergency",
+                    "get-rid-of-node-modules",
+                    "get-rid-of-node_modules",
+                ],
             },
         ),
         command(
             "add",
             object({
                 type: constant("add"),
-                project: multiple(argument(
-                    string({
-                        metavar: "PROJECT(S)",
-                    }),
-                    {
-                        description: message`Path(s) to project(s) to be added.`,
-                    },
-                )),
+                project: multiple(
+                    argument(
+                        string({
+                            metavar: "PROJECT(S)",
+                        }),
+                        {
+                            description: message`Path(s) to project(s) to be added.`,
+                        },
+                    ),
+                ),
             }),
             {
                 brief: message`Adds projects to your project list.`,
                 description:
                     message`Given one or more directory paths, it adds them to the FKN project list. Using this list is optional but very recommended because it makes ${
-                        commandLine("fkn clean")
+                        commandLine(
+                            "fkn clean",
+                        )
                     } work out of the box with many projects at once AND allows in some places to reference by name rather than project path (as in, given a project named ${"foobar"}, allowing you to do ${
-                        commandLine("fkn build foobar")
+                        commandLine(
+                            "fkn build foobar",
+                        )
                     } rather than ${commandLine("fkn build ~/projects/foobar")}).`,
                 footer: message`Analog to ${commandLine("fkn rem")}.`,
             },
@@ -221,17 +266,19 @@ const parser = or(
             "rem",
             object({
                 type: constant("remove"),
-                project: multiple(argument(
-                    path({
-                        type: "directory",
-                        allowCreate: false,
-                        metavar: "PROJECT(S)",
-                        mustExist: true,
-                    }),
-                    {
-                        description: message`Path(s) to project(s) to be removed.`,
-                    },
-                )),
+                project: multiple(
+                    argument(
+                        path({
+                            type: "directory",
+                            allowCreate: false,
+                            metavar: "PROJECT(S)",
+                            mustExist: true,
+                        }),
+                        {
+                            description: message`Path(s) to project(s) to be removed.`,
+                        },
+                    ),
+                ),
             }),
             {
                 brief: message`Removes projects from your project list.`,
@@ -325,21 +372,25 @@ const parser = or(
             "terminate",
             object({
                 type: constant("terminate"),
-                runtime: optional(argument(
-                    string({
-                        metavar: "RUNTIME",
-                    }),
-                    {
-                        description: message`Runtime to be uninstalled.`,
-                    },
-                )),
+                runtime: optional(
+                    argument(
+                        string({
+                            metavar: "RUNTIME",
+                        }),
+                        {
+                            description: message`Runtime to be uninstalled.`,
+                        },
+                    ),
+                ),
                 projectsToo: option("--motherfuckers-too"),
             }),
             {
                 brief: message`Terminates a runtime.`,
                 description:
                     message`Terminates a runtime; this is, does a deep uninstall (trying its best so no installation leftovers remain).\n\nIt uninstalls the whole toolchain. For Node.js this includes all package managers that you may have.\n\nWorks by running a shell script (you can check their source on our public code repository).\n\nIf chosen via ${
-                        optionName("--motherfuckers-too")
+                        optionName(
+                            "--motherfuckers-too",
+                        )
                     } (discouraged!), it will remove from your disk all projects written in said lang. This is useful as projects in a language you are not even using anymore unnecessarily take up storage, though you should use this option with care. Only affects projects tracked by FKN.`,
                 aliases: [
                     "fuck-the-lang",
@@ -361,9 +412,7 @@ const parser = or(
             "upgrade",
             object({
                 type: constant("upgrade"),
-                force: optional(
-                    option("-f", "--force"),
-                ),
+                force: optional(option("-f", "--force")),
             }),
             {
                 brief: message`Upgrades the CLI if needed.`,
@@ -375,15 +424,17 @@ const parser = or(
             "build",
             object({
                 type: constant("build"),
-                project: optional(argument(
-                    path({
-                        type: "directory",
-                        allowCreate: false,
-                    }),
-                    {
-                        description: message`Project to build. Leave empty to use the one in the CWD.`,
-                    },
-                )),
+                project: optional(
+                    argument(
+                        path({
+                            type: "directory",
+                            allowCreate: false,
+                        }),
+                        {
+                            description: message`Project to build. Leave empty to use the one in the CWD.`,
+                        },
+                    ),
+                ),
             }),
             {
                 brief: message`Runs a set of user-defined commands, meant for building your project. If a command fails, it halts.`,
@@ -395,26 +446,36 @@ const parser = or(
             "cpf",
             object({
                 type: constant("cpf"),
-                project: optional(argument(
-                    path({
-                        allowCreate: false,
-                        type: "directory",
+                project: optional(
+                    argument(
+                        path({
+                            allowCreate: false,
+                            type: "directory",
+                        }),
+                        {
+                            description: message`Project to show the CPF for. Defaults to the current working directory.`,
+                        },
+                    ),
+                ),
+                jsonc: optional(
+                    option("-j", "--jsonc", {
+                        description: message`Use JSONC format instead of the default (YAML).`,
                     }),
-                    {
-                        description: message`Project to show the CPF for. Defaults to the current working directory.`,
-                    },
-                )),
-                jsonc: optional(option("-j", "--jsonc", { description: message`Use JSONC format instead of the default (YAML).` })),
+                ),
                 cli: optional(
                     option("-p", "--print", {
                         description: message`If passed, the output will be shown in the terminal regardless of whether ${
-                            optionName("--export")
+                            optionName(
+                                "--export",
+                            )
                         } was passed as well or not.`,
                     }),
                 ),
-                export: optional(option("-e", "--export", {
-                    description: message`If passed, the output will be written to a file instead of being shown in the terminal.`,
-                })),
+                export: optional(
+                    option("-e", "--export", {
+                        description: message`If passed, the output will be written to a file instead of being shown in the terminal.`,
+                    }),
+                ),
             }),
             {
                 brief: message`Exports your project's CPF. Helps with debugging.`,
@@ -452,15 +513,17 @@ const parser = or(
             "audit",
             object({
                 type: constant("audit"),
-                project: optional(argument(
-                    path({
-                        type: "directory",
-                        allowCreate: false,
-                    }),
-                    {
-                        description: message`Project to audit. Leave empty to audit all projects one by one.`,
-                    },
-                )),
+                project: optional(
+                    argument(
+                        path({
+                            type: "directory",
+                            allowCreate: false,
+                        }),
+                        {
+                            description: message`Project to audit. Leave empty to audit all projects one by one.`,
+                        },
+                    ),
+                ),
             }),
             {
                 brief: message`Runs a security audit and determines if any found vulnerability actually affects your project.`,
@@ -472,22 +535,28 @@ const parser = or(
             "migrate",
             object({
                 type: constant("migrate"),
-                project: optional(argument(
-                    path({
-                        type: "directory",
-                        allowCreate: false,
-                    }),
-                    { description: message`Project to migrate. Defaults to the current working directory.` },
-                )),
-                mgr: optional(argument(
-                    string({
-                        metavar: "PACKAGE MANAGER",
-                    }),
-                    {
-                        description:
-                            message`Target package manager (npm, pnpm, yarn, deno, or bun). Note we rely on each manager's ability to understand the other one.`,
-                    },
-                )),
+                project: optional(
+                    argument(
+                        path({
+                            type: "directory",
+                            allowCreate: false,
+                        }),
+                        {
+                            description: message`Project to migrate. Defaults to the current working directory.`,
+                        },
+                    ),
+                ),
+                mgr: optional(
+                    argument(
+                        string({
+                            metavar: "PACKAGE MANAGER",
+                        }),
+                        {
+                            description:
+                                message`Target package manager (npm, pnpm, yarn, deno, or bun). Note we rely on each manager's ability to understand the other one.`,
+                        },
+                    ),
+                ),
             }),
             {
                 brief: message`Migrates a project from one package manager to another and reinstalls deps.`,
@@ -499,13 +568,17 @@ const parser = or(
             "stats",
             object({
                 type: constant("stats"),
-                project: optional(argument(
-                    path({
-                        type: "directory",
-                        allowCreate: false,
-                    }),
-                    { description: message`Project to show stats for. Defaults to the current working directory.` },
-                )),
+                project: optional(
+                    argument(
+                        path({
+                            type: "directory",
+                            allowCreate: false,
+                        }),
+                        {
+                            description: message`Project to show stats for. Defaults to the current working directory.`,
+                        },
+                    ),
+                ),
             }),
             {
                 brief: message`Shows basic statistics for a project and (if viable) compares it against a basic set of recommended standards.`,
@@ -521,21 +594,31 @@ const parser = or(
                 }),
                 object({
                     type: constant("settings"),
-                    task: optional(argument(
-                        string({
-                            metavar: "TASK",
-                        }),
-                        {
-                            description: message`Can be any of:\n
+                    task: optional(
+                        argument(
+                            string({
+                                metavar: "TASK",
+                            }),
+                            {
+                                description: message`Can be any of:\n
                             - flush <f> [--force]\nClears chosen config files. Specify what to remove by setting <f> to either: 'errors' (error log file), 'updates' (update data), 'projects' (all added projects), or 'all' (everything). You can pass --force to skip confirmation.\n\n- repair\nResets all settings to their default value.\n\n- change <s> <v>\nAllows to change chosen setting, <s>, to given value, <v>. When you run 'settings' with no args, you'll see all settings and their key. (The key is the gray, cursive, code-like word at the end). That's the name you'll use for <s>.`,
-                        },
-                    )),
-                    changed: optional(argument(string({
-                        metavar: "SET. TO BE CHANGED",
-                    }))),
-                    val: optional(argument(string({
-                        metavar: "VALUE TO CHANGE TO",
-                    }))),
+                            },
+                        ),
+                    ),
+                    changed: optional(
+                        argument(
+                            string({
+                                metavar: "SET. TO BE CHANGED",
+                            }),
+                        ),
+                    ),
+                    val: optional(
+                        argument(
+                            string({
+                                metavar: "VALUE TO CHANGE TO",
+                            }),
+                        ),
+                    ),
                     force: optional(option("-f", "--force")),
                 }),
             ),
@@ -550,29 +633,33 @@ const parser = or(
             object({
                 type: constant("release"),
                 version: argument(
-                    string(
-                        { pattern: /^\d+\.\d+\.\d+$/, metavar: "VERSION" },
-                    ),
+                    string({ pattern: /^\d+\.\d+\.\d+$/, metavar: "VERSION" }),
                     {
                         description: message`Version to be released. Must be higher than the one in your package file and SemVer compliant.`,
                     },
                 ),
-                project: optional(argument(
-                    path({
-                        type: "directory",
-                        allowCreate: false,
-                    }),
-                    { description: message`Project to release. Defaults to the current working directory.` },
-                )),
+                project: optional(
+                    argument(
+                        path({
+                            type: "directory",
+                            allowCreate: false,
+                        }),
+                        {
+                            description: message`Project to release. Defaults to the current working directory.`,
+                        },
+                    ),
+                ),
                 push: optional(
                     option("-p", "--push", {
                         description:
                             message`Since code changes (and thus a commit) are made, you can pass this flag to push those changes to remote.`,
                     }),
                 ),
-                dryRun: optional(option("-d", "--dry-run", {
-                    description: message`Make everything (commit, run release script, even push), but without publishing to npm / jsr.`,
-                })),
+                dryRun: optional(
+                    option("-d", "--dry-run", {
+                        description: message`Make everything (commit, run release script, even push), but without publishing to npm / jsr.`,
+                    }),
+                ),
             }),
             {
                 brief: message`Releases a new version of a package for you.`,
@@ -590,15 +677,21 @@ const parser = or(
             "launch",
             object({
                 type: constant("launch"),
-                project: optional(argument(
-                    path({
-                        type: "directory",
-                        allowCreate: false,
-                    }),
-                    { description: message`Project to launch. Defaults to the current working directory.` },
-                )),
+                project: optional(
+                    argument(
+                        path({
+                            type: "directory",
+                            allowCreate: false,
+                        }),
+                        {
+                            description: message`Project to launch. Defaults to the current working directory.`,
+                        },
+                    ),
+                ),
                 noIDE: optional(
-                    option("-n", "--no-ide", { description: message`If passed, your IDE will not launch, just the launchCmd.` }),
+                    option("-n", "--no-ide", {
+                        description: message`If passed, your IDE will not launch, just the launchCmd.`,
+                    }),
                 ),
             }),
             {
@@ -611,9 +704,11 @@ const parser = or(
             "compat",
             object({
                 type: constant("compat"),
-                target: optional(argument(string(), {
-                    description: message`Specific feature to show all info about. If not given, a basic summary of all features is shown.`,
-                })),
+                target: optional(
+                    argument(string(), {
+                        description: message`Specific feature to show all info about. If not given, a basic summary of all features is shown.`,
+                    }),
+                ),
             }),
             {
                 aliases: ["features"],
@@ -639,7 +734,9 @@ const parser = or(
             {
                 brief: message`Gives some hints that could be useful for a contributor to debug the program.`,
                 description: message`Takes any of ${["proc", "where", "mem", "who", "root"].join(", ")} as ${
-                    metavar("WHAT-TO-DEBUG")
+                    metavar(
+                        "WHAT-TO-DEBUG",
+                    )
                 } and shows some hints related to that. ${"proc"} for example shows PID and PPID, ${"mem"} shows some memory-related stuff, ${"who"} shows hostname info, etc...`,
             },
         ),
@@ -681,13 +778,17 @@ const parser = or(
                 setup: argument(string(), {
                     description: message`Name of the setup to use.`,
                 }),
-                project: optional(argument(
-                    path({
-                        type: "directory",
-                        allowCreate: false,
-                    }),
-                    { description: message`Project to apply this setup to. Defaults to the current working directory.` },
-                )),
+                project: optional(
+                    argument(
+                        path({
+                            type: "directory",
+                            allowCreate: false,
+                        }),
+                        {
+                            description: message`Project to apply this setup to. Defaults to the current working directory.`,
+                        },
+                    ),
+                ),
             }),
             {
                 aliases: ["configure", "preset"],
@@ -706,34 +807,46 @@ const parser = or(
                         description: message`Optional message to add to the deprecation notice. Write anything you wish.`,
                     }),
                 ),
-                alternative: optional(argument(string({ metavar: "ALTERNATIVE (TEXT)" }), {
-                    description:
-                        message`Optional message explaining any alternative to this tool. If provided, we recommend adding a link to it.`,
-                })),
-                learnMore: optional(argument(
-                    url({
-                        allowedProtocols: ["https:"],
-                        metavar: "LEARN-MORE-URL",
+                alternative: optional(
+                    argument(string({ metavar: "ALTERNATIVE (TEXT)" }), {
+                        description:
+                            message`Optional message explaining any alternative to this tool. If provided, we recommend adding a link to it.`,
                     }),
-                    {
-                        description: message`An optional URL to wherever you can learn more about this deprecation.`,
-                    },
-                )),
-                project: optional(option(
-                    "-p",
-                    "--project",
-                    path({
-                        type: "directory",
-                        allowCreate: false,
+                ),
+                learnMore: optional(
+                    argument(
+                        url({
+                            allowedProtocols: ["https:"],
+                            metavar: "LEARN-MORE-URL",
+                        }),
+                        {
+                            description: message`An optional URL to wherever you can learn more about this deprecation.`,
+                        },
+                    ),
+                ),
+                project: optional(
+                    option(
+                        "-p",
+                        "--project",
+                        path({
+                            type: "directory",
+                            allowCreate: false,
+                        }),
+                        {
+                            description: message`Project to surrender. Defaults to the current working directory.`,
+                        },
+                    ),
+                ),
+                gfm: optional(
+                    option("--gh", "--github", {
+                        description: message`If passed, the deprecation notice will use GitHub Flavored Markdown.`,
                     }),
-                    { description: message`Project to surrender. Defaults to the current working directory.` },
-                )),
-                gfm: optional(option("--gh", "--github", {
-                    description: message`If passed, the deprecation notice will use GitHub Flavored Markdown.`,
-                })),
-                glm: optional(option("--gl", "--gitlab", {
-                    description: message`If passed, the deprecation notice will use GitLab Flavored Markdown.`,
-                })),
+                ),
+                glm: optional(
+                    option("--gl", "--gitlab", {
+                        description: message`If passed, the deprecation notice will use GitLab Flavored Markdown.`,
+                    }),
+                ),
             }),
             {
                 aliases: [
@@ -785,7 +898,9 @@ const parser = or(
                 brief: message`Makes a commit with the given <message> only if a specific task succeeds, (to [branch], if specified).`,
                 description:
                     message`This is language agnostic, by the way. It runs a user-defined command (likely your test suite) and commits ONLY if it succeeds. It also prevents committing files you forgot you had staged, by default (avoid this with ${
-                        optionName("--keep-staged")
+                        optionName(
+                            "--keep-staged",
+                        )
                     }).`,
             },
         ),
@@ -812,15 +927,17 @@ async function main(): Promise<void> {
             console.log(
                 table([
                     {
-                        "Process name": new TextDecoder().decode(
-                            LOCAL_PLATFORM.SYSTEM === "msft"
-                                ? new Deno.Command("powershell", {
-                                    args: ["Get-Process", "-Id", Deno.pid.toString()],
-                                }).outputSync().stdout
-                                : new Deno.Command("ps", {
-                                    args: ["-p", Deno.pid.toString(), "-o", "comm="],
-                                }).outputSync().stdout,
-                        ).trim(),
+                        "Process name": new TextDecoder()
+                            .decode(
+                                LOCAL_PLATFORM.SYSTEM === "msft"
+                                    ? new Deno.Command("powershell", {
+                                        args: ["Get-Process", "-Id", Deno.pid.toString()],
+                                    }).outputSync().stdout
+                                    : new Deno.Command("ps", {
+                                        args: ["-p", Deno.pid.toString(), "-o", "comm="],
+                                    }).outputSync().stdout,
+                            )
+                            .trim(),
                         "Process ID": Deno.pid,
                         "Parent Process ID": Deno.ppid,
                     },
@@ -828,32 +945,40 @@ async function main(): Promise<void> {
             );
         } else if (out.whatTo === "where") {
             console.log(
-                table([{
-                    "CWD": Deno.cwd(),
-                    "execPath": Deno.execPath(),
-                    "import.meta.url": import.meta.url,
-                    "Is it main?": import.meta.main ? "Yes" : "No",
-                }]),
+                table([
+                    {
+                        "CWD": Deno.cwd(),
+                        "execPath": Deno.execPath(),
+                        "import.meta.url": import.meta.url,
+                        "Is it main?": import.meta.main ? "Yes" : "No",
+                    },
+                ]),
             );
         } else if (out.whatTo === "mem") {
             const mem = Deno.memoryUsage();
-            console.log(table(
-                [Object.fromEntries(
-                    Object.entries(mem)
-                        .map(
-                            ([k, v]) => [k, `${(v / 1024 / 1024).toFixed(2)} MB`],
-                        ),
-                )],
-            ));
+            console.log(
+                table([
+                    Object.fromEntries(
+                        Object.entries(mem).map(([k, v]) => [
+                            k,
+                            `${(v / 1024 / 1024).toFixed(2)} MB`,
+                        ]),
+                    ),
+                ]),
+            );
             console.log(
                 "(Note: For properly testing CLI performance, your system's resource manager or the repository's benchmarks are better).",
             );
         } else if (out.whatTo === "who") {
-            console.log(table([{
-                ...Deno.build,
-                standalone: Deno.build.standalone.toString(),
-                hostname: Deno.hostname(),
-            }]));
+            console.log(
+                table([
+                    {
+                        ...Deno.build,
+                        standalone: Deno.build.standalone.toString(),
+                        hostname: Deno.hostname(),
+                    },
+                ]),
+            );
         } else {
             console.log(parse(Deno.execPath()).dir);
         }
@@ -870,17 +995,21 @@ async function main(): Promise<void> {
                 update: out.update,
             },
             parameters: {
-                intensity: out.intensity ?? (GetUserSettings())["default-intensity"],
+                intensity: out.intensity ?? GetUserSettings()["default-intensity"],
                 project: !out.projects || out.projects.length === 0 ? 0 : out.projects,
             },
         });
     }
     if (out.type === "add") return await ListManager("add", out.project);
     if (out.type === "remove") return await ListManager("rem", out.project);
-    if (out.type === "list") return await TheLister(out.alive ? "alive" : out.ignored ? "ignored" : undefined);
+    if (out.type === "list") {
+        return await TheLister(
+            out.alive ? "alive" : out.ignored ? "ignored" : undefined,
+        );
+    }
     if (out.type === "terminate") {
         return await TheTerminator({
-            runtime: (Deno.args[0] === "unnode" || Deno.args[0] === "seriously-fuck-node")
+            runtime: Deno.args[0] === "unnode" || Deno.args[0] === "seriously-fuck-node"
                 ? "node"
                 : Deno.args[0] === "undeno"
                 ? "deno"
@@ -924,7 +1053,10 @@ async function main(): Promise<void> {
         });
     }
     if (out.type === "migrate") {
-        return await TheMigrator({ projectPath: out.project ?? Deno.cwd(), wantedManager: out.mgr });
+        return await TheMigrator({
+            projectPath: out.project ?? Deno.cwd(),
+            wantedManager: out.mgr,
+        });
     }
     if (out.type === "cpf") {
         return await TheExporter({
@@ -943,9 +1075,7 @@ async function main(): Promise<void> {
     }
     if (out.type === "tip") {
         LogStuff(`Here's a pro tip!`);
-        LogStuff(
-            brightBlue(shuffle(HINTS)),
-        );
+        LogStuff(brightBlue(shuffle(HINTS)));
         return;
     }
     if (out.type === "repo") {
@@ -970,12 +1100,18 @@ async function main(): Promise<void> {
         );
     }
     if (out.type === "man") {
-        if (LOCAL_PLATFORM.SYSTEM === "msft") LogStuff("You are on Windows, why the hell would you want to setup a manpage?");
-        else SetupUnixMan();
+        if (LOCAL_PLATFORM.SYSTEM === "msft") {
+            LogStuff(
+                "You are on Windows, why the hell would you want to setup a manpage?",
+            );
+        } else SetupUnixMan();
         return;
     }
     if (out.type === "website") {
-        LogStuff(`Best documentation website for best CLI, live at https://fuckingnode.github.io/`, "bulb");
+        LogStuff(
+            `Best documentation website for best CLI, live at https://fuckingnode.github.io/`,
+            "bulb",
+        );
         return LaunchWebsite("https://fuckingnode.github.io/");
     }
     if (out.type === "commit") {
@@ -990,8 +1126,14 @@ async function main(): Promise<void> {
     }
     if (out.type === "settings") {
         if (!("task" in out)) return await TheSettings({ args: [] });
-        if (out.task?.toLowerCase() === "change") return await TheSettings({ args: ["change", out.changed ?? "", out.val ?? ""] });
-        return await TheSettings({ args: [out.task ?? "", out.changed ?? "", out.force ? "--force" : ""] });
+        if (out.task?.toLowerCase() === "change") {
+            return await TheSettings({
+                args: ["change", out.changed ?? "", out.val ?? ""],
+            });
+        }
+        return await TheSettings({
+            args: [out.task ?? "", out.changed ?? "", out.force ? "--force" : ""],
+        });
     }
     if (out.type === "uncommit") return await TheUncommitter();
     if (out.type === "stats") return await TheStatistics(out.project);

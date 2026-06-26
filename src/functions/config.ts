@@ -1,7 +1,7 @@
 import * as DenoJson from "../../deno.json" with { type: "json" };
 import { GetDateNow } from "../functions/date.ts";
 import { DEFAULT_SETTINGS } from "../constants.ts";
-import type { CF_FKNODE_SETTINGS } from "../types/config_files.ts";
+import { type CF_FKNODE_SETTINGS, SUPPORTED_EDITORS } from "../types/config_files.ts";
 import { FknError } from "./error.ts";
 import { BulkRemove, CheckForDir, CheckForPath, JoinPaths } from "./filesystem.ts";
 import { parse as parseYaml } from "@std/yaml";
@@ -66,20 +66,26 @@ export async function FreshSetup(repairSetts?: boolean): Promise<void> {
     }
 
     if (!CheckForPath(settingsPath) || repairSetts) {
-        tasks.push(Deno.writeTextFile(settingsPath, StringifyYaml(DEFAULT_SETTINGS), { create: true }));
+        tasks.push(
+            Deno.writeTextFile(settingsPath, StringifyYaml(DEFAULT_SETTINGS), {
+                create: true,
+            }),
+        );
     }
 
     if (!CheckForPath(schedulePath)) {
-        tasks.push(Deno.writeTextFile(
-            schedulePath,
-            StringifyYaml({
-                updater: {
-                    latestVer: DenoJson.default.version,
-                    lastCheck: GetDateNow(),
-                },
-            }),
-            { create: true },
-        ));
+        tasks.push(
+            Deno.writeTextFile(
+                schedulePath,
+                StringifyYaml({
+                    updater: {
+                        latestVer: DenoJson.default.version,
+                        lastCheck: GetDateNow(),
+                    },
+                }),
+                { create: true },
+            ),
+        );
     }
 
     await Promise.all(tasks);
@@ -94,7 +100,9 @@ export async function FreshSetup(repairSetts?: boolean): Promise<void> {
  */
 export function GetUserSettings(): CF_FKNODE_SETTINGS {
     if (!SHALL_LOAD_CFG) return DEFAULT_SETTINGS;
-    const stuff: CF_FKNODE_SETTINGS = parseYaml(Deno.readTextFileSync(GetAppPath("SETTINGS"))) as CF_FKNODE_SETTINGS;
+    const stuff: CF_FKNODE_SETTINGS = parseYaml(
+        Deno.readTextFileSync(GetAppPath("SETTINGS")),
+    ) as CF_FKNODE_SETTINGS;
     return {
         ...DEFAULT_SETTINGS,
         ...stuff,
@@ -117,25 +125,65 @@ export function ChangeSetting(
     let newSettings: CF_FKNODE_SETTINGS | undefined;
 
     if (setting === "default-intensity") {
-        if (!validateAgainst(value, ["normal", "hard", "hard-only", "maxim", "maxim-only"])) {
-            return LogStuff(`${value} is not valid. Enter either 'normal', 'hard', 'hard-only', or 'maxim'.`);
+        if (
+            !validateAgainst(value, [
+                "normal",
+                "hard",
+                "hard-only",
+                "maxim",
+                "maxim-only",
+            ])
+        ) {
+            return LogStuff(
+                `${value} is not valid. Enter either 'normal', 'hard', 'hard-only', or 'maxim'.`,
+            );
         }
         newSettings = { ...currentSettings, "default-intensity": value };
     } else if (setting === "default-manager") {
-        if (!validateAgainst(value, ["npm", "pnpm", "yarn", "deno", "bun", "cargo", "go"])) {
-            return LogStuff(`${value} is not valid. Enter either "npm", "pnpm", "yarn", "deno", "bun", "cargo", or "go".`);
+        if (
+            !validateAgainst(value, [
+                "npm",
+                "pnpm",
+                "yarn",
+                "deno",
+                "bun",
+                "cargo",
+                "go",
+            ])
+        ) {
+            return LogStuff(
+                `${value} is not valid. Enter either "npm", "pnpm", "yarn", "deno", "bun", "cargo", or "go".`,
+            );
         }
         newSettings = { ...currentSettings, "default-manager": value };
     } else if (setting === "kickstart-root") {
         if (!validate(value)) return LogStuff("Invalid string provided.");
-        if (!["false", "null", "no"].includes(value) && ["NotFound", "NotDir"].includes(CheckForDir(value))) {
+        if (
+            !["false", "null", "no"].includes(value)
+            && ["NotFound", "NotDir"].includes(CheckForDir(value))
+        ) {
             return LogStuff(
                 `${value} is not a valid directory path, and is not any of the negation strings ("false", "null", or "no") for disabling this setting.`,
             );
         }
-        newSettings = { ...currentSettings, "kickstart-root": ["false", "null", "no"].includes(value) ? null : Deno.realPathSync(value) };
+        newSettings = {
+            ...currentSettings,
+            "kickstart-root": ["false", "null", "no"].includes(value) ? null : Deno.realPathSync(value),
+        };
     } else if (setting === "workspace-policy") {
-        if (!validateAgainst(value, ["standalone", "yes", "add", "unified", "no", "ignore", "default", "null", "0"])) {
+        if (
+            !validateAgainst(value, [
+                "standalone",
+                "yes",
+                "add",
+                "unified",
+                "no",
+                "ignore",
+                "default",
+                "null",
+                "0",
+            ])
+        ) {
             return LogStuff(
                 `${value} is not a valid value. Provide either "standalone" / "yes" / "add" for adding all workspaces; "unified" / "no" / "ignore" for adding just the root; or "default" / "null" / "0" for asking each time (default).`,
             );
@@ -150,15 +198,25 @@ export function ChangeSetting(
         };
     } else if (setting === "update-freq") {
         const freq = Math.ceil(Number(value));
-        if (!Number.isFinite(freq) || freq <= 0) return LogStuff(`${value} is not valid. Enter a valid number greater than 0.`);
+        if (!Number.isFinite(freq) || freq <= 0) {
+            return LogStuff(
+                `${value} is not valid. Enter a valid number greater than 0.`,
+            );
+        }
         newSettings = { ...currentSettings, "update-freq": freq };
     } else if (setting === "notification-threshold-value") {
         const freq = Math.ceil(Number(value));
-        if (!Number.isFinite(freq) || freq <= 1000) return LogStuff(`${value} is not valid. Enter a valid number greater than 1000.`);
+        if (!Number.isFinite(freq) || freq <= 1000) {
+            return LogStuff(
+                `${value} is not valid. Enter a valid number greater than 1000.`,
+            );
+        }
         newSettings = { ...currentSettings, "notification-threshold-value": freq };
     } else if (setting === "fav-editor") {
-        if (!validateAgainst(value, ["vscode", "sublime", "emacs", "atom", "notepad++", "vscodium"])) {
-            return LogStuff(`${value} is not valid. Enter one of: vscode, sublime, emacs, atom, notepad++, vscodium.`);
+        if (!validateAgainst(value, SUPPORTED_EDITORS)) {
+            return LogStuff(
+                `${value} is not valid. Enter one of: ${SUPPORTED_EDITORS.join(", ")}.`,
+            );
         }
         newSettings = { ...currentSettings, "fav-editor": value };
     } else if (setting === "notifications") {
@@ -166,13 +224,31 @@ export function ChangeSetting(
         newSettings = { ...currentSettings, notifications: value === "true" };
     } else if (setting === "always-short-circuit-cleanup") {
         if (!validateAgainst(value, ["true", "false"])) return LogStuff(`${value} is not valid. Enter either 'true' or 'false'.`);
-        newSettings = { ...currentSettings, "always-short-circuit-cleanup": value === "true" };
+        newSettings = {
+            ...currentSettings,
+            "always-short-circuit-cleanup": value === "true",
+        };
     } else if (setting === "notification-threshold") {
         if (!validateAgainst(value, ["true", "false"])) return LogStuff(`${value} is not valid. Enter either 'true' or 'false'.`);
-        newSettings = { ...currentSettings, "notification-threshold": value === "true" };
+        newSettings = {
+            ...currentSettings,
+            "notification-threshold": value === "true",
+        };
     } else {
-        if (!validateAgainst(value, ["npm", "pnpm", "yarn", "bun", "deno", "cargo", "go"])) {
-            return LogStuff(`${value} is not valid. Enter a valid package manager (npm, pnpm, yarn, bun, deno, cargo, go).`);
+        if (
+            !validateAgainst(value, [
+                "npm",
+                "pnpm",
+                "yarn",
+                "bun",
+                "deno",
+                "cargo",
+                "go",
+            ])
+        ) {
+            return LogStuff(
+                `${value} is not valid. Enter a valid package manager (npm, pnpm, yarn, bun, deno, cargo, go).`,
+            );
         }
         if (
             ["cargo", "go"].includes(value)
@@ -185,7 +261,10 @@ export function ChangeSetting(
 
     if (newSettings) {
         Deno.writeTextFileSync(settingsPath, StringifyYaml(newSettings));
-        LogStuff(`Settings successfully updated! ${setting} is now ${value}`, "tick");
+        LogStuff(
+            `Settings successfully updated! ${setting} is now ${value}`,
+            "tick",
+        );
     }
 
     return;
@@ -205,22 +284,30 @@ export function DisplaySettings(): void {
                 `Default package manager         | ${brightGreen(settings["default-manager"])}. ${dim(italic("default-manager"))}`,
                 `Favorite code editor            | ${brightGreen(settings["fav-editor"])}. ${dim(italic("fav-editor"))}`,
                 `Send system notifications       | ${brightGreen(settings["notifications"] ? "Enabled" : "Disabled")}. ${
-                    dim(italic("notifications"))
+                    dim(
+                        italic("notifications"),
+                    )
                 }`,
                 `Threshold notifications?        | ${brightGreen(settings["notification-threshold"] ? "Enabled" : "Disabled")}. ${
-                    dim(italic("notification-threshold"))
+                    dim(
+                        italic("notification-threshold"),
+                    )
                 }`,
                 `Notification threshold          | ${brightGreen(settings["notification-threshold-value"].toString())} milliseconds. ${
-                    dim(italic("notification-threshold"))
+                    dim(
+                        italic("notification-threshold"),
+                    )
                 }`,
                 `Short circuit on cleanup error? | ${brightGreen(settings["always-short-circuit-cleanup"] ? "Enabled" : "Disabled")}. ${
-                    dim(italic("always-short-circuit-cleanup"))
+                    dim(
+                        italic("always-short-circuit-cleanup"),
+                    )
                 }`,
                 `Root for kickstarted projects?  | ${brightGreen(settings["kickstart-root"] ?? "Not set")}. ${dim(italic("kickstart-root"))}`,
                 `Workspace clone handling?       | ${
                     brightGreen(
                         settings["workspace-policy"]
-                            ? (settings["workspace-policy"] === "standalone" ? "Always add as standalone projects" : "Always unify")
+                            ? settings["workspace-policy"] === "standalone" ? "Always add as standalone projects" : "Always unify"
                             : "Not set",
                     )
                 }. ${dim(italic("workspace-policy"))}`,
@@ -238,7 +325,11 @@ export function DisplaySettings(): void {
  * @param {boolean} force If true no confirmation prompt will be shown.
  * @param {boolean} [silent=false] If true no success message will be shown.
  */
-export async function FlushConfigFiles(target: UnknownString, force: boolean, silent: boolean = false): Promise<void> {
+export async function FlushConfigFiles(
+    target: UnknownString,
+    force: boolean,
+    silent: boolean = false,
+): Promise<void> {
     if (!validateAgainst(target, ["projects", "schedules", "errors", "all"])) {
         LogStuff(
             "Specify what to flush. Either 'projects', 'schedules', 'errors', or 'all'.",
@@ -260,7 +351,9 @@ export async function FlushConfigFiles(target: UnknownString, force: boolean, si
         ];
     }
 
-    const fileSize = (await Promise.all(file.map((item) => Deno.stat(item)))).reduce((acc, num) => acc + num.size, 0);
+    const fileSize = (
+        await Promise.all(file.map((item) => Deno.stat(item)))
+    ).reduce((acc, num) => acc + num.size, 0);
 
     if (
         !force

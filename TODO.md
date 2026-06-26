@@ -3,14 +3,21 @@
 > [!TIP]
 > These are all things I want to do. Most tasks are major-release oriented, as patches just fix bugs and minors just bring in random improvements that come to my mind - or at least that's the idea.
 
+## Known problems
+
+- Settings API sucks, a lot.
+- First run fails when `.config/fuckingnode` not exists, yet somehow the 2nd one and onwards do work.
+
+## CLI
+
+- Supposedly, Optique allows us to make Bash autocompletions. Try to do this.
+
 ## Cmds
 
 - [ ] Calls to FKN, so that you can directly invoke, idk, destroy, or clean, or we could even pack some cmd-specific features into the CLI.
 - [ ] Allow to use `--flags` to conditionally execute different scripts in Cmds.
 
 ## Setups
-
-### Features
 
 - [ ] Add advanced templating. This is, prompts and questions to autofill a template
   - [ ] fknode.yaml and prettier ones

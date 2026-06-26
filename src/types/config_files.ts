@@ -4,9 +4,25 @@ import type { NonEmptyArray } from "./misc.ts";
 import type { MANAGER_GLOBAL } from "./platform.ts";
 
 /**
- * Supported code editors.
+ * All supported code editors.
  */
-export type SUPPORTED_EDITORS = "vscode" | "sublime" | "emacs" | "notepad++" | "atom" | "vscodium";
+export const SUPPORTED_EDITORS = [
+    "vscode",
+    "sublime",
+    "emacs",
+    "notepad++",
+    "atom",
+    "vscodium",
+    "zed",
+    "flatpak-zed",
+    "flatpak-vscode",
+    "flatpak-vscodium",
+] as const;
+
+/**
+ * A supported code editor.
+ */
+export type SUPPORTED_EDITOR = (typeof SUPPORTED_EDITORS)[number];
 
 /**
  * User config
@@ -29,9 +45,9 @@ export interface CF_FKNODE_SETTINGS {
     /**
      * User's favorite code editor.
      *
-     * @type {SUPPORTED_EDITORS}
+     * @type {SUPPORTED_EDITOR}
      */
-    "fav-editor": SUPPORTED_EDITORS;
+    "fav-editor": SUPPORTED_EDITOR;
     /**
      * Default package manager / runtime to use for features like `kickstart`.
      *
@@ -97,20 +113,44 @@ export interface CF_FKNODE_SCHEDULE {
 }
 
 /** A single `CmdSet` instruction. */
-export type CmdInstruction = `\$${string}` | `~${string}` | `=${string}` | `<${string}` | null;
-export type ParsedCmdInstruction = { type: "<" | "~" | "$" | "="; cmd: NonEmptyArray<string> };
+export type CmdInstruction =
+    | `\$${string}`
+    | `~${string}`
+    | `=${string}`
+    | `<${string}`
+    | null;
+export type ParsedCmdInstruction = {
+    type: "<" | "~" | "$" | "=";
+    cmd: NonEmptyArray<string>;
+};
 export type CrossPlatformParsedCmdInstruction = {
     msft: ParsedCmdInstruction | ParsedCmdInstruction[] | null;
     posix: ParsedCmdInstruction | ParsedCmdInstruction[] | null;
 };
 // deno-lint-ignore explicit-module-boundary-types no-explicit-any
-export function IsCPCmdInstruction(a: any): a is CrossPlatformParsedCmdInstruction {
+export function IsCPCmdInstruction(
+    a: any,
+): a is CrossPlatformParsedCmdInstruction {
     if (!a.msft && !a.posix) return false;
-    return ((a.msft && a.msft.type && typeof a.msft.type === "string" && validate(a.msft.type))
-        || (a.posix && a.posix.type && typeof a.posix.type === "string" && validate(a.posix.type)));
+    return (
+        (a.msft
+            && a.msft.type
+            && typeof a.msft.type === "string"
+            && validate(a.msft.type))
+        || (a.posix
+            && a.posix.type
+            && typeof a.posix.type === "string"
+            && validate(a.posix.type))
+    );
 }
-export type CmdSet =
-    (CmdInstruction | { posix: CmdInstruction | CmdInstruction[]; msft: CmdInstruction | CmdInstruction[] } | CmdInstruction[])[];
+export type CmdSet = (
+    | CmdInstruction
+    | {
+        posix: CmdInstruction | CmdInstruction[];
+        msft: CmdInstruction | CmdInstruction[];
+    }
+    | CmdInstruction[]
+)[];
 
 /** An `fknode.yaml` file for configuring individual projects */
 export type FkNodeYaml = Partial<FullFkNodeYaml>;
@@ -122,7 +162,9 @@ export interface FullFkNodeYaml {
      *
      * @type {(("updater" | "cleaner" | "linter" | "prettifier" | "destroyer")[] | "*")}
      */
-    divineProtection: ("updater" | "cleaner" | "linter" | "prettifier" | "destroyer")[] | "*";
+    divineProtection:
+        | ("updater" | "cleaner" | "linter" | "prettifier" | "destroyer")[]
+        | "*";
     /**
      * If true, the cleaner will short-circuit whenever an error happens on any task. Defaults to false.
      *
@@ -287,25 +329,25 @@ export function ValidateFkNodeYaml(
         && obj.divineProtection !== "*"
         && !(
             Array.isArray(obj.divineProtection)
-            && obj.divineProtection.every(
-                (item: string) => {
-                    return ["updater", "cleaner", "linter", "prettifier", "destroyer"].includes(item);
-                },
-            )
+            && obj.divineProtection.every((item: string) => {
+                return [
+                    "updater",
+                    "cleaner",
+                    "linter",
+                    "prettifier",
+                    "destroyer",
+                ].includes(item);
+            })
         )
     ) {
         return false;
     }
 
-    if (
-        obj.lintScript !== undefined && typeof obj.lintScript !== "string"
-    ) {
+    if (obj.lintScript !== undefined && typeof obj.lintScript !== "string") {
         return false;
     }
 
-    if (
-        obj.prettyScript !== undefined && typeof obj.prettyScript !== "string"
-    ) {
+    if (obj.prettyScript !== undefined && typeof obj.prettyScript !== "string") {
         return false;
     }
 
@@ -323,7 +365,14 @@ export function ValidateFkNodeYaml(
                     && obj.destroy.intensities.every(
                         // deno-lint-ignore no-explicit-any
                         (intensity: any) => {
-                            return ["normal", "hard", "hard-only", "maxim", "maxim-only", "*"].includes(intensity);
+                            return [
+                                "normal",
+                                "hard",
+                                "hard-only",
+                                "maxim",
+                                "maxim-only",
+                                "*",
+                            ].includes(intensity);
                         },
                     ))
             )
@@ -351,7 +400,13 @@ export function ValidateFkNodeYaml(
     if (obj.flagless !== undefined) {
         if (typeof obj.flagless !== "object" || obj.flagless === null) return false;
 
-        const validKeys = ["flaglessUpdate", "flaglessDestroy", "flaglessLint", "flaglessPretty", "flaglessCommit"];
+        const validKeys = [
+            "flaglessUpdate",
+            "flaglessDestroy",
+            "flaglessLint",
+            "flaglessPretty",
+            "flaglessCommit",
+        ];
         for (const [key, value] of Object.entries(obj.flagless)) if (!validKeys.includes(key) || typeof value !== "boolean") return false;
     }
 
@@ -363,7 +418,10 @@ export function ValidateFkNodeYaml(
 
     if (obj.launchCmd !== undefined && !Array.isArray(obj.launchCmd)) return false;
 
-    if (obj.releaseAlwaysDry !== undefined && typeof obj.releaseAlwaysDry !== "boolean") return false;
+    if (
+        obj.releaseAlwaysDry !== undefined
+        && typeof obj.releaseAlwaysDry !== "boolean"
+    ) return false;
 
     return true;
 }
