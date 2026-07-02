@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- Fixed glob patterns (when not expanded by your shell) not working due to a Deno permission request.
 - Fixed version number still at 5.3.0.
 
 ## [5.4.0] (26-06-2026)

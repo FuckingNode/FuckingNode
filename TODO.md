@@ -8,6 +8,8 @@
 - Settings API sucks, a lot.
 - First run fails when `.config/fuckingnode` not exists, yet somehow the 2nd one and onwards do work.
 - Kickstart a Golang project and you'll see the version is poorly formatted.
+- Self-updater is a mess. Should just remove it.
+- Glob patterns don't really work when they're shell-expanded instead of passed as a string.
 
 ## CLI
 

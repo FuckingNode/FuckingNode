@@ -1,7 +1,7 @@
 import { parse as parseYaml } from "@std/yaml";
 import { parse as parseToml } from "@std/toml";
 import { parse as parseJsonc } from "@std/jsonc";
-import { expandGlobSync } from "@std/fs";
+import { expandGlob, expandGlobSync } from "@std/fs";
 import { DEFAULT_FKNODE_YAML } from "../constants.ts";
 import type {
     CargoPkgFile,
@@ -25,7 +25,6 @@ import { normalize, normalizeArray, type UnknownString, validate, validateAgains
 import { ResolveLockfiles } from "../commands/toolkit/cleaner.ts";
 import { isGlob } from "@std/path/is-glob";
 import { joinGlobs, normalizeGlob, parse } from "@std/path";
-import { globSync } from "node:fs";
 import { orange, pink } from "./color.ts";
 import { bold, brightBlue, brightGreen, cyan, dim, italic, magenta, white } from "@std/fmt/colors";
 import { LOCAL_PLATFORM } from "../platform.ts";
@@ -77,11 +76,9 @@ export async function AddProject(
     workspacePolicy: FullFkNodeYaml["kickstarter"]["workspaces"] = null,
 ): Promise<ProjectEnvironment | "rootless" | "aborted" | "error" | "glob"> {
     if (validate(entry) && isGlob(entry)) {
-        await Promise.all(
-            globSync(entry)
-                .filter((f) => Deno.statSync(f).isDirectory === true)
-                .map((p) => AddProject(p, true)),
-        );
+        for await (const dir of expandGlob(entry)) {
+            if (Deno.statSync(dir.path).isDirectory === true) AddProject(dir.path, true);
+        }
         return "glob";
     }
 

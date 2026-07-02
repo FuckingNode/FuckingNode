@@ -1,4 +1,3 @@
-import { globSync } from "node:fs";
 import * as DenoJson from "../../../deno.json" with { type: "json" };
 import { Commander, ManagerExists } from "../../functions/cli.ts";
 import { BulkRemove, CheckForPath, JoinPaths, ParsePath } from "../../functions/filesystem.ts";
@@ -17,6 +16,7 @@ import { blue, bold, brightBlue, brightGreen, brightYellow, cyan, dim, italic, m
 import { orange, pink } from "../../functions/color.ts";
 import { isGlob } from "@std/path";
 import { CommittablenessState } from "../../types/misc.ts";
+import { expandGlobSync } from "@std/fs";
 
 /** Handles errors and short-circuiting. */
 function HandleErroring(
@@ -159,7 +159,7 @@ const ProjectCleaningFeatures = {
                 if ((target.endsWith("node_modules") || target.endsWith("node_modules/")) && intensity === "maxim") continue; // avoid removing this thingy twice
                 if (isGlob(target)) {
                     LogStuff(`Expanding glob pattern ${bold(target)}...`, "working");
-                    const pattern = globSync(target);
+                    const pattern = Array.from(expandGlobSync(target)).map((p) => p.path);
                     if (pattern.filter((p) => CheckForPath(p)).length === 0) {
                         LogStuff(
                             `No items matching ${bold(target)} currently exist.`,

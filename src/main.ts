@@ -1,3 +1,5 @@
+// deno-lint-ignore-file no-slow-types
+
 // the things.
 import TheCleaner from "./commands/clean.ts";
 import TheLister from "./commands/list.ts";
@@ -41,7 +43,6 @@ import { brightBlue } from "@std/fmt/colors";
 import { shuffle } from "@zakahacecosas/entity-utils";
 import { SetupUnixMan } from "./functions/man.ts";
 
-// deno-lint-ignore no-slow-types
 export const FuckingNodeMeta = {
     version: DenoJson.default.version,
     brief: message`A CLI to automate headache giving tasks and make it easier to develop in NodeJS, Deno, or Bun.`,
@@ -907,7 +908,6 @@ const parser = or(
     ),
 );
 
-// deno-lint-ignore no-slow-types
 export const FuckingNode = defineProgram({
     parser,
     metadata: {
