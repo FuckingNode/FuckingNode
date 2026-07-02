@@ -78,7 +78,7 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
             "Installed from a package manager, please use said package manager to update FuckingNode.\nIf you didn't install from a package manager, then FuckingNode is running from an unknown, which is likely an installation error (or you moving it somewhere else).",
         );
     }
-    LogStuff("Updating...", "package");
+    /* LogStuff("Updating...", "package");
     const res = await fetch(
         `https://fuckingnode.github.io/install${LOCAL_PLATFORM.SSS}`,
     );
@@ -86,33 +86,35 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
     Deno.writeFileSync(
         path,
         await res.bytes(),
-    );
-    if (LOCAL_PLATFORM.SYSTEM === "msft") {
-        await new Deno.Command(
-            LOCAL_PLATFORM.SHELL,
-            {
-                args: [
-                    "-File",
-                    path,
-                    Deno.pid.toString(),
-                ],
-            },
-        ).spawn().output();
-    } else {
-        await new Deno.Command(
-            LOCAL_PLATFORM.SHELL,
-            {
-                args: [
-                    path,
-                    Deno.pid.toString(),
-                ],
-                stdin: "inherit",
-            },
-        ).spawn().output();
-    }
+        ); */
+
     LogStuff(
-        `Updating to ${brightGreen(latestVer)}. A separate terminal should've popped up and started downloading the update.`,
+        `Please run the following command in your terminal: ${
+            brightGreen(
+                LOCAL_PLATFORM.SYSTEM === "msft"
+                    ? "irm fuckingnode.github.io/install.ps1 | iex"
+                    : "curl -fsSL fuckingnode.github.io/install.sh | bash",
+            )
+        }`,
         "tick",
     );
+
+    /* if (LOCAL_PLATFORM.SYSTEM === "msft") {
+        new Deno.Command(LOCAL_PLATFORM.SHELL, {
+            args: ["-File", path, String(Deno.pid)],
+            stdin: "inherit",
+            stdout: "inherit",
+            stderr: "inherit",
+        }).spawn();
+    } else {
+        new Deno.Command("sudo", {
+            args: [LOCAL_PLATFORM.SHELL, path, String(Deno.pid)],
+            stdin: "inherit",
+            stdout: "inherit",
+            stderr: "inherit",
+        }).spawn();
+    }
+
+    Deno.exit(0); */
     return;
 }

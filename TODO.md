@@ -7,6 +7,7 @@
 
 - Settings API sucks, a lot.
 - First run fails when `.config/fuckingnode` not exists, yet somehow the 2nd one and onwards do work.
+- Kickstart a Golang project and you'll see the version is poorly formatted.
 
 ## CLI
 

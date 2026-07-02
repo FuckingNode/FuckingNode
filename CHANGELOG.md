@@ -6,7 +6,13 @@ All notable changes will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Dates are in the DD-MM-YYYY format.
 
-## [5.4.0] (Unreleased)
+## [5.4.1] (Unreleased)
+
+### Fixed
+
+- Fixed version number still at 5.3.0.
+
+## [5.4.0] (26-06-2026)
 
 ### Added
 
@@ -17,6 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- Clean changed its syntax: it now uses `-i <intensity>` instead of a positional argument; projects are now unnamed and expected anywhere but after `-i`.
 - Kickstart changed its syntax: it now uses `-m <manager> -p <path>` instead of positional parameters.
 - Now the project uses the Optique.dev CLI parser, making everything stabler.
 
