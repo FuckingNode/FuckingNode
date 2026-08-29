@@ -1,13 +1,14 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@optique/core@^1.1.1": "1.1.1",
-    "jsr:@optique/man@^1.1.1": "1.1.1",
-    "jsr:@optique/run@^1.1.1": "1.1.1",
+    "jsr:@optique/core@^1.2.4": "1.2.4",
+    "jsr:@optique/man@^1.2.4": "1.2.4",
+    "jsr:@optique/run@^1.2.4": "1.2.4",
     "jsr:@std/assert@^1.0.19": "1.0.19",
-    "jsr:@std/cli@^1.0.31": "1.0.31",
+    "jsr:@std/async@^1.5.0": "1.5.0",
+    "jsr:@std/cli@^1.0.32": "1.0.32",
     "jsr:@std/collections@^1.1.3": "1.2.0",
-    "jsr:@std/data-structures@^1.1.0": "1.1.0",
+    "jsr:@std/data-structures@^1.1.2": "1.1.2",
     "jsr:@std/datetime@~0.225.7": "0.225.7",
     "jsr:@std/fmt@^1.0.10": "1.0.10",
     "jsr:@std/fs@^1.0.24": "1.0.24",
@@ -18,7 +19,7 @@
     "jsr:@std/path@^1.1.5": "1.1.6",
     "jsr:@std/path@^1.1.6": "1.1.6",
     "jsr:@std/semver@1.0.8": "1.0.8",
-    "jsr:@std/testing@^1.0.19": "1.0.19",
+    "jsr:@std/testing@^1.0.20": "1.0.20",
     "jsr:@std/toml@^1.0.11": "1.0.11",
     "jsr:@std/yaml@1.1.1": "1.1.1",
     "jsr:@zakahacecosas/entity-utils@^1.0.1": "1.0.1",
@@ -29,19 +30,19 @@
     "npm:x11@^2.3.0": "2.3.0"
   },
   "jsr": {
-    "@optique/core@1.1.1": {
-      "integrity": "8288c0adcf42951c59fb450de016873ece1a71f976ccaca3da9618e56e284447"
+    "@optique/core@1.2.4": {
+      "integrity": "2eac4b2de349f021ca1398c67dd70d022ed5a631c07d31ed33403f2f60caede6"
     },
-    "@optique/man@1.1.1": {
-      "integrity": "a8c50487f2fa8a62b9702c94ff60fa0c3fed1d6df7b5c782e25ccdbd712ce3a5",
+    "@optique/man@1.2.4": {
+      "integrity": "aa9fcadc687d1a8e5a5d8233e861ed29bdbd765c5ecc3cff8871ea6ef340aca8",
       "dependencies": [
         "jsr:@optique/core",
         "jsr:@optique/run",
         "npm:tsx"
       ]
     },
-    "@optique/run@1.1.1": {
-      "integrity": "a05a670c360ba9725b20c37dde4265b1661265edb71dbaaae05a11bb09d833eb",
+    "@optique/run@1.2.4": {
+      "integrity": "fe27fb24a0718b93608a709ae7a7c71e9cd635e00a4e67389be02014ebb4414a",
       "dependencies": [
         "jsr:@optique/core"
       ]
@@ -52,8 +53,11 @@
         "jsr:@std/internal@^1.0.12"
       ]
     },
-    "@std/cli@1.0.31": {
-      "integrity": "190bb61f809378267c06be3bcd689fcc540f0cfaa5892171144cae787d02e2fd",
+    "@std/async@1.5.0": {
+      "integrity": "4c1f22d287a17ad7d8643b1952bc5a4d21e5d8b68dc8c20d8268eecc69096e82"
+    },
+    "@std/cli@1.0.32": {
+      "integrity": "188b3a100d6202d64e3f5bd3d799c7fa4f6d77f92cc65eb7f641c1fa0aa92a66",
       "dependencies": [
         "jsr:@std/fmt",
         "jsr:@std/internal@^1.0.14"
@@ -71,8 +75,8 @@
     "@std/collections@1.2.0": {
       "integrity": "47627a21d3a13138b77fd0e4d790ba9d2e603c3510b686cde6b132fe9aa98a88"
     },
-    "@std/data-structures@1.1.0": {
-      "integrity": "c35ae4ad5d8e41a38573c2fe3e19b18ea2505f63cfea201edcb8720aca1f7f58"
+    "@std/data-structures@1.1.2": {
+      "integrity": "2471377c9e0051f9ec34e57d0ebd0ad133a5a889677446ec6ba9938e4e102918"
     },
     "@std/datetime@0.225.7": {
       "integrity": "e62c6c454a0ecfc2918fe41e7a621e0f334a6f82605e98fd32eb1e6371999328"
@@ -117,14 +121,15 @@
     "@std/semver@1.0.8": {
       "integrity": "dc830e8b8b6a380c895d53fbfd1258dc253704ca57bbe1629ac65fd7830179b7"
     },
-    "@std/testing@1.0.19": {
-      "integrity": "f4236172365b216728dc3cc8b5e80a9f4c33083d1e4ede7613d5b25b4014898e",
+    "@std/testing@1.0.20": {
+      "integrity": "21380ed438672762e4ec549cbf4fe41c5b68f5598773a30b64abe7375513e721",
       "dependencies": [
         "jsr:@std/assert",
+        "jsr:@std/async",
         "jsr:@std/data-structures",
         "jsr:@std/fs",
         "jsr:@std/internal@^1.0.14",
-        "jsr:@std/path@^1.1.5"
+        "jsr:@std/path@^1.1.6"
       ]
     },
     "@std/toml@1.0.11": {
@@ -422,18 +427,18 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@optique/core@^1.1.1",
-      "jsr:@optique/man@^1.1.1",
-      "jsr:@optique/run@^1.1.1",
+      "jsr:@optique/core@^1.2.4",
+      "jsr:@optique/man@^1.2.4",
+      "jsr:@optique/run@^1.2.4",
       "jsr:@std/assert@^1.0.19",
-      "jsr:@std/cli@^1.0.31",
+      "jsr:@std/cli@^1.0.32",
       "jsr:@std/datetime@~0.225.7",
       "jsr:@std/fmt@^1.0.10",
       "jsr:@std/fs@^1.0.24",
       "jsr:@std/jsonc@^1.0.2",
       "jsr:@std/path@^1.1.6",
       "jsr:@std/semver@1.0.8",
-      "jsr:@std/testing@^1.0.19",
+      "jsr:@std/testing@^1.0.20",
       "jsr:@std/toml@^1.0.11",
       "jsr:@std/yaml@1.1.1",
       "jsr:@zakahacecosas/entity-utils@^1.0.1",

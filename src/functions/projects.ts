@@ -839,8 +839,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
                 dlx: ["bunx"],
                 file: ["bun"],
                 update: ["update", "--save-text-lockfile"],
-                // ["install", "--analyze src/**/*.ts"]
-                clean: false,
+                clean: [["dedupe"], ["prune"]],
                 script: ["bun", "run"],
                 audit: ["audit", "--json"],
                 publish: ["publish"],

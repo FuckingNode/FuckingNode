@@ -9,7 +9,7 @@ const p = brightYellow("Partial");
 const a = brightBlue("(Agnostic)");
 
 const featureCompatibility = [
-    { Feature: "Cleanup", NodeJS: y, Deno: p, Bun: p, Go: p, Cargo: p },
+    { Feature: "Cleanup", NodeJS: y, Deno: p, Bun: y, Go: p, Cargo: p },
     { Feature: "Kickstart", NodeJS: y, Deno: y, Bun: y, Go: y, Cargo: y },
     { Feature: "Commit", NodeJS: a, Deno: a, Bun: a, Go: a, Cargo: a },
     { Feature: "Uncommit", NodeJS: a, Deno: a, Bun: a, Go: a, Cargo: a },
@@ -20,13 +20,6 @@ const featureCompatibility = [
     { Feature: "Audit", NodeJS: y, Deno: y, Bun: y, Go: n, Cargo: n },
     { Feature: "Launch", NodeJS: a, Deno: a, Bun: a, Go: a, Cargo: a },
     { Feature: "Terminate", NodeJS: p, Deno: p, Bun: p, Go: y, Cargo: y },
-];
-
-const advancedFeatureCompatibility = [
-    { Option: "Lint", NodeJS: y, Deno: y, Bun: y, Go: y, Cargo: y },
-    { Option: "Pretty", NodeJS: y, Deno: y, Bun: y, Go: y, Cargo: y },
-    { Option: "Destroy", NodeJS: y, Deno: y, Bun: y, Go: y, Cargo: y },
-    { Option: "Update", NodeJS: y, Deno: y, Bun: y, Go: y, Cargo: y },
 ];
 
 const kickstartCompatibility = [
@@ -60,7 +53,7 @@ function overallSupport(): void {
     LogStuff("OVERALL SUPPORT ---");
     LogStuff(table(featureCompatibility));
     LogStuff(
-        "'Yes', 'No', 'Partial' indicate the obvious.\n'(Agnostic)' indicates that the feature runs anywhere, even if not listed here.\n\nFor specific compatibility details, run 'compat' followed by any of these:\ncleaner, kickstart, release, migrate, commit, launch.",
+        "'Yes', 'No', 'Partial' indicate the obvious.\n'(Agnostic)' indicates that the feature runs anywhere, even if not listed here.\n\nFor specific compatibility details, run 'compat' followed by any of these:\nkickstart, release, migrate, commit, launch.",
     );
     return;
 }
@@ -79,16 +72,11 @@ export default function TheCompater(params: TheCompaterConstructedParams): void 
     }
 
     switch (normalize(params.target, { strict: true })) {
-        case "cleaner":
-        case "advanced":
-            LogStuff("ADVANCED CLEANER FEATURES SUPPORT ---");
-            LogStuff(table(advancedFeatureCompatibility));
-            return;
         case "kickstart":
             LogStuff("KICKSTART FEATURE SUPPORT ---");
             LogStuff(table(kickstartCompatibility));
             // IDEs too, this is simple so i ain't extracting to a constant
-            LogStuff(`Supported IDEs: ${["VSCode", "VSCodium", "Notepad++", "Sublime", "Emacs", "Atom"].join(", ")}`);
+            LogStuff(`Supported IDEs: ${["VSCode", "VSCodium", "Notepad++", "Sublime", "Emacs", "Atom", "Zed", "Zed (Flatpak)"].join(" | ")}`);
             // git clients too, this is simple too so i ain't extracting to a constant
             LogStuff("Supported Git client aliases:");
             LogStuff(table([

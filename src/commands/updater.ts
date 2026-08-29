@@ -78,15 +78,6 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
             "Installed from a package manager, please use said package manager to update FuckingNode.\nIf you didn't install from a package manager, then FuckingNode is running from an unknown, which is likely an installation error (or you moving it somewhere else).",
         );
     }
-    /* LogStuff("Updating...", "package");
-    const res = await fetch(
-        `https://fuckingnode.github.io/install${LOCAL_PLATFORM.SSS}`,
-    );
-    const path = Deno.makeTempFileSync({ prefix: "UPDATE-FKN", suffix: LOCAL_PLATFORM.SSS });
-    Deno.writeFileSync(
-        path,
-        await res.bytes(),
-        ); */
 
     LogStuff(
         `Please run the following command in your terminal: ${
@@ -99,22 +90,5 @@ export default async function TheUpdater(params: TheUpdaterConstructedParams): P
         "tick",
     );
 
-    /* if (LOCAL_PLATFORM.SYSTEM === "msft") {
-        new Deno.Command(LOCAL_PLATFORM.SHELL, {
-            args: ["-File", path, String(Deno.pid)],
-            stdin: "inherit",
-            stdout: "inherit",
-            stderr: "inherit",
-        }).spawn();
-    } else {
-        new Deno.Command("sudo", {
-            args: [LOCAL_PLATFORM.SHELL, path, String(Deno.pid)],
-            stdin: "inherit",
-            stdout: "inherit",
-            stderr: "inherit",
-        }).spawn();
-    }
-
-    Deno.exit(0); */
     return;
 }

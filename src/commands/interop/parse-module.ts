@@ -175,7 +175,7 @@ export const PackageFileParsers = {
 
             return {
                 name: parsedContent.module,
-                version: version || undefined,
+                version: version ? version.trim().replace("v", "") : undefined,
                 rm: "go",
                 plat: {
                     edt: parsedContent.go,
