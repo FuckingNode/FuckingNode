@@ -156,9 +156,9 @@
         "verbatimModuleSyntax": true
     },
     "imports": {
-        "@optique/core": "jsr:@optique/core@^1.2.4",
-        "@optique/man": "jsr:@optique/man@^1.2.4",
-        "@optique/run": "jsr:@optique/run@^1.2.4",
+        "@optique/core": "jsr:@optique/core@^1.2.5",
+        "@optique/man": "jsr:@optique/man@^1.2.5",
+        "@optique/run": "jsr:@optique/run@^1.2.5",
         "@particle/dbus-next": "npm:@particle/dbus-next@^0.11.4",
         "@std/cli": "jsr:@std/cli@^1.0.32",
         "@std/datetime": "jsr:@std/datetime@^0.225.7",

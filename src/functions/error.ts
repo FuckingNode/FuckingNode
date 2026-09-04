@@ -85,7 +85,7 @@ export class FknError extends Error {
                 break;
             case "Env__SchrodingerLockfile":
                 this.hint =
-                    "Either leave just one lockfile, or manually specify the package manager you use via the 'fknode.yaml' file, by adding the 'projectEnvOverride' field with the value of 'npm', 'pnpm', 'bun', 'deno', 'golang', or 'rust'.";
+                    "Either leave just one lockfile, or manually specify the package manager you use via either\n- The 'fknode.yaml' file, by adding the 'projectEnvOverride' field with the value of 'npm', 'pnpm', 'bun', 'deno', 'golang', or 'rust'.\n- CLI arguments if they allow it. E.g., kickstart let’s you specify the runtime to use.";
                 break;
             case "Git__NoBranch":
                 this.hint =
@@ -116,6 +116,9 @@ export class FknError extends Error {
             "----------",
             red(`A FknError happened! ${bold(this.code)}`),
         ];
+        messageParts.push(
+            this.stack ?? "(no stack)",
+        );
         if (this.message) {
             messageParts.push(
                 `Thrown message:      ${brightYellow(this.message)}`,

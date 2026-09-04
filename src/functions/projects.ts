@@ -7,6 +7,7 @@ import type {
     CargoPkgFile,
     ConservativeProjectEnvironment,
     FnCPF,
+    MANAGER_GLOBAL,
     NodePkgFile,
     ProjectEnvironment,
     UnderstoodProjectProtection,
@@ -74,6 +75,7 @@ export async function AddProject(
     entry: UnknownString,
     glob: boolean = false,
     workspacePolicy: FullFkNodeYaml["kickstarter"]["workspaces"] = null,
+    config: { envOverride: MANAGER_GLOBAL | undefined } | undefined = undefined,
 ): Promise<ProjectEnvironment | "rootless" | "aborted" | "error" | "glob"> {
     if (validate(entry) && isGlob(entry)) {
         for await (const dir of expandGlob(entry)) {
@@ -102,9 +104,9 @@ export async function AddProject(
 
     const list = GetAllProjects();
     try {
-        const env = await GetProjectEnvironment(workingEntry);
+        const env = await GetProjectEnvironment(workingEntry, config);
 
-        const validation = await ValidateProject(workingEntry, list, false);
+        const validation = await ValidateProject(workingEntry, list, false, config);
 
         if (validation !== true) {
             if (validation === "IsDuplicate") {
@@ -169,7 +171,9 @@ export async function AddProject(
             LogStuff(italic(dim(`Couldn't add ${workingEntry}. Maybe it's not a project. Skipping it...`)));
             return "error";
         }
-        if (!(e instanceof FknError) || e.code !== "Env__PkgFileUnparsable") throw e;
+        if (!(e instanceof FknError) || e.code !== "Env__PkgFileUnparsable") {
+            throw e;
+        }
 
         const ws = GetWorkspaces(workingEntry);
         if (ws.length === 0) throw e;
@@ -428,11 +432,16 @@ export function UnderstandProjectProtection(settings: FkNodeYaml, options: {
  * @param {boolean} existing True if you're validating an existing project, false if it's a new one to be added.
  * @returns {Promise<true | PROJECT_ERROR_CODES>} True if it's valid, a `PROJECT_ERROR_CODES` otherwise.
  */
-export async function ValidateProject(entry: string, allProjects: string[], existing: boolean): Promise<true | PROJECT_ERROR_CODES> {
+export async function ValidateProject(
+    entry: string,
+    allProjects: string[],
+    existing: boolean,
+    config?: { envOverride: MANAGER_GLOBAL | undefined },
+): Promise<true | PROJECT_ERROR_CODES> {
     if (!CheckForPath(entry)) return "NotFound";
     // await GetProjectEnvironment() already does some validations by itself, so we can just use it here
     try {
-        await GetProjectEnvironment(entry);
+        await GetProjectEnvironment(entry, config);
     } catch (e) {
         if (e instanceof FknError && e.code === "Env__SchrodingerLockfile") return "TooManyLockfiles";
         else return "CantGetProjectEnv";
@@ -583,8 +592,13 @@ function ColorizeRuntime(
  * @param {UnknownString} path Path to the project's root.
  * @returns {Promise<ProjectEnvironment>}
  */
-export async function GetProjectEnvironment(path: UnknownString): Promise<ProjectEnvironment> {
-    DEBUG_LOG("CALLED GetProjectEnvironment WITH path", path);
+export async function GetProjectEnvironment(path: UnknownString, _config?: {
+    envOverride: MANAGER_GLOBAL | undefined;
+}): Promise<ProjectEnvironment> {
+    const config = _config ?? {
+        envOverride: undefined,
+    };
+    DEBUG_LOG("CALLED GetProjectEnvironment WITH path", path, "AND CONFIG", config);
     const root = await SpotProject(path);
     const settings: FullFkNodeYaml = GetProjectSettings(root);
 
@@ -648,7 +662,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
      * like if `isGo` is true but `envOverride` is `"bun"`, go evaluates first and JS short circuits,
      * breaking this thing
      */
-    const _ = settings.projectEnvOverride === false;
+    const _ = settings.projectEnvOverride === false && config.envOverride === undefined;
     const isGo = _ && pathChecks.golang["pkg"] || pathChecks.golang["lock"] || settings.projectEnvOverride === "go";
     const isRust = _ && pathChecks.rust["pkg"] || pathChecks.rust["lock"] || settings.projectEnvOverride === "cargo";
     const isDeno = _ && pathChecks.deno["lock"]
@@ -690,7 +704,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
         );
     }
 
-    if (ResolveLockfiles(root).length > 1) {
+    if (_ && ResolveLockfiles(root).length > 1) {
         throw new FknError(
             "Env__SchrodingerLockfile",
             `Multiple lockfiles found in ${bold(root)}. This is a bad practice and does not let us properly infer the package manager to use.`,
@@ -705,13 +719,13 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
         ? pathChecks.deno["jsonc"] ? paths.deno.jsonc : pathChecks.deno["json"] ? paths.deno.json : paths.node.json
         : paths.node.json;
 
-    const mainString: string = _ ? Deno.readTextFileSync(mainPath) : "";
+    const mainString: string = Deno.readTextFileSync(mainPath);
 
     const runtimeColor = isBun ? "pink" : isNode ? "bright-green" : isDeno ? "bright-blue" : isRust ? "orange" : "cyan";
 
     const { PackageFileParsers } = FkNodeInterop;
 
-    if (settings.projectEnvOverride === "go" || isGo) {
+    if (config.envOverride === "go" || settings.projectEnvOverride === "go" || isGo) {
         let goTag: string | undefined = undefined;
 
         // idiots at google couldn't think of a 'version' field in go.mod
@@ -752,7 +766,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             },
         };
     }
-    if (settings.projectEnvOverride === "cargo" || isRust) {
+    if (config.envOverride === "cargo" || settings.projectEnvOverride === "cargo" || isRust) {
         const cpf = PackageFileParsers.Cargo.CPF(mainString, workspaces);
 
         return {
@@ -784,7 +798,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             hall_of_trash: JoinPaths(root, "target"),
         };
     }
-    if (settings.projectEnvOverride === "deno" || isDeno) {
+    if (config.envOverride === "deno" || settings.projectEnvOverride === "deno" || isDeno) {
         const cpf = PackageFileParsers.Deno.CPF(mainString, workspaces);
 
         return {
@@ -815,7 +829,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             },
         };
     }
-    if (settings.projectEnvOverride === "bun" || isBun) {
+    if (config.envOverride === "bun" || settings.projectEnvOverride === "bun" || isBun) {
         const cpf = PackageFileParsers.NodeBun.CPF(mainString, "bun", workspaces);
 
         return {
@@ -847,7 +861,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             },
         };
     }
-    if (settings.projectEnvOverride === "yarn" || isYarn) {
+    if (config.envOverride === "yarn" || settings.projectEnvOverride === "yarn" || isYarn) {
         const cpf = PackageFileParsers.NodeBun.CPF(mainString, "yarn", workspaces);
 
         return {
@@ -879,7 +893,7 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             },
         };
     }
-    if (settings.projectEnvOverride === "pnpm" || isPnpm) {
+    if (config.envOverride === "pnpm" || settings.projectEnvOverride === "pnpm" || isPnpm) {
         const cpf = PackageFileParsers.NodeBun.CPF(mainString, "pnpm", workspaces);
 
         return {
@@ -911,8 +925,8 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
             },
         };
     }
-    // (|| isNode) assume it's npm if it's node.js and we can't tell the package manager
-    if (settings.projectEnvOverride === "npm" || isNpm || isNode) {
+    // (|| isNode) to assume it's npm if it's node.js and we can't tell the package manager
+    if (config.envOverride === "npm" || settings.projectEnvOverride === "npm" || isNpm || isNode) {
         const cpf = PackageFileParsers.NodeBun.CPF(mainString, "npm", workspaces);
 
         return {
@@ -951,9 +965,11 @@ export async function GetProjectEnvironment(path: UnknownString): Promise<Projec
     );
 }
 
-export async function ConservativelyGetProjectEnvironment(path: UnknownString): Promise<ProjectEnvironment | ConservativeProjectEnvironment> {
+export async function ConservativelyGetProjectEnvironment(path: UnknownString, config?: {
+    envOverride: MANAGER_GLOBAL | undefined;
+}): Promise<ProjectEnvironment | ConservativeProjectEnvironment> {
     try {
-        return await GetProjectEnvironment(path);
+        return await GetProjectEnvironment(path, config);
     } catch (e) {
         if (!(e instanceof FknError)) throw e;
         if (e.code !== "Env__CannotDetermine" && e.code !== "Env__NoPkgFile") throw e;

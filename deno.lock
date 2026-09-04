@@ -1,9 +1,9 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@optique/core@^1.2.4": "1.2.4",
-    "jsr:@optique/man@^1.2.4": "1.2.4",
-    "jsr:@optique/run@^1.2.4": "1.2.4",
+    "jsr:@optique/core@^1.2.5": "1.2.5",
+    "jsr:@optique/man@^1.2.5": "1.2.5",
+    "jsr:@optique/run@^1.2.5": "1.2.5",
     "jsr:@std/assert@^1.0.19": "1.0.19",
     "jsr:@std/async@^1.5.0": "1.5.0",
     "jsr:@std/cli@^1.0.32": "1.0.32",
@@ -30,19 +30,19 @@
     "npm:x11@^2.3.0": "2.3.0"
   },
   "jsr": {
-    "@optique/core@1.2.4": {
-      "integrity": "2eac4b2de349f021ca1398c67dd70d022ed5a631c07d31ed33403f2f60caede6"
+    "@optique/core@1.2.5": {
+      "integrity": "0c35c05048a91e5b0b9abcfca58458ecae96db7465cdf159ce8307ea3b013d54"
     },
-    "@optique/man@1.2.4": {
-      "integrity": "aa9fcadc687d1a8e5a5d8233e861ed29bdbd765c5ecc3cff8871ea6ef340aca8",
+    "@optique/man@1.2.5": {
+      "integrity": "750d82af3725f7c775c3f849aaf4a2f3360de7b1028531b20b1299a8579ee42e",
       "dependencies": [
         "jsr:@optique/core",
         "jsr:@optique/run",
         "npm:tsx"
       ]
     },
-    "@optique/run@1.2.4": {
-      "integrity": "fe27fb24a0718b93608a709ae7a7c71e9cd635e00a4e67389be02014ebb4414a",
+    "@optique/run@1.2.5": {
+      "integrity": "117a7862b921c667bdbd6687105205fdf318c77f60cad664597183175dbed57f",
       "dependencies": [
         "jsr:@optique/core"
       ]
@@ -427,9 +427,9 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@optique/core@^1.2.4",
-      "jsr:@optique/man@^1.2.4",
-      "jsr:@optique/run@^1.2.4",
+      "jsr:@optique/core@^1.2.5",
+      "jsr:@optique/man@^1.2.5",
+      "jsr:@optique/run@^1.2.5",
       "jsr:@std/assert@^1.0.19",
       "jsr:@std/cli@^1.0.32",
       "jsr:@std/datetime@~0.225.7",

@@ -38,6 +38,7 @@ async function InstallDependencies(
     manager: UnknownString,
     userSettings: CF_FKNODE_SETTINGS,
     policies: FullFkNodeYaml["kickstarter"],
+    config?: { envOverride: MANAGER_GLOBAL | undefined },
 ): Promise<ProjectEnvironment> {
     const lockfiles = ResolveLockfiles(Deno.cwd());
     const isRequest = validate(manager) && manager.startsWith("use ");
@@ -82,7 +83,7 @@ async function InstallDependencies(
             "Hit 'Y' to use it, or 'N' to ignore the request and use default settings.",
             "ask",
         );
-        env = await AddProject(Deno.cwd(), false, proceed ? policies.workspaces : null);
+        env = await AddProject(Deno.cwd(), false, proceed ? policies.workspaces : null, config);
     } else if (policies.workspaces === "force-liberty") {
         await Notification(
             "Heads up!",
@@ -91,9 +92,9 @@ async function InstallDependencies(
         LogStuff(
             "This project wants you to explicitly handle workspace addition, regardless of defaults.\nIntervention will be needed.",
         );
-        env = await AddProject(Deno.cwd(), false, policies.workspaces);
+        env = await AddProject(Deno.cwd(), false, policies.workspaces, config);
     } else {
-        env = await AddProject(Deno.cwd());
+        env = await AddProject(Deno.cwd(), false, null, config);
     }
 
     // if there's no env the error should've already been reported
@@ -197,11 +198,14 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
     Deno.chdir(clonePath);
 
     const settings = GetProjectSettings(clonePath);
+    const config = {
+        envOverride: manager as MANAGER_GLOBAL | undefined,
+    };
 
     let env;
 
     if (!settings.kickstarter.install) {
-        env = await InstallDependencies(manager, userSettings, settings.kickstarter);
+        env = await InstallDependencies(manager, userSettings, settings.kickstarter, config);
     } else if (settings.kickstarter.install.startsWith("use ")) {
         await Notification(
             "Heads up!",
@@ -225,14 +229,14 @@ export default async function TheKickstarter(params: TheKickstarterConstructedPa
             LogStuff("Request ignored. Exited.", "bruh");
             return;
         }
-        env = await InstallDependencies(settings.kickstarter.install, userSettings, settings.kickstarter);
+        env = await InstallDependencies(settings.kickstarter.install, userSettings, settings.kickstarter, config);
     } else {
         LogStuff(
             bold(
                 "This project specifically wants no dependency installation to happen, therefore it has been skipped.\nYou can manually install dependencies at any time.\n",
             ),
         );
-        env = await ConservativelyGetProjectEnvironment(clonePath);
+        env = await ConservativelyGetProjectEnvironment(clonePath, config);
     }
 
     if (!settings.kickstartCmd) await Success(startup);

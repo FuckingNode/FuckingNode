@@ -8,11 +8,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [5.4.1] (Unreleased)
 
+### Changed
+
+- If you get a `FknError` you’ll now see the internal stack trace. Provide it with bug reports!
+
 ### Fixed
 
-- Fixed package version formatting when kickstarting a Go project.
-- Fixed glob patterns (when not expanded by your shell) not working due to a Deno permission request.
-- Fixed version number still at 5.3.0.
+- Package version formatting being broken when kickstarting a Go project.
+- Glob patterns (when not expanded by your shell) not working due to a Deno permission request.
+- Version number still at 5.3.0.
+- Kickstart demanding to be able to guess the manager of a project even if you explicitly provide one.
 
 ### Removed
 
