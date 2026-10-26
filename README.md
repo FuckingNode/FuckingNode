@@ -4,12 +4,12 @@
     <img src="https://fuckingnode.github.io/fkn_logo.webp" alt="FuckingNode Logo" height=150>
     </a>
 </p>
-<h1 align="center">FuckingNode</h1>
-<h3 align="center">The fucking chaos of maintaining JavaScript projects ends here</h3>
+<h1 align="center">F*ckingNode</h1>
+<h3 align="center">The chaos of maintaining coding projects ends here</h3>
 
 <div align="center">
 
-[![stars](https://img.shields.io/github/stars/FuckingNode/FuckingNode)](https://github.com/FuckingNode/FuckingNode/stargazers) [![twitter](https://img.shields.io/twitter/follow/FuckingNode)](https://x.com/FuckingNode) [![discord](https://img.shields.io/discord/1333145935265398826)](https://discord.gg/AA2jYAFNmq) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/FuckingNode/FuckingNode)
+[![stars](https://img.shields.io/github/stars/FuckingNode/FuckingNode)](https://github.com/FuckingNode/FuckingNode/stargazers) [![twitter](https://img.shields.io/twitter/follow/FuckingNode)](https://x.com/FuckingNode) [![discord](https://img.shields.io/discord/1333145935265398826)](https://discord.gg/AA2jYAFNmq)
 
 </div>
 
