@@ -63,7 +63,7 @@ Deno.test({
             commonPkgFile,
             {
                 name: "vuelto.pp.ua",
-                version: "v1.1.0",
+                version: "1.1.0",
                 rm: "go",
                 plat: {
                     edt: "1.18",

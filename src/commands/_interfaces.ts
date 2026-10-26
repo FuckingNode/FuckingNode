@@ -1,3 +1,5 @@
+// TODO(@ZakaHaceCosas): most likely drop this
+
 import type { UnknownString } from "@zakahacecosas/string-utils";
 
 /**
@@ -72,20 +74,6 @@ export interface TheMigratorConstructedParams {
      * @type {UnknownString}
      */
     wantedManager: UnknownString;
-}
-
-/**
- * The Settings.
- *
- * @interface TheSettingsConstructedParams
- */
-export interface TheSettingsConstructedParams {
-    /**
-     * Arguments.
-     *
-     * @type {string[]}
-     */
-    args: string[];
 }
 
 /**

@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [5.4.1] (Unreleased)
 
+### Added
+
+- `state` command. Shows a summary and Git state for one or more projects (or all of your added projects).
+
 ### Changed
 
 - If you get a `FknError` you’ll now see the internal stack trace. Provide it with bug reports!
@@ -22,6 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Removed
 
 - Auto-update capability.
+- Release schedule. I do not actively maintain this project and can’t just say I’ll release stuff every month.
 
 ## [5.4.0] (26-06-2026)
 

@@ -478,3 +478,19 @@ export function GetRepoRoot(path: string): string {
         );
     }
 }
+
+/**
+ * Gets how many commits the local branch is ahead of / behind its upstream.
+ * Returns `null` when the repo has no upstream (or Git can't tell us).
+ */
+export function GetUpstreamState(root: string): { ahead: number; behind: number } | null {
+    const output = g(root, ["rev-list", "--count", "--left-right", "@{u}...HEAD"]);
+    if (!output.success) return null;
+
+    const [behindRaw, aheadRaw] = output.stdout.trim().split(/\s+/);
+    const behind = Number.parseInt(behindRaw ?? "", 10);
+    const ahead = Number.parseInt(aheadRaw ?? "", 10);
+
+    if (Number.isNaN(ahead) || Number.isNaN(behind)) return null;
+    return { ahead, behind };
+}

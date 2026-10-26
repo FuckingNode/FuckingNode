@@ -1,25 +1,25 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@optique/core@^1.2.5": "1.2.5",
-    "jsr:@optique/man@^1.2.5": "1.2.5",
-    "jsr:@optique/run@^1.2.5": "1.2.5",
+    "jsr:@optique/core@^1.3.6": "1.3.6",
+    "jsr:@optique/man@^1.3.6": "1.3.6",
+    "jsr:@optique/run@^1.3.6": "1.3.6",
     "jsr:@std/assert@^1.0.19": "1.0.19",
-    "jsr:@std/async@^1.5.0": "1.5.0",
+    "jsr:@std/async@^1.5.1": "1.5.1",
     "jsr:@std/cli@^1.0.32": "1.0.32",
-    "jsr:@std/collections@^1.1.3": "1.2.0",
-    "jsr:@std/data-structures@^1.1.2": "1.1.2",
+    "jsr:@std/collections@^1.1.3": "1.4.0",
+    "jsr:@std/data-structures@^1.1.3": "1.1.3",
     "jsr:@std/datetime@~0.225.7": "0.225.7",
     "jsr:@std/fmt@^1.0.10": "1.0.10",
     "jsr:@std/fs@^1.0.24": "1.0.24",
     "jsr:@std/internal@^1.0.12": "1.0.14",
     "jsr:@std/internal@^1.0.14": "1.0.14",
-    "jsr:@std/json@^1.0.2": "1.0.2",
-    "jsr:@std/jsonc@^1.0.2": "1.0.2",
+    "jsr:@std/json@^1.1.0": "1.1.0",
+    "jsr:@std/jsonc@^1.0.3": "1.0.3",
     "jsr:@std/path@^1.1.5": "1.1.6",
     "jsr:@std/path@^1.1.6": "1.1.6",
     "jsr:@std/semver@1.0.8": "1.0.8",
-    "jsr:@std/testing@^1.0.20": "1.0.20",
+    "jsr:@std/testing@^1.0.21": "1.0.21",
     "jsr:@std/toml@^1.0.11": "1.0.11",
     "jsr:@std/yaml@1.1.1": "1.1.1",
     "jsr:@zakahacecosas/entity-utils@^1.0.1": "1.0.1",
@@ -30,19 +30,19 @@
     "npm:x11@^2.3.0": "2.3.0"
   },
   "jsr": {
-    "@optique/core@1.2.5": {
-      "integrity": "0c35c05048a91e5b0b9abcfca58458ecae96db7465cdf159ce8307ea3b013d54"
+    "@optique/core@1.3.6": {
+      "integrity": "7d9e21ed99695a410c2175e289da8b2476c72e75405e0a608ffd6115936080b8"
     },
-    "@optique/man@1.2.5": {
-      "integrity": "750d82af3725f7c775c3f849aaf4a2f3360de7b1028531b20b1299a8579ee42e",
+    "@optique/man@1.3.6": {
+      "integrity": "0b497a2fe2a0c535693d3351e5027bad9a373c03f122c48e1d23341474108e1d",
       "dependencies": [
         "jsr:@optique/core",
         "jsr:@optique/run",
         "npm:tsx"
       ]
     },
-    "@optique/run@1.2.5": {
-      "integrity": "117a7862b921c667bdbd6687105205fdf318c77f60cad664597183175dbed57f",
+    "@optique/run@1.3.6": {
+      "integrity": "fe81395008042292264d0f9b5ef0d452a7a3000b97849bd8f3d54bec8986c1a8",
       "dependencies": [
         "jsr:@optique/core"
       ]
@@ -53,8 +53,8 @@
         "jsr:@std/internal@^1.0.12"
       ]
     },
-    "@std/async@1.5.0": {
-      "integrity": "4c1f22d287a17ad7d8643b1952bc5a4d21e5d8b68dc8c20d8268eecc69096e82"
+    "@std/async@1.5.1": {
+      "integrity": "c82455dc70cab29a0adf3ac8075db934785bffdd3902af5afcf25d21a74cfd86"
     },
     "@std/cli@1.0.32": {
       "integrity": "188b3a100d6202d64e3f5bd3d799c7fa4f6d77f92cc65eb7f641c1fa0aa92a66",
@@ -75,8 +75,11 @@
     "@std/collections@1.2.0": {
       "integrity": "47627a21d3a13138b77fd0e4d790ba9d2e603c3510b686cde6b132fe9aa98a88"
     },
-    "@std/data-structures@1.1.2": {
-      "integrity": "2471377c9e0051f9ec34e57d0ebd0ad133a5a889677446ec6ba9938e4e102918"
+    "@std/collections@1.4.0": {
+      "integrity": "bd7f74966e11de11b1f0420b7e8cb7bb381d8af7872b738443b92050db28c9c0"
+    },
+    "@std/data-structures@1.1.3": {
+      "integrity": "a5ec67199e79ee5b29123474d93fa9a47701ec08a4ef3bd1b623a36476306c5b"
     },
     "@std/datetime@0.225.7": {
       "integrity": "e62c6c454a0ecfc2918fe41e7a621e0f334a6f82605e98fd32eb1e6371999328"
@@ -103,11 +106,11 @@
     "@std/internal@1.0.14": {
       "integrity": "291516b3d4c35024d6ffbc0a9df5bf4c64116e05b50012cf846710152d2ffdf7"
     },
-    "@std/json@1.0.2": {
-      "integrity": "d9e5497801c15fb679f55a2c01c7794ad7a5dfda4dd1bebab5e409cb5e0d34d4"
+    "@std/json@1.1.0": {
+      "integrity": "93330d3ed4054d6b1ffe54b075432c80a5f671be77277b978931e018014cb1cc"
     },
-    "@std/jsonc@1.0.2": {
-      "integrity": "909605dae3af22bd75b1cbda8d64a32cf1fd2cf6efa3f9e224aba6d22c0f44c7",
+    "@std/jsonc@1.0.3": {
+      "integrity": "9a4bb168c6b64e8e89944e45f96390a6e6e6865f59f02f0a70b24653911f2d64",
       "dependencies": [
         "jsr:@std/json"
       ]
@@ -121,8 +124,8 @@
     "@std/semver@1.0.8": {
       "integrity": "dc830e8b8b6a380c895d53fbfd1258dc253704ca57bbe1629ac65fd7830179b7"
     },
-    "@std/testing@1.0.20": {
-      "integrity": "21380ed438672762e4ec549cbf4fe41c5b68f5598773a30b64abe7375513e721",
+    "@std/testing@1.0.21": {
+      "integrity": "a0d14b2519005242821565091127c7d6fa96ca1b330e84e9249afcd602ee764f",
       "dependencies": [
         "jsr:@std/assert",
         "jsr:@std/async",
@@ -427,18 +430,18 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@optique/core@^1.2.5",
-      "jsr:@optique/man@^1.2.5",
-      "jsr:@optique/run@^1.2.5",
+      "jsr:@optique/core@^1.3.6",
+      "jsr:@optique/man@^1.3.6",
+      "jsr:@optique/run@^1.3.6",
       "jsr:@std/assert@^1.0.19",
       "jsr:@std/cli@^1.0.32",
       "jsr:@std/datetime@~0.225.7",
       "jsr:@std/fmt@^1.0.10",
       "jsr:@std/fs@^1.0.24",
-      "jsr:@std/jsonc@^1.0.2",
+      "jsr:@std/jsonc@^1.0.3",
       "jsr:@std/path@^1.1.6",
       "jsr:@std/semver@1.0.8",
-      "jsr:@std/testing@^1.0.20",
+      "jsr:@std/testing@^1.0.21",
       "jsr:@std/toml@^1.0.11",
       "jsr:@std/yaml@1.1.1",
       "jsr:@zakahacecosas/entity-utils@^1.0.1",

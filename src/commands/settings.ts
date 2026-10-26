@@ -1,7 +1,6 @@
 import { Interrogate, LogStuff } from "../functions/io.ts";
-import type { TheSettingsConstructedParams } from "./_interfaces.ts";
 import { ChangeSetting, DisplaySettings, FlushConfigFiles, FreshSetup } from "../functions/config.ts";
-import { normalizeArray, testFlag, validate, validateAgainst } from "@zakahacecosas/string-utils";
+import { validate, validateAgainst } from "@zakahacecosas/string-utils";
 import type { CF_FKNODE_SETTINGS } from "../types/config_files.ts";
 import { DEFAULT_SETTINGS } from "../constants.ts";
 
@@ -17,39 +16,48 @@ function ResetSettings(): void {
     DisplaySettings();
 }
 
-export default async function TheSettings(params: TheSettingsConstructedParams): Promise<void> {
+export default async function TheSettings(
+    params?: {
+        action: "change";
+        set: string | undefined;
+        to: string | undefined;
+    } | {
+        action: "flush";
+        files: string | undefined;
+        force: boolean | undefined;
+    } | {
+        action: "reset";
+        force: boolean | undefined;
+    },
+): Promise<void> {
     const VALID_SETTINGS: (keyof CF_FKNODE_SETTINGS)[] = Object.keys(DEFAULT_SETTINGS) as (keyof CF_FKNODE_SETTINGS)[];
-    const args = normalizeArray(params.args, {
-        preserveCase: true,
-    });
 
-    if (!args || args.length === 0) {
+    if (!params) {
         DisplaySettings();
         return;
     }
 
-    switch (args[0]) {
+    switch (params.action) {
         case "flush":
-            await FlushConfigFiles(args[1], testFlag(args[2] ?? "", "force"));
+            await FlushConfigFiles(params.files, params.force ?? false);
             break;
-        case "repair":
         case "reset":
             ResetSettings();
             break;
         case "change":
-            if (!validateAgainst(args[1], VALID_SETTINGS)) {
+            if (!validateAgainst(params.set, VALID_SETTINGS)) {
                 LogStuff(
                     `Invalid setting, use one of these keys:\n- ${VALID_SETTINGS.join("\n- ")}`,
                 );
                 return;
             }
-            if (!validate(args[2])) {
+            if (!validate(params.to)) {
                 LogStuff("Provide a value to update this setting to.");
                 return;
             }
             ChangeSetting(
-                args[1],
-                args[2],
+                params.set,
+                params.to,
             );
             break;
         default:

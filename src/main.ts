@@ -4,6 +4,7 @@
 import TheCleaner from "./commands/clean.ts";
 import TheLister from "./commands/list.ts";
 import TheStatistics from "./commands/stats.ts";
+import TheStater from "./commands/state.ts";
 import TheMigrator from "./commands/migrate.ts";
 import TheUpdater from "./commands/updater.ts";
 import TheSettings from "./commands/settings.ts";
@@ -588,39 +589,82 @@ const parser = or(
             },
         ),
         command(
+            "state",
+            object({
+                type: constant("state"),
+                projects: optional(
+                    multiple(
+                        argument(
+                            string({
+                                metavar: "PROJECT(S)",
+                            }),
+                            {
+                                description: message`Project(s) to show state for. When omitted, all added projects are used.`,
+                            },
+                        ),
+                    ),
+                ),
+            }),
+            {
+                brief: message`Shows a summary and Git state for one or more projects.`,
+                description:
+                    message`For each given project (or all of your added projects if none are given), shows its runtime, package manager, dependency and workspace counts, plus its Git branch, working tree status, and last commit.`,
+                aliases: ["status"],
+            },
+        ),
+        command(
             "settings",
             or(
                 object({
                     type: constant("settings"),
+                    t: constant("view"),
                 }),
                 object({
                     type: constant("settings"),
-                    task: optional(
-                        argument(
-                            string({
-                                metavar: "TASK",
-                            }),
-                            {
-                                description: message`Can be any of:\n
-                            - flush <f> [--force]\nClears chosen config files. Specify what to remove by setting <f> to either: 'errors' (error log file), 'updates' (update data), 'projects' (all added projects), or 'all' (everything). You can pass --force to skip confirmation.\n\n- repair\nResets all settings to their default value.\n\n- change <s> <v>\nAllows to change chosen setting, <s>, to given value, <v>. When you run 'settings' with no args, you'll see all settings and their key. (The key is the gray, cursive, code-like word at the end). That's the name you'll use for <s>.`,
-                            },
-                        ),
-                    ),
+                    t: constant("chg"),
                     changed: optional(
                         argument(
                             string({
-                                metavar: "SET. TO BE CHANGED",
+                                metavar: "SETTING TO BE CHANGED",
                             }),
+                            {
+                                description: message`Key of the setting you want to change. E.g. fav-editor.`,
+                            },
                         ),
                     ),
                     val: optional(
                         argument(
                             string({
-                                metavar: "VALUE TO CHANGE TO",
+                                metavar: "VALUE TO SET IT TO",
                             }),
+                            {
+                                description: message`Value you wish to give to the setting. Leave empty to see accepted values.`,
+                            },
                         ),
                     ),
+                }),
+                object({
+                    type: constant("settings"),
+                    t: constant("cl"),
+                    force: optional(option("-f", "--force", {
+                        description: message`Forces clear or reset.`,
+                    })),
+                    flush: optional(
+                        option("-c", "--clear", string(), {
+                            description: message`Clears one or more configuration files.`,
+                        }),
+                    ),
+                }),
+                object({
+                    type: constant("settings"),
+                    t: constant("rp"),
                     force: optional(option("-f", "--force")),
+                    reset: optional(option("-r", "--reset", {
+                        description: message`Resets settings to default.`,
+                    })),
+                    repair: optional(option("--repair", {
+                        description: message`Compatible alias to reset.`,
+                    })),
                 }),
             ),
             {
@@ -1094,9 +1138,7 @@ async function main(): Promise<void> {
     }
     if (out.type === "sokoballs") {
         return LaunchWebsite(
-            Math.random() > 0.5
-                ? "https://tenor.com/view/sokora-sokodunk-sokoballs-sokora-dunk-dunk-gif-9264211909049323587?quality=lossless"
-                : "https://tenor.com/view/sokora-dunk-ice-skate-ice-dunk-balling-gif-7665972654807661282?quality=lossless",
+            Math.random() > 0.5 ? "https://klipy.com/gifs/sokoballing/player" : "https://klipy.com/gifs/sokoballing-2/player",
         );
     }
     if (out.type === "man") {
@@ -1125,18 +1167,29 @@ async function main(): Promise<void> {
         });
     }
     if (out.type === "settings") {
-        if (!("task" in out)) return await TheSettings({ args: [] });
-        if (out.task?.toLowerCase() === "change") {
+        if (out.t === "view") return await TheSettings();
+        if (out.t === "chg") {
             return await TheSettings({
-                args: ["change", out.changed ?? "", out.val ?? ""],
+                action: "change",
+                set: out.changed,
+                to: out.val,
+            });
+        }
+        if (out.t === "cl") {
+            return await TheSettings({
+                action: "flush",
+                files: out.flush,
+                force: out.force,
             });
         }
         return await TheSettings({
-            args: [out.task ?? "", out.changed ?? "", out.force ? "--force" : ""],
+            action: "reset",
+            force: out.force,
         });
     }
     if (out.type === "uncommit") return await TheUncommitter();
     if (out.type === "stats") return await TheStatistics(out.project);
+    if (out.type === "state") return await TheStater({ projects: out.projects });
     if (out.type === "surrender") {
         return await TheSurrenderer({
             project: out.project,
